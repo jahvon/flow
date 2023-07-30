@@ -4,23 +4,23 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: saturday
-      time: "05:00"
+      day: friday
+      time: "08:00"
     labels:
       - "dependencies"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: saturday
-      time: "05:00"
+      day: friday
+      time: "08:00"
     labels:
       - "dependencies"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: saturday
-      time: "05:00"
+      day: friday
+      time: "08:00"
     labels:
       - "dependencies"
