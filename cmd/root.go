@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 Jahvon Dockery <jahvondockery@gmail.com
+Copyright © 2023 Jahvon Dockery <jahvondockery@gmail.com>
 */
 
 // Package cmd handle the cli commands

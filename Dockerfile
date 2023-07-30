@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.19
+ARG GO_VERSION=1.20
 
 # Build stage
 FROM golang:${GO_VERSION} AS builder
@@ -20,7 +20,7 @@ RUN echo "nonroot:x:65534:65534:Non root:/:" > /etc_passwd
 # Final stage
 FROM scratch
 
-LABEL maintainer="Jahvon Dockery <jahvondockery@gmail.com"
+LABEL maintainer="Jahvon Dockery <jahvondockery@gmail.com>"
 
 COPY --from=builder /go/bin/pilotcli /bin/pilotcli
 COPY --from=builder /etc_passwd /etc/passwd

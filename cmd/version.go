@@ -1,12 +1,13 @@
 /*
-Copyright © 2022 Jahvon Dockery <jahvondockery@gmail.com
+Copyright © 2024 Jahvon Dockery <jahvondockery@gmail.com>
 */
 
 package cmd
 
 import (
-	"github.com/jahvon/pilotcli/internal/cmd/version"
 	"github.com/spf13/cobra"
+
+	"github.com/jahvon/pilotcli/internal/cmd/version"
 )
 
 // versionCmd represents the version command
