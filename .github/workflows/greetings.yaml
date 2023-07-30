@@ -27,7 +27,7 @@ jobs:
             I will try to review your contribution as soon as possible.
             
             Thanks,
-            @jahvon
+            Jahvon
             `
 
             github.rest.issues.createComment({
@@ -52,7 +52,7 @@ jobs:
             I will work on this as soon as possible.
 
             Thanks,
-            @jahvon
+            Jahvon
             `
 
             github.rest.issues.createComment({
