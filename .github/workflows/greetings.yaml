@@ -1,0 +1,61 @@
+name: Greetings
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    branches: [main]
+    types: [opened]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comment pull request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          # Comment as whoever you want using `secrets.TAP_GITHUB_TOKEN` or GitHub bot if not set.
+          github-token: ${{ secrets.TAP_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            let output = `Hello! 
+
+            Thank you for your contribution to [pilotcli](https://github.com/jahvon/pilotcli).
+            If you are fixing a bug, please reference the issue number in the description.
+
+            We will revise your contribution as soon as possible.
+
+            The pilotcli team.
+            `
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Comment issue
+        uses: actions/github-script@v6
+        if: github.event_name != 'pull_request'
+        with:
+          # Comment as whoever you want using `secrets.TAP_GITHUB_TOKEN` or GitHub bot if not set.
+          github-token: ${{ secrets.TAP_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            let output = `:wave: Hello! 
+
+            Thank you for filing an issue.
+            If this is a bug report, please include relevant logs to help us debug the problem.
+
+            We will work on this as soon as possible.
+
+            The pilotcli team.
+            `
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })

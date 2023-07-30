@@ -1,0 +1,138 @@
+env:
+  - GO111MODULE=auto
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+    - ./scripts/completions.sh
+    - ./scripts/manpages.sh
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - "386"
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - "7"
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+
+universal_binaries:
+  - replace: false
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^Merge pull request"
+      - "^Merge branch"
+
+archives:
+  - name_template: >-
+      {{ .ProjectName }}_
+      {{- .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - completions/*
+      - manpages/*
+
+brews:
+  - tap:
+      owner: jahvon
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    goarm: "7"
+    homepage: https://github.com/jahvon/pilotcli
+    description: A Golang cli template.
+    license: Apache 2.0
+    test: |
+      system "#{bin}/pilotcli version"
+    dependencies:
+      - name: go
+        type: optional
+    install: |-
+      bin.install "pilotcli"
+      bash_completion.install "completions/pilotcli.bash" => "pilotcli"
+      zsh_completion.install "completions/pilotcli.zsh" => "_pilotcli"
+      fish_completion.install "completions/pilotcli.fish"
+      man1.install "manpages/pilotcli.1.gz"
+
+nfpms:
+  - file_name_template: "{{ .ConventionalFileName }}"
+    id: packages
+    homepage: https://github.com/jahvon/pilotcli
+    description: A Golang cli template.
+    maintainer: Jahvon Dockery <jahvondockery@gmail.com>
+    license: Apache 2.0
+    vendor: jahvon
+    bindir: /usr/bin
+    section: utils
+    contents:
+      - src: ./completions/pilotcli.bash
+        dst: /usr/share/bash-completion/completions/pilotcli
+        file_info:
+          mode: 0644
+      - src: ./completions/pilotcli.fish
+        dst: /usr/share/fish/vendor_completions.d/pilotcli.fish
+        file_info:
+          mode: 0644
+      - src: ./completions/pilotcli.zsh
+        dst: /usr/share/zsh/vendor-completions/_pilotcli
+        file_info:
+          mode: 0644
+      - src: ./manpages/pilotcli.1.gz
+        dst: /usr/share/man/man1/pilotcli.1.gz
+        file_info:
+          mode: 0644
+      - src: ./LICENSE
+        dst: /usr/share/doc/pilotcli/copyright
+        file_info:
+          mode: 0644
+    formats:
+      - apk
+      - deb
+      - rpm
+      - archlinux
+    recommends:
+      - golang
+    deb:
+      lintian_overrides:
+        - statically-linked-binary
+        - changelog-file-missing-in-native-package
+
+publishers:
+  - name: fury.io
+    ids:
+      - packages
+    env:
+      - "FURY_TOKEN={{ .Env.FURY_TOKEN }}"
+    cmd: ./scripts/fury-upload.sh {{ .ArtifactName }}
+
+release:
+  footer: |
+    **Full Changelog**: https://github.com/jahvon/pilotcli/compare/{{ .PreviousTag }}...{{ .Tag }}

@@ -1,0 +1,86 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "^1.19.4"
+
+      - name: Init project
+        run: |
+          go mod tidy
+          go generate ./...
+
+      #   ____                       _ _
+      #  / ___|  ___  ___ _   _ _ __(_) |_ _   _
+      #  \___ \ / _ \/ __| | | | '__| | __| | | |
+      #   ___) |  __/ (__| |_| | |  | | |_| |_| |
+      #  |____/ \___|\___|\__,_|_|  |_|\__|\__, |
+      #                                    |___/
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: "-no-fail -fmt sarif -out results.sarif ./..."
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+
+      #   _     _       _
+      #  | |   (_)_ __ | |_
+      #  | |   | | '_ \| __|
+      #  | |___| | | | | |_
+      #  |_____|_|_| |_|\__|
+      #
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.50.1
+          skip-pkg-cache: true
+
+      #   _____         _
+      #  |_   _|__  ___| |_
+      #    | |/ _ \/ __| __|
+      #    | |  __/\__ \ |_
+      #    |_|\___||___/\__|
+      #
+      - name: Run coverage
+        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.txt
+          fail_ci_if_error: true
+
+      #   ____             _
+      #  |  _ \  ___   ___| | _____ _ __
+      #  | | | |/ _ \ / __| |/ / _ \ '__|
+      #  | |_| | (_) | (__|   <  __/ |
+      #  |____/ \___/ \___|_|\_\___|_|
+      #
+      - name: Build the Docker image
+        run: make VERSION=latest docker/build
+      - name: Run the Anchore scan action
+        uses: anchore/scan-action@v3
+        with:
+          image: "jahvon/pilotcli:latest"
+          output-format: json
