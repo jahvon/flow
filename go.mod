@@ -1,6 +1,6 @@
 module github.com/jahvon/pilotcli
 
-go 1.19
+go 1.20
 
 require (
 	github.com/muesli/mango-cobra v1.2.0

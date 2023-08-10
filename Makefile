@@ -1,7 +1,6 @@
-BIN_NAME=pilotcli
-IMAGE_NAME=jahvon/${BIN_NAME}
+IMAGE_NAME=jahvon/pilotcli
 BIN_PATH=${GOPATH}/bin
-GO_VERSION=1.19
+GO_VERSION=1.20
 
 default: help
 

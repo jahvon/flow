@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 Jahvon Dockery <jahvondockery@gmail.com
+Copyright © 2023 Jahvon Dockery <jahvondockery@gmail.com>
 */
 package cmd
 
@@ -24,7 +24,7 @@ var manCmd = &cobra.Command{
 			panic(err)
 		}
 
-		manPage = manPage.WithSection("Copyright", "(C) 2022 Jahvon Dockery <jahvondockery@gmail.com")
+		manPage = manPage.WithSection("Copyright", "(C) 2023 Jahvon Dockery <jahvondockery@gmail.com>")
 
 		fmt.Fprint(os.Stdout, manPage.Build(roff.NewDocument()))
 	},
