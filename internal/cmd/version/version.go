@@ -31,13 +31,17 @@ var osArch = fmt.Sprintf("%s %s", runtime.GOOS, runtime.GOARCH)
 
 // generateOutput return the output of the version command
 func generateOutput() string {
-	return fmt.Sprintf(`pilotcli - %s
+	return fmt.Sprintf(`tbox - %s
 
 Git Commit: %s
 Build date: %s
 Go version: %s
 OS / Arch : %s
 `, version, gitCommit, buildDate, goVersion, osArch)
+}
+
+func String() string {
+	return generateOutput()
 }
 
 // Print the current version
