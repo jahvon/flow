@@ -18,13 +18,16 @@
 # Code coverage
 coverage.txt
 
+# IDE
+.idea
+
 # build files
 internal/cmd/version/commit.txt
 internal/cmd/version/version.txt
 internal/cmd/version/build_date.txt
-pilotcli
+tbox
 !docs/pilotcli
-pilotcli*.tar.gz
+tbox*.tar.gz
 dist
 completions/
-manpages
+

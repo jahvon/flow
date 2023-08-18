@@ -1,24 +1,24 @@
 # Contributing
 
 By participating in this project, you agree to abide our
-[code of conduct](https://github.com/jahvon/pilotcli/blob/main/.github/CODE_OF_CONDUCT.md).
+[code of conduct](https://github.com/jahvon/tbox/blob/main/.github/CODE_OF_CONDUCT.md).
 
 ## Set up your machine
 
-`pilotcli` is written in [Go](https://golang.org/).
+`tbox` is written in [Go](https://golang.org/).
 
 Prerequisites:
 
-- [Go 1.19+](https://golang.org/doc/install)
+- [Go 1.20+](https://golang.org/doc/install)
 
 Other things you might need to run the tests:
 
 - [Docker](https://www.docker.com/)
 
-Clone `pilotcli` anywhere:
+Clone `tbox` anywhere:
 
 ```sh
-git clone git@github.com:thazelart/pilotcli.git
+git clone git@github.com:jahvon/tbox.git
 ```
 
 `cd` into the directory and install the dependencies:
@@ -57,7 +57,7 @@ You can follow the documentation on
 
 ## Submit a pull request
 
-Push your branch to your `pilotcli` fork and open a pull request against the main branch.
+Push your branch to your `tbox` fork and open a pull request against the main branch.
 
 ## Credit
 

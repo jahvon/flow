@@ -25,8 +25,8 @@ body:
   - type: textarea
     id: version
     attributes:
-      label: pilotcli version
-      description: "`pilotcli version` output"
+      label: tbox version
+      description: "`tbox version` output"
       render: bash
     validations:
       required: true
@@ -41,7 +41,7 @@ body:
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/jahvon/pilotcli/blob/main/.github/CODE_OF_CONDUCT.md)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/jahvon/tbox/blob/main/.github/CODE_OF_CONDUCT.md)
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true

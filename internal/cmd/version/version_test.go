@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var regexp = fmt.Sprintf(`^pilotcli - .*
+var regexp = fmt.Sprintf(`^tbox - .*
 
 Git Commit: .*
 Build date: [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} .*

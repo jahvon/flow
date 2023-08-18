@@ -1,4 +1,5 @@
-IMAGE_NAME=jahvon/pilotcli
+IMAGE_NAME=jahvon/tbox
+BIN_NAME=tbox
 BIN_PATH=${GOPATH}/bin
 GO_VERSION=1.20
 
@@ -10,7 +11,6 @@ local/deps:
 	go install github.com/spf13/cobra-cli@v1.3.0
 	go install github.com/goreleaser/goreleaser@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
-	python3 -m pip install -r docs/requirements.txt
 
 ## Locally run the golang test.
 go/test:
@@ -36,7 +36,6 @@ pre-commit: go/test
 ## Test the goreleaser configuration locally.
 goreleaser/test:
 	goreleaser --snapshot --skip-publish --rm-dist
-
 
 ## Print his help screen
 help:
