@@ -14,6 +14,11 @@ func Log() zerolog.Logger {
 }
 
 func PrintInfo(message string) {
+	log := Log()
+	log.Info().Msg(message)
+}
+
+func PrintNotice(message string) {
 	color.HiBlue(message)
 }
 

@@ -2,8 +2,11 @@ package io
 
 import (
 	"fmt"
+	"os"
+	"syscall"
 
 	"github.com/rs/zerolog/log"
+	"golang.org/x/term"
 )
 
 func Ask(question string) string {
@@ -19,4 +22,22 @@ func Ask(question string) string {
 func AskYesNo(question string) bool {
 	answer := Ask(question + " (y/n) ")
 	return answer == "y" || answer == "Y"
+}
+
+func AskForMasterKey() string {
+	PrintQuestion("Master Key:")
+	passkey, err := term.ReadPassword(syscall.Stdin)
+	if err != nil {
+		os.Exit(1)
+	}
+	return string(passkey)
+}
+
+func AskForPassword() string {
+	PrintQuestion("Password:")
+	passkey, err := term.ReadPassword(syscall.Stdin)
+	if err != nil {
+		os.Exit(1)
+	}
+	return string(passkey)
 }
