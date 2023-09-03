@@ -10,11 +10,11 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"github.com/jahvon/tbox/internal/backend"
-	"github.com/jahvon/tbox/internal/backend/consts"
-	"github.com/jahvon/tbox/internal/cmd/flags"
-	"github.com/jahvon/tbox/internal/io"
-	"github.com/jahvon/tbox/internal/parameter"
+	"github.com/jahvon/flow/internal/backend"
+	"github.com/jahvon/flow/internal/backend/consts"
+	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/parameter"
 )
 
 var log = io.Log()

@@ -75,7 +75,7 @@ func EncryptValue(masterKey string, text string) (string, error) {
 
 	cfb := cipher.NewCFBEncrypter(block, iv)
 	cfb.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
-	return fmt.Sprintf("%s", ciphertext), nil
+	return string(ciphertext), nil
 }
 
 // DecryptValue decrypts a string using AES-256 and returns the decrypted value as a base64 encoded string.
@@ -100,5 +100,5 @@ func DecryptValue(masterKey string, text string) (string, error) {
 
 	cfb := cipher.NewCFBDecrypter(block, iv)
 	cfb.XORKeyStream(plainText, ciphertext)
-	return fmt.Sprintf("%s", plainText), nil
+	return string(plainText), nil
 }

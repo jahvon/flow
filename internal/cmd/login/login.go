@@ -6,14 +6,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/backend"
-	"github.com/jahvon/tbox/internal/backend/consts"
-	"github.com/jahvon/tbox/internal/backend/conv"
-	"github.com/jahvon/tbox/internal/cmd/flags"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/backend"
+	"github.com/jahvon/flow/internal/backend/consts"
+	"github.com/jahvon/flow/internal/backend/conv"
+	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/io"
 )
 
-const AuthEnvVar = "TBOX_MASTER_KEY"
+const AuthEnvVar = "FLOW_MASTER_KEY"
 
 var log = io.Log()
 

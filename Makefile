@@ -1,5 +1,5 @@
-IMAGE_NAME=jahvon/tbox
-BIN_NAME=tbox
+IMAGE_NAME=jahvon/flow
+BIN_NAME=flow
 BIN_PATH=${GOPATH}/bin
 GO_VERSION=1.20
 

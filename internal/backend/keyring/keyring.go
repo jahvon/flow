@@ -5,13 +5,13 @@ import (
 
 	"github.com/zalando/go-keyring"
 
-	"github.com/jahvon/tbox/internal/backend"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/backend"
+	"github.com/jahvon/flow/internal/io"
 )
 
 const (
 	// Keyring service name / prefix
-	serviceName = "tbox"
+	serviceName = "flow"
 )
 
 var log = io.Log()

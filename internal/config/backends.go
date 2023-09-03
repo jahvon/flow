@@ -3,10 +3,10 @@ package config
 import (
 	"fmt"
 
-	"github.com/jahvon/tbox/internal/backend"
-	"github.com/jahvon/tbox/internal/backend/consts"
-	"github.com/jahvon/tbox/internal/backend/conv"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/backend"
+	"github.com/jahvon/flow/internal/backend/consts"
+	"github.com/jahvon/flow/internal/backend/conv"
+	"github.com/jahvon/flow/internal/io"
 )
 
 func SetSecretBackend(config *RootConfig, secretConfig *backend.SecretConfig) error {

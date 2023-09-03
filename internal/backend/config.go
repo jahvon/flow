@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/jahvon/tbox/internal/backend/consts"
-	"github.com/jahvon/tbox/internal/crypto"
+	"github.com/jahvon/flow/internal/backend/consts"
+	"github.com/jahvon/flow/internal/crypto"
 )
 
 const defaultRememberMeDuration = 24 * time.Hour

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/jahvon/tbox/cmd"
+import "github.com/jahvon/flow/cmd"
 
 func main() {
 	cmd.Execute()

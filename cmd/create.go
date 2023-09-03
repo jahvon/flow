@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/common"
-	"github.com/jahvon/tbox/internal/config"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/common"
+	"github.com/jahvon/flow/internal/config"
+	"github.com/jahvon/flow/internal/io"
 )
 
 // createCmd represents the create command

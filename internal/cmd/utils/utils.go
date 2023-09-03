@@ -8,8 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/cmd/flags"
-	"github.com/jahvon/tbox/internal/config"
+	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/config"
 )
 
 func ValidateAndGetContext(cmd *cobra.Command, currentConfig *config.RootConfig) (string, error) {

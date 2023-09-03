@@ -6,10 +6,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/tbox/internal/common"
+	"github.com/jahvon/flow/internal/common"
 )
-
-const dataDirName = ".tbox"
 
 var (
 	RootConfigPath       = common.DataDirPath() + "/config.yaml"
@@ -21,12 +19,7 @@ func writeConfigFile(config *RootConfig) error {
 	if err != nil {
 		return fmt.Errorf("unable to open config file - %v", err)
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			
-		}
-	}(file)
+	defer file.Close()
 
 	if err := file.Truncate(0); err != nil {
 		return fmt.Errorf("unable to truncate config file - %v", err)

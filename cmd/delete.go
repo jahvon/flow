@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/config"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/config"
+	"github.com/jahvon/flow/internal/io"
 )
 
 // deleteCmd represents the delete command
@@ -21,7 +21,7 @@ var deleteWorkspaceCmd = &cobra.Command{
 	Use:   "workspace <name>",
 	Short: "Delete an existing workspace.",
 	Long: "Delete an existing workspace. File contents will remain in the corresponding directory but the workspace will be " +
-		"unlinked from tbox's conv. Note: You cannot delete the current workspace.",
+		"unlinked from flow's conv. Note: You cannot delete the current workspace.",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			return errors.New("requires a name argument")

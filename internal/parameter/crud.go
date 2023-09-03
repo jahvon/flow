@@ -1,7 +1,7 @@
 package parameter
 
 import (
-	"github.com/jahvon/tbox/internal/backend"
+	"github.com/jahvon/flow/internal/backend"
 )
 
 func (p *Parameter) Data(context, masterKey string, secretBackend backend.SecretBackend) (string, error) {

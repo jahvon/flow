@@ -6,10 +6,10 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/tbox/internal/backend"
-	"github.com/jahvon/tbox/internal/common"
-	"github.com/jahvon/tbox/internal/io"
-	"github.com/jahvon/tbox/internal/workspace"
+	"github.com/jahvon/flow/internal/backend"
+	"github.com/jahvon/flow/internal/common"
+	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/workspace"
 )
 
 var (
@@ -47,7 +47,10 @@ func (c *RootConfig) CurrentWorkspaceConfig() *workspace.Config {
 }
 
 func (c *RootConfig) setCurrentWorkspaceConfig() error {
-	wsPath, _ := c.Workspaces[c.CurrentWorkspace]
+	wsPath, found := c.Workspaces[c.CurrentWorkspace]
+	if !found {
+		return fmt.Errorf("current workspace %s is not registered", c.CurrentWorkspace)
+	}
 	wsCfg, err := workspace.LoadConfig(wsPath)
 	if err != nil {
 		return fmt.Errorf("unable to load current workspace config - %v", err)

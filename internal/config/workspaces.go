@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/jahvon/tbox/internal/workspace"
+	"github.com/jahvon/flow/internal/workspace"
 )
 
 func SetCurrentWorkspace(config *RootConfig, name string) error {

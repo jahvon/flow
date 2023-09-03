@@ -1,4 +1,4 @@
-module github.com/jahvon/tbox
+module github.com/jahvon/flow
 
 go 1.20
 

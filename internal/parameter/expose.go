@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jahvon/tbox/internal/backend"
+	"github.com/jahvon/flow/internal/backend"
 )
 
 func (p *Parameter) Expose(context, masterKey string, secretBackend backend.SecretBackend) error {

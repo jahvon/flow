@@ -17,7 +17,6 @@ Fixes #
 
 # Checklist:
 
-- [ ] I have read the [CONTRIBUTING](https://github.com/jahvon/pilotcli/blob/main/.github/CONTRIBUTING.md) document.
 - [ ] I have performed a self-review of my code
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings

@@ -3,10 +3,10 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/cmd/flags"
-	"github.com/jahvon/tbox/internal/cmd/login"
-	"github.com/jahvon/tbox/internal/config"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/cmd/login"
+	"github.com/jahvon/flow/internal/config"
+	"github.com/jahvon/flow/internal/io"
 )
 
 var loginCmd = &cobra.Command{

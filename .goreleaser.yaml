@@ -6,7 +6,6 @@ before:
     - go mod tidy
     - go generate ./...
     - ./scripts/completions.sh
-    - ./scripts/manpages.sh
 
 builds:
   - env:
@@ -14,11 +13,8 @@ builds:
     goos:
       - linux
       - darwin
-      - windows
     goarch:
-      - "386"
       - amd64
-      - arm
       - arm64
     goarm:
       - "7"
@@ -49,7 +45,6 @@ archives:
       {{ .ProjectName }}_
       {{- .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
@@ -59,58 +54,52 @@ archives:
       - README.md
       - LICENSE
       - completions/*
-      - manpages/*
 
 brews:
-  - tap:
+  - repository:
       owner: jahvon
       name: homebrew-tap
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     goarm: "7"
-    homepage: https://github.com/jahvon/pilotcli
-    description: A Golang cli template.
+    homepage: https://github.com/jahvon/flow
+    description: Configurable local workflow manager.
     license: Apache 2.0
     test: |
-      system "#{bin}/pilotcli version"
+      system "#{bin}/flow version"
     dependencies:
       - name: go
         type: optional
     install: |-
-      bin.install "pilotcli"
-      bash_completion.install "completions/pilotcli.bash" => "pilotcli"
-      zsh_completion.install "completions/pilotcli.zsh" => "_pilotcli"
-      fish_completion.install "completions/pilotcli.fish"
-      man1.install "manpages/pilotcli.1.gz"
+      bin.install "flow"
+      bash_completion.install "completions/flow.bash" => "flow"
+      zsh_completion.install "completions/flow.zsh" => "_flow"
+      fish_completion.install "completions/flow.fish"
 
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
     id: packages
-    homepage: https://github.com/jahvon/pilotcli
-    description: A Golang cli template.
+    homepage: https://github.com/jahvon/flow
+    description: Configurable local workflow manager.
     maintainer: Jahvon Dockery <jahvondockery@gmail.com>
     license: Apache 2.0
     vendor: jahvon
     bindir: /usr/bin
     section: utils
     contents:
-      - src: ./completions/tbox.bash
-        dst: /usr/share/bash-completion/completions/tbox
+      - src: ./completions/flow.bash
+        dst: /usr/share/bash-completion/completions/flow
         file_info:
           mode: 0644
-      - src: ./completions/tbox.fish
-        dst: /usr/share/fish/vendor_completions.d/tbox.fish
+      - src: ./completions/flow.fish
+        dst: /usr/share/fish/vendor_completions.d/flow.fish
         file_info:
           mode: 0644
-      - src: ./completions/tbox.zsh
-        dst: /usr/share/zsh/vendor-completions/_pilotcli
-        file_info:
-          mode: 0644
-      - src: ./manpages/tbox.1.gz
-        dst: /usr/share/man/man1/tbox.1.gz
+      - src: ./completions/flow.zsh
+        dst: /usr/share/zsh/vendor-completions/_flow
         file_info:
           mode: 0644
       - src: ./LICENSE
-        dst: /usr/share/doc/tbox/copyright
+        dst: /usr/share/doc/flow/copyright
         file_info:
           mode: 0644
     formats:
@@ -135,4 +124,4 @@ publishers:
 
 release:
   footer: |
-    **Full Changelog**: https://github.com/jahvon/pilotcli/compare/{{ .PreviousTag }}...{{ .Tag }}
+    **Full Changelog**: https://github.com/jahvon/flow/compare/{{ .PreviousTag }}...{{ .Tag }}

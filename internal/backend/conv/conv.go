@@ -3,10 +3,10 @@ package conv
 import (
 	"fmt"
 
-	"github.com/jahvon/tbox/internal/backend"
-	"github.com/jahvon/tbox/internal/backend/consts"
-	"github.com/jahvon/tbox/internal/backend/defaults"
-	"github.com/jahvon/tbox/internal/backend/keyring"
+	"github.com/jahvon/flow/internal/backend"
+	"github.com/jahvon/flow/internal/backend/consts"
+	"github.com/jahvon/flow/internal/backend/defaults"
+	"github.com/jahvon/flow/internal/backend/keyring"
 )
 
 func AuthBackendFromName(name consts.BackendName) (backend.AuthBackend, error) {

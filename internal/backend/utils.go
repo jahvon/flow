@@ -3,7 +3,7 @@ package backend
 import (
 	"fmt"
 
-	"github.com/jahvon/tbox/internal/backend/consts"
+	"github.com/jahvon/flow/internal/backend/consts"
 )
 
 func StrToAuthMode(str string) consts.AuthMode {

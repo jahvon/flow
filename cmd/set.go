@@ -5,12 +5,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/backend/consts"
-	"github.com/jahvon/tbox/internal/cmd/flags"
-	"github.com/jahvon/tbox/internal/cmd/set"
-	"github.com/jahvon/tbox/internal/cmd/utils"
-	"github.com/jahvon/tbox/internal/config"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/backend/consts"
+	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/cmd/set"
+	"github.com/jahvon/flow/internal/cmd/utils"
+	"github.com/jahvon/flow/internal/config"
+	"github.com/jahvon/flow/internal/io"
 )
 
 // setCmd represents the set command

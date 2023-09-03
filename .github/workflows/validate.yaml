@@ -82,5 +82,5 @@ jobs:
       - name: Run the Anchore scan action
         uses: anchore/scan-action@v3
         with:
-          image: "jahvon/tbox:latest"
+          image: "jahvon/flow:latest"
           output-format: json

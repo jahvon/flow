@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/io"
 )
 
-const dataDirName = ".tbox"
+const dataDirName = ".flow"
 
 var log = io.Log()
 

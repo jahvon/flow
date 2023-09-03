@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	tboxIO "github.com/jahvon/tbox/internal/io"
+	flowIO "github.com/jahvon/flow/internal/io"
 )
 
 type Destination string
@@ -25,10 +25,10 @@ const (
 	DestinationEnv  Destination = "env"
 	DestinationFile Destination = "file"
 
-	ReservedPrefix = "TBOX_"
+	ReservedPrefix = "FLOW_"
 )
 
-var log = tboxIO.Log()
+var log = flowIO.Log()
 
 func (p *Parameter) Validate() error {
 	if p.Key == "" {

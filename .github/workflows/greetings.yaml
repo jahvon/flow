@@ -21,7 +21,7 @@ jobs:
           script: |
             let output = `Hello! 
 
-            Thank you for your contribution to [tbox](https://github.com/jahvon/tbox).
+            Thank you for your contribution to [flow](https://github.com/jahvon/flow).
             If you are fixing a bug, please reference the issue number in the description.
 
             I will try to review your contribution as soon as possible.

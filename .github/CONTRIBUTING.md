@@ -1,11 +1,11 @@
 # Contributing
 
 By participating in this project, you agree to abide our
-[code of conduct](https://github.com/jahvon/tbox/blob/main/.github/CODE_OF_CONDUCT.md).
+[code of conduct](https://github.com/jahvon/flow/blob/main/.github/CODE_OF_CONDUCT.md).
 
 ## Set up your machine
 
-`tbox` is written in [Go](https://golang.org/).
+`flow` is written in [Go](https://golang.org/).
 
 Prerequisites:
 
@@ -15,10 +15,10 @@ Other things you might need to run the tests:
 
 - [Docker](https://www.docker.com/)
 
-Clone `tbox` anywhere:
+Clone `flow` anywhere:
 
 ```sh
-git clone git@github.com:jahvon/tbox.git
+git clone git@github.com:jahvon/flow.git
 ```
 
 `cd` into the directory and install the dependencies:
@@ -57,7 +57,7 @@ You can follow the documentation on
 
 ## Submit a pull request
 
-Push your branch to your `tbox` fork and open a pull request against the main branch.
+Push your branch to your `flow` fork and open a pull request against the main branch.
 
 ## Credit
 

@@ -10,9 +10,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/jahvon/tbox/internal/backend"
-	"github.com/jahvon/tbox/internal/backend/consts"
-	"github.com/jahvon/tbox/internal/common"
+	"github.com/jahvon/flow/internal/backend"
+	"github.com/jahvon/flow/internal/backend/consts"
+	"github.com/jahvon/flow/internal/common"
 )
 
 const envFileSuffix = ".scrts"
@@ -116,12 +116,7 @@ func envFileToMap(filePath string) (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open env file: %w", err)
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
@@ -146,12 +141,7 @@ func mapToEnvFile(envMap map[string]string, filePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open env file: %w", err)
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
+	defer file.Close()
 
 	if err := file.Truncate(0); err != nil {
 		return fmt.Errorf("unable to truncate env file - %v", err)

@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/config"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/config"
+	"github.com/jahvon/flow/internal/io"
 )
 
 // getCmd represents the get command

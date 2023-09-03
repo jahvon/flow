@@ -25,9 +25,9 @@ coverage.txt
 internal/cmd/version/commit.txt
 internal/cmd/version/version.txt
 internal/cmd/version/build_date.txt
-tbox
+flow
 !docs/pilotcli
-tbox*.tar.gz
+flow*.tar.gz
 dist
 completions/
 

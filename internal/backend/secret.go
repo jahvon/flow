@@ -3,11 +3,11 @@ package backend
 import (
 	"strings"
 
-	"github.com/jahvon/tbox/internal/crypto"
+	"github.com/jahvon/flow/internal/crypto"
 )
 
 const (
-	encryptionPrefix = "tbox:v1:"
+	encryptionPrefix = "flow:v1:"
 )
 
 type Secret string

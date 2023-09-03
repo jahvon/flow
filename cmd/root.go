@@ -8,12 +8,12 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/tbox/internal/cmd/version"
-	"github.com/jahvon/tbox/internal/io"
+	"github.com/jahvon/flow/internal/cmd/version"
+	"github.com/jahvon/flow/internal/io"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "tbox",
+	Use:   "flow",
 	Short: "[Alpha] CLI script wrapper",
 	Long:  `Command line interface script wrapper`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
