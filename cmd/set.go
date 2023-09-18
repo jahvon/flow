@@ -17,6 +17,7 @@ import (
 var setCmd = &cobra.Command{
 	Use:     "set",
 	Aliases: []string{"s"},
+	GroupID: CrudGroup.ID,
 	Short:   "Update a configuration, environment, or workspace option.",
 }
 

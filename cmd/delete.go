@@ -12,8 +12,9 @@ import (
 
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete a configuration, environment, or workspace option.",
+	Use:     "delete",
+	GroupID: CrudGroup.ID,
+	Short:   "Delete a configuration, environment, or workspace option.",
 }
 
 // deleteWorkspaceCmd represents the delete workspace subcommand

@@ -5,6 +5,16 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+)
+
+type OutputFormat string
+
+const (
+	OutputFormatJSON       OutputFormat = "json"
+	OutputFormatPrettyJson OutputFormat = "jsonp"
+	OutputFormatYAML       OutputFormat = "yaml"
+	OutputFormatDefault    OutputFormat = "default"
 )
 
 func Log() zerolog.Logger {
@@ -41,4 +51,32 @@ func PrintErrorAndExit(err error) {
 
 func PrintError(err error) {
 	color.HiRed(err.Error())
+}
+
+type StdOutWriter struct {
+	LogAsDebug bool
+}
+
+func (w StdOutWriter) Write(p []byte) (n int, err error) {
+	if w.LogAsDebug {
+		log.Debug().Msg(string(p))
+		return len(p), nil
+	}
+
+	log.Info().Msg(string(p))
+	return len(p), nil
+}
+
+type StdErrWriter struct {
+	LogAsDebug bool
+}
+
+func (w StdErrWriter) Write(p []byte) (n int, err error) {
+	if w.LogAsDebug {
+		log.Debug().Msg(string(p))
+		return len(p), nil
+	}
+
+	log.Error().Msg(string(p))
+	return len(p), nil
 }

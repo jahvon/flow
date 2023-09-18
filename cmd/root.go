@@ -45,4 +45,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose log output")
+
+	rootCmd.AddGroup(CrudGroup)
+	rootCmd.AddGroup(ExecutableGroup)
 }

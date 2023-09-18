@@ -41,3 +41,9 @@ func AskForPassword() string {
 	}
 	return string(passkey)
 }
+
+type StdInReader struct{}
+
+func (r StdInReader) Read(p []byte) (n int, err error) {
+	return os.Stdin.Read(p)
+}

@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/config"
+	"github.com/jahvon/flow/internal/io"
 )
+
+var log = io.Log()
 
 func ValidateAndGetContext(cmd *cobra.Command, currentConfig *config.RootConfig) (string, error) {
 	var err error

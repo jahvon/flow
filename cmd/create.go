@@ -15,6 +15,7 @@ import (
 var createCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
+	GroupID: CrudGroup.ID,
 	Short:   "Create a configuration, environment, or workspace option.",
 }
 

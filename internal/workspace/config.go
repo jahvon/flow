@@ -5,10 +5,12 @@ import (
 	"os"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/jahvon/flow/internal/executable"
 )
 
 type Config struct {
-	RegisteredExecutables map[string]string `yaml:"executables"`
+	ExecutablePreferences map[string]executable.Preference `yaml:"executablePreferences"`
 }
 
 func (c *Config) Validate() error {
@@ -33,6 +35,6 @@ func LoadConfig(workspacePath string) (*Config, error) {
 
 func defaultConfig() *Config {
 	return &Config{
-		RegisteredExecutables: make(map[string]string),
+		ExecutablePreferences: make(map[string]executable.Preference),
 	}
 }
