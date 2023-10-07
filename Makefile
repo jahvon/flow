@@ -1,7 +1,6 @@
-IMAGE_NAME=jahvon/flow
 BIN_NAME=flow
 BIN_PATH=${GOPATH}/bin
-GO_VERSION=1.20
+GO_VERSION=1.21.1
 
 default: help
 
@@ -24,18 +23,9 @@ go/build:
 	go generate ./...
 	go build -o ${BIN_PATH}/${BIN_NAME}
 
-## Compile optimized for alpine linux.
-docker/build:
-	@echo "building image ${IMAGE_NAME}"
-	docker build --build-arg GO_VERSION=${GO_VERSION} -t $(IMAGE_NAME):latest .
-
 ## Make sure everything is ok before a commit
 pre-commit: go/test
 	go fmt ./...
-
-## Test the goreleaser configuration locally.
-goreleaser/test:
-	goreleaser --snapshot --skip-publish --rm-dist
 
 ## Print his help screen
 help:

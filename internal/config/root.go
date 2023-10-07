@@ -65,7 +65,7 @@ func (c *RootConfig) setCurrentWorkspaceConfig() error {
 
 func LoadConfig() *RootConfig {
 	if err := common.EnsureDataDir(); err != nil {
-		log.Fatal().Err(err).Msg("encountered issue with backend directory")
+		log.Fatal().Err(err).Msg("encountered issue with flow data directory")
 	}
 
 	var config *RootConfig
