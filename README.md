@@ -1,69 +1,72 @@
 # flow - Local, CLI Workflow Manager
 
-<p align="center">
-  <a href="https://github.com/jahvon/flow/releases" rel="nofollow">
-    <img alt="GitHub release (latest SemVer including pre-releases)" src="https://img.shields.io/github/v/release/jahvon/flow?include_prereleases">
-  </a>
+## Configuration and Workflow Definition Files
 
-  <a href="https://github.com/jahvon/flow/actions/workflows/release.yaml" rel="nofollow">
-    <img src="https://github.com/jahvon/flow/actions/workflows/release.yaml/badge.svg" alt="goreleaser" style="max-width:100%;">
-  </a>
+`flow` uses a configuration file to define the workspaces and workflows that it manages. 
+The location for this flow configuration file is `~/.flow/config.yaml`. Below is an example of a flow configuration file.
 
-  <a href="https://pkg.go.dev/github.com/jahvon/flow" rel="nofollow">
-    <img src="https://pkg.go.dev/badge/github.com/jahvon/flow.svg" alt="Go reference" style="max-width:100%;">
-  </a>
-
-  <a href="https://github.com/jahvon/flow/blob/main/LICENSE" rel="nofollow">
-    <img src="https://img.shields.io/badge/license-Apache 2.0-blue.svg" alt="License Apache 2.0" style="max-width:100%;">
-  </a>
-
-  <br/>
-
-  <a href="https://codecov.io/gh/jahvon/flow" >
-    <img src="https://codecov.io/gh/jahvon/flow/branch/main/graph/badge.svg?token=CLP6KW4QLK"/>
-  </a>
-
-  <a href="https://github.com/jahvon/flow/actions/workflows/codeql.yaml" rel="nofollow">
-    <img src="https://github.com/jahvon/flow/actions/workflows/codeql.yaml/badge.svg" alt="codeql" style="max-width:100%;">
-  </a>
-
-  <a href="https://goreportcard.com/report/github.com/jahvon/flow" rel="nofollow">
-    <img src="https://goreportcard.com/badge/github.com/jahvon/flow" alt="Go report card" style="max-width:100%;">
-  </a>
-</p>
-<br/>
-
-## Development
-
-### Dependencies
-
-`flow` is written in [Go](https://golang.org/).
-
-Prerequisites:
-
-- [Go 1.20+](https://golang.org/doc/install)
-
-Other local dependencies can be installed with:
-
-```sh
-make local/deps
+```yaml
+currentWorkspace: workspace1
+workspaces:
+  workspace1: /path/to/workspace1
+  workspace2: /path/to/workspace2
+backends:
+  secret:
+    backend: envFile
+  auth:
+    backend: keyring
+    preferredMode: password
+    rememberMe: true
+    rememberDuration: 24h
 ```
 
-### Build / Testing
+Workflows can be defined anywhere within a workspace's directory with the `.flow` file extension.
+Below is an example of a workflow definition file.
 
-```sh
-make go/build
+```yaml
+namespace: ns
+tags:
+  - example
+executables:
+  - type: open
+    name: config
+    tags:
+      - config
+    description: open flow config in vscode
+    spec:
+      args:
+        - ~/.flow
+      application: code
 ```
 
-```sh
-make go/test
-```
+Running `flow open ns:config` will run the above workflow.
 
-### Pre-commit
+## CLI Usage
 
-```sh
-make pre-commit
-```
+```bash
+flow [command]
+``` 
+
+### Available Commands
+
+**Updating configs and data used by `flow`**
+
+- `flow get` - Get current value of various configuration options and data
+- `flow set` - Update various configuration options and data
+- `flow create` - Create ...
+- `flow delete` - Delete ...
+- `flow login` - Login to auth backend. This is needed only when an auth backend is set.
+
+**Executing workflows**
+
+- `flow run` - Run a workflow
+- `flow open` - Open a workflow in the browser
+
+**Autocompletion**
+
+- `flow completion` - Generate shell autocompletion for `flow`
+
+Example autocompletion setup script: `flow completion zsh > ~/.oh-my-zsh/completions/_flow`
 
 ## Install
 
@@ -147,7 +150,3 @@ $ go install
 ```
 
 </details>
-
-## Credits
-
-Repository initially generated with [thazelart/golang-cli-template](https://github.com/thazelart/golang-cli-template).
