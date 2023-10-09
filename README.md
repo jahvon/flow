@@ -10,14 +10,6 @@ currentWorkspace: workspace1
 workspaces:
   workspace1: /path/to/workspace1
   workspace2: /path/to/workspace2
-backends:
-  secret:
-    backend: envFile
-  auth:
-    backend: keyring
-    preferredMode: password
-    rememberMe: true
-    rememberDuration: 24h
 ```
 
 Workflows can be defined anywhere within a workspace's directory with the `.flow` file extension.
@@ -34,9 +26,8 @@ executables:
       - config
     description: open flow config in vscode
     spec:
-      args:
-        - ~/.flow
-      application: code
+      uri: .flow
+      application: Visual Studio Code
 ```
 
 Running `flow open ns:config` will run the above workflow.
@@ -55,7 +46,7 @@ flow [command]
 - `flow set` - Update various configuration options and data
 - `flow create` - Create ...
 - `flow delete` - Delete ...
-- `flow login` - Login to auth backend. This is needed only when an auth backend is set.
+- `flow vault` - Manage secrets stored in the vault
 
 **Executing workflows**
 
