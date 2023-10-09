@@ -7,10 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jahvon/flow/internal/io"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
+
+	"github.com/jahvon/flow/internal/io"
 )
 
 var log = io.Log()
@@ -61,7 +62,7 @@ func RunFile(filename, dir string, envList []string) error {
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		return fmt.Errorf("file does not exist - %s", fullPath)
 	}
-	file, err := os.OpenFile(fullPath, os.O_RDONLY, 0)
+	file, err := os.OpenFile(filepath.Clean(fullPath), os.O_RDONLY, 0)
 	if err != nil {
 		return fmt.Errorf("unable to open file - %w", err)
 	}
