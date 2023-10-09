@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	"github.com/pterm/pterm"
-	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/io"
 )
+
+var log = io.Log()
 
 type executableListOutput struct {
 	Executables []*executableOutput `json:"executables"`

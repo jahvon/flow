@@ -22,13 +22,15 @@ type Definition struct {
 	Tags        []string        `yaml:"tags"`
 	Executables executable.List `yaml:"executables"`
 
-	workspace string
+	workspace     string
+	workspacePath string
 }
 
-func (d *Definition) SetContext(workspace string) {
+func (d *Definition) SetContext(workspace, workspacePath string) {
 	d.workspace = workspace
+	d.workspacePath = workspacePath
 	for _, exec := range d.Executables {
-		exec.SetContext(workspace, d.Namespace)
+		exec.SetContext(workspace, workspacePath, d.Namespace)
 	}
 }
 
@@ -91,7 +93,7 @@ func LoadDefinitions(workspace, workspacePath string) (DefinitionList, error) {
 		if err != nil {
 			return nil, err
 		}
-		definition.SetContext(workspace)
+		definition.SetContext(workspace, workspacePath)
 		definitions = append(definitions, definition)
 	}
 

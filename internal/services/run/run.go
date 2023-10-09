@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"mvdan.cc/sh/v3/expand"
@@ -15,11 +16,8 @@ import (
 
 var log = io.Log()
 
-func RunCmd(commandStr string) error {
-	return RunCmdIn(commandStr, "")
-}
-
-func RunCmdIn(commandStr, dir string) error {
+// RunCmd executes a command in the current shell in a specific directory
+func RunCmd(commandStr, dir string, envList []string) error {
 	log.Trace().Msgf("running command (%s) in dir (%s)", commandStr, dir)
 
 	ctx := context.Background()
@@ -30,10 +28,14 @@ func RunCmdIn(commandStr, dir string) error {
 		return fmt.Errorf("unable to parse command - %v", err)
 	}
 
+	if envList == nil {
+		envList = make([]string, 0)
+	}
+	envList = append(os.Environ(), envList...)
+
 	runner, err := interp.New(
 		interp.Dir(dir),
-		// TODO: accept configured env vars
-		interp.Env(expand.ListEnviron(os.Environ()...)),
+		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
 			io.StdInReader{},
 			io.StdOutWriter{LogAsDebug: false},
@@ -43,6 +45,47 @@ func RunCmdIn(commandStr, dir string) error {
 	err = runner.Run(ctx, prog)
 	if err != nil {
 		return fmt.Errorf("encountered an error executing command - %v", err)
+	}
+	return nil
+}
+
+// RunFile executes a file in the current shell in a specific directory
+func RunFile(filename, dir string, envList []string) error {
+	log.Trace().Msgf("executing file (%s)", filename)
+
+	ctx := context.Background()
+	fullPath := filepath.Join(dir, filename)
+	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+		return fmt.Errorf("file does not exist - %s", fullPath)
+	}
+	file, err := os.OpenFile(fullPath, os.O_RDONLY, 0)
+	if err != nil {
+		return fmt.Errorf("unable to open file - %v", err)
+	}
+	defer file.Close()
+	
+	parser := syntax.NewParser()
+	prog, err := parser.Parse(file, "")
+	if err != nil {
+		return fmt.Errorf("unable to parse file - %v", err)
+	}
+
+	if envList == nil {
+		envList = make([]string, 0)
+	}
+	envList = append(os.Environ(), envList...)
+
+	runner, err := interp.New(
+		interp.Env(expand.ListEnviron(envList...)),
+		interp.StdIO(
+			io.StdInReader{},
+			io.StdOutWriter{LogAsDebug: false},
+			io.StdErrWriter{LogAsDebug: false},
+		),
+	)
+	err = runner.Run(ctx, prog)
+	if err != nil {
+		return fmt.Errorf("encountered an error executing file - %v", err)
 	}
 	return nil
 }

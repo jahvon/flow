@@ -20,17 +20,19 @@ type Executable struct {
 	Tags        []string               `yaml:"tags"`
 	Spec        map[string]interface{} `yaml:"spec"`
 
-	workspace string
-	namespace string
+	workspace     string
+	workspacePath string
+	namespace     string
 }
 
-func (e *Executable) SetContext(workspace, namespace string) {
+func (e *Executable) SetContext(workspace, workspacePath, namespace string) {
 	e.workspace = workspace
+	e.workspacePath = workspacePath
 	e.namespace = namespace
 }
 
-func (e *Executable) GetContext() (workspace string, namespace string) {
-	return e.workspace, e.namespace
+func (e *Executable) GetContext() (workspace, workspacePath, namespace string) {
+	return e.workspace, e.workspacePath, e.namespace
 }
 
 func (e *Executable) ID() string {

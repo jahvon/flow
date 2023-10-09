@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/jahvon/flow/internal/workspace"
 )
@@ -17,12 +16,11 @@ func SetCurrentWorkspace(config *RootConfig, name string) error {
 }
 
 func SetWorkspace(config *RootConfig, name, location string) error {
-	workspaceDir := filepath.Join(location, name)
-	if err := workspace.SetDirectory(workspaceDir); err != nil {
+	if err := workspace.SetDirectory(location); err != nil {
 		return err
 	}
 
-	config.Workspaces[name] = workspaceDir
+	config.Workspaces[name] = location
 	return writeConfigFile(config)
 }
 

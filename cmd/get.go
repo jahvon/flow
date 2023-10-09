@@ -32,7 +32,9 @@ var getWorkspaceCmd = &cobra.Command{
 		if rootCfg == nil {
 			log.Fatal().Msg("failed to load config")
 		}
-		io.PrintNotice(rootCfg.CurrentWorkspace)
+		wsPath := rootCfg.Workspaces[rootCfg.CurrentWorkspace]
+		wsInfo := fmt.Sprintf("%s (%s)", rootCfg.CurrentWorkspace, wsPath)
+		io.PrintNotice(wsInfo)
 	},
 }
 

@@ -6,12 +6,14 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
 
 type Parameter struct {
-	// Only one of text or secretRef should be set.
+	// Only one of text, secretRef, or prompt should be set.
 	Text      string `yaml:"text"`
+	Prompt    string `yaml:"prompt"`
 	SecretRef string `yaml:"secretRef"`
 
 	EnvKey string `yaml:"envKey"`
@@ -22,10 +24,14 @@ const (
 )
 
 func (p *Parameter) Validate() error {
-	if p.Text == "" && p.SecretRef == "" {
-		return errors.New("must set either text or secretRef for parameter")
+	if p.Text == "" && p.SecretRef == "" && p.Prompt == "" {
+		return errors.New("must set either text, secretRef, or prompt for parameter")
 	} else if p.Text != "" && p.SecretRef != "" {
 		return errors.New("cannot set both text and secretRef for parameter")
+	} else if p.Text != "" && p.Prompt != "" {
+		return errors.New("cannot set both text and prompt for parameter")
+	} else if p.SecretRef != "" && p.Prompt != "" {
+		return errors.New("cannot set both secretRef and prompt for parameter")
 	}
 
 	if p.EnvKey == "" {
@@ -43,10 +49,13 @@ func (p *Parameter) Validate() error {
 }
 
 func (p *Parameter) Value() (string, error) {
-	if p.Text == "" && p.SecretRef == "" {
+	if p.Text == "" && p.SecretRef == "" && p.Prompt == "" {
 		return "", nil
 	} else if p.Text != "" {
 		return p.Text, nil
+	} else if p.Prompt != "" {
+		response := io.Ask(p.Prompt)
+		return response, nil
 	}
 
 	if err := vault.ValidateReference(p.SecretRef); err != nil {

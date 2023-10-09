@@ -2,6 +2,7 @@ package run
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -15,10 +16,12 @@ type agent struct {
 }
 
 type Spec struct {
-	Timeout    string                `yaml:"timeout" mapstructure:"timeout"`
-	CommandStr string                `yaml:"cmd" mapstructure:"cmd"`
-	Dir        string                `yaml:"dir" mapstructure:"dir"`
-	Params     []parameter.Parameter `yaml:"params" mapstructure:"params"`
+	Timeout string                `yaml:"timeout" mapstructure:"timeout"`
+	Dir     string                `yaml:"dir" mapstructure:"dir"`
+	Params  []parameter.Parameter `yaml:"params" mapstructure:"params"`
+
+	CommandStr string `yaml:"cmd" mapstructure:"cmd"`
+	ShFile     string `yaml:"file" mapstructure:"file"`
 }
 
 func NewAgent() executable.Agent {
@@ -39,11 +42,31 @@ func (a *agent) Exec(exec executable.Executable) error {
 		return fmt.Errorf("unable to decode 'run' executable spec - %v", err)
 	}
 
+	params := runSpec.Params
+	envList, err := parameter.ParameterListToEnvList(params)
+	if err != nil {
+		return fmt.Errorf("unable to convert parameters to env list - %v", err)
+	}
+
+	targetDir := runSpec.Dir
+	if targetDir == "" {
+		_, workspacePath, _ := exec.GetContext()
+		targetDir = workspacePath
+	} else if strings.HasPrefix(targetDir, "//") {
+		_, workspacePath, _ := exec.GetContext()
+		targetDir = strings.Replace(targetDir, "//", workspacePath+"/", 1)
+	}
+
 	err = executable.WithTimeout(runSpec.Timeout, func() error {
-		if runSpec.Dir != "" {
-			return run.RunCmdIn(runSpec.CommandStr, runSpec.Dir)
+		if runSpec.CommandStr != "" && runSpec.ShFile != "" {
+			return fmt.Errorf("cannot set both cmd and file")
+		} else if runSpec.CommandStr != "" {
+			return run.RunCmd(runSpec.CommandStr, targetDir, envList)
+		} else if runSpec.ShFile != "" {
+			return run.RunFile(runSpec.ShFile, targetDir, envList)
+		} else {
+			return fmt.Errorf("either cmd or file must be specified")
 		}
-		return run.RunCmd(runSpec.CommandStr)
 	})
 
 	return err

@@ -6,6 +6,10 @@ import (
 )
 
 func WithTimeout(timeoutStr string, fn func() error) error {
+	if timeoutStr == "" {
+		return fn()
+	}
+
 	timeout, err := time.ParseDuration(timeoutStr)
 	if err != nil {
 		return fmt.Errorf("unable to parse timeout duration - %v", err)
