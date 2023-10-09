@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pterm/pterm"
-	"gopkg.in/yaml.v3"
-
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/pterm/pterm"
+	"gopkg.in/yaml.v3"
 )
 
 var log = io.Log()
@@ -23,16 +22,17 @@ type executableOutput struct {
 }
 
 func PrintExecutableList(format io.OutputFormat, executables executable.List) {
-	if format == io.OutputFormatYAML {
+	switch format {
+	case io.OutputFormatYAML:
 		printExecutableListYAML(executables)
-	} else if format == io.OutputFormatJSON {
+	case io.OutputFormatJSON:
 		printExecutableListJSON(executables, false)
-	} else if format == io.OutputFormatPrettyJson {
+	case io.OutputFormatPrettyJSON:
 		printExecutableListJSON(executables, true)
-	} else if format == io.OutputFormatDefault {
+	case io.OutputFormatDefault:
 		printExecutableListTable(executables)
-	} else {
-		log.Fatal().Msgf("Unsupported output format %s", format)
+	default:
+		log.Panic().Msgf("Unsupported output format %s", format)
 	}
 }
 
@@ -47,7 +47,7 @@ func printExecutableListYAML(executables executable.List) {
 	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
-		log.Fatal().Msgf("Failed to marshal executable list - %v", err)
+		log.Panic().Msgf("Failed to marshal executable list - %v", err)
 	}
 	fmt.Println(string(yamlBytes))
 }
@@ -70,7 +70,7 @@ func printExecutableListJSON(executables executable.List, pretty bool) {
 		jsonBytes, err = json.Marshal(enriched)
 	}
 	if err != nil {
-		log.Fatal().Msgf("Failed to marshal executable - %v", err)
+		log.Panic().Msgf("Failed to marshal executable - %v", err)
 	}
 	fmt.Println(string(jsonBytes))
 }
@@ -87,21 +87,22 @@ func printExecutableListTable(executables executable.List) {
 
 	err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
 	if err != nil {
-		log.Fatal().Msgf("Failed to render executable list - %v", err)
+		log.Panic().Msgf("Failed to render executable list - %v", err)
 	}
 }
 
 func PrintExecutable(format io.OutputFormat, exec *executable.Executable) {
-	if format == io.OutputFormatYAML {
+	switch format {
+	case io.OutputFormatYAML:
 		printExecutableYAML(exec)
-	} else if format == io.OutputFormatJSON {
+	case io.OutputFormatJSON:
 		printExecutableJSON(exec, false)
-	} else if format == io.OutputFormatPrettyJson {
+	case io.OutputFormatPrettyJSON:
 		printExecutableJSON(exec, true)
-	} else if format == io.OutputFormatDefault {
+	case io.OutputFormatDefault:
 		printExecutableTable(exec)
-	} else {
-		log.Fatal().Msgf("Unsupported output format %s", format)
+	default:
+		log.Panic().Msgf("Unsupported output format %s", format)
 	}
 }
 
@@ -118,7 +119,7 @@ func printExecutableJSON(exec *executable.Executable, pretty bool) {
 		jsonBytes, err = json.Marshal(enriched)
 	}
 	if err != nil {
-		log.Fatal().Msgf("Failed to marshal executable - %v", err)
+		log.Panic().Msgf("Failed to marshal executable - %v", err)
 	}
 	fmt.Println(string(jsonBytes))
 }
@@ -130,7 +131,7 @@ func printExecutableYAML(exec *executable.Executable) {
 	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
-		log.Fatal().Msgf("Failed to marshal executable - %v", err)
+		log.Panic().Msgf("Failed to marshal executable - %v", err)
 	}
 	fmt.Println(string(yamlBytes))
 }
@@ -138,7 +139,7 @@ func printExecutableYAML(exec *executable.Executable) {
 func printExecutableTable(exec *executable.Executable) {
 	yamlSpec, err := yaml.Marshal(exec.Spec)
 	if err != nil {
-		log.Fatal().Msgf("Failed to marshal spec - %v", err)
+		log.Panic().Msgf("Failed to marshal spec - %v", err)
 	}
 	err = pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(pterm.TableData{
 		{"Key", "Value"},
@@ -151,6 +152,6 @@ func printExecutableTable(exec *executable.Executable) {
 		{"Spec", string(yamlSpec)},
 	}).Render()
 	if err != nil {
-		log.Fatal().Msgf("Failed to render executable - %v", err)
+		log.Panic().Msgf("Failed to render executable - %v", err)
 	}
 }

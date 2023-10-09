@@ -1,10 +1,9 @@
+//nolint:cyclop
 package executable
 
 import (
 	"errors"
 	"strings"
-
-	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/cmd/utils"
@@ -14,6 +13,7 @@ import (
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/workspace"
+	"github.com/spf13/cobra"
 )
 
 var log = io.Log()
@@ -29,6 +29,9 @@ func ArgsToExecutable(
 	}
 	executableIdentifier := args[0]
 	ws, ns, name, err := SplitExecutableIdentifier(executableIdentifier)
+	if err != nil {
+		return "", nil, err
+	}
 
 	if ws == "" {
 		log.Debug().Msg("defaulting to the current workspace")
@@ -132,13 +135,14 @@ func SplitExecutableIdentifier(identifier string) (ws, ns, name string, _ error)
 	}
 
 	split = strings.Split(identifier, "/")
-	if len(split) > 2 {
-		return "", "", "", errors.New("invalid executable identifier")
-	} else if len(split) == 2 {
+	switch len(split) {
+	case 1:
+		remaining = split[0]
+	case 2:
 		ws = split[0]
 		remaining = split[1]
-	} else {
-		remaining = split[0]
+	default:
+		return "", "", "", errors.New("invalid executable identifier")
 	}
 
 	split = strings.Split(remaining, ":")

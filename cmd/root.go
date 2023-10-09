@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/rs/zerolog"
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/cmd/version"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/rs/zerolog"
+	"github.com/spf13/cobra"
 )
 
 var log = io.Log()
@@ -21,7 +20,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbose, err := strconv.ParseBool(cmd.Flag("verbose").Value.String())
 		if err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("invalid verbose flag - %v", err))
+			io.PrintErrorAndExit(fmt.Errorf("invalid verbose flag - %w", err))
 		}
 
 		if verbose {

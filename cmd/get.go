@@ -3,17 +3,16 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/cmd/executable"
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/io"
 	executable2 "github.com/jahvon/flow/internal/io/executable"
+	"github.com/spf13/cobra"
 )
 
-// getCmd represents the get command
+// getCmd represents the get command.
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
@@ -21,7 +20,7 @@ var getCmd = &cobra.Command{
 	Short:   "Get the current value of a configuration, environment, or workspace option.",
 }
 
-// getWorkspaceCmd represents the get workspace subcommand
+// getWorkspaceCmd represents the get workspace subcommand.
 var getWorkspaceCmd = &cobra.Command{
 	Use:     "workspace",
 	Aliases: []string{"w"},
@@ -30,7 +29,7 @@ var getWorkspaceCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 		wsPath := rootCfg.Workspaces[rootCfg.CurrentWorkspace]
 		wsInfo := fmt.Sprintf("%s (%s)", rootCfg.CurrentWorkspace, wsPath)
@@ -46,7 +45,7 @@ var getExecutablesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 
 		executables, err := executable.FlagsToExecutableList(cmd, rootCfg)
@@ -67,12 +66,12 @@ var getExecutableCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 
 		agent := cmd.Flag(flags.AgentTypeFlagName)
 		if agent == nil || !agent.Changed {
-			log.Fatal().Msg("agent type is required")
+			log.Panic().Msg("agent type is required")
 		}
 
 		_, exec, err := executable.ArgsToExecutable(args, consts.AgentType(agent.Value.String()), rootCfg)
@@ -88,10 +87,30 @@ var getExecutableCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getWorkspaceCmd)
 
-	getExecutablesCmd.Flags().StringP(flags.OutputFormatFlagName, "o", "default", "Output format. One of: default, yaml, json, jsonp.")
-	getExecutablesCmd.Flags().StringP(flags.AgentTypeFlagName, "a", "", "Filter executables by agent type.")
-	getExecutablesCmd.Flags().StringP(flags.TagFlagName, "t", "", "Filter executables by tag.")
-	getExecutablesCmd.Flags().StringP(flags.NamespaceFlagName, "n", "", "Filter executables by namespace.")
+	getExecutablesCmd.Flags().StringP(
+		flags.OutputFormatFlagName,
+		"o",
+		"default",
+		"Output format. One of: default, yaml, json, jsonp.",
+	)
+	getExecutablesCmd.Flags().StringP(
+		flags.AgentTypeFlagName,
+		"a",
+		"",
+		"Filter executables by agent type.",
+	)
+	getExecutablesCmd.Flags().StringP(
+		flags.TagFlagName,
+		"t",
+		"",
+		"Filter executables by tag.",
+	)
+	getExecutablesCmd.Flags().StringP(
+		flags.NamespaceFlagName,
+		"n",
+		"",
+		"Filter executables by namespace.",
+	)
 	getExecutablesCmd.Flags().StringP(
 		flags.WorkspaceContextFlagName, "w", "", "Filter executables by workspace.",
 	)
@@ -101,11 +120,20 @@ func init() {
 	getExecutablesCmd.MarkFlagsMutuallyExclusive(flags.WorkspaceContextFlagName, flags.GlobalContextFlagName)
 	getCmd.AddCommand(getExecutablesCmd)
 
-	getExecutableCmd.Flags().StringP(flags.OutputFormatFlagName, "o", "default", "Output format. One of: default, yaml, json, jsonp.")
-	getExecutableCmd.Flags().StringP(flags.AgentTypeFlagName, "a", "", fmt.Sprintf("Executable agent type. One of: %s", consts.ValidAgentTypes))
+	getExecutableCmd.Flags().StringP(
+		flags.OutputFormatFlagName,
+		"o",
+		"default",
+		"Output format. One of: default, yaml, json, jsonp.",
+	)
+	getExecutableCmd.Flags().StringP(
+		flags.AgentTypeFlagName,
+		"a",
+		"",
+		fmt.Sprintf("Executable agent type. One of: %s", consts.ValidAgentTypes),
+	)
 	_ = getExecutableCmd.MarkFlagRequired(flags.AgentTypeFlagName)
 	getCmd.AddCommand(getExecutableCmd)
 
 	rootCmd.AddCommand(getCmd)
-
 }

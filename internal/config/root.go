@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/jahvon/flow/internal/common"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/workspace"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -44,11 +43,11 @@ func (c *RootConfig) setCurrentWorkspaceConfig() error {
 	}
 	wsCfg, err := workspace.LoadConfig(wsPath)
 	if err != nil {
-		return fmt.Errorf("unable to load current workspace config - %v", err)
+		return fmt.Errorf("unable to load current workspace config - %w", err)
 	} else if wsCfg == nil {
 		return fmt.Errorf("current workspace config is nil")
 	} else if err := wsCfg.Validate(); err != nil {
-		return fmt.Errorf("encountered workspace config validation error - %v", err)
+		return fmt.Errorf("encountered workspace config validation error - %w", err)
 	}
 	c.currentWorkspaceConfig = wsCfg
 	return nil
@@ -56,7 +55,7 @@ func (c *RootConfig) setCurrentWorkspaceConfig() error {
 
 func LoadConfig() *RootConfig {
 	if err := common.EnsureConfigDir(); err != nil {
-		log.Fatal().Err(err).Msg("encountered issue with flow data directory")
+		log.Panic().Err(err).Msg("encountered issue with flow data directory")
 	}
 
 	var config *RootConfig
@@ -66,35 +65,35 @@ func LoadConfig() *RootConfig {
 			config = defaultConfig()
 			file, err = os.Create(RootConfigPath)
 			if err != nil {
-				log.Fatal().Err(err).Msg("unable to create config file")
+				log.Panic().Err(err).Msg("unable to create config file")
 			}
 			err = writeConfigFile(config)
 			if err != nil {
-				log.Fatal().Err(err).Msg("unable to write config file")
+				log.Panic().Err(err).Msg("unable to write config file")
 			}
 		} else {
-			log.Fatal().Err(err).Msg("unable to open config file")
+			log.Panic().Err(err).Msg("unable to open config file")
 		}
 	} else {
 		config = &RootConfig{}
 		err = yaml.NewDecoder(file).Decode(config)
 		if err != nil {
-			log.Fatal().Err(err).Msg("unable to decode config file")
+			log.Panic().Err(err).Msg("unable to decode config file")
 		}
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			log.Fatal().Err(err).Msg("unable to close config file")
+			log.Panic().Err(err).Msg("unable to close config file")
 		}
 	}(file)
 
 	if err := config.Validate(); err != nil {
-		log.Fatal().Err(err).Msg("encountered validation error")
+		log.Panic().Err(err).Msg("encountered validation error")
 	}
 
 	if err := config.setCurrentWorkspaceConfig(); err != nil {
-		log.Fatal().Err(err).Msg("encountered issue setting current workspace config")
+		log.Panic().Err(err).Msg("encountered issue setting current workspace config")
 	}
 
 	return config
@@ -102,7 +101,7 @@ func LoadConfig() *RootConfig {
 
 func defaultConfig() *RootConfig {
 	if err := workspace.SetDirectory(DefaultWorkspacePath); err != nil {
-		log.Fatal().Err(err).Msg("encountered issue with workspace directory")
+		log.Panic().Err(err).Msg("encountered issue with workspace directory")
 	}
 
 	return &RootConfig{

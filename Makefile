@@ -8,8 +8,7 @@ default: help
 local/deps:
 	go mod tidy
 	go install github.com/spf13/cobra-cli@v1.3.0
-	go install github.com/goreleaser/goreleaser@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
 
 ## Locally run the golang test.
 go/test:

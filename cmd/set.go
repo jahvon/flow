@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/spf13/cobra"
 )
 
-// setCmd represents the set command
+// setCmd represents the set command.
 var setCmd = &cobra.Command{
 	Use:     "set",
 	Aliases: []string{"s"},
@@ -15,7 +14,7 @@ var setCmd = &cobra.Command{
 	Short:   "Update a configuration, environment, or workspace option.",
 }
 
-// setWorkspaceCmd represents the set workspace subcommand
+// setWorkspaceCmd represents the set workspace subcommand.
 var setWorkspaceCmd = &cobra.Command{
 	Use:     "workspace <name>",
 	Aliases: []string{"w"},
@@ -25,7 +24,7 @@ var setWorkspaceCmd = &cobra.Command{
 		workspace := args[0]
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 
 		if err := config.SetCurrentWorkspace(rootCfg, workspace); err != nil {

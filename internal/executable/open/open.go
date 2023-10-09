@@ -6,21 +6,20 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/services/open"
+	"github.com/mitchellh/mapstructure"
 )
 
 type agent struct {
 }
 
 type Spec struct {
-	App     string `yaml:"app" mapstructure:"app"`
-	Uri     string `yaml:"uri" mapstructure:"uri"`
-	Wait    bool   `yaml:"wait" mapstructure:"wait"`
-	Timeout string `yaml:"timeout" mapstructure:"timeout"`
+	App     string `mapstructure:"app"     yaml:"app"`
+	URI     string `mapstructure:"uri"     yaml:"uri"`
+	Wait    bool   `mapstructure:"wait"    yaml:"wait"`
+	Timeout string `mapstructure:"timeout" yaml:"timeout"`
 }
 
 func NewAgent() executable.Agent {
@@ -38,22 +37,22 @@ func (a *agent) Exec(exec executable.Executable) error {
 	var openSpec Spec
 	err := mapstructure.Decode(exec.Spec, &openSpec)
 	if err != nil {
-		return fmt.Errorf("unable to decode 'open' executable spec - %v", err)
+		return fmt.Errorf("unable to decode 'open' executable spec - %w", err)
 	}
 
-	if strings.HasPrefix(openSpec.Uri, "~/") {
+	if strings.HasPrefix(openSpec.URI, "~/") {
 		dir, err := os.UserHomeDir()
 		if err != nil {
-			return fmt.Errorf("unable to get user home directory - %v", err)
+			return fmt.Errorf("unable to get user home directory - %w", err)
 		}
-		openSpec.Uri = filepath.Join(dir, openSpec.Uri[2:])
+		openSpec.URI = filepath.Join(dir, openSpec.URI[2:])
 	}
 
 	err = executable.WithTimeout(openSpec.Timeout, func() error {
 		if openSpec.App == "" {
-			return open.Open(openSpec.Uri, openSpec.Wait)
+			return open.Open(openSpec.URI, openSpec.Wait)
 		} else {
-			return open.OpenWith(openSpec.App, openSpec.Uri, openSpec.Wait)
+			return open.OpenWith(openSpec.App, openSpec.URI, openSpec.Wait)
 		}
 	})
 

@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
 
 	"github.com/jahvon/flow/internal/cmd/executable"
 	"github.com/jahvon/flow/internal/config"
 	openagent "github.com/jahvon/flow/internal/executable/open"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/spf13/cobra"
 )
 
 var openCmd = &cobra.Command{
@@ -23,14 +24,14 @@ var openCmd = &cobra.Command{
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		} else if executable == nil {
-			log.Fatal().Msg("executable is nil")
+			log.Panic().Msg("executable is nil")
 		}
 
 		err = agent.Exec(*executable)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		}
-		log.Info().Msg("open uri flow completed")
+		log.Info().Msg(fmt.Sprintf("open uri %s flow completed", executable.Name))
 	},
 }
 

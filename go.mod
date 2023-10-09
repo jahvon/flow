@@ -13,7 +13,6 @@ require (
 	github.com/rs/zerolog v1.30.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
-	github.com/zalando/go-keyring v0.2.3
 	golang.org/x/crypto v0.13.0
 	golang.org/x/term v0.12.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -24,13 +23,10 @@ require (
 	atomicgo.dev/cursor v0.2.0 // indirect
 	atomicgo.dev/keyboard v0.2.9 // indirect
 	atomicgo.dev/schedule v0.1.0 // indirect
-	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/containerd/console v1.0.3 // indirect
-	github.com/danieljoos/wincred v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/gookit/color v1.5.4 // indirect

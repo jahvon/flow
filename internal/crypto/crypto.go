@@ -16,7 +16,7 @@ func GenerateKey() (string, error) {
 	key := make([]byte, 32)
 	_, err := rand.Read(key)
 	if err != nil {
-		return "", fmt.Errorf("error reading random bytes: %s", err)
+		return "", fmt.Errorf("error reading random bytes: %w", err)
 	}
 	return EncodeValue(key), nil
 }
@@ -59,18 +59,18 @@ func DecodeValue(s string) ([]byte, error) {
 func EncryptValue(encryptionKey string, text string) (string, error) {
 	decodedMasterKey, err := DecodeValue(encryptionKey)
 	if err != nil {
-		return "", fmt.Errorf("error decoding master key: %s", err)
+		return "", fmt.Errorf("error decoding master key: %w", err)
 	}
 	block, err := aes.NewCipher(decodedMasterKey)
 	if err != nil {
-		return "", fmt.Errorf("error creating new cipher: %s", err)
+		return "", fmt.Errorf("error creating new cipher: %w", err)
 	}
 
 	plaintext := []byte(text)
 	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
 	iv := ciphertext[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", fmt.Errorf("error reading random bytes: %s", err)
+		return "", fmt.Errorf("error reading random bytes: %w", err)
 	}
 
 	cfb := cipher.NewCFBEncrypter(block, iv)
@@ -83,11 +83,11 @@ func EncryptValue(encryptionKey string, text string) (string, error) {
 func DecryptValue(encryptionKey string, text string) (string, error) {
 	decodedMasterKey, err := DecodeValue(encryptionKey)
 	if err != nil {
-		return "", fmt.Errorf("error decoding master key: %s", err)
+		return "", fmt.Errorf("error decoding master key: %w", err)
 	}
 	block, err := aes.NewCipher(decodedMasterKey)
 	if err != nil {
-		return "", fmt.Errorf("error creating new cipher: %s", err)
+		return "", fmt.Errorf("error creating new cipher: %w", err)
 	}
 
 	ciphertext := []byte(text)

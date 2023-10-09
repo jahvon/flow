@@ -4,24 +4,23 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/executable/parameter"
 	"github.com/jahvon/flow/internal/services/run"
+	"github.com/mitchellh/mapstructure"
 )
 
 type agent struct {
 }
 
 type Spec struct {
-	Timeout string                `yaml:"timeout" mapstructure:"timeout"`
-	Dir     string                `yaml:"dir" mapstructure:"dir"`
-	Params  []parameter.Parameter `yaml:"params" mapstructure:"params"`
+	Timeout string                `mapstructure:"timeout" yaml:"timeout"`
+	Dir     string                `mapstructure:"dir"     yaml:"dir"`
+	Params  []parameter.Parameter `mapstructure:"params"  yaml:"params"`
 
-	CommandStr string `yaml:"cmd" mapstructure:"cmd"`
-	ShFile     string `yaml:"file" mapstructure:"file"`
+	CommandStr string `mapstructure:"cmd"  yaml:"cmd"`
+	ShFile     string `mapstructure:"file" yaml:"file"`
 }
 
 func NewAgent() executable.Agent {
@@ -39,13 +38,13 @@ func (a *agent) Exec(exec executable.Executable) error {
 	var runSpec Spec
 	err := mapstructure.Decode(exec.Spec, &runSpec)
 	if err != nil {
-		return fmt.Errorf("unable to decode 'run' executable spec - %v", err)
+		return fmt.Errorf("unable to decode 'run' executable spec - %w", err)
 	}
 
 	params := runSpec.Params
 	envList, err := parameter.ParameterListToEnvList(params)
 	if err != nil {
-		return fmt.Errorf("unable to convert parameters to env list - %v", err)
+		return fmt.Errorf("unable to convert parameters to env list - %w", err)
 	}
 
 	targetDir := runSpec.Dir

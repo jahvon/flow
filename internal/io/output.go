@@ -12,7 +12,7 @@ type OutputFormat string
 
 const (
 	OutputFormatJSON       OutputFormat = "json"
-	OutputFormatPrettyJson OutputFormat = "jsonp"
+	OutputFormatPrettyJSON OutputFormat = "jsonp"
 	OutputFormatYAML       OutputFormat = "yaml"
 	OutputFormatDefault    OutputFormat = "default"
 )

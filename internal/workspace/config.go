@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/jahvon/flow/internal/executable"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
@@ -22,18 +21,18 @@ func LoadConfig(workspacePath string) (*Config, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			if err := SetDirectory(workspacePath); err != nil {
-				return nil, fmt.Errorf("unable to set workspace directory - %v", err)
+				return nil, fmt.Errorf("unable to set workspace directory - %w", err)
 			}
 			return defaultConfig(), nil
 		}
-		return nil, fmt.Errorf("unable to open workspace config file - %v", err)
+		return nil, fmt.Errorf("unable to open workspace config file - %w", err)
 	}
 	defer file.Close()
 
 	config := &Config{}
 	err = yaml.NewDecoder(file).Decode(config)
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode workspace config file - %v", err)
+		return nil, fmt.Errorf("unable to decode workspace config file - %w", err)
 	}
 
 	return config, nil

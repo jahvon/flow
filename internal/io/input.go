@@ -14,7 +14,7 @@ func Ask(question string) string {
 	var answer string
 	_, err := fmt.Scanln(&answer)
 	if err != nil {
-		log.Fatal().Err(err).Msg("unable to scan input")
+		log.Panic().Err(err).Msg("unable to scan input")
 	}
 	return answer
 }

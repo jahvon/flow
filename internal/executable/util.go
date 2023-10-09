@@ -12,7 +12,7 @@ func WithTimeout(timeoutStr string, fn func() error) error {
 
 	timeout, err := time.ParseDuration(timeoutStr)
 	if err != nil {
-		return fmt.Errorf("unable to parse timeout duration - %v", err)
+		return fmt.Errorf("unable to parse timeout duration - %w", err)
 	}
 	if timeout == 0 {
 		return fn()

@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/spf13/cobra"
 )
 
 var log = io.Log()
@@ -24,10 +23,9 @@ func ValidateAndGetContext(cmd *cobra.Command, currentConfig *config.RootConfig)
 	if globalFlag != nil {
 		val, err := strconv.ParseBool(cmd.Flag(flags.GlobalContextFlagName).Value.String())
 		if err != nil {
-			return "", fmt.Errorf("invalid global flag - %v", err)
+			return "", fmt.Errorf("invalid global flag - %w", err)
 		}
 		global = &val
-
 	}
 	if wsFlag != nil {
 		val := cmd.Flag(flags.WorkspaceContextFlagName).Value.String()

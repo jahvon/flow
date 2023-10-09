@@ -6,11 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/jahvon/flow/internal/errors"
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/executable/consts"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -69,7 +68,10 @@ func (l *DefinitionList) FilterByTag(tag string) DefinitionList {
 
 // LookupExecutableByTypeAndName searches for an executable by type and name.
 // If the executable is found, the namespace and executable are returned.
-func (l *DefinitionList) LookupExecutableByTypeAndName(agent consts.AgentType, name string) (string, *executable.Executable, error) {
+func (l *DefinitionList) LookupExecutableByTypeAndName(
+	agent consts.AgentType,
+	name string,
+) (string, *executable.Executable, error) {
 	for _, definition := range *l {
 		exec, err := definition.Executables.FindByTypeAndName(agent, name)
 		if err != nil {
@@ -101,16 +103,16 @@ func LoadDefinitions(workspace, workspacePath string) (DefinitionList, error) {
 }
 
 func loadDefinition(definitionFile string) (*Definition, error) {
-	file, err := os.Open(definitionFile)
+	file, err := os.Open(filepath.Clean(definitionFile))
 	if err != nil {
-		return nil, fmt.Errorf("unable to open definition file - %v", err)
+		return nil, fmt.Errorf("unable to open definition file - %w", err)
 	}
 	defer file.Close()
 
 	config := &Definition{}
 	err = yaml.NewDecoder(file).Decode(config)
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode definition file - %v", err)
+		return nil, fmt.Errorf("unable to decode definition file - %w", err)
 	}
 
 	return config, nil

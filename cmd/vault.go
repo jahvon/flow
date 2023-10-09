@@ -3,12 +3,11 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/spf13/cobra"
 )
 
 var vaultCmd = &cobra.Command{

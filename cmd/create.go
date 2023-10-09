@@ -4,14 +4,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/common"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/spf13/cobra"
 )
 
-// createCmd represents the create command
+// createCmd represents the create command.
 var createCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
@@ -19,7 +18,7 @@ var createCmd = &cobra.Command{
 	Short:   "Create a configuration, environment, or workspace option.",
 }
 
-// createWorkspaceCmd represents the create workspace subcommand
+// createWorkspaceCmd represents the create workspace subcommand.
 var createWorkspaceCmd = &cobra.Command{
 	Use:     "workspace <name>",
 	Aliases: []string{"w"},
@@ -31,7 +30,7 @@ var createWorkspaceCmd = &cobra.Command{
 
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 
 		name := args[0]
@@ -45,7 +44,7 @@ var createWorkspaceCmd = &cobra.Command{
 		name := args[0]
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 
 		path := cmd.Flag("path").Value.String()
@@ -65,11 +64,21 @@ var createWorkspaceCmd = &cobra.Command{
 }
 
 func init() {
-	createWorkspaceCmd.Flags().StringP("path", "p", common.ConfigDirPath(), "Path to the directory where the workspace should be created")
+	createWorkspaceCmd.Flags().StringP(
+		"path",
+		"p",
+		common.ConfigDirPath(),
+		"Path to the directory where the workspace should be created",
+	)
 	if err := createWorkspaceCmd.MarkFlagDirname("path"); err != nil {
-		log.Fatal().Err(err).Msg("Failed to mark path flag as a directory")
+		log.Panic().Err(err).Msg("Failed to mark path flag as a directory")
 	}
-	createWorkspaceCmd.Flags().BoolP("set", "s", false, "Set the newly created workspace as the current workspace")
+	createWorkspaceCmd.Flags().BoolP(
+		"set",
+		"s",
+		false,
+		"Set the newly created workspace as the current workspace",
+	)
 
 	createCmd.AddCommand(createWorkspaceCmd)
 	rootCmd.AddCommand(createCmd)

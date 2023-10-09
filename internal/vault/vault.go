@@ -10,11 +10,10 @@ import (
 	"regexp"
 	"time"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/jahvon/flow/internal/common"
 	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/io"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -30,7 +29,7 @@ type Vault struct {
 	cachedData          *data
 }
 
-// Represents the data stored in the vault data file
+// Represents the data stored in the vault data file.
 type data struct {
 	LastUpdated string            `yaml:"lastUpdated"`
 	Secrets     map[string]Secret `yaml:"secrets"`
@@ -48,11 +47,11 @@ func RegisterEncryptionKey(key string) error {
 	}
 
 	dir, _ := filepath.Split(fullPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("unable to create vault directory - %v", err)
+	if err := os.MkdirAll(dir, 0750); err != nil {
+		return fmt.Errorf("unable to create vault directory - %w", err)
 	}
-	if _, err := os.Create(fullPath); err != nil {
-		return fmt.Errorf("unable to create vault data file - %v", err)
+	if _, err := os.Create(filepath.Clean(fullPath)); err != nil {
+		return fmt.Errorf("unable to create vault data file - %w", err)
 	}
 
 	return nil
@@ -158,15 +157,15 @@ func (v *Vault) loadData() (*data, error) {
 	}
 
 	fullPath := dataFilePath(key)
-	file, err := os.Open(fullPath)
+	file, err := os.Open(filepath.Clean(fullPath))
 	if err != nil {
-		return nil, fmt.Errorf("unable to open vault data file - %v", err)
+		return nil, fmt.Errorf("unable to open vault data file - %w", err)
 	}
 	defer file.Close()
 
 	encryptedDataStr, err := stdio.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read vault data file - %v", err)
+		return nil, fmt.Errorf("unable to read vault data file - %w", err)
 	}
 
 	if len(encryptedDataStr) == 0 {
@@ -175,12 +174,12 @@ func (v *Vault) loadData() (*data, error) {
 
 	dataStr, err := crypto.DecryptValue(key, string(encryptedDataStr))
 	if err != nil {
-		return nil, fmt.Errorf("unable to decrypt vault data - %v", err)
+		return nil, fmt.Errorf("unable to decrypt vault data - %w", err)
 	}
 
 	var d data
 	if err := yaml.Unmarshal([]byte(dataStr), &d); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal vault data - %v", err)
+		return nil, fmt.Errorf("unable to unmarshal vault data - %w", err)
 	}
 	return &d, nil
 }
@@ -199,22 +198,22 @@ func (v *Vault) saveData(d *data) error {
 	d.LastUpdated = time.Now().Format(time.RFC3339)
 	dataStr, err := yaml.Marshal(d)
 	if err != nil {
-		return fmt.Errorf("unable to marshal vault data - %v", err)
+		return fmt.Errorf("unable to marshal vault data - %w", err)
 	}
 	encryptedDataStr, err := crypto.EncryptValue(key, string(dataStr))
 	if err != nil {
-		return fmt.Errorf("unable to encrypt vault data - %v", err)
+		return fmt.Errorf("unable to encrypt vault data - %w", err)
 	}
 
 	fullPath := dataFilePath(key)
-	file, err := os.OpenFile(fullPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	file, err := os.OpenFile(filepath.Clean(fullPath), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return fmt.Errorf("unable to open vault data file - %v", err)
+		return fmt.Errorf("unable to open vault data file - %w", err)
 	}
 	defer file.Close()
 
 	if _, err := file.WriteString(encryptedDataStr); err != nil {
-		return fmt.Errorf("unable to write to vault data file - %v", err)
+		return fmt.Errorf("unable to write to vault data file - %w", err)
 	}
 	return nil
 }
@@ -245,7 +244,7 @@ func dataFilePath(encryptionKey string) string {
 	hasher := sha512.New()
 	_, err := hasher.Write([]byte(encryptionKey))
 	if err != nil {
-		log.Fatal().Err(err).Msg("unable to hash encryption key")
+		log.Panic().Err(err).Msg("unable to hash encryption key")
 	}
 	storageKey := crypto.EncodeValue(hasher.Sum(nil))
 	return filepath.Join(common.CachedDataDirPath(), cacheDirName, storageKey, "data")
