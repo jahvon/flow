@@ -20,6 +20,12 @@ func (c *Config) Validate() error {
 func LoadConfig(workspacePath string) (*Config, error) {
 	file, err := os.Open(workspacePath + "/" + ConfigFileName)
 	if err != nil {
+		if os.IsNotExist(err) {
+			if err := SetDirectory(workspacePath); err != nil {
+				return nil, fmt.Errorf("unable to set workspace directory - %v", err)
+			}
+			return defaultConfig(), nil
+		}
 		return nil, fmt.Errorf("unable to open workspace config file - %v", err)
 	}
 	defer file.Close()

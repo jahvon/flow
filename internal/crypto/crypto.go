@@ -55,9 +55,9 @@ func DecodeValue(s string) ([]byte, error) {
 }
 
 // EncryptValue encrypts a string using AES-256 and returns the encrypted value as a base64 encoded string.
-// The master key used for encryption must be a base64 encoded string.
-func EncryptValue(masterKey string, text string) (string, error) {
-	decodedMasterKey, err := DecodeValue(masterKey)
+// The encryption key used for encryption must be a base64 encoded string.
+func EncryptValue(encryptionKey string, text string) (string, error) {
+	decodedMasterKey, err := DecodeValue(encryptionKey)
 	if err != nil {
 		return "", fmt.Errorf("error decoding master key: %s", err)
 	}
@@ -80,8 +80,8 @@ func EncryptValue(masterKey string, text string) (string, error) {
 
 // DecryptValue decrypts a string using AES-256 and returns the decrypted value as a base64 encoded string.
 // The master key used for decryption must be a base64 encoded string.
-func DecryptValue(masterKey string, text string) (string, error) {
-	decodedMasterKey, err := DecodeValue(masterKey)
+func DecryptValue(encryptionKey string, text string) (string, error) {
+	decodedMasterKey, err := DecodeValue(encryptionKey)
 	if err != nil {
 		return "", fmt.Errorf("error decoding master key: %s", err)
 	}

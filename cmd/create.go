@@ -65,7 +65,7 @@ var createWorkspaceCmd = &cobra.Command{
 }
 
 func init() {
-	createWorkspaceCmd.Flags().StringP("path", "p", common.DataDirPath(), "Path to the directory where the workspace should be created")
+	createWorkspaceCmd.Flags().StringP("path", "p", common.ConfigDirPath(), "Path to the directory where the workspace should be created")
 	if err := createWorkspaceCmd.MarkFlagDirname("path"); err != nil {
 		log.Fatal().Err(err).Msg("Failed to mark path flag as a directory")
 	}

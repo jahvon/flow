@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	RootConfigPath       = common.DataDirPath() + "/config.yaml"
-	DefaultWorkspacePath = common.DataDirPath() + "/default"
+	RootConfigPath       = common.ConfigDirPath() + "/config.yaml"
+	DefaultWorkspacePath = common.CachedDataDirPath() + "/default"
 )
 
 func writeConfigFile(config *RootConfig) error {

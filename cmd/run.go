@@ -26,7 +26,7 @@ var runCmd = &cobra.Command{
 			log.Fatal().Msg("executable is nil")
 		}
 
-		err = agent.Exec(executable.Spec, nil)
+		err = agent.Exec(*executable)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		}

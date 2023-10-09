@@ -1,11 +1,10 @@
 package executable
 
-import "github.com/jahvon/flow/internal/executable/consts"
+import (
+	"github.com/jahvon/flow/internal/executable/consts"
+)
 
 type Agent interface {
 	Name() consts.AgentType
-	Exec(
-		spec map[string]interface{},
-		preferences *Preference,
-	) error
+	Exec(executable Executable) error
 }

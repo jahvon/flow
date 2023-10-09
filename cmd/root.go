@@ -12,6 +12,8 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
+var log = io.Log()
+
 var rootCmd = &cobra.Command{
 	Use:   "flow",
 	Short: "[Alpha] CLI script wrapper",
@@ -31,8 +33,6 @@ var rootCmd = &cobra.Command{
 	},
 	Version: version.String(),
 }
-
-var log = io.Log()
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.

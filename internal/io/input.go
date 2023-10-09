@@ -24,17 +24,8 @@ func AskYesNo(question string) bool {
 	return answer == "y" || answer == "Y"
 }
 
-func AskForMasterKey() string {
-	PrintQuestion("Master Key:")
-	passkey, err := term.ReadPassword(syscall.Stdin)
-	if err != nil {
-		os.Exit(1)
-	}
-	return string(passkey)
-}
-
-func AskForPassword() string {
-	PrintQuestion("Password:")
+func AskForEncryptionKey() string {
+	PrintQuestion("Enter vault encryption key:")
 	passkey, err := term.ReadPassword(syscall.Stdin)
 	if err != nil {
 		os.Exit(1)

@@ -1,17 +1,6 @@
 package flags
 
 const (
-	BackendFlagName            = "backend"
-	PreferredModeFlagName      = "preferredMode"
-	RememberMeFlagName         = "rememberMe"
-	RememberMeDurationFlagName = "rememberMeDuration"
-
-	KeyFlagName       = "key"
-	TextValueFlagName = "text"
-	ExposeAsFlagName  = "exposeAs"
-	ExposeKeyFlagName = "exposeKey"
-	SecretRefFlagName = "secretRef"
-
 	GlobalContextFlagName    = "global"
 	WorkspaceContextFlagName = "workspace"
 
@@ -20,6 +9,5 @@ const (
 	TagFlagName          = "tag"
 	NamespaceFlagName    = "namespace"
 
-	PasswordFlagName  = "password"
-	MasterKeyFlagName = "masterKey"
+	PlainTextFlagName = "plainText"
 )

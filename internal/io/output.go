@@ -2,10 +2,10 @@ package io
 
 import (
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 type OutputFormat string
@@ -58,12 +58,18 @@ type StdOutWriter struct {
 }
 
 func (w StdOutWriter) Write(p []byte) (n int, err error) {
-	if w.LogAsDebug {
-		log.Debug().Msg(string(p))
+	log := Log()
+	trimmedP := strings.TrimSpace(string(p))
+	if trimmedP == "" {
 		return len(p), nil
 	}
 
-	log.Info().Msg(string(p))
+	if w.LogAsDebug {
+		log.Debug().Msg(trimmedP)
+		return len(p), nil
+	}
+
+	log.Info().Msg(trimmedP)
 	return len(p), nil
 }
 
@@ -72,6 +78,12 @@ type StdErrWriter struct {
 }
 
 func (w StdErrWriter) Write(p []byte) (n int, err error) {
+	log := Log()
+	trimmedP := strings.TrimSpace(string(p))
+	if trimmedP == "" {
+		return len(p), nil
+	}
+
 	if w.LogAsDebug {
 		log.Debug().Msg(string(p))
 		return len(p), nil

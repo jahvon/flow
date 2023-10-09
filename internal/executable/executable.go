@@ -3,8 +3,6 @@ package executable
 import (
 	"fmt"
 
-	"github.com/golang/protobuf/ptypes/duration"
-
 	"github.com/jahvon/flow/internal/errors"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/io"
@@ -18,7 +16,6 @@ type Executable struct {
 	Type        consts.AgentType       `yaml:"type"`
 	Name        string                 `yaml:"name"`
 	Description string                 `yaml:"description"`
-	Timeout     duration.Duration      `yaml:"timeout"`
 	Aliases     []string               `yaml:"aliases"`
 	Tags        []string               `yaml:"tags"`
 	Spec        map[string]interface{} `yaml:"spec"`
@@ -30,6 +27,10 @@ type Executable struct {
 func (e *Executable) SetContext(workspace, namespace string) {
 	e.workspace = workspace
 	e.namespace = namespace
+}
+
+func (e *Executable) GetContext() (workspace string, namespace string) {
+	return e.workspace, e.namespace
 }
 
 func (e *Executable) ID() string {

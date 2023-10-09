@@ -6,7 +6,6 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/internal/backend"
 	"github.com/jahvon/flow/internal/common"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/workspace"
@@ -19,7 +18,6 @@ var (
 type RootConfig struct {
 	Workspaces       map[string]string `yaml:"workspaces"`
 	CurrentWorkspace string            `yaml:"currentWorkspace"`
-	Backends         *backend.Config   `yaml:"backends"`
 
 	currentWorkspaceConfig *workspace.Config
 }
@@ -30,13 +28,6 @@ func (c *RootConfig) Validate() error {
 	}
 	if _, wsFound := c.Workspaces[c.CurrentWorkspace]; !wsFound {
 		return fmt.Errorf("current workspace %s does not exist", c.CurrentWorkspace)
-	}
-
-	if c.Backends == nil {
-		return fmt.Errorf("backends are not set")
-	}
-	if err := c.Backends.Validate(); err != nil {
-		return err
 	}
 
 	return nil
@@ -64,7 +55,7 @@ func (c *RootConfig) setCurrentWorkspaceConfig() error {
 }
 
 func LoadConfig() *RootConfig {
-	if err := common.EnsureDataDir(); err != nil {
+	if err := common.EnsureConfigDir(); err != nil {
 		log.Fatal().Err(err).Msg("encountered issue with flow data directory")
 	}
 
@@ -117,6 +108,5 @@ func defaultConfig() *RootConfig {
 	return &RootConfig{
 		Workspaces:       map[string]string{"default": DefaultWorkspacePath},
 		CurrentWorkspace: "default",
-		Backends:         backend.NewConfig(),
 	}
 }

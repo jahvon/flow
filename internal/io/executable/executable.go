@@ -145,7 +145,6 @@ func printExecutableTable(exec *executable.Executable) {
 		{"Name", exec.Name},
 		{"Type", string(exec.Type)},
 		{"Description", exec.Description},
-		{"Timeout", exec.Timeout.String()},
 		{"Aliases", strings.Join(exec.Aliases, ", ")},
 		{"Tags", strings.Join(exec.Tags, ", ")},
 		{"Spec", string(yamlSpec)},
