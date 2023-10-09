@@ -10,14 +10,6 @@ currentWorkspace: workspace1
 workspaces:
   workspace1: /path/to/workspace1
   workspace2: /path/to/workspace2
-backends:
-  secret:
-    backend: envFile
-  auth:
-    backend: keyring
-    preferredMode: password
-    rememberMe: true
-    rememberDuration: 24h
 ```
 
 Workflows can be defined anywhere within a workspace's directory with the `.flow` file extension.
@@ -34,9 +26,8 @@ executables:
       - config
     description: open flow config in vscode
     spec:
-      args:
-        - ~/.flow
-      application: code
+      uri: .flow
+      application: Visual Studio Code
 ```
 
 Running `flow open ns:config` will run the above workflow.
@@ -55,7 +46,7 @@ flow [command]
 - `flow set` - Update various configuration options and data
 - `flow create` - Create ...
 - `flow delete` - Delete ...
-- `flow login` - Login to auth backend. This is needed only when an auth backend is set.
+- `flow vault` - Manage secrets stored in the vault
 
 **Executing workflows**
 
@@ -70,60 +61,15 @@ Example autocompletion setup script: `flow completion zsh > ~/.oh-my-zsh/complet
 
 ## Install
 
-You can install the pre-compiled binary (in several ways), use Docker or compile from source (when on OSS).
+You can install the pre-compiled binary or compile from source.
 
-Below you can find the steps for each of them.
-
-<details>
-  <summary><h3>homebrew tap</h3></summary>
-
-```bash
-brew install jahvon/tap/flow
-```
-
-</details>
-
-<details>
-  <summary><h3>apt</h3></summary>
-
-```bash
-echo 'deb [trusted=yes] https://apt.fury.io/jahvon/ /' | sudo tee /etc/apt/sources.list.d/jahvon.list
-sudo apt update
-sudo apt install flow
-```
-
-</details>
-
-<details>
-  <summary><h3>yum</h3></summary>
-
-```bash
-echo '[jahvon]
-name=Gemfury jahvon repository
-baseurl=https://yum.fury.io/jahvon/
-enabled=1
-gpgcheck=0' | sudo tee /etc/yum.repos.d/jahvon.repo
-sudo yum install goreleaser
-```
-
-</details>
-
-<details>
-  <summary><h3>deb, rpm and apk packages</h3></summary>
-Download the .deb, .rpm or .apk packages from the [release page](https://github.com/jahvon/flow/releases) and install them with the appropriate tools.
-</details>
-
-<details>
-  <summary><h3>go install</h3></summary>
+### via Go Install
 
 ```bash
 go install github.com/jahvon/flow@latest
 ```
 
-</details>
-
-<details>
-  <summary><h3>from the GitHub releases</h3></summary>
+### via GitHub Releases
 
 Download the pre-compiled binaries from the [release page](https://github.com/jahvon/flow/releases) page and copy them to the desired location.
 
@@ -137,10 +83,7 @@ $ sudo tar xvf ${TAR_FILE} flow -C /usr/local/bin
 $ rm -f ${TAR_FILE}
 ```
 
-</details>
-
-<details>
-  <summary><h3>manually</h3></summary>
+### via Source
 
 ```bash
 $ git clone github.com/jahvon/flow
@@ -148,5 +91,3 @@ $ cd flow
 $ go generate ./...
 $ go install
 ```
-
-</details>

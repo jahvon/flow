@@ -8,26 +8,48 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
-const dataDirName = ".flow"
+const (
+	flowDirName = "flow"
+)
 
 var log = io.Log()
 
-func DataDirPath() string {
-	dirname, err := os.UserHomeDir()
+func ConfigDirPath() string {
+	dirname, err := os.UserConfigDir()
 	if err != nil {
-		log.Fatal().Err(err).Msg("unable to get home directory")
+		log.Panic().Err(err).Msg("unable to get config directory")
 	}
-	return filepath.Join(dirname, dataDirName)
+	return filepath.Join(dirname, flowDirName)
 }
 
-func EnsureDataDir() error {
-	if _, err := os.Stat(DataDirPath()); os.IsNotExist(err) {
-		err = os.MkdirAll(DataDirPath(), 0755)
+func EnsureConfigDir() error {
+	if _, err := os.Stat(ConfigDirPath()); os.IsNotExist(err) {
+		err = os.MkdirAll(ConfigDirPath(), 0750)
 		if err != nil {
-			return fmt.Errorf("unable to create data directory - %v", err)
+			return fmt.Errorf("unable to create config directory - %w", err)
 		}
 	} else if err != nil {
-		return fmt.Errorf("unable to check for data directory - %v", err)
+		return fmt.Errorf("unable to check for config directory - %w", err)
+	}
+	return nil
+}
+
+func CachedDataDirPath() string {
+	dirname, err := os.UserCacheDir()
+	if err != nil {
+		log.Panic().Err(err).Msg("unable to get cache directory")
+	}
+	return filepath.Join(dirname, flowDirName)
+}
+
+func EnsureCachedDataDir() error {
+	if _, err := os.Stat(CachedDataDirPath()); os.IsNotExist(err) {
+		err = os.MkdirAll(CachedDataDirPath(), 0750)
+		if err != nil {
+			return fmt.Errorf("unable to create cache directory - %w", err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("unable to check for cache directory - %w", err)
 	}
 	return nil
 }

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jahvon/flow/internal/executable"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	RegisteredExecutables map[string]string `yaml:"executables"`
+	ExecutablePreferences map[string]executable.Preference `yaml:"executablePreferences"`
 }
 
 func (c *Config) Validate() error {
@@ -18,14 +19,20 @@ func (c *Config) Validate() error {
 func LoadConfig(workspacePath string) (*Config, error) {
 	file, err := os.Open(workspacePath + "/" + ConfigFileName)
 	if err != nil {
-		return nil, fmt.Errorf("unable to open workspace config file - %v", err)
+		if os.IsNotExist(err) {
+			if err := SetDirectory(workspacePath); err != nil {
+				return nil, fmt.Errorf("unable to set workspace directory - %w", err)
+			}
+			return defaultConfig(), nil
+		}
+		return nil, fmt.Errorf("unable to open workspace config file - %w", err)
 	}
 	defer file.Close()
 
 	config := &Config{}
 	err = yaml.NewDecoder(file).Decode(config)
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode workspace config file - %v", err)
+		return nil, fmt.Errorf("unable to decode workspace config file - %w", err)
 	}
 
 	return config, nil
@@ -33,6 +40,6 @@ func LoadConfig(workspacePath string) (*Config, error) {
 
 func defaultConfig() *Config {
 	return &Config{
-		RegisteredExecutables: make(map[string]string),
+		ExecutablePreferences: make(map[string]executable.Preference),
 	}
 }

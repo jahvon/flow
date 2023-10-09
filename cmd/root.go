@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/rs/zerolog"
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/cmd/version"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/rs/zerolog"
+	"github.com/spf13/cobra"
 )
+
+var log = io.Log()
 
 var rootCmd = &cobra.Command{
 	Use:   "flow",
@@ -19,7 +20,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbose, err := strconv.ParseBool(cmd.Flag("verbose").Value.String())
 		if err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("invalid verbose flag - %v", err))
+			io.PrintErrorAndExit(fmt.Errorf("invalid verbose flag - %w", err))
 		}
 
 		if verbose {
@@ -32,8 +33,6 @@ var rootCmd = &cobra.Command{
 	Version: version.String(),
 }
 
-var log = io.Log()
-
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -45,4 +44,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose log output")
+
+	rootCmd.AddGroup(CrudGroup)
+	rootCmd.AddGroup(ExecutableGroup)
 }

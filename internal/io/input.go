@@ -14,7 +14,7 @@ func Ask(question string) string {
 	var answer string
 	_, err := fmt.Scanln(&answer)
 	if err != nil {
-		log.Fatal().Err(err).Msg("unable to scan input")
+		log.Panic().Err(err).Msg("unable to scan input")
 	}
 	return answer
 }
@@ -24,8 +24,8 @@ func AskYesNo(question string) bool {
 	return answer == "y" || answer == "Y"
 }
 
-func AskForMasterKey() string {
-	PrintQuestion("Master Key:")
+func AskForEncryptionKey() string {
+	PrintQuestion("Enter vault encryption key:")
 	passkey, err := term.ReadPassword(syscall.Stdin)
 	if err != nil {
 		os.Exit(1)
@@ -33,11 +33,8 @@ func AskForMasterKey() string {
 	return string(passkey)
 }
 
-func AskForPassword() string {
-	PrintQuestion("Password:")
-	passkey, err := term.ReadPassword(syscall.Stdin)
-	if err != nil {
-		os.Exit(1)
-	}
-	return string(passkey)
+type StdInReader struct{}
+
+func (r StdInReader) Read(p []byte) (n int, err error) {
+	return os.Stdin.Read(p)
 }

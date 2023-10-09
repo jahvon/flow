@@ -3,7 +3,7 @@
 package version
 
 import (
-	// using blank import for embed as it is only used inside comments
+	// using blank import for embed as it is only used inside comments.
 	_ "embed"
 	"fmt"
 	"runtime"
@@ -23,13 +23,13 @@ var (
 	buildDate string
 )
 
-// GoVersion returns the version of the go runtime used to compile the binary
+// GoVersion returns the version of the go runtime used to compile the binary.
 var goVersion = runtime.Version()
 
-// OsArch returns the os and arch used to build the binary
+// OsArch returns the os and arch used to build the binary.
 var osArch = fmt.Sprintf("%s %s", runtime.GOOS, runtime.GOARCH)
 
-// generateOutput return the output of the version command
+// generateOutput return the output of the version command.
 func generateOutput() string {
 	return fmt.Sprintf(`flow - %s
 
@@ -44,7 +44,7 @@ func String() string {
 	return generateOutput()
 }
 
-// Print the current version
+// Print the current version.
 func Print() {
 	fmt.Println(generateOutput())
 }

@@ -4,24 +4,24 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the delete command
+// deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete a configuration, environment, or workspace option.",
+	Use:     "delete",
+	GroupID: CrudGroup.ID,
+	Short:   "Delete a configuration, environment, or workspace option.",
 }
 
-// deleteWorkspaceCmd represents the delete workspace subcommand
+// deleteWorkspaceCmd represents the delete workspace subcommand.
 var deleteWorkspaceCmd = &cobra.Command{
 	Use:   "workspace <name>",
 	Short: "Delete an existing workspace.",
-	Long: "Delete an existing workspace. File contents will remain in the corresponding directory but the workspace will be " +
-		"unlinked from flow's conv. Note: You cannot delete the current workspace.",
+	Long: "Delete an existing workspace. File contents will remain in the corresponding directory but the " +
+		"workspace will be unlinked from flow's conv. Note: You cannot delete the current workspace.",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			return errors.New("requires a name argument")
@@ -29,7 +29,7 @@ var deleteWorkspaceCmd = &cobra.Command{
 
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 
 		name := args[0]
@@ -53,7 +53,7 @@ var deleteWorkspaceCmd = &cobra.Command{
 
 		rootCfg := config.LoadConfig()
 		if rootCfg == nil {
-			log.Fatal().Msg("failed to load config")
+			log.Panic().Msg("failed to load config")
 		}
 
 		if err := config.DeleteWorkspace(rootCfg, name); err != nil {
