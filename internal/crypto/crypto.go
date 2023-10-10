@@ -67,7 +67,12 @@ func EncryptValue(encryptionKey string, text string) (string, error) {
 	}
 
 	plaintext := []byte(text)
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	// verify that the plaintext is not too long to fit in an int
+	if len(plaintext) > 64*1024*1024 {
+		return "", fmt.Errorf("plaintext too long to encrypt")
+	}
+	size := aes.BlockSize + len(plaintext)
+	ciphertext := make([]byte, size)
 	iv := ciphertext[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return "", fmt.Errorf("error reading random bytes: %w", err)

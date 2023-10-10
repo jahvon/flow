@@ -3,6 +3,7 @@ package workspace
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -39,7 +40,7 @@ func SetDirectory(location string) error {
 }
 
 func writeConfigFile(workspacePath string, config *Config) error {
-	file, err := os.Create(workspacePath + "/" + ConfigFileName)
+	file, err := os.Create(filepath.Clean(workspacePath + "/" + ConfigFileName))
 	if err != nil {
 		return fmt.Errorf("unable to create workspace config file - %w", err)
 	}

@@ -3,9 +3,11 @@ package workspace
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/executable"
-	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
@@ -17,7 +19,7 @@ func (c *Config) Validate() error {
 }
 
 func LoadConfig(workspacePath string) (*Config, error) {
-	file, err := os.Open(workspacePath + "/" + ConfigFileName)
+	file, err := os.Open(filepath.Clean(workspacePath + "/" + ConfigFileName))
 	if err != nil {
 		if os.IsNotExist(err) {
 			if err := SetDirectory(workspacePath); err != nil {
