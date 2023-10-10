@@ -3,9 +3,11 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/common"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -14,7 +16,7 @@ var (
 )
 
 func writeConfigFile(config *RootConfig) error {
-	file, err := os.OpenFile(RootConfigPath, os.O_WRONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(filepath.Clean(RootConfigPath), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return fmt.Errorf("unable to open config file - %w", err)
 	}
