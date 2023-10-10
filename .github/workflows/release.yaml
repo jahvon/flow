@@ -17,6 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "^1.21.1"
+
       - name: Generate Version Files
         run: |
             go generate ./internal/cmd/version
