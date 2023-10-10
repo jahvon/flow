@@ -11,6 +11,8 @@ on:
 
 jobs:
   codeql:
+    permissions:
+      security-events: write
     runs-on: ubuntu-latest
 
     steps:
