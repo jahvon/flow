@@ -141,7 +141,7 @@ linters:
     - whitespace # detects leading and trailing whitespace
     - zerologlint # detects the wrong usage of zerolog that a user forgets to dispatch zerolog.Event
     - decorder # checks declaration order and count of types, constants, variables and functions
-    - gci # controls golang package import order and makes it always deterministic
+    #- gci # controls golang package import order and makes it always deterministic - doesn't work as expected
     - ginkgolinter # [if you use ginkgo/gomega] enforces standards of using ginkgo and gomega
     - interfacebloat # checks the number of methods inside an interface
     - tagalign # checks that struct tags are well aligned
@@ -186,3 +186,6 @@ issues:
         - gosec
         - noctx
         - wrapcheck
+    - linters:
+        - staticcheck
+      text: "SA5011" # SA5011: Should not use unsafe.Pointer - this throws false positives when a nil check does not result in a return

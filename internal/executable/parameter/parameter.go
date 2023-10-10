@@ -24,13 +24,14 @@ const (
 )
 
 func (p *Parameter) Validate() error {
-	if p.Text == "" && p.SecretRef == "" && p.Prompt == "" {
+	switch {
+	case p.Text == "" && p.SecretRef == "" && p.Prompt == "":
 		return errors.New("must set either text, secretRef, or prompt for parameter")
-	} else if p.Text != "" && p.SecretRef != "" {
+	case p.Text != "" && p.SecretRef != "":
 		return errors.New("cannot set both text and secretRef for parameter")
-	} else if p.Text != "" && p.Prompt != "" {
+	case p.Text != "" && p.Prompt != "":
 		return errors.New("cannot set both text and prompt for parameter")
-	} else if p.SecretRef != "" && p.Prompt != "" {
+	case p.SecretRef != "" && p.Prompt != "":
 		return errors.New("cannot set both secretRef and prompt for parameter")
 	}
 
@@ -49,24 +50,27 @@ func (p *Parameter) Validate() error {
 }
 
 func (p *Parameter) Value() (string, error) {
-	if p.Text == "" && p.SecretRef == "" && p.Prompt == "" {
+	switch {
+	case p.Text == "" && p.SecretRef == "" && p.Prompt == "":
 		return "", nil
-	} else if p.Text != "" {
+	case p.Text != "":
 		return p.Text, nil
-	} else if p.Prompt != "" {
+	case p.Prompt != "":
 		response := io.Ask(p.Prompt)
 		return response, nil
+	case p.SecretRef != "":
+		if err := vault.ValidateReference(p.SecretRef); err != nil {
+			return "", err
+		}
+		v := vault.NewVault()
+		secret, err := v.GetSecret(p.SecretRef)
+		if err != nil {
+			return "", err
+		}
+		return secret.PlainTextString(), nil
+	default:
+		return "", errors.New("failed to get value for parameter")
 	}
-
-	if err := vault.ValidateReference(p.SecretRef); err != nil {
-		return "", err
-	}
-	v := vault.NewVault()
-	secret, err := v.GetSecret(p.SecretRef)
-	if err != nil {
-		return "", err
-	}
-	return secret.PlainTextString(), nil
 }
 
 func ParameterListToEnvList(params []Parameter) ([]string, error) {

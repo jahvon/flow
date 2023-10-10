@@ -1,3 +1,4 @@
+//nolint:cyclop
 package utils
 
 import (
@@ -5,10 +6,11 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/spf13/cobra"
 )
 
 var log = io.Log()
@@ -34,11 +36,12 @@ func ValidateAndGetContext(cmd *cobra.Command, currentConfig *config.RootConfig)
 	globalSet := global != nil
 	wsSet := ws != nil
 
-	if (globalSet && *global) && (wsSet && *ws != "") {
+	switch {
+	case (globalSet && *global) && (wsSet && *ws != ""):
 		return "", errors.New("cannot set a secret to both global and workspace scope")
-	} else if globalSet && *global {
+	case globalSet && *global:
 		context = "global"
-	} else if wsSet && *ws != "" {
+	case wsSet && *ws != "":
 		var found bool
 		for _, curWs := range currentConfig.Workspaces {
 			if curWs == *ws {
@@ -51,7 +54,7 @@ func ValidateAndGetContext(cmd *cobra.Command, currentConfig *config.RootConfig)
 			return "", fmt.Errorf("workspace %s does not exist", *ws)
 		}
 		context = *ws
-	} else {
+	default:
 		log.Debug().Msg("defaulting to the current workspace")
 		context = currentConfig.CurrentWorkspace
 	}

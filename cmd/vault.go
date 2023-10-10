@@ -3,11 +3,12 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
-	"github.com/spf13/cobra"
 )
 
 var vaultCmd = &cobra.Command{
@@ -67,7 +68,10 @@ var vaultGetCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		reference := args[0]
-		asPlainText := cmd.Flag(flags.PlainTextFlagName).Value.String() == "true"
+		asPlainText, err := cmd.Flags().GetBool(flags.PlainTextFlagName)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
 
 		v := vault.NewVault()
 		secret, err := v.GetSecret(reference)
@@ -89,7 +93,11 @@ var vaultListCmd = &cobra.Command{
 	Short:   "List all secrets in the vault.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		asPlainText := cmd.Flag(flags.PlainTextFlagName).Value.String() == "true"
+		asPlainText, err := cmd.Flags().GetBool(flags.PlainTextFlagName)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+
 		v := vault.NewVault()
 		secrets, err := v.GetAllSecrets()
 		if err != nil {

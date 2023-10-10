@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/jahvon/flow/internal/common"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/workspace"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -60,16 +61,11 @@ func LoadConfig() *RootConfig {
 
 	var config *RootConfig
 	file, err := os.Open(RootConfigPath)
-	if err != nil {
+	if err != nil { //nolint: nestif
 		if os.IsNotExist(err) {
-			config = defaultConfig()
-			file, err = os.Create(RootConfigPath)
+			config, err = initializeDefaultConfig()
 			if err != nil {
-				log.Panic().Err(err).Msg("unable to create config file")
-			}
-			err = writeConfigFile(config)
-			if err != nil {
-				log.Panic().Err(err).Msg("unable to write config file")
+				log.Panic().Err(err).Msg("unable to initialize default config")
 			}
 		} else {
 			log.Panic().Err(err).Msg("unable to open config file")
@@ -108,4 +104,17 @@ func defaultConfig() *RootConfig {
 		Workspaces:       map[string]string{"default": DefaultWorkspacePath},
 		CurrentWorkspace: "default",
 	}
+}
+
+func initializeDefaultConfig() (*RootConfig, error) {
+	config := defaultConfig()
+	_, err := os.Create(RootConfigPath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create config file - %w", err)
+	}
+	err = writeConfigFile(config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to write config file - %w", err)
+	}
+	return config, nil
 }

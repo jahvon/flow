@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jahvon/flow/internal/common"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/spf13/cobra"
 )
 
 // createCmd represents the create command.
@@ -53,7 +54,11 @@ var createWorkspaceCmd = &cobra.Command{
 		}
 		io.PrintSuccess(fmt.Sprintf("Workspace %s created in %s", name, path))
 
-		if cmd.Flag("set").Value.String() == "true" {
+		set, err := cmd.Flags().GetBool("set")
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+		if set {
 			if err := config.SetCurrentWorkspace(rootCfg, name); err != nil {
 				io.PrintErrorAndExit(err)
 			}

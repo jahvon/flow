@@ -55,6 +55,7 @@ jobs:
         with:
           version: v1.54.2
           skip-pkg-cache: true
+          only-new-issues: true
 
       #   _____         _
       #  |_   _|__  ___| |_

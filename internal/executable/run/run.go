@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/executable/parameter"
 	"github.com/jahvon/flow/internal/services/run"
-	"github.com/mitchellh/mapstructure"
 )
 
 type agent struct {
@@ -57,14 +58,17 @@ func (a *agent) Exec(exec executable.Executable) error {
 	}
 
 	err = executable.WithTimeout(runSpec.Timeout, func() error {
-		if runSpec.CommandStr != "" && runSpec.ShFile != "" {
-			return fmt.Errorf("cannot set both cmd and file")
-		} else if runSpec.CommandStr != "" {
-			return run.RunCmd(runSpec.CommandStr, targetDir, envList)
-		} else if runSpec.ShFile != "" {
-			return run.RunFile(runSpec.ShFile, targetDir, envList)
-		} else {
+		switch {
+		case runSpec.CommandStr == "" && runSpec.ShFile == "":
 			return fmt.Errorf("either cmd or file must be specified")
+		case runSpec.CommandStr != "" && runSpec.ShFile != "":
+			return fmt.Errorf("cannot set both cmd and file")
+		case runSpec.CommandStr != "":
+			return run.RunCmd(runSpec.CommandStr, targetDir, envList)
+		case runSpec.ShFile != "":
+			return run.RunFile(runSpec.ShFile, targetDir, envList)
+		default:
+			return fmt.Errorf("unable to determine how executable should be run")
 		}
 	})
 
