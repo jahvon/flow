@@ -88,10 +88,11 @@ func FlagsToExecutableList(cmd *cobra.Command, currentConfig *config.RootConfig)
 	var executables executable.List
 	if context == "global" {
 		for ws, wsPath := range currentConfig.Workspaces {
-			executables, err = collectExecutablesInWorkspace(ws, wsPath, agentFilter, tagFilter, namespaceFilter)
+			collected, err := collectExecutablesInWorkspace(ws, wsPath, agentFilter, tagFilter, namespaceFilter)
 			if err != nil {
 				return nil, err
 			}
+			executables = append(executables, collected...)
 		}
 	} else {
 		executables, err = collectExecutablesInWorkspace(
