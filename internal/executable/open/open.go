@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/services/open"
-	"github.com/mitchellh/mapstructure"
 )
 
 type agent struct {
@@ -46,6 +47,9 @@ func (a *agent) Exec(exec executable.Executable) error {
 			return fmt.Errorf("unable to get user home directory - %w", err)
 		}
 		openSpec.URI = filepath.Join(dir, openSpec.URI[2:])
+	} else if strings.HasPrefix(openSpec.URI, "//") {
+		_, workspacePath, _ := exec.GetContext()
+		openSpec.URI = strings.Replace(openSpec.URI, "//", workspacePath+"/", 1)
 	}
 
 	err = executable.WithTimeout(openSpec.Timeout, func() error {
