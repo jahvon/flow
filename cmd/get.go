@@ -3,13 +3,15 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/pterm/pterm"
+	"github.com/spf13/cobra"
+
 	"github.com/jahvon/flow/internal/cmd/executable"
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/io"
-	executable2 "github.com/jahvon/flow/internal/io/executable"
-	"github.com/spf13/cobra"
+	executableio "github.com/jahvon/flow/internal/io/executable"
 )
 
 // getCmd represents the get command.
@@ -37,6 +39,29 @@ var getWorkspaceCmd = &cobra.Command{
 	},
 }
 
+var getWorkspacesCmd = &cobra.Command{
+	Use:     "workspaces",
+	Aliases: []string{"wss"},
+	Short:   "Print a list of discovered workspaces.",
+	Args:    cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		rootCfg := config.LoadConfig()
+		if rootCfg == nil {
+			log.Panic().Msg("failed to load config")
+		}
+
+		log.Info().Msgf("Printing %d workspaces", len(rootCfg.Workspaces))
+		tableRows := pterm.TableData{{"Name", "Location"}}
+		for ws, wsPath := range rootCfg.Workspaces {
+			tableRows = append(tableRows, []string{ws, wsPath})
+		}
+		err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
+		if err != nil {
+			log.Panic().Msgf("Failed to render workspace list - %v", err)
+		}
+	},
+}
+
 var getExecutablesCmd = &cobra.Command{
 	Use:     "executables",
 	Aliases: []string{"execs"},
@@ -54,7 +79,7 @@ var getExecutablesCmd = &cobra.Command{
 		}
 
 		outputFormat := cmd.Flag(flags.OutputFormatFlagName).Value.String()
-		executable2.PrintExecutableList(io.OutputFormat(outputFormat), executables)
+		executableio.PrintExecutableList(io.OutputFormat(outputFormat), executables)
 	},
 }
 
@@ -80,12 +105,13 @@ var getExecutableCmd = &cobra.Command{
 		}
 
 		outputFormat := cmd.Flag(flags.OutputFormatFlagName).Value.String()
-		executable2.PrintExecutable(io.OutputFormat(outputFormat), exec)
+		executableio.PrintExecutable(io.OutputFormat(outputFormat), exec)
 	},
 }
 
 func init() {
 	getCmd.AddCommand(getWorkspaceCmd)
+	getCmd.AddCommand(getWorkspacesCmd)
 
 	getExecutablesCmd.Flags().StringP(
 		flags.OutputFormatFlagName,

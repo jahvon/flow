@@ -36,5 +36,19 @@ func AskForEncryptionKey() string {
 type StdInReader struct{}
 
 func (r StdInReader) Read(p []byte) (n int, err error) {
-	return os.Stdin.Read(p)
+	if len(p) == 0 {
+		return 0, nil
+	}
+
+	info, err := os.Stdin.Stat()
+	if err != nil {
+		return len(p), err
+	}
+	if info.Size() == 0 {
+		return len(p), nil
+	} else if info.Mode()&os.ModeNamedPipe == 0 {
+		return len(p), nil
+	} else {
+		return os.Stdin.Read(p)
+	}
 }

@@ -3,6 +3,8 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -49,6 +51,28 @@ var createWorkspaceCmd = &cobra.Command{
 		}
 
 		path := cmd.Flag("path").Value.String()
+		if path == "." || strings.HasPrefix(path, "./") {
+			wd, err := os.Getwd()
+			if err != nil {
+				io.PrintErrorAndExit(err)
+			}
+			if path == "." {
+				path = wd
+			} else {
+				path = fmt.Sprintf("%s/%s", wd, path[2:])
+			}
+		} else if path == "~" || strings.HasPrefix(path, "~/") {
+			hd, err := os.UserHomeDir()
+			if err != nil {
+				io.PrintErrorAndExit(err)
+			}
+			if path == "~" {
+				path = hd
+			} else {
+				path = fmt.Sprintf("%s/%s", hd, path[2:])
+			}
+		}
+
 		if err := config.SetWorkspace(rootCfg, name, path); err != nil {
 			io.PrintErrorAndExit(err)
 		}

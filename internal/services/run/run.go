@@ -50,6 +50,7 @@ func RunCmd(commandStr, dir string, envList []string) error {
 	if err != nil {
 		return fmt.Errorf("encountered an error executing command - %w", err)
 	}
+
 	return nil
 }
 

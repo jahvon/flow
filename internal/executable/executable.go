@@ -37,7 +37,7 @@ func (e *Executable) GetContext() (workspace, workspacePath, namespace string) {
 
 func (e *Executable) ID() string {
 	if e.namespace == "" {
-		return fmt.Sprintf("%s:%s", e.workspace, e.Name)
+		return fmt.Sprintf("%s/%s", e.workspace, e.Name)
 	} else if e.workspace == "" {
 		log.Debug().
 			Str("workspace", e.workspace).Str("namespace", e.namespace).
