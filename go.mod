@@ -10,7 +10,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
 	github.com/pterm/pterm v0.12.69
-	github.com/rs/zerolog v1.30.0
+	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/crypto v0.14.0
 	golang.org/x/term v0.13.0
