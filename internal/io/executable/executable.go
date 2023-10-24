@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jahvon/flow/internal/executable"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/pterm/pterm"
 	"gopkg.in/yaml.v3"
+
+	"github.com/jahvon/flow/internal/executable"
+	"github.com/jahvon/flow/internal/io"
 )
 
 var log = io.Log()
@@ -92,6 +93,10 @@ func printExecutableListTable(executables executable.List) {
 }
 
 func PrintExecutable(format io.OutputFormat, exec *executable.Executable) {
+	if exec == nil {
+		log.Panic().Msg("Executable is nil")
+	}
+
 	switch format {
 	case io.OutputFormatYAML:
 		printExecutableYAML(exec)

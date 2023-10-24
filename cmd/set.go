@@ -1,17 +1,18 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/spf13/cobra"
 )
 
 // setCmd represents the set command.
 var setCmd = &cobra.Command{
 	Use:     "set",
 	Aliases: []string{"s"},
-	GroupID: CrudGroup.ID,
-	Short:   "Update a configuration, environment, or workspace option.",
+	GroupID: DataGroup.ID,
+	Short:   "Update an existing data or metadata value.",
 }
 
 // setWorkspaceCmd represents the set workspace subcommand.

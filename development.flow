@@ -1,0 +1,39 @@
+tags:
+  - go
+  - dev
+executables:
+  - type: run
+    name: pre-commit
+    aliases:
+        - pc
+    tags:
+      - internal
+    description: Lint and run test suite
+    spec:
+      cmd: |
+        echo "Running go formatting and linting"
+        go fmt ./...
+        golangci-lint run ./... --fix
+        echo "Running test suite"
+        go test ./... -race
+  - type: run
+    name: install-deps
+    aliases:
+        - id
+    tags:
+      - internal
+    description: Lint and run test suite
+    spec:
+      cmd: |
+        echo "Installing dependencies"
+        go mod tidy
+        go install github.com/spf13/cobra-cli@v1.3.0
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
+  - type: run
+    name: go-install
+    description: Build and install flow into GOPATH
+    spec:
+      dir: //
+      cmd: |
+        go generate ./...
+        go build -o ${GOPATH}/bin/flow

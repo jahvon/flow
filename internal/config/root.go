@@ -16,8 +16,8 @@ var (
 )
 
 type RootConfig struct {
-	Workspaces       map[string]string `yaml:"workspaces"`
-	CurrentWorkspace string            `yaml:"currentWorkspace"`
+	Workspaces       map[string]string `json:"workspaces"       yaml:"workspaces"`
+	CurrentWorkspace string            `json:"currentWorkspace" yaml:"currentWorkspace"`
 
 	currentWorkspaceConfig *workspace.Config
 }
@@ -42,7 +42,7 @@ func (c *RootConfig) setCurrentWorkspaceConfig() error {
 	if !found {
 		return fmt.Errorf("current workspace %s is not registered", c.CurrentWorkspace)
 	}
-	wsCfg, err := workspace.LoadConfig(wsPath)
+	wsCfg, err := workspace.LoadConfig(c.CurrentWorkspace, wsPath)
 	if err != nil {
 		return fmt.Errorf("unable to load current workspace config - %w", err)
 	} else if wsCfg == nil {
@@ -96,13 +96,14 @@ func LoadConfig() *RootConfig {
 }
 
 func defaultConfig() *RootConfig {
-	if err := workspace.SetDirectory(DefaultWorkspacePath); err != nil {
+	defaultWsName := "default"
+	if _, err := workspace.NewWorkspace(defaultWsName, DefaultWorkspacePath); err != nil {
 		log.Panic().Err(err).Msg("encountered issue with workspace directory")
 	}
 
 	return &RootConfig{
-		Workspaces:       map[string]string{"default": DefaultWorkspacePath},
-		CurrentWorkspace: "default",
+		Workspaces:       map[string]string{defaultWsName: DefaultWorkspacePath},
+		CurrentWorkspace: defaultWsName,
 	}
 }
 

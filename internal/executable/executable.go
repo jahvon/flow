@@ -90,6 +90,30 @@ func (l *List) FindByTypeAndName(agent consts.AgentType, name string) (*Executab
 	return nil, errors.ExecutableNotFound(agent, name)
 }
 
+func (l *List) FilterByTags(tags []string) []*Executable {
+	var executables []*Executable
+	// TODO: switch to set lookup if performance is bad
+	for _, exec := range *l {
+		var found bool
+		for _, execTag := range exec.Tags {
+			for _, tag := range tags {
+				if execTag == tag {
+					executables = append(executables, exec)
+					found = true
+					break
+				}
+				if found {
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+	return executables
+}
+
 func (l *List) FilterByTag(tag string) []*Executable {
 	var executables []*Executable
 	for _, exec := range *l {

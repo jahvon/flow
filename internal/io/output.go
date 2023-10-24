@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/pterm/pterm"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type OutputFormat string
@@ -51,6 +53,22 @@ func PrintErrorAndExit(err error) {
 
 func PrintError(err error) {
 	color.HiRed(err.Error())
+}
+
+func PrintTableNoHeader(data [][]string) {
+	tableRows := pterm.TableData(data)
+	err := pterm.DefaultTable.WithBoxed().WithData(tableRows).Render()
+	if err != nil {
+		log.Error().Msgf("encountered error printing table: %v", err)
+	}
+}
+
+func PrintTableWithHeader(data [][]string) {
+	tableRows := pterm.TableData(data)
+	err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
+	if err != nil {
+		log.Error().Msgf("encountered error printing table: %v", err)
+	}
 }
 
 type StdOutWriter struct {
