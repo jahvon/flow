@@ -14,7 +14,7 @@ import (
 var vaultCmd = &cobra.Command{
 	Use:     "vault",
 	Aliases: []string{"v"},
-	GroupID: CrudGroup.ID,
+	GroupID: DataGroup.ID,
 	Short:   "Manage Flow's secret vault data.",
 }
 
@@ -43,7 +43,7 @@ var vaultCreateCmd = &cobra.Command{
 }
 
 var vaultSetCmd = &cobra.Command{
-	Use:     "set",
+	Use:     "set <name> <value>",
 	Aliases: []string{"s"},
 	Short:   "Set a secret in the vault.",
 	Args:    cobra.ExactArgs(2),
@@ -62,16 +62,17 @@ var vaultSetCmd = &cobra.Command{
 }
 
 var vaultGetCmd = &cobra.Command{
-	Use:     "get",
+	Use:     "get <name>",
 	Aliases: []string{"g"},
 	Short:   "Get a secret from the vault.",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		reference := args[0]
-		asPlainText, err := cmd.Flags().GetBool(flags.PlainTextFlagName)
+		plainTextFlag, err := Flags.ValueFor(cmd, flags.OutputSecretAsPlainTextFlag.Name)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		}
+		asPlainText, _ := plainTextFlag.(bool)
 
 		v := vault.NewVault()
 		secret, err := v.GetSecret(reference)
@@ -93,10 +94,11 @@ var vaultListCmd = &cobra.Command{
 	Short:   "List all secrets in the vault.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		asPlainText, err := cmd.Flags().GetBool(flags.PlainTextFlagName)
+		plainTextFlag, err := Flags.ValueFor(cmd, flags.OutputSecretAsPlainTextFlag.Name)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		}
+		asPlainText, _ := plainTextFlag.(bool)
 
 		v := vault.NewVault()
 		secrets, err := v.GetAllSecrets()
@@ -115,7 +117,7 @@ var vaultListCmd = &cobra.Command{
 }
 
 var vaultDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   "delete <name>",
 	Short: "Delete a secret from the vault.",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -133,19 +135,11 @@ var vaultDeleteCmd = &cobra.Command{
 func init() {
 	vaultCmd.AddCommand(vaultCreateCmd)
 	vaultCmd.AddCommand(vaultSetCmd)
-	vaultGetCmd.Flags().BoolP(
-		flags.PlainTextFlagName,
-		"p",
-		false,
-		"Print the secret value as plain text instead of an obfuscated string",
-	)
+
+	registerFlagOrPanic(vaultGetCmd, *flags.OutputSecretAsPlainTextFlag)
 	vaultCmd.AddCommand(vaultGetCmd)
-	vaultListCmd.Flags().BoolP(
-		flags.PlainTextFlagName,
-		"p",
-		false,
-		"Print the secret value as plain text instead of an obfuscated string",
-	)
+
+	registerFlagOrPanic(vaultListCmd, *flags.OutputSecretAsPlainTextFlag)
 	vaultCmd.AddCommand(vaultListCmd)
 	vaultCmd.AddCommand(vaultDeleteCmd)
 

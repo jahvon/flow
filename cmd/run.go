@@ -3,15 +3,16 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jahvon/flow/internal/cmd/executable"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/executable/run"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/spf13/cobra"
 )
 
 var runCmd = &cobra.Command{
-	Use:     "run",
+	Use:     "run <identifier>",
 	Aliases: []string{"r"},
 	GroupID: ExecutableGroup.ID,
 	Short:   "Execute run flow.",

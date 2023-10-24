@@ -3,15 +3,16 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jahvon/flow/internal/cmd/executable"
 	"github.com/jahvon/flow/internal/config"
 	openagent "github.com/jahvon/flow/internal/executable/open"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/spf13/cobra"
 )
 
 var openCmd = &cobra.Command{
-	Use:     "open",
+	Use:     "open <identifier>",
 	Aliases: []string{"o"},
 	GroupID: ExecutableGroup.ID,
 	Short:   "Execute open uri flow.",

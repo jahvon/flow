@@ -1,0 +1,29 @@
+tags:
+  - shortcut
+executables:
+# Open Repo
+  - type: open
+    name: goland
+    tags:
+      - git
+      - ide
+    description: Open Flow's project directory in GoLand
+    spec:
+      uri:  //
+      app: GoLand
+  - type: open
+    name: vscode
+    tags:
+      - git
+      - ide
+    description: Open Flow's project directory in VSCode
+    spec:
+      uri:  //
+      app: Visual Studio Code
+  - type: open
+    name: github
+    tags:
+      - git
+    description: Open Flow's GitHub repo in a browser
+    spec:
+      uri: https://github.com/jahvon/flow

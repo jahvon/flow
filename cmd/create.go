@@ -8,17 +8,19 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/common"
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/services/cache"
 )
 
 // createCmd represents the create command.
 var createCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
-	GroupID: CrudGroup.ID,
-	Short:   "Create a configuration, environment, or workspace option.",
+	GroupID: DataGroup.ID,
+	Short:   "Create a new set of flow configurations.",
 }
 
 // createWorkspaceCmd represents the create workspace subcommand.
@@ -51,7 +53,9 @@ var createWorkspaceCmd = &cobra.Command{
 		}
 
 		path := cmd.Flag("path").Value.String()
-		if path == "." || strings.HasPrefix(path, "./") {
+		if path == "" {
+			path = common.ConfigDirPath()
+		} else if path == "." || strings.HasPrefix(path, "./") {
 			wd, err := os.Getwd()
 			if err != nil {
 				io.PrintErrorAndExit(err)
@@ -73,7 +77,7 @@ var createWorkspaceCmd = &cobra.Command{
 			}
 		}
 
-		if err := config.SetWorkspace(rootCfg, name, path); err != nil {
+		if err := config.CreateWorkspace(rootCfg, name, path); err != nil {
 			io.PrintErrorAndExit(err)
 		}
 		io.PrintSuccess(fmt.Sprintf("Workspace %s created in %s", name, path))
@@ -89,26 +93,19 @@ var createWorkspaceCmd = &cobra.Command{
 			io.PrintInfo(fmt.Sprintf("Workspace %s set as current workspace", name))
 		}
 
+		if _, err := cache.Update(); err != nil {
+			io.PrintErrorAndExit(fmt.Errorf("failed to update cache - %w", err))
+		}
 	},
 }
 
 func init() {
-	createWorkspaceCmd.Flags().StringP(
-		"path",
-		"p",
-		common.ConfigDirPath(),
-		"Path to the directory where the workspace should be created",
-	)
-	if err := createWorkspaceCmd.MarkFlagDirname("path"); err != nil {
+	registerFlagOrPanic(createWorkspaceCmd, *flags.SetAfterCreateFlag)
+	registerFlagOrPanic(createWorkspaceCmd, *flags.WorkspacePathFlag)
+	if err := createWorkspaceCmd.MarkFlagDirname(flags.WorkspacePathFlag.Name); err != nil {
 		log.Panic().Err(err).Msg("Failed to mark path flag as a directory")
 	}
-	createWorkspaceCmd.Flags().BoolP(
-		"set",
-		"s",
-		false,
-		"Set the newly created workspace as the current workspace",
-	)
-
 	createCmd.AddCommand(createWorkspaceCmd)
+
 	rootCmd.AddCommand(createCmd)
 }

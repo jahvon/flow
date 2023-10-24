@@ -3,12 +3,14 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/jahvon/flow/internal/cmd/version"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
+
+	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/cmd/version"
+	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/services/cache"
 )
 
 var log = io.Log()
@@ -18,16 +20,39 @@ var rootCmd = &cobra.Command{
 	Short: "[Alpha] CLI script wrapper",
 	Long:  `Command line interface script wrapper`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		verbose, err := strconv.ParseBool(cmd.Flag("verbose").Value.String())
+		verbosity, err := cmd.Flags().GetInt(flags.VerbosityFlag.Name)
 		if err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("invalid verbose flag - %w", err))
+			io.PrintErrorAndExit(fmt.Errorf("invalid verbosity flag - %w", err))
 		}
 
-		if verbose {
-			zerolog.SetGlobalLevel(zerolog.TraceLevel)
-			io.PrintInfo("Verbose logging enabled")
-		} else {
+		switch verbosity {
+		case 0:
+			zerolog.SetGlobalLevel(zerolog.NoLevel)
+		case 1:
+			zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+		case 2:
 			zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		case 3:
+			zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		case 4:
+			zerolog.SetGlobalLevel(zerolog.TraceLevel)
+		default:
+			io.PrintErrorAndExit(fmt.Errorf("verbosity (%d) must be between 0 and 4", verbosity))
+		}
+
+		if verbosity != 2 {
+			io.PrintInfo(fmt.Sprintf("Log level set to %d", verbosity))
+		}
+
+		syncCache, err := cmd.Flags().GetBool(flags.SyncCacheFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(fmt.Errorf("invalid sync flag - %w", err))
+		}
+		if syncCache {
+			_, err := cache.Update()
+			if err != nil {
+				io.PrintErrorAndExit(err)
+			}
 		}
 	},
 	Version: version.String(),
@@ -43,8 +68,18 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose log output")
+	rootCmd.PersistentFlags().IntP(
+		flags.VerbosityFlag.Name,
+		flags.VerbosityFlag.Shorthand,
+		flags.VerbosityFlag.Default.(int),
+		flags.VerbosityFlag.Usage,
+	)
+	rootCmd.PersistentFlags().Bool(
+		flags.SyncCacheFlag.Name,
+		flags.SyncCacheFlag.Default.(bool),
+		flags.SyncCacheFlag.Usage,
+	)
 
-	rootCmd.AddGroup(CrudGroup)
+	rootCmd.AddGroup(DataGroup)
 	rootCmd.AddGroup(ExecutableGroup)
 }

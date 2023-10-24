@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/internal/cmd/executable"
@@ -11,18 +10,40 @@ import (
 	"github.com/jahvon/flow/internal/config"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/io"
+	configio "github.com/jahvon/flow/internal/io/config"
 	executableio "github.com/jahvon/flow/internal/io/executable"
+	workspaceio "github.com/jahvon/flow/internal/io/workspace"
+	"github.com/jahvon/flow/internal/services/cache"
+	"github.com/jahvon/flow/internal/workspace"
 )
 
-// getCmd represents the get command.
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
-	GroupID: CrudGroup.ID,
-	Short:   "Get the current value of a configuration, environment, or workspace option.",
+	GroupID: DataGroup.ID,
+	Short:   "Print current flow data and metadata.",
 }
 
-// getWorkspaceCmd represents the get workspace subcommand.
+var getConfigCmd = &cobra.Command{
+	Use:     "config",
+	Aliases: []string{"cfg"},
+	Short:   "Print the current flow config.",
+	Args:    cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		rootCfg := config.LoadConfig()
+		if rootCfg == nil {
+			log.Panic().Msg("failed to load config")
+		}
+
+		outputFormatFlag, err := Flags.ValueFor(cmd, flags.OutputFormatFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+		outputFormat, _ := outputFormatFlag.(string)
+		configio.PrintRootConfig(io.OutputFormat(outputFormat), rootCfg)
+	},
+}
+
 var getWorkspaceCmd = &cobra.Command{
 	Use:     "workspace",
 	Aliases: []string{"w"},
@@ -33,9 +54,34 @@ var getWorkspaceCmd = &cobra.Command{
 		if rootCfg == nil {
 			log.Panic().Msg("failed to load config")
 		}
-		wsPath := rootCfg.Workspaces[rootCfg.CurrentWorkspace]
-		wsInfo := fmt.Sprintf("%s (%s)", rootCfg.CurrentWorkspace, wsPath)
-		io.PrintNotice(wsInfo)
+
+		workspaceFlag, err := Flags.ValueFor(cmd, flags.SpecificWorkspaceFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+		workspaceName, _ := workspaceFlag.(string)
+		if workspaceName != "" {
+			if _, found := rootCfg.Workspaces[workspaceName]; !found {
+				io.PrintErrorAndExit(fmt.Errorf("workspace %s not found", workspaceName))
+			}
+		} else {
+			workspaceName = rootCfg.CurrentWorkspace
+		}
+
+		wsPath := rootCfg.Workspaces[workspaceName]
+		wsCfg, err := workspace.LoadConfig(workspaceName, wsPath)
+		if err != nil {
+			log.Panic().Msgf("failed loading workspace config: %v", err)
+		} else if wsCfg == nil {
+			io.PrintErrorAndExit(fmt.Errorf("config not found for workspace %s", workspaceName))
+		}
+
+		outputFormatFlag, err := Flags.ValueFor(cmd, flags.OutputFormatFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+		outputFormat, _ := outputFormatFlag.(string)
+		workspaceio.PrintWorkspaceConfig(io.OutputFormat(outputFormat), wsCfg)
 	},
 }
 
@@ -50,15 +96,44 @@ var getWorkspacesCmd = &cobra.Command{
 			log.Panic().Msg("failed to load config")
 		}
 
-		log.Info().Msgf("Printing %d workspaces", len(rootCfg.Workspaces))
-		tableRows := pterm.TableData{{"Name", "Location"}}
-		for ws, wsPath := range rootCfg.Workspaces {
-			tableRows = append(tableRows, []string{ws, wsPath})
-		}
-		err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
+		outputFormatFlag, err := Flags.ValueFor(cmd, flags.OutputFormatFlag.Name)
 		if err != nil {
-			log.Panic().Msgf("Failed to render workspace list - %v", err)
+			io.PrintErrorAndExit(err)
 		}
+		outputFormat, _ := outputFormatFlag.(string)
+
+		tagsFlag, err := Flags.ValueFor(cmd, flags.FilterTagFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+		tagsFilter, _ := tagsFlag.([]string)
+
+		log.Debug().Msg("Loading workspace configs from cache")
+		cacheData, err := cache.Get()
+		if err != nil {
+			log.Error().Err(err).Msg("failed to load workspace configs from cache")
+		}
+
+		if cacheData == nil {
+			log.Debug().Msg("Cache data is nil; updating cache")
+			cacheData, err = cache.Update()
+			if err != nil || cacheData == nil {
+				io.PrintErrorAndExit(fmt.Errorf("cache failure unrecoverable - %w", err))
+			}
+		}
+
+		filteredWorkspaces := make([]workspace.Config, 0)
+		for _, ws := range cacheData.Workspaces {
+			if !ws.HasAnyTags(tagsFilter) {
+				continue
+			}
+			filteredWorkspaces = append(filteredWorkspaces, *ws)
+		}
+
+		if len(filteredWorkspaces) == 0 {
+			io.PrintErrorAndExit(fmt.Errorf("no workspaces found"))
+		}
+		workspaceio.PrintWorkspaceList(io.OutputFormat(outputFormat), filteredWorkspaces)
 	},
 }
 
@@ -73,18 +148,22 @@ var getExecutablesCmd = &cobra.Command{
 			log.Panic().Msg("failed to load config")
 		}
 
-		executables, err := executable.FlagsToExecutableList(cmd, rootCfg)
+		executables, err := executable.FlagsToExecutableList(cmd, *Flags, rootCfg)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		}
 
-		outputFormat := cmd.Flag(flags.OutputFormatFlagName).Value.String()
+		outputFormatFlag, err := Flags.ValueFor(cmd, flags.OutputFormatFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+		outputFormat, _ := outputFormatFlag.(string)
 		executableio.PrintExecutableList(io.OutputFormat(outputFormat), executables)
 	},
 }
 
 var getExecutableCmd = &cobra.Command{
-	Use:     "executable",
+	Use:     "executable <identifier>",
 	Aliases: []string{"exec"},
 	Short:   "Find and print a discovered executable.",
 	Args:    cobra.ExactArgs(1),
@@ -94,71 +173,52 @@ var getExecutableCmd = &cobra.Command{
 			log.Panic().Msg("failed to load config")
 		}
 
-		agent := cmd.Flag(flags.AgentTypeFlagName)
-		if agent == nil || !agent.Changed {
-			log.Panic().Msg("agent type is required")
+		agentFlag, err := Flags.ValueFor(cmd, flags.AgentTypeFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(err)
 		}
+		agent, _ := agentFlag.(string)
 
-		_, exec, err := executable.ArgsToExecutable(args, consts.AgentType(agent.Value.String()), rootCfg)
+		_, exec, err := executable.ArgsToExecutable(args, consts.AgentType(agent), rootCfg)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		}
 
-		outputFormat := cmd.Flag(flags.OutputFormatFlagName).Value.String()
+		outputFormatFlag, err := Flags.ValueFor(cmd, flags.OutputFormatFlag.Name)
+		if err != nil {
+			io.PrintErrorAndExit(err)
+		}
+		outputFormat, _ := outputFormatFlag.(string)
 		executableio.PrintExecutable(io.OutputFormat(outputFormat), exec)
 	},
 }
 
 func init() {
+	registerFlagOrPanic(getConfigCmd, *flags.OutputFormatFlag)
+	getCmd.AddCommand(getConfigCmd)
+
+	registerFlagOrPanic(getWorkspaceCmd, *flags.OutputFormatFlag)
+	registerFlagOrPanic(getWorkspaceCmd, *flags.SpecificWorkspaceFlag)
 	getCmd.AddCommand(getWorkspaceCmd)
+
+	registerFlagOrPanic(getWorkspacesCmd, *flags.OutputFormatFlag)
+	registerFlagOrPanic(getWorkspacesCmd, *flags.FilterTagFlag)
 	getCmd.AddCommand(getWorkspacesCmd)
 
-	getExecutablesCmd.Flags().StringP(
-		flags.OutputFormatFlagName,
-		"o",
-		"default",
-		"Output format. One of: default, yaml, json, jsonp.",
+	registerFlagOrPanic(getExecutablesCmd, *flags.OutputFormatFlag)
+	registerFlagOrPanic(getExecutablesCmd, *flags.FilterAgentTypeFlag)
+	registerFlagOrPanic(getExecutablesCmd, *flags.FilterTagFlag)
+	registerFlagOrPanic(getExecutablesCmd, *flags.FilterNamespaceFlag)
+	registerFlagOrPanic(getExecutablesCmd, *flags.ListWorkspaceContextFlag)
+	registerFlagOrPanic(getExecutablesCmd, *flags.ListGlobalContextFlag)
+	getExecutablesCmd.MarkFlagsMutuallyExclusive(
+		flags.ListWorkspaceContextFlag.Name,
+		flags.ListGlobalContextFlag.Name,
 	)
-	getExecutablesCmd.Flags().StringP(
-		flags.AgentTypeFlagName,
-		"a",
-		"",
-		"Filter executables by agent type.",
-	)
-	getExecutablesCmd.Flags().StringP(
-		flags.TagFlagName,
-		"t",
-		"",
-		"Filter executables by tag.",
-	)
-	getExecutablesCmd.Flags().StringP(
-		flags.NamespaceFlagName,
-		"n",
-		"",
-		"Filter executables by namespace.",
-	)
-	getExecutablesCmd.Flags().StringP(
-		flags.WorkspaceContextFlagName, "w", "", "Filter executables by workspace.",
-	)
-	getExecutablesCmd.Flags().BoolP(
-		flags.GlobalContextFlagName, "g", false, "List executables across all workspaces.",
-	)
-	getExecutablesCmd.MarkFlagsMutuallyExclusive(flags.WorkspaceContextFlagName, flags.GlobalContextFlagName)
 	getCmd.AddCommand(getExecutablesCmd)
 
-	getExecutableCmd.Flags().StringP(
-		flags.OutputFormatFlagName,
-		"o",
-		"default",
-		"Output format. One of: default, yaml, json, jsonp.",
-	)
-	getExecutableCmd.Flags().StringP(
-		flags.AgentTypeFlagName,
-		"a",
-		"",
-		fmt.Sprintf("Executable agent type. One of: %s", consts.ValidAgentTypes),
-	)
-	_ = getExecutableCmd.MarkFlagRequired(flags.AgentTypeFlagName)
+	registerFlagOrPanic(getExecutableCmd, *flags.OutputFormatFlag)
+	registerFlagOrPanic(getExecutableCmd, *flags.AgentTypeFlag)
 	getCmd.AddCommand(getExecutableCmd)
 
 	rootCmd.AddCommand(getCmd)

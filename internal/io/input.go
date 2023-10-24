@@ -44,11 +44,12 @@ func (r StdInReader) Read(p []byte) (n int, err error) {
 	if err != nil {
 		return len(p), err
 	}
-	if info.Size() == 0 {
+	switch {
+	case info.Size() == 0:
 		return len(p), nil
-	} else if info.Mode()&os.ModeNamedPipe == 0 {
+	case info.Mode()&os.ModeNamedPipe == 0:
 		return len(p), nil
-	} else {
+	default:
 		return os.Stdin.Read(p)
 	}
 }

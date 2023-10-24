@@ -15,8 +15,8 @@ func SetCurrentWorkspace(config *RootConfig, name string) error {
 	return writeConfigFile(config)
 }
 
-func SetWorkspace(config *RootConfig, name, location string) error {
-	if err := workspace.SetDirectory(location); err != nil {
+func CreateWorkspace(config *RootConfig, name, location string) error {
+	if _, err := workspace.NewWorkspace(name, location); err != nil {
 		return err
 	}
 

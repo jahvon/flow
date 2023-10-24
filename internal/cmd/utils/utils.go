@@ -4,7 +4,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -15,45 +14,38 @@ import (
 
 var log = io.Log()
 
-func ValidateAndGetContext(cmd *cobra.Command, currentConfig *config.RootConfig) (string, error) {
-	var global *bool
-	var ws *string
+func ValidateAndGetContext(cmd *cobra.Command, set flags.FlagSet, currentConfig *config.RootConfig) (string, error) {
 	var context string
+	globalRaw, err := set.ValueFor(cmd, flags.ListGlobalContextFlag.Name)
+	if err != nil {
+		return "", fmt.Errorf("invalid global flag - %w", err)
+	}
+	global, _ := globalRaw.(bool)
 
-	globalFlag := cmd.Flag(flags.GlobalContextFlagName)
-	wsFlag := cmd.Flag(flags.WorkspaceContextFlagName)
-	if globalFlag != nil {
-		val, err := strconv.ParseBool(cmd.Flag(flags.GlobalContextFlagName).Value.String())
-		if err != nil {
-			return "", fmt.Errorf("invalid global flag - %w", err)
-		}
-		global = &val
+	wsRaw, err := set.ValueFor(cmd, flags.FilterNamespaceFlag.Name)
+	if err != nil {
+		return "", fmt.Errorf("invalid namespace flag - %w", err)
 	}
-	if wsFlag != nil {
-		val := cmd.Flag(flags.WorkspaceContextFlagName).Value.String()
-		ws = &val
-	}
-	globalSet := global != nil
-	wsSet := ws != nil
+	ws, _ := wsRaw.(string)
 
 	switch {
-	case (globalSet && *global) && (wsSet && *ws != ""):
+	case global && ws != "":
 		return "", errors.New("cannot set a secret to both global and workspace scope")
-	case globalSet && *global:
+	case global:
 		context = "global"
-	case wsSet && *ws != "":
+	case ws != "":
 		var found bool
 		for _, curWs := range currentConfig.Workspaces {
-			if curWs == *ws {
+			if curWs == ws {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			return "", fmt.Errorf("workspace %s does not exist", *ws)
+			return "", fmt.Errorf("workspace %s does not exist", ws)
 		}
-		context = *ws
+		context = ws
 	default:
 		log.Debug().Msg("defaulting to the current workspace")
 		context = currentConfig.CurrentWorkspace
