@@ -4,6 +4,7 @@ package cache
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 
@@ -32,7 +33,7 @@ func Update() (*WorkspaceCacheData, error) {
 
 	if info, err := os.Stat(cacheFilePath); err != nil && os.IsNotExist(err) {
 		log.Debug().Msg("Cache data file does not exist, creating")
-		if _, err := os.Create(cacheFilePath); err != nil {
+		if _, err := os.Create(filepath.Clean(cacheFilePath)); err != nil {
 			return nil, fmt.Errorf("unable to create cache data file - %w", err)
 		}
 	} else if err != nil {
@@ -63,7 +64,7 @@ func Update() (*WorkspaceCacheData, error) {
 		return nil, fmt.Errorf("unable to encode cache data - %w", err)
 	}
 
-	cacheFile, err := os.OpenFile(cacheFilePath, os.O_RDWR, 0644)
+	cacheFile, err := os.OpenFile(filepath.Clean(cacheFilePath), os.O_RDWR, 0600)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open cache data file - %w", err)
 	}
@@ -91,7 +92,7 @@ func Get() (*WorkspaceCacheData, error) {
 		return nil, fmt.Errorf("cache data file is a directory")
 	}
 
-	cacheFile, err := os.Open(cacheFilePath)
+	cacheFile, err := os.Open(filepath.Clean(cacheFilePath))
 	if err != nil {
 		return nil, fmt.Errorf("unable to open cache data file - %w", err)
 	}
