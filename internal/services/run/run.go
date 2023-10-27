@@ -14,7 +14,7 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
-var log = io.Log()
+var log = io.Log().With().Str("service", "run").Logger()
 
 // RunCmd executes a command in the current shell in a specific directory.
 func RunCmd(commandStr, dir string, envList []string) error {

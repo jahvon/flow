@@ -8,7 +8,7 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
-var log = io.Log()
+var log = io.Log().With().Str("pkg", "executable").Logger()
 
 type Preference map[string]interface{}
 
@@ -74,6 +74,7 @@ type List []*Executable
 func (l *List) FindByTypeAndName(agent consts.AgentType, name string) (*Executable, error) {
 	for _, exec := range *l {
 		if exec.Type != agent {
+			log.Trace().Msgf("skipping executable %s of different type", exec.Name)
 			continue
 		}
 
@@ -86,8 +87,9 @@ func (l *List) FindByTypeAndName(agent consts.AgentType, name string) (*Executab
 				}
 			}
 		}
+		log.Trace().Msgf("skipping executable %s of different name", exec.Name)
 	}
-	return nil, errors.ExecutableNotFound(agent, name)
+	return nil, errors.ExecutableNotFoundError{Agent: agent, Name: name}
 }
 
 func (l *List) FilterByTags(tags []string) []*Executable {

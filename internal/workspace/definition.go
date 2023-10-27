@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	stdErrors "errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -20,7 +21,7 @@ const (
 )
 
 var (
-	log = io.Log()
+	log = io.Log().With().Str("pkg", "workspace").Logger()
 	up  = ".."
 )
 
@@ -66,16 +67,28 @@ func (d *Definition) HasTag(tag string) bool {
 type DefinitionList []*Definition
 
 func (l *DefinitionList) FilterByNamespace(namespace string) DefinitionList {
+	if namespace == "" {
+		return *l
+	}
+
 	var definitions []*Definition
 	for _, definition := range *l {
 		if definition.Namespace == namespace {
 			definitions = append(definitions, definition)
 		}
 	}
+
+	log.Trace().
+		Int("definitions", len(definitions)).
+		Msg("filtered definitions by namespace")
 	return definitions
 }
 
 func (l *DefinitionList) FilterByTag(tag string) DefinitionList {
+	if tag == "" {
+		return *l
+	}
+
 	var definitions []*Definition
 	for _, definition := range *l {
 		for _, definitionTag := range definition.Tags {
@@ -84,6 +97,10 @@ func (l *DefinitionList) FilterByTag(tag string) DefinitionList {
 			}
 		}
 	}
+
+	log.Trace().
+		Int("definitions", len(definitions)).
+		Msg("filtered definitions by tag")
 	return definitions
 }
 
@@ -93,15 +110,19 @@ func (l *DefinitionList) LookupExecutableByTypeAndName(
 	agent consts.AgentType,
 	name string,
 ) (string, *executable.Executable, error) {
+	log.Debug().Msgf("looking up executable %s of type %s", name, agent)
+
+	notFound := errors.ExecutableNotFoundError{Agent: agent, Name: name}
 	for _, definition := range *l {
 		exec, err := definition.Executables.FindByTypeAndName(agent, name)
-		if err != nil {
-			return "", nil, err
+		if err != nil && !stdErrors.Is(err, notFound) {
+			log.Err(err).Msgf("failed to lookup executable %s of type %s", name, agent)
+			continue
 		} else if exec != nil {
 			return definition.Namespace, exec, nil
 		}
 	}
-	return "", nil, errors.ExecutableNotFound(agent, name)
+	return "", nil, notFound
 }
 
 func LoadDefinitions(workspace, workspacePath string) (DefinitionList, error) {
@@ -119,6 +140,7 @@ func LoadDefinitions(workspace, workspacePath string) (DefinitionList, error) {
 		definition.SetContext(workspace, workspacePath)
 		definitions = append(definitions, definition)
 	}
+	log.Trace().Msgf("loaded %d definitions", len(definitions))
 
 	return definitions, nil
 }

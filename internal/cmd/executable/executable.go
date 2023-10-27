@@ -40,7 +40,7 @@ func ArgsToExecutable(
 	}
 	wsPath, found := currentConfig.Workspaces[ws]
 	if !found {
-		return "", nil, flowErrs.WorkspaceNotFound(ws)
+		return "", nil, flowErrs.WorkspaceNotFoundError{Workspace: ws}
 	}
 
 	definitions, err := workspace.LoadDefinitions(ws, wsPath)
@@ -50,7 +50,7 @@ func ArgsToExecutable(
 
 	if len(definitions) == 0 {
 		log.Debug().Msg("no definitions found in workspace")
-		return "", nil, flowErrs.ExecutableNotFound(agentType, name)
+		return "", nil, flowErrs.ExecutableNotFoundError{Agent: agentType, Name: name}
 	}
 	definitions = definitions.FilterByNamespace(ns)
 
@@ -58,7 +58,7 @@ func ArgsToExecutable(
 	if err != nil {
 		return "", nil, err
 	} else if exec == nil {
-		return "", nil, flowErrs.ExecutableNotFound(agentType, name)
+		return "", nil, flowErrs.ExecutableNotFoundError{Agent: agentType, Name: name}
 	}
 
 	return ns, exec, nil

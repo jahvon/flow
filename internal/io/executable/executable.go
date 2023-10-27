@@ -10,6 +10,7 @@ import (
 
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/io/utils"
 )
 
 var log = io.Log()
@@ -82,7 +83,13 @@ func printExecutableListTable(executables executable.List) {
 	for _, exec := range executables {
 		tableRows = append(
 			tableRows,
-			[]string{exec.ID(), exec.Name, string(exec.Type), exec.Description, strings.Join(exec.Tags, ", ")},
+			[]string{
+				exec.ID(),
+				exec.Name,
+				string(exec.Type),
+				utils.WrapLines(exec.Description, 5),
+				strings.Join(exec.Tags, ", "),
+			},
 		)
 	}
 
@@ -151,7 +158,7 @@ func printExecutableTable(exec *executable.Executable) {
 		{"ID", exec.ID()},
 		{"Name", exec.Name},
 		{"Type", string(exec.Type)},
-		{"Description", exec.Description},
+		{"Description", utils.WrapLines(exec.Description, 10)},
 		{"Aliases", strings.Join(exec.Aliases, ", ")},
 		{"Tags", strings.Join(exec.Tags, ", ")},
 		{"Spec", string(yamlSpec)},

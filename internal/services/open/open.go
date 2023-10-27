@@ -7,7 +7,7 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
-var log = io.Log()
+var log = io.Log().With().Str("service", "open").Logger()
 
 func Open(uri string, wait bool) error {
 	log.Trace().Msgf("opening uri (%s), wait=%v", uri, wait)

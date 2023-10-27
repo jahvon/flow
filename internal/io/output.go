@@ -65,7 +65,7 @@ func PrintTableNoHeader(data [][]string) {
 
 func PrintTableWithHeader(data [][]string) {
 	tableRows := pterm.TableData(data)
-	err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
+	err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).WithRowSeparator("").Render()
 	if err != nil {
 		log.Error().Msgf("encountered error printing table: %v", err)
 	}
