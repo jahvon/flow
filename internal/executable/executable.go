@@ -3,6 +3,8 @@ package executable
 import (
 	"fmt"
 
+	"github.com/samber/lo"
+
 	"github.com/jahvon/flow/internal/errors"
 	"github.com/jahvon/flow/internal/executable/consts"
 	"github.com/jahvon/flow/internal/io"
@@ -72,68 +74,35 @@ func (e *Executable) MergeTags(tags []string) {
 type List []*Executable
 
 func (l *List) FindByTypeAndName(agent consts.AgentType, name string) (*Executable, error) {
-	for _, exec := range *l {
-		if exec.Type != agent {
-			log.Trace().Msgf("skipping executable %s of different type", exec.Name)
-			continue
-		}
-
-		if exec.Name == name {
-			return exec, nil
-		} else if len(exec.Aliases) > 0 {
-			for _, alias := range exec.Aliases {
-				if alias == name {
-					return exec, nil
-				}
-			}
-		}
-		log.Trace().Msgf("skipping executable %s of different name", exec.Name)
+	exec, found := lo.Find(*l, func(exec *Executable) bool {
+		return (exec.Type == agent && exec.Name == name) || lo.Contains(exec.Aliases, name)
+	})
+	if found {
+		return exec, nil
 	}
 	return nil, errors.ExecutableNotFoundError{Agent: agent, Name: name}
 }
 
-func (l *List) FilterByTags(tags []string) []*Executable {
-	var executables []*Executable
-	// TODO: switch to set lookup if performance is bad
-	for _, exec := range *l {
-		var found bool
-		for _, execTag := range exec.Tags {
-			for _, tag := range tags {
-				if execTag == tag {
-					executables = append(executables, exec)
-					found = true
-					break
-				}
-				if found {
-					break
-				}
-			}
-			if found {
-				break
-			}
-		}
-	}
-	return executables
+func (l *List) FilterByTags(tags []string) List {
+	execs := lo.Filter(*l, func(exec *Executable, _ int) bool {
+		return lo.Some(exec.Tags, tags)
+	})
+	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by tags %v", tags)
+	return execs
 }
 
-func (l *List) FilterByTag(tag string) []*Executable {
-	var executables []*Executable
-	for _, exec := range *l {
-		for _, execTag := range exec.Tags {
-			if execTag == tag {
-				executables = append(executables, exec)
-			}
-		}
-	}
-	return executables
+func (l *List) FilterByTag(tag string) List {
+	execs := lo.Filter(*l, func(exec *Executable, _ int) bool {
+		return lo.Contains(exec.Tags, tag)
+	})
+	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by tag %s", tag)
+	return execs
 }
 
-func (l *List) FilterByType(agent consts.AgentType) []*Executable {
-	var executables []*Executable
-	for _, exec := range *l {
-		if exec.Type == agent {
-			executables = append(executables, exec)
-		}
-	}
-	return executables
+func (l *List) FilterByType(agent consts.AgentType) List {
+	execs := lo.Filter(*l, func(exec *Executable, _ int) bool {
+		return exec.Type == agent
+	})
+	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by type %s", agent)
+	return execs
 }

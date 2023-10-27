@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/samber/lo"
+
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -74,17 +76,17 @@ func (p *Parameter) Value() (string, error) {
 }
 
 func ParameterListToEnvList(params []Parameter) ([]string, error) {
-	var env []string
 	var errs []error
-	for _, param := range params {
+	env := lo.Map(params, func(param Parameter, _ int) string {
 		key := param.EnvKey
 		value, err := param.Value()
 		if err != nil {
 			errs = append(errs, err)
-			continue
+			return ""
 		}
-		env = append(env, fmt.Sprintf("%s=%s", key, value))
-	}
+		return fmt.Sprintf("%s=%s", key, value)
+	})
+
 	if len(errs) > 0 {
 		return nil, fmt.Errorf("failed to get values for parameters: %v", errs)
 	}

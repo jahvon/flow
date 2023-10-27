@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/errors"
@@ -47,15 +48,16 @@ func (d *Definition) HasAnyTag(tags []string) bool {
 		return true
 	}
 
-	for _, t := range tags {
-		if d.HasTag(t) {
-			return true
-		}
-	}
-	return false
+	_, found := lo.Find(tags, func(tag string) bool {
+		return d.HasTag(tag)
+	})
+	return found
 }
 
 func (d *Definition) HasTag(tag string) bool {
+	if tag == "" {
+		return true
+	}
 	for _, t := range d.Tags {
 		if t == tag {
 			return true
@@ -67,40 +69,18 @@ func (d *Definition) HasTag(tag string) bool {
 type DefinitionList []*Definition
 
 func (l *DefinitionList) FilterByNamespace(namespace string) DefinitionList {
-	if namespace == "" {
-		return *l
-	}
-
-	var definitions []*Definition
-	for _, definition := range *l {
-		if definition.Namespace == namespace {
-			definitions = append(definitions, definition)
-		}
-	}
-
-	log.Trace().
-		Int("definitions", len(definitions)).
-		Msg("filtered definitions by namespace")
+	definitions := lo.Filter(*l, func(definition *Definition, _ int) bool {
+		return definition.Namespace == namespace
+	})
+	log.Trace().Int("definitions", len(definitions)).Msgf("filtered definitions by namespace %s", namespace)
 	return definitions
 }
 
 func (l *DefinitionList) FilterByTag(tag string) DefinitionList {
-	if tag == "" {
-		return *l
-	}
-
-	var definitions []*Definition
-	for _, definition := range *l {
-		for _, definitionTag := range definition.Tags {
-			if definitionTag == tag {
-				definitions = append(definitions, definition)
-			}
-		}
-	}
-
-	log.Trace().
-		Int("definitions", len(definitions)).
-		Msg("filtered definitions by tag")
+	definitions := lo.Filter(*l, func(definition *Definition, _ int) bool {
+		return definition.HasTag(tag)
+	})
+	log.Trace().Int("definitions", len(definitions)).Msgf("filtered definitions by tag %s", tag)
 	return definitions
 }
 
@@ -116,7 +96,7 @@ func (l *DefinitionList) LookupExecutableByTypeAndName(
 	for _, definition := range *l {
 		exec, err := definition.Executables.FindByTypeAndName(agent, name)
 		if err != nil && !stdErrors.Is(err, notFound) {
-			log.Err(err).Msgf("failed to lookup executable %s of type %s", name, agent)
+			log.Err(err).Str("type", string(agent)).Msgf("failed to lookup executable %s", name)
 			continue
 		} else if exec != nil {
 			return definition.Namespace, exec, nil
