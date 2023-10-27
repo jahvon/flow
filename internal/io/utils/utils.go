@@ -2,13 +2,9 @@ package utils
 
 import (
 	"strings"
-
-	"github.com/pterm/pterm"
 )
 
-var width = pterm.GetTerminalWidth()
-
-// WrapLines Replace every n space with a newline character, leaving at most maxWords words per line
+// WrapLines Replace every n space with a newline character, leaving at most maxWords words per line.
 func WrapLines(text string, maxWords int) string {
 	trimmed := strings.TrimSpace(text)
 	words := strings.Split(trimmed, " ")

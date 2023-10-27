@@ -92,11 +92,7 @@ func printExecutableListTable(executables executable.List) {
 			},
 		)
 	}
-
-	err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
-	if err != nil {
-		log.Panic().Msgf("Failed to render executable list - %v", err)
-	}
+	io.PrintTableWithHeader(tableRows)
 }
 
 func PrintExecutable(format io.OutputFormat, exec *executable.Executable) {
@@ -153,7 +149,7 @@ func printExecutableTable(exec *executable.Executable) {
 	if err != nil {
 		log.Panic().Msgf("Failed to marshal spec - %v", err)
 	}
-	err = pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(pterm.TableData{
+	tableData := [][]string{
 		{"Key", "Value"},
 		{"ID", exec.ID()},
 		{"Name", exec.Name},
@@ -162,8 +158,6 @@ func printExecutableTable(exec *executable.Executable) {
 		{"Aliases", strings.Join(exec.Aliases, ", ")},
 		{"Tags", strings.Join(exec.Tags, ", ")},
 		{"Spec", string(yamlSpec)},
-	}).Render()
-	if err != nil {
-		log.Panic().Msgf("Failed to render executable - %v", err)
 	}
+	io.PrintTableWithHeader(tableData)
 }

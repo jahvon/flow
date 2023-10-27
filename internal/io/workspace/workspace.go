@@ -149,6 +149,5 @@ func printWorkspaceConfigTable(ws *workspace.Config) {
 			tableRows = append(tableRows, []string{"Executables", string(execs)})
 		}
 	}
-
 	io.PrintTableWithHeader(tableRows)
 }
