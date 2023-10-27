@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/errors"
@@ -46,12 +47,11 @@ func (d *Definition) HasAnyTag(tags []string) bool {
 		return true
 	}
 
-	for _, t := range tags {
-		if d.HasTag(t) {
-			return true
-		}
-	}
-	return false
+	_, found := lo.Find(tags, func(tag string) bool {
+		return d.HasTag(tag)
+	})
+
+	return found
 }
 
 func (d *Definition) HasTag(tag string) bool {
@@ -66,25 +66,15 @@ func (d *Definition) HasTag(tag string) bool {
 type DefinitionList []*Definition
 
 func (l *DefinitionList) FilterByNamespace(namespace string) DefinitionList {
-	var definitions []*Definition
-	for _, definition := range *l {
-		if definition.Namespace == namespace {
-			definitions = append(definitions, definition)
-		}
-	}
-	return definitions
+	return lo.Filter(*l, func(definition *Definition, _ int) bool {
+		return definition.Namespace == namespace
+	})
 }
 
 func (l *DefinitionList) FilterByTag(tag string) DefinitionList {
-	var definitions []*Definition
-	for _, definition := range *l {
-		for _, definitionTag := range definition.Tags {
-			if definitionTag == tag {
-				definitions = append(definitions, definition)
-			}
-		}
-	}
-	return definitions
+	return lo.Filter(*l, func(definition *Definition, _ int) bool {
+		return definition.HasTag(tag)
+	})
 }
 
 // LookupExecutableByTypeAndName searches for an executable by type and name.
