@@ -57,7 +57,12 @@ func PrintError(err error) {
 
 func PrintTableNoHeader(data [][]string) {
 	tableRows := pterm.TableData(data)
-	err := pterm.DefaultTable.WithBoxed().WithData(tableRows).Render()
+	err := pterm.DefaultTable.
+		WithData(tableRows).
+		WithBoxed().
+		WithRowSeparator("-").
+		WithSeparatorStyle(pterm.NewStyle(pterm.FgDarkGray)).
+		Render()
 	if err != nil {
 		log.Error().Msgf("encountered error printing table: %v", err)
 	}
@@ -65,7 +70,13 @@ func PrintTableNoHeader(data [][]string) {
 
 func PrintTableWithHeader(data [][]string) {
 	tableRows := pterm.TableData(data)
-	err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
+	err := pterm.DefaultTable.
+		WithData(tableRows).
+		WithHasHeader().
+		WithBoxed().
+		WithRowSeparator("-").
+		WithSeparatorStyle(pterm.NewStyle(pterm.FgDarkGray)).
+		Render()
 	if err != nil {
 		log.Error().Msgf("encountered error printing table: %v", err)
 	}

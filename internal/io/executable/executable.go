@@ -10,6 +10,7 @@ import (
 
 	"github.com/jahvon/flow/internal/executable"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/io/utils"
 )
 
 var log = io.Log()
@@ -82,14 +83,16 @@ func printExecutableListTable(executables executable.List) {
 	for _, exec := range executables {
 		tableRows = append(
 			tableRows,
-			[]string{exec.ID(), exec.Name, string(exec.Type), exec.Description, strings.Join(exec.Tags, ", ")},
+			[]string{
+				exec.ID(),
+				exec.Name,
+				string(exec.Type),
+				utils.WrapLines(exec.Description, 5),
+				strings.Join(exec.Tags, ", "),
+			},
 		)
 	}
-
-	err := pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableRows).Render()
-	if err != nil {
-		log.Panic().Msgf("Failed to render executable list - %v", err)
-	}
+	io.PrintTableWithHeader(tableRows)
 }
 
 func PrintExecutable(format io.OutputFormat, exec *executable.Executable) {
@@ -146,17 +149,15 @@ func printExecutableTable(exec *executable.Executable) {
 	if err != nil {
 		log.Panic().Msgf("Failed to marshal spec - %v", err)
 	}
-	err = pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(pterm.TableData{
+	tableData := [][]string{
 		{"Key", "Value"},
 		{"ID", exec.ID()},
 		{"Name", exec.Name},
 		{"Type", string(exec.Type)},
-		{"Description", exec.Description},
+		{"Description", utils.WrapLines(exec.Description, 10)},
 		{"Aliases", strings.Join(exec.Aliases, ", ")},
 		{"Tags", strings.Join(exec.Tags, ", ")},
 		{"Spec", string(yamlSpec)},
-	}).Render()
-	if err != nil {
-		log.Panic().Msgf("Failed to render executable - %v", err)
 	}
+	io.PrintTableWithHeader(tableData)
 }

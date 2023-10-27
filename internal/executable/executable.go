@@ -10,7 +10,7 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
-var log = io.Log()
+var log = io.Log().With().Str("pkg", "executable").Logger()
 
 type Preference map[string]interface{}
 
@@ -80,23 +80,29 @@ func (l *List) FindByTypeAndName(agent consts.AgentType, name string) (*Executab
 	if found {
 		return exec, nil
 	}
-	return nil, errors.ExecutableNotFound(agent, name)
+	return nil, errors.ExecutableNotFoundError{Agent: agent, Name: name}
 }
 
 func (l *List) FilterByTags(tags []string) List {
-	return lo.Filter(*l, func(exec *Executable, _ int) bool {
+	execs := lo.Filter(*l, func(exec *Executable, _ int) bool {
 		return lo.Some(exec.Tags, tags)
 	})
+	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by tags %v", tags)
+	return execs
 }
 
-func (l *List) FilterByTag(tag string) []*Executable {
-	return lo.Filter(*l, func(exec *Executable, _ int) bool {
+func (l *List) FilterByTag(tag string) List {
+	execs := lo.Filter(*l, func(exec *Executable, _ int) bool {
 		return lo.Contains(exec.Tags, tag)
 	})
+	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by tag %s", tag)
+	return execs
 }
 
-func (l *List) FilterByType(agent consts.AgentType) []*Executable {
-	return lo.Filter(*l, func(exec *Executable, _ int) bool {
+func (l *List) FilterByType(agent consts.AgentType) List {
+	execs := lo.Filter(*l, func(exec *Executable, _ int) bool {
 		return exec.Type == agent
 	})
+	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by type %s", agent)
+	return execs
 }

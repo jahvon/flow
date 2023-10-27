@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	stdErrors "errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -21,7 +22,7 @@ const (
 )
 
 var (
-	log = io.Log()
+	log = io.Log().With().Str("pkg", "workspace").Logger()
 	up  = ".."
 )
 
@@ -50,11 +51,13 @@ func (d *Definition) HasAnyTag(tags []string) bool {
 	_, found := lo.Find(tags, func(tag string) bool {
 		return d.HasTag(tag)
 	})
-
 	return found
 }
 
 func (d *Definition) HasTag(tag string) bool {
+	if tag == "" {
+		return true
+	}
 	for _, t := range d.Tags {
 		if t == tag {
 			return true
@@ -66,15 +69,19 @@ func (d *Definition) HasTag(tag string) bool {
 type DefinitionList []*Definition
 
 func (l *DefinitionList) FilterByNamespace(namespace string) DefinitionList {
-	return lo.Filter(*l, func(definition *Definition, _ int) bool {
+	definitions := lo.Filter(*l, func(definition *Definition, _ int) bool {
 		return definition.Namespace == namespace
 	})
+	log.Trace().Int("definitions", len(definitions)).Msgf("filtered definitions by namespace %s", namespace)
+	return definitions
 }
 
 func (l *DefinitionList) FilterByTag(tag string) DefinitionList {
-	return lo.Filter(*l, func(definition *Definition, _ int) bool {
+	definitions := lo.Filter(*l, func(definition *Definition, _ int) bool {
 		return definition.HasTag(tag)
 	})
+	log.Trace().Int("definitions", len(definitions)).Msgf("filtered definitions by tag %s", tag)
+	return definitions
 }
 
 // LookupExecutableByTypeAndName searches for an executable by type and name.
@@ -83,15 +90,19 @@ func (l *DefinitionList) LookupExecutableByTypeAndName(
 	agent consts.AgentType,
 	name string,
 ) (string, *executable.Executable, error) {
+	log.Debug().Msgf("looking up executable %s of type %s", name, agent)
+
+	notFound := errors.ExecutableNotFoundError{Agent: agent, Name: name}
 	for _, definition := range *l {
 		exec, err := definition.Executables.FindByTypeAndName(agent, name)
-		if err != nil {
-			return "", nil, err
+		if err != nil && !stdErrors.Is(err, notFound) {
+			log.Err(err).Str("type", string(agent)).Msgf("failed to lookup executable %s", name)
+			continue
 		} else if exec != nil {
 			return definition.Namespace, exec, nil
 		}
 	}
-	return "", nil, errors.ExecutableNotFound(agent, name)
+	return "", nil, notFound
 }
 
 func LoadDefinitions(workspace, workspacePath string) (DefinitionList, error) {
@@ -109,6 +120,7 @@ func LoadDefinitions(workspace, workspacePath string) (DefinitionList, error) {
 		definition.SetContext(workspace, workspacePath)
 		definitions = append(definitions, definition)
 	}
+	log.Trace().Msgf("loaded %d definitions", len(definitions))
 
 	return definitions, nil
 }

@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/io/utils"
 	"github.com/jahvon/flow/internal/workspace"
 )
 
@@ -66,7 +67,7 @@ func printWorkspaceListTable(workspaces []workspace.Config) {
 			[]string{
 				name,
 				ws.Location(),
-				ws.Description,
+				utils.WrapLines(ws.Description, 5),
 				strings.Join(ws.Tags, ", "),
 			},
 		)
@@ -127,7 +128,7 @@ func printWorkspaceConfigTable(ws *workspace.Config) {
 		tableRows = append(tableRows, []string{"Display Name", ws.DisplayName})
 	}
 	if ws.Description != "" {
-		tableRows = append(tableRows, []string{"Description", ws.Description})
+		tableRows = append(tableRows, []string{"Description", utils.WrapLines(ws.Description, 10)})
 	}
 	if ws.Tags != nil {
 		tableRows = append(tableRows, []string{"Tags", strings.Join(ws.Tags, ", ")})
@@ -148,6 +149,5 @@ func printWorkspaceConfigTable(ws *workspace.Config) {
 			tableRows = append(tableRows, []string{"Executables", string(execs)})
 		}
 	}
-
 	io.PrintTableWithHeader(tableRows)
 }

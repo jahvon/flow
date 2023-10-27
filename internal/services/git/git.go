@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rs/zerolog/log"
-
+	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/services/run"
 )
+
+var log = io.Log().With().Str("service", "git").Logger()
 
 func Pull(repoDir string) error {
 	if info, err := os.Stat(repoDir); err != nil && os.IsNotExist(err) {
