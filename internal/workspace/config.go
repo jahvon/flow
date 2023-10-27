@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/executable"
@@ -54,15 +55,7 @@ func (c *Config) HasAnyTags(tags []string) bool {
 		return true
 	}
 
-	for _, tag := range tags {
-		for _, wsTag := range c.Tags {
-			if wsTag == tag {
-				return true
-			}
-		}
-	}
-
-	return false
+	return lo.Some(c.Tags, tags)
 }
 
 func defaultConfig(name string) *Config {
