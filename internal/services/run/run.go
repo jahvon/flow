@@ -37,7 +37,7 @@ func RunCmd(commandStr, dir string, envList []string) error {
 		interp.Dir(dir),
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
-			io.StdInReader{},
+			os.Stdin,
 			io.StdOutWriter{LogAsDebug: false},
 			io.StdErrWriter{LogAsDebug: false},
 		),
