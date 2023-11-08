@@ -1,15 +1,21 @@
 package ui
 
-import "github.com/rivo/tview"
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
 
 type FrameOptions struct {
 	CurrentView      View
+	CurrentState     State
 	CurrentWorkspace string
 	CurrentNamespace string
+	CurrentFilter    string
 	Notice           string
 
-	ObjectContent *tview.Box
-	ObjectList    *tview.List
+	ObjectContent *TableData
+	ObjectList    *TableData
 }
 
 type FrameOption func(*FrameOptions)
@@ -17,9 +23,11 @@ type FrameOption func(*FrameOptions)
 func MergeFrameOptions(opts ...FrameOption) *FrameOptions {
 	o := &FrameOptions{
 		CurrentView:      DefaultView,
-		CurrentWorkspace: "[red]unk",
-		CurrentNamespace: "[red]unk",
-		Notice:           "testing. this is a placeholder notice!",
+		CurrentState:     DefaultState,
+		CurrentWorkspace: "unk",
+		CurrentNamespace: "unk",
+		CurrentFilter:    "",
+		Notice:           "---",
 		ObjectContent:    nil,
 		ObjectList:       nil,
 	}
@@ -27,6 +35,18 @@ func MergeFrameOptions(opts ...FrameOption) *FrameOptions {
 		opt(o)
 	}
 	return o
+}
+
+func WithCurrentView(view View) FrameOption {
+	return func(o *FrameOptions) {
+		o.CurrentView = view
+	}
+}
+
+func WithCurrentState(state State) FrameOption {
+	return func(o *FrameOptions) {
+		o.CurrentState = state
+	}
 }
 
 func WithCurrentWorkspace(workspace string) FrameOption {
@@ -41,14 +61,42 @@ func WithCurrentNamespace(namespace string) FrameOption {
 	}
 }
 
-func WithObjectContent(content *tview.Box) FrameOption {
+func WithCurrentFilter(tags []string) FrameOption {
+	var tagStr string
+	sort.Strings(tags)
+	for _, tag := range tags {
+		tagStr += fmt.Sprintf("<%s> ", tag)
+	}
+	tagStr = strings.TrimSpace(tagStr)
 	return func(o *FrameOptions) {
-		o.ObjectContent = content
+		o.CurrentFilter = tagStr
 	}
 }
 
-func WithObjectList(list *tview.List) FrameOption {
+func WithNotice(notice string) FrameOption {
+	return func(o *FrameOptions) {
+		o.Notice = notice
+	}
+}
+
+func WithObjectContent(content *TableData) FrameOption {
+	if content == nil {
+		return func(o *FrameOptions) {}
+	}
+
+	return func(o *FrameOptions) {
+		o.ObjectContent = content
+		o.ObjectList = nil
+	}
+}
+
+func WithObjectList(list *TableData) FrameOption {
+	if list == nil {
+		return func(o *FrameOptions) {}
+	}
+
 	return func(o *FrameOptions) {
 		o.ObjectList = list
+		o.ObjectContent = nil
 	}
 }
