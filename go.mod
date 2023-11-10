@@ -9,7 +9,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/onsi/gomega v1.29.0
-	github.com/pterm/pterm v0.12.69
+	github.com/pterm/pterm v0.12.70
 	github.com/rs/zerolog v1.31.0
 	github.com/samber/lo v1.38.1
 	github.com/spf13/cobra v1.7.0
