@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	stdCtx "context"
 	"fmt"
 
 	"github.com/rs/zerolog"
@@ -9,15 +10,15 @@ import (
 
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/cmd/version"
+	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/jahvon/flow/internal/services/cache"
 )
 
 var log = io.Log()
 
 var rootCmd = &cobra.Command{
 	Use:   "flow",
-	Short: "[Alpha] CLI script wrapper",
+	Short: "flow is a command line interface for managing and running machine commands.",
 	Long:  `Command line interface script wrapper`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbosity, err := cmd.Flags().GetInt(flags.VerbosityFlag.Name)
@@ -43,17 +44,6 @@ var rootCmd = &cobra.Command{
 		if verbosity != 2 {
 			io.PrintInfo(fmt.Sprintf("Log level set to %d", verbosity))
 		}
-
-		syncCache, err := cmd.Flags().GetBool(flags.SyncCacheFlag.Name)
-		if err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("invalid sync flag - %w", err))
-		}
-		if syncCache {
-			_, err := cache.Update()
-			if err != nil {
-				io.PrintErrorAndExit(err)
-			}
-		}
 	},
 	Version: version.String(),
 }
@@ -74,12 +64,16 @@ func init() {
 		flags.VerbosityFlag.Default.(int),
 		flags.VerbosityFlag.Usage,
 	)
-	rootCmd.PersistentFlags().Bool(
-		flags.SyncCacheFlag.Name,
-		flags.SyncCacheFlag.Default.(bool),
-		flags.SyncCacheFlag.Usage,
-	)
+}
 
-	rootCmd.AddGroup(DataGroup)
-	rootCmd.AddGroup(ExecutableGroup)
+func newCtx(cmd *cobra.Command) *context.Context {
+	ctx := stdCtx.Background()
+
+	syncFlag, err := Flags.ValueFor(cmd, flags.SyncCacheFlag.Name)
+	if err != nil {
+		io.PrintErrorAndExit(err)
+	}
+	sync, _ := syncFlag.(bool)
+
+	return context.NewContext(ctx, sync)
 }

@@ -7,14 +7,14 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/utils"
-	"github.com/jahvon/flow/internal/workspace"
 )
 
 var log = io.Log()
 
-func PrintWorkspaceList(format io.OutputFormat, workspaces []workspace.Config) {
+func PrintWorkspaceList(format io.OutputFormat, workspaces []config.WorkspaceConfig) {
 	switch format {
 	case io.OutputFormatYAML:
 		printWorkspaceListYAML(workspaces)
@@ -29,7 +29,7 @@ func PrintWorkspaceList(format io.OutputFormat, workspaces []workspace.Config) {
 	}
 }
 
-func printWorkspaceListYAML(workspaces []workspace.Config) {
+func printWorkspaceListYAML(workspaces []config.WorkspaceConfig) {
 	log.Info().Msgf("Printing %d workspaces", len(workspaces))
 	yamlBytes, err := yaml.Marshal(workspaces)
 	if err != nil {
@@ -38,7 +38,7 @@ func printWorkspaceListYAML(workspaces []workspace.Config) {
 	fmt.Println(string(yamlBytes))
 }
 
-func printWorkspaceListJSON(workspaces []workspace.Config, pretty bool) {
+func printWorkspaceListJSON(workspaces []config.WorkspaceConfig, pretty bool) {
 	log.Info().Msgf("Printing %d workspaces", len(workspaces))
 	var jsonBytes []byte
 	var err error
@@ -53,7 +53,7 @@ func printWorkspaceListJSON(workspaces []workspace.Config, pretty bool) {
 	fmt.Println(string(jsonBytes))
 }
 
-func printWorkspaceListTable(workspaces []workspace.Config) {
+func printWorkspaceListTable(workspaces []config.WorkspaceConfig) {
 	log.Info().Msgf("Printing %d workspaces", len(workspaces))
 	tableRows := [][]string{{"Name", "Location", "Description", "Tags"}}
 	for _, ws := range workspaces {
@@ -75,7 +75,7 @@ func printWorkspaceListTable(workspaces []workspace.Config) {
 	io.PrintTableWithHeader(tableRows)
 }
 
-func PrintWorkspaceConfig(format io.OutputFormat, ws *workspace.Config) {
+func PrintWorkspaceConfig(format io.OutputFormat, ws *config.WorkspaceConfig) {
 	if ws == nil {
 		log.Panic().Msg("Workspace config is nil")
 	}
@@ -94,7 +94,7 @@ func PrintWorkspaceConfig(format io.OutputFormat, ws *workspace.Config) {
 	}
 }
 
-func printWorkspaceConfigsYAML(ws *workspace.Config) {
+func printWorkspaceConfigsYAML(ws *config.WorkspaceConfig) {
 	log.Info().Msgf("Printing workspace config for %s", ws.DisplayName)
 	yamlBytes, err := yaml.Marshal(ws)
 	if err != nil {
@@ -103,7 +103,7 @@ func printWorkspaceConfigsYAML(ws *workspace.Config) {
 	fmt.Println(string(yamlBytes))
 }
 
-func printWorkspaceConfigJSON(ws *workspace.Config, pretty bool) {
+func printWorkspaceConfigJSON(ws *config.WorkspaceConfig, pretty bool) {
 	log.Info().Msgf("Printing workspace config for %s", ws.DisplayName)
 	var jsonBytes []byte
 	var err error
@@ -118,7 +118,7 @@ func printWorkspaceConfigJSON(ws *workspace.Config, pretty bool) {
 	fmt.Println(string(jsonBytes))
 }
 
-func printWorkspaceConfigTable(ws *workspace.Config) {
+func printWorkspaceConfigTable(ws *config.WorkspaceConfig) {
 	tableRows := [][]string{
 		{"Key", "Value"},
 		{"Name", ws.AssignedName()},

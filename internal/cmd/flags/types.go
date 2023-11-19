@@ -4,7 +4,7 @@ package flags
 import (
 	"fmt"
 
-	"github.com/jahvon/flow/internal/executable/consts"
+	"github.com/jahvon/flow/config"
 )
 
 type Metadata struct {
@@ -30,18 +30,10 @@ var SyncCacheFlag = &Metadata{
 	Required: false,
 }
 
-var ListGlobalContextFlag = &Metadata{
-	Name:      "global",
-	Shorthand: "g",
-	Usage:     "List from all workspaces",
-	Default:   false,
-	Required:  false,
-}
-
-var ListWorkspaceContextFlag = &Metadata{
+var FilterWorkspaceFlag = &Metadata{
 	Name:      "workspace",
 	Shorthand: "w",
-	Usage:     "List from a specific workspace",
+	Usage:     "Filter executables by workspace.",
 	Default:   "",
 	Required:  false,
 }
@@ -54,27 +46,19 @@ var FilterNamespaceFlag = &Metadata{
 	Required:  false,
 }
 
+var FilterVerbFlag = &Metadata{
+	Name:      "verb",
+	Shorthand: "v",
+	Usage:     fmt.Sprintf("Filter executables by verb. One of: %s", config.ValidVerbs),
+	Default:   "",
+	Required:  false,
+}
+
 var FilterTagFlag = &Metadata{
 	Name:      "tag",
 	Shorthand: "t",
 	Usage:     "Filter by tags.",
 	Default:   []string{},
-	Required:  false,
-}
-
-var FilterAgentTypeFlag = &Metadata{
-	Name:      "agent",
-	Shorthand: "a",
-	Usage:     fmt.Sprintf("Filter by executable agent type. One of: %s", consts.ValidAgentTypes),
-	Default:   "",
-	Required:  false,
-}
-
-var SpecificWorkspaceFlag = &Metadata{
-	Name:      "workspace",
-	Shorthand: "w",
-	Usage:     "Specify a workspace to get",
-	Default:   "",
 	Required:  false,
 }
 
@@ -94,34 +78,26 @@ var OutputSecretAsPlainTextFlag = &Metadata{
 	Required:  false,
 }
 
-var OutputMetadataFlag = &Metadata{
-	Name:      "metadata",
-	Shorthand: "m",
-	Usage:     "Include metadata in output.",
-	Default:   false,
-	Required:  false,
-}
-
-var AgentTypeFlag = &Metadata{
-	Name:      "agent",
-	Shorthand: "a",
-	Usage:     fmt.Sprintf("Executable agent type. One of: %s", consts.ValidAgentTypes),
-	Default:   "",
-	Required:  true,
-}
-
-var WorkspacePathFlag = &Metadata{
-	Name:      "path",
-	Shorthand: "p",
-	Usage:     "Path to the workspace",
-	Default:   "",
-	Required:  true,
-}
-
 var SetAfterCreateFlag = &Metadata{
 	Name:      "set",
 	Shorthand: "s",
 	Usage:     "Set the newly created workspace as the current workspace",
 	Default:   false,
+	Required:  false,
+}
+
+var SetNamespaceFlag = &Metadata{
+	Name:      "namespace",
+	Shorthand: "n",
+	Usage:     "Set the namespace context for the current workspace",
+	Default:   "",
+	Required:  false,
+}
+
+var SetWorkspaceFlag = &Metadata{
+	Name:      "workspace",
+	Shorthand: "w",
+	Usage:     "Set the workspace context",
+	Default:   "",
 	Required:  false,
 }

@@ -14,7 +14,7 @@ var (
 	//go:embed commit.txt
 	gitCommit string
 
-	// Version returns the main version number that is being run at the moment.
+	// Version returns the main version number that is being exec at the moment.
 	//go:embed version.txt
 	version string
 

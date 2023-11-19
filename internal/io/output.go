@@ -1,14 +1,16 @@
 package io
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/pterm/pterm"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
+
+var log = Log()
 
 type OutputFormat string
 
@@ -26,7 +28,6 @@ func Log() zerolog.Logger {
 }
 
 func PrintInfo(message string) {
-	log := Log()
 	log.Info().Msg(message)
 }
 
@@ -84,21 +85,35 @@ func PrintTableWithHeader(data [][]string) {
 
 type StdOutWriter struct {
 	LogAsDebug bool
+
+	structuredLogBreak bool
 }
 
 func (w StdOutWriter) Write(p []byte) (n int, err error) {
-	log := Log()
 	trimmedP := strings.TrimSpace(string(p))
 	if trimmedP == "" {
 		return len(p), nil
 	}
+	splitP := strings.Split(trimmedP, "\n")
+	for _, line := range splitP {
+		if line == "---break" {
+			w.structuredLogBreak = true
+			continue
+		} else if line == "---endbreak" {
+			w.structuredLogBreak = false
+			continue
+		}
 
-	if w.LogAsDebug {
-		log.Debug().Msg(trimmedP)
-		return len(p), nil
+		switch {
+		case w.structuredLogBreak:
+			_, _ = fmt.Fprintln(os.Stdout, line)
+		case w.LogAsDebug:
+			log.Debug().Msg(line)
+		default:
+			log.Info().Msg(line)
+		}
 	}
 
-	log.Info().Msg(trimmedP)
 	return len(p), nil
 }
 
@@ -107,7 +122,6 @@ type StdErrWriter struct {
 }
 
 func (w StdErrWriter) Write(p []byte) (n int, err error) {
-	log := Log()
 	trimmedP := strings.TrimSpace(string(p))
 	if trimmedP == "" {
 		return len(p), nil
@@ -120,4 +134,8 @@ func (w StdErrWriter) Write(p []byte) (n int, err error) {
 
 	log.Error().Msg(string(p))
 	return len(p), nil
+}
+
+func DocsURL(docID string) string {
+	return fmt.Sprintf("https://github.com/jahvon/flow/blob/main/docs/%s.md", docID)
 }
