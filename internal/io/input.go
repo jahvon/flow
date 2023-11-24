@@ -5,7 +5,6 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/rs/zerolog/log"
 	"golang.org/x/term"
 )
 

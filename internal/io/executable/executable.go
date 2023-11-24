@@ -8,7 +8,7 @@ import (
 	"github.com/pterm/pterm"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/internal/executable"
+	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/utils"
 )
@@ -19,11 +19,11 @@ type executableListOutput struct {
 	Executables []*executableOutput `json:"executables"`
 }
 type executableOutput struct {
-	ID   string                 `json:"id"`
-	Data *executable.Executable `json:"data"`
+	ID   string             `json:"id"`
+	Data *config.Executable `json:"data"`
 }
 
-func PrintExecutableList(format io.OutputFormat, executables executable.List) {
+func PrintExecutableList(format io.OutputFormat, executables config.ExecutableList) {
 	switch format {
 	case io.OutputFormatYAML:
 		printExecutableListYAML(executables)
@@ -38,8 +38,8 @@ func PrintExecutableList(format io.OutputFormat, executables executable.List) {
 	}
 }
 
-func printExecutableListYAML(executables executable.List) {
-	log.Info().Msgf("Printing %d executables", len(executables))
+func printExecutableListYAML(executables config.ExecutableList) {
+	log.Debug().Msgf("Printing %d executables", len(executables))
 	enriched := &executableListOutput{Executables: make([]*executableOutput, 0)}
 	for _, exec := range executables {
 		enriched.Executables = append(enriched.Executables, &executableOutput{
@@ -54,8 +54,8 @@ func printExecutableListYAML(executables executable.List) {
 	fmt.Println(string(yamlBytes))
 }
 
-func printExecutableListJSON(executables executable.List, pretty bool) {
-	log.Info().Msgf("Printing %d executables", len(executables))
+func printExecutableListJSON(executables config.ExecutableList, pretty bool) {
+	log.Debug().Msgf("Printing %d executables", len(executables))
 	enriched := &executableListOutput{Executables: make([]*executableOutput, 0)}
 	for _, exec := range executables {
 		enriched.Executables = append(enriched.Executables, &executableOutput{
@@ -77,16 +77,16 @@ func printExecutableListJSON(executables executable.List, pretty bool) {
 	fmt.Println(string(jsonBytes))
 }
 
-func printExecutableListTable(executables executable.List) {
-	log.Info().Msgf("Printing %d executables", len(executables))
-	tableRows := pterm.TableData{{"ID", "Name", "Type", "Description", "Tags"}}
+func printExecutableListTable(executables config.ExecutableList) {
+	log.Debug().Msgf("Printing %d executables", len(executables))
+	tableRows := pterm.TableData{{"ID", "Name", "Verb", "Description", "Tags"}}
 	for _, exec := range executables {
 		tableRows = append(
 			tableRows,
 			[]string{
 				exec.ID(),
 				exec.Name,
-				string(exec.Type),
+				string(exec.Verb),
 				utils.WrapLines(exec.Description, 5),
 				strings.Join(exec.Tags, ", "),
 			},
@@ -95,7 +95,7 @@ func printExecutableListTable(executables executable.List) {
 	io.PrintTableWithHeader(tableRows)
 }
 
-func PrintExecutable(format io.OutputFormat, exec *executable.Executable) {
+func PrintExecutable(format io.OutputFormat, exec *config.Executable) {
 	if exec == nil {
 		log.Panic().Msg("Executable is nil")
 	}
@@ -114,7 +114,7 @@ func PrintExecutable(format io.OutputFormat, exec *executable.Executable) {
 	}
 }
 
-func printExecutableJSON(exec *executable.Executable, pretty bool) {
+func printExecutableJSON(exec *config.Executable, pretty bool) {
 	var jsonBytes []byte
 	var err error
 	enriched := &executableOutput{
@@ -132,7 +132,7 @@ func printExecutableJSON(exec *executable.Executable, pretty bool) {
 	fmt.Println(string(jsonBytes))
 }
 
-func printExecutableYAML(exec *executable.Executable) {
+func printExecutableYAML(exec *config.Executable) {
 	enriched := &executableOutput{
 		ID:   exec.ID(),
 		Data: exec,
@@ -144,8 +144,8 @@ func printExecutableYAML(exec *executable.Executable) {
 	fmt.Println(string(yamlBytes))
 }
 
-func printExecutableTable(exec *executable.Executable) {
-	yamlSpec, err := yaml.Marshal(exec.Spec)
+func printExecutableTable(exec *config.Executable) {
+	yamlSpec, err := yaml.Marshal(exec.Type)
 	if err != nil {
 		log.Panic().Msgf("Failed to marshal spec - %v", err)
 	}
@@ -153,11 +153,11 @@ func printExecutableTable(exec *executable.Executable) {
 		{"Key", "Value"},
 		{"ID", exec.ID()},
 		{"Name", exec.Name},
-		{"Type", string(exec.Type)},
+		{"Verb", string(exec.Verb)},
 		{"Description", utils.WrapLines(exec.Description, 10)},
 		{"Aliases", strings.Join(exec.Aliases, ", ")},
 		{"Tags", strings.Join(exec.Tags, ", ")},
-		{"Spec", string(yamlSpec)},
+		{"Type Spec", string(yamlSpec)},
 	}
 	io.PrintTableWithHeader(tableData)
 }

@@ -10,10 +10,11 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/jahvon/flow/internal/common"
+	"gopkg.in/yaml.v3"
+
+	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/io"
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -37,7 +38,7 @@ type data struct {
 
 func RegisterEncryptionKey(key string) error {
 	log.Trace().Msg("registering encryption key")
-	if err := common.EnsureCachedDataDir(); err != nil {
+	if err := file.EnsureCachedDataDir(); err != nil {
 		return err
 	}
 
@@ -247,5 +248,5 @@ func dataFilePath(encryptionKey string) string {
 		log.Panic().Err(err).Msg("unable to hash encryption key")
 	}
 	storageKey := crypto.EncodeValue(hasher.Sum(nil))
-	return filepath.Join(common.CachedDataDirPath(), cacheDirName, storageKey, "data")
+	return filepath.Join(file.CachedDataDirPath(), cacheDirName, storageKey, "data")
 }

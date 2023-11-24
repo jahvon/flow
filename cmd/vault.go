@@ -14,7 +14,6 @@ import (
 var vaultCmd = &cobra.Command{
 	Use:     "vault",
 	Aliases: []string{"v"},
-	GroupID: DataGroup.ID,
 	Short:   "Manage Flow's secret vault data.",
 }
 
@@ -68,11 +67,7 @@ var vaultGetCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		reference := args[0]
-		plainTextFlag, err := Flags.ValueFor(cmd, flags.OutputSecretAsPlainTextFlag.Name)
-		if err != nil {
-			io.PrintErrorAndExit(err)
-		}
-		asPlainText, _ := plainTextFlag.(bool)
+		asPlainText := getFlagValue[bool](cmd, *flags.OutputSecretAsPlainTextFlag)
 
 		v := vault.NewVault()
 		secret, err := v.GetSecret(reference)
@@ -94,11 +89,7 @@ var vaultListCmd = &cobra.Command{
 	Short:   "List all secrets in the vault.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		plainTextFlag, err := Flags.ValueFor(cmd, flags.OutputSecretAsPlainTextFlag.Name)
-		if err != nil {
-			io.PrintErrorAndExit(err)
-		}
-		asPlainText, _ := plainTextFlag.(bool)
+		asPlainText := getFlagValue[bool](cmd, *flags.OutputSecretAsPlainTextFlag)
 
 		v := vault.NewVault()
 		secrets, err := v.GetAllSecrets()
