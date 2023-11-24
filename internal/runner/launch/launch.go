@@ -31,7 +31,7 @@ func (r *launchRunner) Exec(_ *context.Context, executable *config.Executable) e
 	launchSpec := executable.Type.Launch
 	envMap, err := runner.ParametersToEnvMap(&launchSpec.ParameterizedExecutable)
 	if err != nil {
-		return fmt.Errorf("unable to convert parameters to env map - %w", err)
+		return fmt.Errorf("env setup failed  - %w", err)
 	}
 	if err := runner.SetEnv(&launchSpec.ParameterizedExecutable); err != nil {
 		return fmt.Errorf("unable to set parameters to env - %w", err)

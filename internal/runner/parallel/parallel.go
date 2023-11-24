@@ -42,12 +42,21 @@ func (r *parallelRunner) Exec(ctx *context.Context, executable *config.Executabl
 	group.SetLimit(limit)
 	var errs []error
 	for _, ref := range refs {
+		ref = context.ExpandRef(ctx, ref)
 		exec, err := ctx.ExecutableCache.GetExecutableByRef(ref)
 		if err != nil {
-			return fmt.Errorf("unable to get executable by ref %s - %w", ref, err)
+			return err
 		} else if executable == nil {
 			return fmt.Errorf("unable to find executable with reference %s", ref)
 		}
+
+		if exec.Type.Exec != nil {
+			fields := map[string]interface{}{
+				"executable": exec.ID(),
+			}
+			exec.Type.Exec.SetLogFields(fields)
+		}
+
 		group.Go(func() error {
 			if parallelSpec.FailFast {
 				return runner.Exec(ctx, exec)

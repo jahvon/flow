@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -56,7 +57,7 @@ func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string
 func ValidateOneOf(fieldName string, vals ...interface{}) error {
 	var count int
 	for _, val := range vals {
-		if val != nil {
+		if val != nil && (reflect.ValueOf(val).Kind() == reflect.Ptr && !reflect.ValueOf(val).IsNil()) {
 			count++
 		}
 	}

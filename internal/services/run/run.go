@@ -19,7 +19,7 @@ import (
 var log = io.Log().With().Str("scope", "service/run").Logger()
 
 // RunCmd executes a command in the current shell in a specific directory.
-func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode) error {
+func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode, logFields map[string]interface{}) error {
 	log.Trace().Msgf("running command (%s) in dir (%s)", commandStr, dir)
 
 	ctx := context.Background()
@@ -40,8 +40,8 @@ func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode) er
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
 			io.StdInReader{},
-			stdOutWriter(logMode),
-			stdErrWriter(logMode),
+			stdOutWriter(logMode, logFields),
+			stdErrWriter(logMode, logFields),
 		),
 	)
 	if err != nil {
@@ -57,7 +57,7 @@ func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode) er
 }
 
 // RunFile executes a file in the current shell in a specific directory.
-func RunFile(filename, dir string, envList []string, logMode config.LogMode) error {
+func RunFile(filename, dir string, envList []string, logMode config.LogMode, logFields map[string]interface{}) error {
 	log.Trace().Msgf("executing file (%s)", filename)
 
 	ctx := context.Background()
@@ -86,8 +86,8 @@ func RunFile(filename, dir string, envList []string, logMode config.LogMode) err
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
 			io.StdInReader{},
-			stdOutWriter(logMode),
-			stdErrWriter(logMode),
+			stdOutWriter(logMode, logFields),
+			stdErrWriter(logMode, logFields),
 		),
 	)
 	if err != nil {
@@ -101,12 +101,12 @@ func RunFile(filename, dir string, envList []string, logMode config.LogMode) err
 	return nil
 }
 
-func stdOutWriter(mode config.LogMode) stdio.Writer {
+func stdOutWriter(mode config.LogMode, logFields map[string]interface{}) stdio.Writer {
 	switch mode {
 	case config.NoLogMode:
 		return stdio.Discard
 	case config.StructuredLogMode:
-		return io.StdOutWriter{LogAsDebug: false}
+		return io.StdOutWriter{LogAsDebug: false, LogFields: logFields}
 	case config.RawLogMode:
 		return os.Stdout
 	default:
@@ -115,12 +115,12 @@ func stdOutWriter(mode config.LogMode) stdio.Writer {
 	}
 }
 
-func stdErrWriter(mode config.LogMode) stdio.Writer {
+func stdErrWriter(mode config.LogMode, logFields map[string]interface{}) stdio.Writer {
 	switch mode {
 	case config.NoLogMode:
 		return stdio.Discard
 	case config.StructuredLogMode:
-		return io.StdErrWriter{LogAsDebug: false}
+		return io.StdErrWriter{LogAsDebug: false, LogFields: logFields}
 	case config.RawLogMode:
 		return os.Stderr
 	default:

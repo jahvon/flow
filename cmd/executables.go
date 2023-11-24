@@ -67,7 +67,7 @@ var executablesListCmd = &cobra.Command{
 		}
 
 		verbFilter := getFlagValue[string](cmd, *flags.FilterVerbFlag)
-		tagsFilter := getFlagValue[config.Tags](cmd, *flags.FilterTagFlag)
+		tagsFilter := getFlagValue[[]string](cmd, *flags.FilterTagFlag)
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 
 		allExecs, err := ctx.ExecutableCache.GetExecutableList()
@@ -75,13 +75,8 @@ var executablesListCmd = &cobra.Command{
 			io.PrintErrorAndExit(err)
 		}
 		filteredExec := allExecs
-		if wsFilter == "" {
-			filteredExec = filteredExec.FilterForWorkspaceVisibility(ctx.UserConfig.CurrentWorkspace)
-		} else {
-			filteredExec = filteredExec.FilterByWorkspace(wsFilter)
-		}
-
 		filteredExec = filteredExec.
+			FilterByWorkspace(wsFilter).
 			FilterByNamespace(nsFilter).
 			FilterByVerb(config.Verb(verbFilter)).
 			FilterByTags(tagsFilter)

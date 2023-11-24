@@ -71,3 +71,15 @@ func NewContext(ctx context.Context, syncCache bool) *Context {
 		ExecutableCache:  cache.NewExecutableCache(),
 	}
 }
+
+func ExpandRef(ctx *Context, ref config.Ref) config.Ref {
+	id := ref.GetID()
+	ws, ns, name := config.ParseExecutableID(id)
+	if ws == "" {
+		ws = ctx.UserConfig.CurrentWorkspace
+	}
+	if ns == "" {
+		ns = ctx.UserConfig.CurrentNamespace
+	}
+	return config.NewRef(config.NewExecutableID(ws, ns, name), ref.GetVerb())
+}

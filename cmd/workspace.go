@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -70,7 +71,7 @@ var workspaceGetCmd = &cobra.Command{
 		}
 
 		if _, found := userConfig.Workspaces[workspaceName]; !found {
-			io.PrintErrorAndExit(fmt.Errorf("workspace %s not found", workspaceName))
+			io.PrintErrorAndExit(fmt.Errorf("workspace '%s' not found", workspaceName))
 		}
 
 		wsPath := userConfig.Workspaces[workspaceName]
@@ -108,7 +109,7 @@ var workspaceAddCmd = &cobra.Command{
 		}
 
 		if path == "" {
-			path = file.CachedDataDirPath()
+			path = filepath.Join(file.CachedDataDirPath(), name)
 		} else if path == "." || strings.HasPrefix(path, "./") {
 			wd, err := os.Getwd()
 			if err != nil {
@@ -134,35 +135,35 @@ var workspaceAddCmd = &cobra.Command{
 		if err := file.InitWorkspaceConfig(name, path); err != nil {
 			io.PrintErrorAndExit(err)
 		}
-		io.PrintSuccess(fmt.Sprintf("Workspace %s created in %s", name, path))
+		userConfig.Workspaces[name] = path
 
 		set := getFlagValue[bool](cmd, *flags.SetAfterCreateFlag)
 		if set {
 			userConfig.CurrentWorkspace = name
-			if err := file.WriteUserConfig(userConfig); err != nil {
-				io.PrintErrorAndExit(err)
-			}
-			io.PrintInfo(fmt.Sprintf("Workspace %s set as current workspace", name))
+			io.PrintInfo(fmt.Sprintf("Workspace '%s' set as current workspace", name))
 		}
 
-		wsCache := cache.NewWorkspaceCache()
-		if err := wsCache.Update(); err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("failed to update cache - %w", err))
-		} else {
-			io.PrintInfo("Workspace cache updated")
+		if err := file.WriteUserConfig(userConfig); err != nil {
+			io.PrintErrorAndExit(err)
 		}
+
+		if err := cache.UpdateAll(); err != nil {
+			io.PrintErrorAndExit(fmt.Errorf("failed to update cache - %w", err))
+		}
+
+		io.PrintSuccess(fmt.Sprintf("Workspace '%s' created in %s", name, path))
 	},
 }
 
 var workspaceList = &cobra.Command{
 	Use:     "list",
-	Aliases: []string{"l"},
+	Aliases: []string{"l", "ls"},
 	Short:   "ParameterList workspace configurations.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := newCtx(cmd)
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
-		tagsFilter := getFlagValue[config.Tags](cmd, *flags.FilterTagFlag)
+		tagsFilter := getFlagValue[[]string](cmd, *flags.FilterTagFlag)
 
 		log.Debug().Msg("Loading workspace configs from cache")
 		workspaceCache, err := ctx.WorkspacesCache.Get()
@@ -221,13 +222,10 @@ var workspaceRemoveCmd = &cobra.Command{
 			io.PrintErrorAndExit(err)
 		}
 
-		io.PrintWarning(fmt.Sprintf("Workspace %s deleted", name))
+		io.PrintWarning(fmt.Sprintf("Workspace '%s' deleted", name))
 
-		wsCache := cache.NewWorkspaceCache()
-		if err := wsCache.Update(); err != nil {
+		if err := cache.UpdateAll(); err != nil {
 			io.PrintErrorAndExit(fmt.Errorf("failed to update cache - %w", err))
-		} else {
-			io.PrintInfo("Workspace cache updated")
 		}
 	},
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/exec"
@@ -39,7 +40,7 @@ var execCmd = &cobra.Command{
 		}
 
 		idArg := args[0]
-		ref := config.NewRef(idArg, verb)
+		ref := context.ExpandRef(ctx, config.NewRef(idArg, verb))
 		executable, err := ctx.ExecutableCache.GetExecutableByRef(ref)
 		if err != nil {
 			io.PrintErrorAndExit(err)
@@ -49,6 +50,16 @@ var execCmd = &cobra.Command{
 
 		if err := executable.Validate(); err != nil {
 			io.PrintErrorAndExit(err)
+		}
+
+		if !executable.IsExecutableFromWorkspace(ctx.UserConfig.CurrentWorkspace) {
+			io.PrintErrorAndExit(
+				fmt.Errorf(
+					"executable '%s' cannot be executed from workspace %s",
+					ref,
+					ctx.UserConfig.CurrentWorkspace,
+				),
+			)
 		}
 
 		if err := runner.Exec(ctx, executable); err != nil {

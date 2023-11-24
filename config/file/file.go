@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bufio"
 	"fmt"
 	"io/fs"
 	"os"
@@ -73,7 +74,8 @@ func LoadUserConfig() *config.UserConfig {
 }
 
 func WriteWorkspaceConfig(workspacePath string, config *config.WorkspaceConfig) error {
-	file, err := os.OpenFile(filepath.Join(workspacePath, WorkspaceConfigFileName), os.O_WRONLY|os.O_CREATE, 0600)
+	wsFile := filepath.Join(workspacePath, WorkspaceConfigFileName)
+	file, err := os.OpenFile(filepath.Clean(wsFile), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return fmt.Errorf("unable to open workspace config file - %w", err)
 	}
@@ -99,7 +101,8 @@ func LoadWorkspaceConfig(workspaceName, workspacePath string) (*config.Workspace
 	}
 
 	wsCfg := &config.WorkspaceConfig{}
-	file, err := os.Open(filepath.Join(workspacePath, WorkspaceConfigFileName))
+	wsFile := filepath.Join(workspacePath, WorkspaceConfigFileName)
+	file, err := os.Open(filepath.Clean(wsFile))
 	if err != nil {
 		return nil, fmt.Errorf("unable to open workspace config file - %w", err)
 	}
@@ -144,7 +147,9 @@ func LoadWorkspaceExecutableDefinitions(workspaceCfg *config.WorkspaceConfig) (c
 		definition.SetContext(workspaceCfg.AssignedName(), workspaceCfg.Location(), definitionFile)
 		definitions = append(definitions, definition)
 	}
-	log.Trace().Msgf("loaded %d definitions", len(definitions))
+	log.Trace().
+		Str("workspace", workspaceCfg.AssignedName()).
+		Msgf("loaded %d definitions", len(definitions))
 
 	return definitions, nil
 }
@@ -169,6 +174,40 @@ func WriteLatestCachedData(cacheKey string, data []byte) error {
 	}
 
 	return nil
+}
+
+func LoadLatestCachedData(cacheKey string) ([]byte, error) {
+	if err := EnsureCachedDataDir(); err != nil {
+		return nil, fmt.Errorf("unable to ensure existence of cache directory - %w", err)
+	}
+
+	if _, err := os.Stat(LatestCachedDataFilePath(cacheKey)); os.IsNotExist(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("unable to stat cache data file - %w", err)
+	}
+
+	file, err := os.Open(LatestCachedDataFilePath(cacheKey))
+	if err != nil {
+		return nil, fmt.Errorf("unable to open cache data file - %w", err)
+	}
+	defer file.Close()
+
+	data := make([]byte, 0)
+	buf := bufio.NewReader(file)
+	for {
+		var line []byte
+		line, err = buf.ReadBytes('\n')
+		if err != nil {
+			break
+		}
+		data = append(data, line...)
+	}
+	if err.Error() != "EOF" {
+		return nil, fmt.Errorf("unable to read cache data file - %w", err)
+	}
+
+	return data, nil
 }
 
 func findDefinitionFiles(workspaceCfg *config.WorkspaceConfig) ([]string, error) {

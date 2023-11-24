@@ -10,6 +10,8 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
+const wsCacheKey = "workspace"
+
 type WorkspaceCacheData struct {
 	// Map of workspace name to workspace config
 	Workspaces map[string]*config.WorkspaceConfig `yaml:"workspaces"`
@@ -26,7 +28,10 @@ var (
 )
 
 func NewWorkspaceCache() *WorkspaceCache {
-	return &WorkspaceCache{}
+	if workspaceCache == nil {
+		workspaceCache = &WorkspaceCache{}
+	}
+	return workspaceCache
 }
 
 func (c *WorkspaceCache) Update() error {
@@ -63,7 +68,7 @@ func (c *WorkspaceCache) Update() error {
 		return fmt.Errorf("unable to encode cache data - %w", err)
 	}
 
-	err = file.WriteLatestCachedData("workspace", data)
+	err = file.WriteLatestCachedData(wsCacheKey, data)
 	if err != nil {
 		return fmt.Errorf("unable to write cache data - %w", err)
 	}
@@ -79,8 +84,18 @@ func (c *WorkspaceCache) Get() (*WorkspaceCacheData, error) {
 		return c.Data, nil
 	}
 
-	if err := c.Update(); err != nil {
-		return nil, fmt.Errorf("unable to get updated workspace cache data - %w", err)
+	cacheData, err := file.LoadLatestCachedData(wsCacheKey)
+	if err != nil {
+		return nil, fmt.Errorf("unable to load workspace cache data - %w", err)
+	} else if cacheData == nil {
+		if err := c.Update(); err != nil {
+			return nil, fmt.Errorf("unable to get updated workspace cache data - %w", err)
+		}
+	}
+
+	c.Data = &WorkspaceCacheData{}
+	if err := yaml.Unmarshal(cacheData, c.Data); err != nil {
+		return nil, fmt.Errorf("unable to decode workspace cache data - %w", err)
 	}
 	log.Trace().Int("workspaces", len(c.Data.Workspaces)).Msg("Fetched workspace cache data")
 

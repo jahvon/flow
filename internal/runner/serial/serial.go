@@ -3,12 +3,13 @@ package serial
 import (
 	"fmt"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
 )
+
+var log = io.Log().With().Str("scope", "runner/serial").Logger()
 
 type serialRunner struct{}
 
@@ -36,15 +37,26 @@ func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable)
 	order := serialSpec.ExecutableRefs
 	for i, executableRef := range order {
 		log.Debug().Msgf("executing %s (%d/%d)", executableRef, i+1, len(order))
+		executableRef = context.ExpandRef(ctx, executableRef)
 		exec, err := ctx.ExecutableCache.GetExecutableByRef(executableRef)
 		if err != nil {
-			return fmt.Errorf("unable to get executable by ref %s - %w", executableRef, err)
+			return err
 		} else if exec == nil {
 			return fmt.Errorf("unable to find executable with reference %s", executableRef)
 		}
 
+		if exec.Type.Exec != nil {
+			fields := map[string]interface{}{
+				"executable": exec.ID(),
+			}
+			exec.Type.Exec.SetLogFields(fields)
+		}
+
 		if err := runner.Exec(ctx, exec); err != nil {
-			return fmt.Errorf("execution error for %s - %w", executableRef, err)
+			if serialSpec.FailFast {
+				return fmt.Errorf("execution error for %s - %w", executableRef, err)
+			}
+			log.Error().Err(err).Msgf("execution error for %s", executableRef)
 		}
 	}
 

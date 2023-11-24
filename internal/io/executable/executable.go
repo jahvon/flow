@@ -39,7 +39,7 @@ func PrintExecutableList(format io.OutputFormat, executables config.ExecutableLi
 }
 
 func printExecutableListYAML(executables config.ExecutableList) {
-	log.Info().Msgf("Printing %d executables", len(executables))
+	log.Debug().Msgf("Printing %d executables", len(executables))
 	enriched := &executableListOutput{Executables: make([]*executableOutput, 0)}
 	for _, exec := range executables {
 		enriched.Executables = append(enriched.Executables, &executableOutput{
@@ -55,7 +55,7 @@ func printExecutableListYAML(executables config.ExecutableList) {
 }
 
 func printExecutableListJSON(executables config.ExecutableList, pretty bool) {
-	log.Info().Msgf("Printing %d executables", len(executables))
+	log.Debug().Msgf("Printing %d executables", len(executables))
 	enriched := &executableListOutput{Executables: make([]*executableOutput, 0)}
 	for _, exec := range executables {
 		enriched.Executables = append(enriched.Executables, &executableOutput{
@@ -78,7 +78,7 @@ func printExecutableListJSON(executables config.ExecutableList, pretty bool) {
 }
 
 func printExecutableListTable(executables config.ExecutableList) {
-	log.Info().Msgf("Printing %d executables", len(executables))
+	log.Debug().Msgf("Printing %d executables", len(executables))
 	tableRows := pterm.TableData{{"ID", "Name", "Verb", "Description", "Tags"}}
 	for _, exec := range executables {
 		tableRows = append(

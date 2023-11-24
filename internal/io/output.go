@@ -56,19 +56,6 @@ func PrintError(err error) {
 	color.HiRed(err.Error())
 }
 
-func PrintTableNoHeader(data [][]string) {
-	tableRows := pterm.TableData(data)
-	err := pterm.DefaultTable.
-		WithData(tableRows).
-		WithBoxed().
-		WithRowSeparator("-").
-		WithSeparatorStyle(pterm.NewStyle(pterm.FgDarkGray)).
-		Render()
-	if err != nil {
-		log.Error().Msgf("encountered error printing table: %v", err)
-	}
-}
-
 func PrintTableWithHeader(data [][]string) {
 	tableRows := pterm.TableData(data)
 	err := pterm.DefaultTable.
@@ -85,11 +72,13 @@ func PrintTableWithHeader(data [][]string) {
 
 type StdOutWriter struct {
 	LogAsDebug bool
+	LogFields  map[string]interface{}
 
 	structuredLogBreak bool
 }
 
 func (w StdOutWriter) Write(p []byte) (n int, err error) {
+	stdOutLog := log.With().Fields(w.LogFields).Logger()
 	trimmedP := strings.TrimSpace(string(p))
 	if trimmedP == "" {
 		return len(p), nil
@@ -108,9 +97,9 @@ func (w StdOutWriter) Write(p []byte) (n int, err error) {
 		case w.structuredLogBreak:
 			_, _ = fmt.Fprintln(os.Stdout, line)
 		case w.LogAsDebug:
-			log.Debug().Msg(line)
+			stdOutLog.Debug().Msg(line)
 		default:
-			log.Info().Msg(line)
+			stdOutLog.Info().Msg(line)
 		}
 	}
 
@@ -119,20 +108,22 @@ func (w StdOutWriter) Write(p []byte) (n int, err error) {
 
 type StdErrWriter struct {
 	LogAsDebug bool
+	LogFields  map[string]interface{}
 }
 
 func (w StdErrWriter) Write(p []byte) (n int, err error) {
+	stdOutLog := log.With().Fields(w.LogFields).Logger()
 	trimmedP := strings.TrimSpace(string(p))
 	if trimmedP == "" {
 		return len(p), nil
 	}
 
 	if w.LogAsDebug {
-		log.Debug().Msg(string(p))
+		stdOutLog.Debug().Msg(string(p))
 		return len(p), nil
 	}
 
-	log.Error().Msg(string(p))
+	stdOutLog.Error().Msg(string(p))
 	return len(p), nil
 }
 

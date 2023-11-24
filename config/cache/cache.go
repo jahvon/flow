@@ -1,13 +1,18 @@
 package cache
 
+var (
+	workspaceCache  *WorkspaceCache
+	executableCache *ExecutableCache
+)
+
 func UpdateAll() error {
-	executableCache := NewExecutableCache()
-	if err := executableCache.Update(); err != nil {
+	wsCache := NewWorkspaceCache()
+	if err := wsCache.Update(); err != nil {
 		return err
 	}
 
-	workspaceCache := NewWorkspaceCache()
-	if err := workspaceCache.Update(); err != nil {
+	execCache := NewExecutableCache()
+	if err := execCache.Update(); err != nil {
 		return err
 	}
 

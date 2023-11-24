@@ -30,7 +30,7 @@ func PrintWorkspaceList(format io.OutputFormat, workspaces []config.WorkspaceCon
 }
 
 func printWorkspaceListYAML(workspaces []config.WorkspaceConfig) {
-	log.Info().Msgf("Printing %d workspaces", len(workspaces))
+	log.Debug().Msgf("Printing %d workspaces", len(workspaces))
 	yamlBytes, err := yaml.Marshal(workspaces)
 	if err != nil {
 		log.Panic().Msgf("Failed to marshal workspace list - %v", err)
@@ -39,7 +39,7 @@ func printWorkspaceListYAML(workspaces []config.WorkspaceConfig) {
 }
 
 func printWorkspaceListJSON(workspaces []config.WorkspaceConfig, pretty bool) {
-	log.Info().Msgf("Printing %d workspaces", len(workspaces))
+	log.Debug().Msgf("Printing %d workspaces", len(workspaces))
 	var jsonBytes []byte
 	var err error
 	if pretty {
@@ -54,7 +54,7 @@ func printWorkspaceListJSON(workspaces []config.WorkspaceConfig, pretty bool) {
 }
 
 func printWorkspaceListTable(workspaces []config.WorkspaceConfig) {
-	log.Info().Msgf("Printing %d workspaces", len(workspaces))
+	log.Debug().Msgf("Printing %d workspaces", len(workspaces))
 	tableRows := [][]string{{"Name", "Location", "Description", "Tags"}}
 	for _, ws := range workspaces {
 		name := ws.DisplayName
@@ -95,7 +95,7 @@ func PrintWorkspaceConfig(format io.OutputFormat, ws *config.WorkspaceConfig) {
 }
 
 func printWorkspaceConfigsYAML(ws *config.WorkspaceConfig) {
-	log.Info().Msgf("Printing workspace config for %s", ws.DisplayName)
+	log.Debug().Msgf("Printing workspace config for %s", ws.DisplayName)
 	yamlBytes, err := yaml.Marshal(ws)
 	if err != nil {
 		log.Panic().Msgf("Failed to marshal workspace config - %v", err)
@@ -104,7 +104,7 @@ func printWorkspaceConfigsYAML(ws *config.WorkspaceConfig) {
 }
 
 func printWorkspaceConfigJSON(ws *config.WorkspaceConfig, pretty bool) {
-	log.Info().Msgf("Printing workspace config for %s", ws.DisplayName)
+	log.Debug().Msgf("Printing workspace config for %s", ws.DisplayName)
 	var jsonBytes []byte
 	var err error
 	if pretty {

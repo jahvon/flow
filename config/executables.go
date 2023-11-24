@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/jahvon/flow/internal/utils"
 )
 
+const tmpdir = "f:tmp"
+
 type ExecutableContext struct {
 	Workspace          string
 	Namespace          string
@@ -21,10 +24,31 @@ type ExecutableContext struct {
 
 type DirectoryScopedExecutable struct {
 	Directory string `yaml:"dir"`
+
+	finalizerFunc func()
 }
 
-func (e *DirectoryScopedExecutable) ExpandDirectory(wsPath, execPath string, env map[string]string) string {
-	return utils.ExpandDirectory(e.Directory, wsPath, execPath, env)
+func (e *DirectoryScopedExecutable) ExpandDirectory(wsPath, execPath string, env map[string]string) (string, error) {
+	if e.Directory == tmpdir {
+		file, err := os.CreateTemp("", "flow")
+		if err != nil {
+			return "", err
+		}
+		e.finalizerFunc = func() {
+			if err := os.Remove(file.Name()); err != nil {
+				log.Error().Err(err).Msgf("unable to remove temp file %s", file.Name())
+			}
+		}
+		return file.Name(), nil
+	}
+
+	return utils.ExpandDirectory(e.Directory, wsPath, execPath, env), nil
+}
+
+func (e *DirectoryScopedExecutable) Finalize() {
+	if e.finalizerFunc != nil {
+		e.finalizerFunc()
+	}
 }
 
 type ParameterizedExecutable struct {
@@ -38,6 +62,16 @@ type ExecExecutableType struct {
 	Command string  `yaml:"cmd"`
 	File    string  `yaml:"file"`
 	LogMode LogMode `yaml:"logMode"`
+
+	logFields map[string]interface{}
+}
+
+func (e *ExecExecutableType) SetLogFields(fields map[string]interface{}) {
+	e.logFields = fields
+}
+
+func (e *ExecExecutableType) GetLogFields() map[string]interface{} {
+	return e.logFields
 }
 
 type LaunchExecutableType struct {
@@ -49,15 +83,14 @@ type LaunchExecutableType struct {
 }
 
 type SerialExecutableType struct {
-	DirectoryScopedExecutable `yaml:",inline"`
-	ParameterizedExecutable   `yaml:",inline"`
+	ParameterizedExecutable `yaml:",inline"`
 
 	ExecutableRefs []Ref `yaml:"refs"`
+	FailFast       bool  `yaml:"failFast"`
 }
 
 type ParallelExecutableType struct {
-	DirectoryScopedExecutable `yaml:",inline"`
-	ParameterizedExecutable   `yaml:",inline"`
+	ParameterizedExecutable `yaml:",inline"`
 
 	ExecutableRefs []Ref `yaml:"refs"`
 	MaxThreads     int   `yaml:"maxThreads"`
@@ -65,10 +98,10 @@ type ParallelExecutableType struct {
 }
 
 type ExecutableTypeSpec struct {
-	Exec     *ExecExecutableType     `yaml:"exec"`
-	Launch   *LaunchExecutableType   `yaml:"launch"`
-	Serial   *SerialExecutableType   `yaml:"serial"`
-	Parallel *ParallelExecutableType `yaml:"parallel"`
+	Exec     *ExecExecutableType     `yaml:"exec,omitempty"`
+	Launch   *LaunchExecutableType   `yaml:"launch,omitempty"`
+	Serial   *SerialExecutableType   `yaml:"serial,omitempty"`
+	Parallel *ParallelExecutableType `yaml:"parallel,omitempty"`
 }
 
 type Executable struct {
@@ -104,11 +137,28 @@ func (e *Executable) ID() string {
 			Str("definitionFile", e.definitionPath).
 			Msgf("missing workspace for %s", e.Name)
 		return "unk"
-	} else if e.namespace == "" {
-		return fmt.Sprintf("%s/%s", e.workspace, e.Name)
 	}
 
-	return fmt.Sprintf("%s/%s:%s", e.workspace, e.namespace, e.Name)
+	return NewExecutableID(e.workspace, e.namespace, e.Name)
+}
+
+func (e *Executable) AliasesIDs() []string {
+	if len(e.Aliases) == 0 {
+		return nil
+	}
+
+	if e.workspace == "" {
+		log.Debug().
+			Str("namespace", e.namespace).
+			Str("definitionFile", e.definitionPath).
+			Msgf("missing workspace for %s", e.Name)
+		return nil
+	}
+	aliases := make([]string, 0)
+	for _, alias := range e.Aliases {
+		aliases = append(aliases, NewExecutableID(e.workspace, e.namespace, alias))
+	}
+	return aliases
 }
 
 func (e *Executable) WorkspacePath() string {
@@ -214,7 +264,11 @@ func (e *Executable) IsExecutableFromWorkspace(workspace string) bool {
 	}
 }
 
-func (l ExecutableList) FindByVerbAndID(verb Verb, name string) (*Executable, error) {
+func (l ExecutableList) FindByVerbAndID(verb Verb, id string) (*Executable, error) {
+	_, _, name := ParseExecutableID(id) // Assumes that ws and ns has already been filtered down
+	if name == "" {
+		return nil, errors.ExecutableNotFoundError{Verb: string(verb), Name: name}
+	}
 	filteredList := l.FilterByVerb(verb)
 	exec, found := lo.Find(filteredList, func(exec *Executable) bool {
 		return exec.NameEquals(name)
@@ -223,15 +277,6 @@ func (l ExecutableList) FindByVerbAndID(verb Verb, name string) (*Executable, er
 		return exec, nil
 	}
 	return nil, errors.ExecutableNotFoundError{Verb: string(verb), Name: name}
-}
-
-func (l ExecutableList) FilterForWorkspaceVisibility(ws string) ExecutableList {
-	visible := lo.Filter(l, func(executable *Executable, _ int) bool {
-		return executable.IsVisibleFromWorkspace(ws)
-	})
-
-	log.Trace().Int("executables", len(visible)).Msgf("filtered executables for workspace %s", ws)
-	return visible
 }
 
 func (l ExecutableList) FilterByTags(tags Tags) ExecutableList {
@@ -264,11 +309,15 @@ func (l ExecutableList) FilterByVerb(verb Verb) ExecutableList {
 }
 
 func (l ExecutableList) FilterByWorkspace(ws string) ExecutableList {
+	executables := lo.Filter(l, func(executable *Executable, _ int) bool {
+		return executable.IsVisibleFromWorkspace(ws)
+	})
+
 	if ws == "" || ws == "*" {
-		return l
+		return executables
 	}
 
-	executables := lo.Filter(l, func(executable *Executable, _ int) bool {
+	executables = lo.Filter(executables, func(executable *Executable, _ int) bool {
 		return executable.workspace == ws
 	})
 
@@ -289,12 +338,26 @@ func (l ExecutableList) FilterByNamespace(ns string) ExecutableList {
 	return executables
 }
 
-func parseExecutableID(id string) (workspace, namespace, name string) {
+func ParseExecutableID(id string) (workspace, namespace, name string) {
 	parts := strings.Split(id, "/")
-	if len(parts) == 2 {
-		return parts[0], "*", parts[1]
-	} else if len(parts) == 3 {
-		return parts[0], parts[1], parts[2]
+	switch len(parts) {
+	case 1:
+		return "", "", parts[0]
+	case 2:
+		subparts := strings.Split(parts[1], ":")
+		if len(subparts) == 1 {
+			return parts[0], "*", subparts[0]
+		} else if len(subparts) == 2 {
+			return parts[0], subparts[0], subparts[1]
+		}
 	}
+
 	return "", "", ""
+}
+
+func NewExecutableID(workspace, namespace, name string) string {
+	if namespace == "" {
+		return fmt.Sprintf("%s/%s", workspace, name)
+	}
+	return fmt.Sprintf("%s/%s:%s", workspace, namespace, name)
 }

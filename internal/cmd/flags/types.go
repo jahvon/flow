@@ -16,11 +16,10 @@ type Metadata struct {
 }
 
 var VerbosityFlag = &Metadata{
-	Name:      "verbosity",
-	Shorthand: "v",
-	Usage:     "Log verbosity level (from 0 to 4 where 4 is most verbose)",
-	Default:   2,
-	Required:  false,
+	Name:     "verbosity",
+	Usage:    "Log verbosity level (from 0 to 4 where 4 is most verbose)",
+	Default:  2,
+	Required: false,
 }
 
 var SyncCacheFlag = &Metadata{

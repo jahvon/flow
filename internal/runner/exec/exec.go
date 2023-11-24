@@ -20,7 +20,7 @@ func (r *execRunner) Name() string {
 }
 
 func (r *execRunner) IsCompatible(executable *config.Executable) bool {
-	if executable == nil || executable.Type == nil || executable.Type.Parallel == nil {
+	if executable == nil || executable.Type == nil || executable.Type.Exec == nil {
 		return false
 	}
 	return true
@@ -30,15 +30,24 @@ func (r *execRunner) Exec(_ *context.Context, executable *config.Executable) err
 	execSpec := executable.Type.Exec
 	envMap, err := runner.ParametersToEnvMap(&execSpec.ParameterizedExecutable)
 	if err != nil {
-		return fmt.Errorf("unable to convert parameters to env map - %w", err)
+		return fmt.Errorf("env setup failed - %w", err)
 	}
 	envList, err := runner.ParametersToEnvList(&execSpec.ParameterizedExecutable)
 	if err != nil {
-		return fmt.Errorf("unable to convert parameters to env list - %w", err)
+		return fmt.Errorf("env setup failed  - %w", err)
 	}
 
-	targetDir := execSpec.ExpandDirectory(executable.WorkspacePath(), executable.DefinitionPath(), envMap)
+	targetDir, err := execSpec.ExpandDirectory(executable.WorkspacePath(), executable.DefinitionPath(), envMap)
+	if err != nil {
+		return fmt.Errorf("unable to expand directory - %w", err)
+	}
+	defer execSpec.Finalize()
 	logMode := execSpec.LogMode
+	var logFields map[string]interface{}
+
+	if logMode == config.StructuredLogMode {
+		logFields = execSpec.GetLogFields()
+	}
 
 	switch {
 	case execSpec.Command == "" && execSpec.File == "":
@@ -46,9 +55,9 @@ func (r *execRunner) Exec(_ *context.Context, executable *config.Executable) err
 	case execSpec.Command != "" && execSpec.File != "":
 		return fmt.Errorf("cannot set both cmd and file")
 	case execSpec.Command != "":
-		return run.RunCmd(execSpec.Command, targetDir, envList, logMode)
+		return run.RunCmd(execSpec.Command, targetDir, envList, logMode, logFields)
 	case execSpec.File != "":
-		return run.RunFile(execSpec.File, targetDir, envList, logMode)
+		return run.RunFile(execSpec.File, targetDir, envList, logMode, logFields)
 	default:
 		return fmt.Errorf("unable to determine how executable should be run")
 	}

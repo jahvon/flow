@@ -49,11 +49,25 @@ func (v Verb) Equals(other Verb) bool {
 	return ValidVerbToGroupID[v.String()] == ValidVerbToGroupID[other.String()]
 }
 
+func RelatedVerbs(verb Verb) []Verb {
+	verbs := make([]Verb, 0)
+	for _, v := range ValidVerbs {
+		if ValidVerbToGroupID[v] == ValidVerbToGroupID[verb.String()] {
+			verbs = append(verbs, Verb(v))
+		}
+	}
+	return lo.Uniq(verbs)
+}
+
 const (
-	VisibilityPublic   VisibilityType = "public"
-	VisibilityPrivate  VisibilityType = "private"
+	// VisibilityPublic is executable and visible across all workspaces.
+	VisibilityPublic VisibilityType = "public"
+	// VisibilityPrivate is executable and visible only within it's own workspace.
+	VisibilityPrivate VisibilityType = "private"
+	// VisibilityInternal is not visible but can be executed within a workspace.
 	VisibilityInternal VisibilityType = "internal"
-	VisibilityHidden   VisibilityType = "hidden"
+	// VisibilityHidden is not executable or visible.
+	VisibilityHidden VisibilityType = "hidden"
 )
 
 // From highest the visible [0] to the lowest visible [n-1].
@@ -136,7 +150,7 @@ func (r Ref) Validate() error {
 		return err
 	}
 	id := refParts[1]
-	ws, _, name := parseExecutableID(id)
+	ws, _, name := ParseExecutableID(id)
 	if ws == "" || name == "" {
 		return fmt.Errorf("invalid executable id %s", id)
 	}
