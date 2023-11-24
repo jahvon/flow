@@ -8,7 +8,7 @@ require (
 	github.com/fatih/color v1.16.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/onsi/ginkgo/v2 v2.13.0
-	github.com/onsi/gomega v1.29.0
+	github.com/onsi/gomega v1.30.0
 	github.com/pterm/pterm v0.12.69
 	github.com/rs/zerolog v1.31.0
 	github.com/samber/lo v1.38.1
