@@ -3,6 +3,7 @@ package run
 import (
 	"context"
 	"fmt"
+	stdio "io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,13 +12,14 @@ import (
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
+	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/io"
 )
 
-var log = io.Log().With().Str("service", "run").Logger()
+var log = io.Log().With().Str("scope", "service/run").Logger()
 
 // RunCmd executes a command in the current shell in a specific directory.
-func RunCmd(commandStr, dir string, envList []string) error {
+func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode, logFields map[string]interface{}) error {
 	log.Trace().Msgf("running command (%s) in dir (%s)", commandStr, dir)
 
 	ctx := context.Background()
@@ -38,8 +40,8 @@ func RunCmd(commandStr, dir string, envList []string) error {
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
 			io.StdInReader{},
-			io.StdOutWriter{LogAsDebug: false},
-			io.StdErrWriter{LogAsDebug: false},
+			stdOutWriter(logMode, logFields),
+			stdErrWriter(logMode, logFields),
 		),
 	)
 	if err != nil {
@@ -55,7 +57,7 @@ func RunCmd(commandStr, dir string, envList []string) error {
 }
 
 // RunFile executes a file in the current shell in a specific directory.
-func RunFile(filename, dir string, envList []string) error {
+func RunFile(filename, dir string, envList []string, logMode config.LogMode, logFields map[string]interface{}) error {
 	log.Trace().Msgf("executing file (%s)", filename)
 
 	ctx := context.Background()
@@ -84,8 +86,8 @@ func RunFile(filename, dir string, envList []string) error {
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
 			io.StdInReader{},
-			io.StdOutWriter{LogAsDebug: false},
-			io.StdErrWriter{LogAsDebug: false},
+			stdOutWriter(logMode, logFields),
+			stdErrWriter(logMode, logFields),
 		),
 	)
 	if err != nil {
@@ -97,4 +99,32 @@ func RunFile(filename, dir string, envList []string) error {
 		return fmt.Errorf("encountered an error executing file - %w", err)
 	}
 	return nil
+}
+
+func stdOutWriter(mode config.LogMode, logFields map[string]interface{}) stdio.Writer {
+	switch mode {
+	case config.NoLogMode:
+		return stdio.Discard
+	case config.StructuredLogMode:
+		return io.StdOutWriter{LogAsDebug: false, LogFields: logFields}
+	case config.RawLogMode:
+		return os.Stdout
+	default:
+		log.Error().Str("mode", string(mode)).Msg("unknown log mode")
+		return stdio.Discard
+	}
+}
+
+func stdErrWriter(mode config.LogMode, logFields map[string]interface{}) stdio.Writer {
+	switch mode {
+	case config.NoLogMode:
+		return stdio.Discard
+	case config.StructuredLogMode:
+		return io.StdErrWriter{LogAsDebug: false, LogFields: logFields}
+	case config.RawLogMode:
+		return os.Stderr
+	default:
+		log.Error().Str("mode", string(mode)).Msg("unknown log mode")
+		return stdio.Discard
+	}
 }

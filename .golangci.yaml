@@ -79,7 +79,7 @@ linters-settings:
         strict: true
 
   tenv:
-    # The option `all` will run against whole test files (`_test.go`) regardless of method/function signatures.
+    # The option `all` will exec against whole test files (`_test.go`) regardless of method/function signatures.
     # Otherwise, only methods that take `*testing.T`, `*testing.B`, and `testing.TB` as arguments are checked.
     # Default: false
     all: true
@@ -112,7 +112,6 @@ linters:
     - goconst # finds repeated strings that could be replaced by a constant
     - gocritic # provides diagnostics that check for bugs, performance and style issues
     - gocyclo # computes and checks the cyclomatic complexity of functions
-    - godot # checks if comments end in a period
     - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
     - gomodguard # allow and block lists linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations
@@ -161,6 +160,7 @@ linters:
     #- prealloc # [premature optimization, but can be used in some cases] finds slice declarations that could potentially be preallocated
     #- varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope
     #- wrapcheck # checks that errors returned from external packages are wrapped
+    #- godot # checks if comments end in a period
 
 
 issues:

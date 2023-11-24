@@ -10,7 +10,7 @@ local/deps:
 	go install github.com/spf13/cobra-cli@v1.3.0
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
 
-## Locally run the golang test.
+## Locally exec the golang test.
 go/test:
 	golangci-lint run ./...
 	go test ./...
