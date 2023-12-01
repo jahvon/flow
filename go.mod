@@ -7,7 +7,7 @@ toolchain go1.21.1
 require (
 	github.com/fatih/color v1.16.0
 	github.com/jahvon/open-golang v0.0.0-20200116055534-eef842397966
-	github.com/onsi/ginkgo/v2 v2.13.1
+	github.com/onsi/ginkgo/v2 v2.13.2
 	github.com/onsi/gomega v1.30.0
 	github.com/pterm/pterm v0.12.71
 	github.com/rs/zerolog v1.31.0
