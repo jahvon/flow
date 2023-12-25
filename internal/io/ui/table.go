@@ -8,29 +8,20 @@ import (
 	"github.com/rivo/tview"
 )
 
-const DefaultView = WorkspaceView
-
-type View string
-
-const (
-	WorkspaceView  View = "workspace"
-	NamespaceView  View = "namespace"
-	ExecutableView View = "executable"
-)
-
 type TableData struct {
 	Headers []string
 	Rows    [][]string
 }
 
-func (t TableData) TViewTable() *tview.Table {
+func (t TableData) TViewTable(selectFunc func(rowData []string)) *tview.Table {
 	table := tview.NewTable().
 		InsertRow(len(t.Rows)).
 		InsertColumn(len(t.Headers))
 
 	for i, header := range t.Headers {
-		cell := tview.NewTableCell(strings.ToUpper(strWithPadding(header))).
-			SetBackgroundColor(tcell.ColorRed).
+		cell := tview.NewTableCell(strings.
+			ToUpper(strWithPadding(header))).
+			SetBackgroundColor(tcell.ColorBlack).
 			SetStyle(
 				tcell.StyleDefault.
 					Bold(true).
@@ -50,8 +41,22 @@ func (t TableData) TViewTable() *tview.Table {
 			} else {
 				cell = cell.SetBackgroundColor(tcell.ColorGray).SetTextColor(tcell.ColorWhite)
 			}
-			table.SetCell(i+1, j, cell).SetSelectable(false, false)
+			table.SetCell(i+1, j, cell)
 		}
+	}
+
+	if selectFunc != nil {
+		table.SetSelectable(true, false)
+		table.SetSelectedFunc(func(row int, column int) {
+			selectFunc(t.Rows[row-1])
+		})
+		table.SetSelectedStyle(
+			tcell.StyleDefault.
+				Background(IdleState.PrimaryBGColor()).
+				Foreground(IdleState.PrimaryFGColor()),
+		)
+	} else {
+		table.SetSelectable(false, false)
 	}
 	table.SetBorderPadding(0, 1, 1, 1)
 	table.SetBorder(false)

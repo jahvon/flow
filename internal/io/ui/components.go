@@ -9,6 +9,10 @@ import (
 	"github.com/rivo/tview"
 )
 
+const (
+	HelpNotice = "Help: [h]"
+)
+
 func brandTxt(state State) *tview.TextView {
 	blink := state == ProgressingState
 	return tview.NewTextView().
@@ -81,37 +85,6 @@ func noticeTxt(notice string, state State) *tview.TextView {
 				Foreground(tcell.ColorBlack),
 		).
 		SetText(notice + " ")
-}
-
-func contentBox(title string, opts FrameOptions) *tview.Flex {
-	flex := tview.NewFlex()
-	if opts.ObjectContent != nil {
-		flex.SetDirection(tview.FlexRow).
-			AddItem(opts.ObjectContent.TViewTable(), 0, 1, false)
-
-	} else if opts.ObjectList != nil {
-		flex.SetDirection(tview.FlexRow).
-			AddItem(opts.ObjectList.TViewTable(), 0, 1, false)
-	} else {
-		flex.SetDirection(tview.FlexColumn).
-			AddItem(tview.NewTextView().
-				SetText("\ninternal error").
-				SetTextColor(tcell.ColorRed).
-				SetTextAlign(tview.AlignCenter),
-				0, 1, false)
-	}
-
-	flex.SetBorder(true)
-	flex.SetBorderColor(tcell.ColorWhite)
-	flex.SetTitle(title)
-	flex.SetTitleColor(opts.CurrentState.PrimaryFGColor())
-	flex.SetTitleAlign(tview.AlignCenter)
-
-	return flex
-}
-
-func emptyBox() *tview.Box {
-	return tview.NewBox().SetBorder(false)
 }
 
 func textViewWidth(tv *tview.TextView) int {

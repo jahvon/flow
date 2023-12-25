@@ -51,7 +51,9 @@ var configSetCmd = &cobra.Command{
 
 		ws := getFlagValue[string](cmd, *flags.SetWorkspaceFlag)
 		ns := getFlagValue[string](cmd, *flags.SetNamespaceFlag)
-		if ws == "" && ns == "" {
+		uiEnabled := getFlagValue[bool](cmd, *flags.SetUIEnabledFlag)
+		uiEnabledChanged := uiEnabled != userConfig.UIEnabled
+		if ws == "" && ns == "" && !uiEnabledChanged {
 			io.PrintErrorAndExit(fmt.Errorf("no flags provided"))
 		}
 
@@ -64,6 +66,10 @@ var configSetCmd = &cobra.Command{
 
 		if ns != "" {
 			userConfig.CurrentNamespace = ns
+		}
+
+		if uiEnabledChanged {
+			userConfig.UIEnabled = uiEnabled
 		}
 
 		if err := file.WriteUserConfig(userConfig); err != nil {
@@ -98,6 +104,7 @@ func init() {
 
 	registerFlagOrPanic(configSetCmd, *flags.SetWorkspaceFlag)
 	registerFlagOrPanic(configSetCmd, *flags.SetNamespaceFlag)
+	registerFlagOrPanic(configSetCmd, *flags.SetUIEnabledFlag)
 	configCmd.AddCommand(configSetCmd)
 
 	registerFlagOrPanic(configGetCmd, *flags.OutputFormatFlag)

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/fatih/color"
-	"github.com/pterm/pterm"
 	"github.com/rs/zerolog"
+
+	"github.com/jahvon/flow/internal/utils"
 )
 
 var log = Log()
@@ -56,18 +58,22 @@ func PrintError(err error) {
 	color.HiRed(err.Error())
 }
 
-func PrintTableWithHeader(data [][]string) {
-	tableRows := pterm.TableData(data)
-	err := pterm.DefaultTable.
-		WithData(tableRows).
-		WithHasHeader().
-		WithBoxed().
-		WithRowSeparator("-").
-		WithSeparatorStyle(pterm.NewStyle(pterm.FgDarkGray)).
-		Render()
-	if err != nil {
-		log.Error().Msgf("encountered error printing table: %v", err)
+func PrintMap(m map[string]string) {
+	for k, v := range m {
+		if utils.IsMultiLine(v) {
+			fmt.Printf("%s:\n%s\n", color.HiBlueString(k), v)
+		} else {
+			fmt.Printf("%s: %s\n", color.HiBlueString(k), v)
+		}
 	}
+}
+
+func PrintTableData(data [][]string) {
+	tabWriter := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	for _, row := range data {
+		_, _ = fmt.Fprintln(tabWriter, strings.Join(row, "\t"))
+	}
+	_ = tabWriter.Flush()
 }
 
 type StdOutWriter struct {

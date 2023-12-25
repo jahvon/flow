@@ -13,6 +13,8 @@ import (
 	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/io/ui"
+	"github.com/jahvon/flow/internal/io/ui/builder"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 )
 
@@ -55,13 +57,7 @@ var workspaceGetCmd = &cobra.Command{
 	Short:   "Get a workspace's configuration. If the name is omitted, the current workspace is used.",
 	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		userConfig := file.LoadUserConfig()
-		if userConfig == nil {
-			io.PrintErrorAndExit(fmt.Errorf("failed to load user config"))
-		}
-		if err := userConfig.Validate(); err != nil {
-			io.PrintErrorAndExit(err)
-		}
+		userConfig := curCtx.UserConfig
 
 		var workspaceName string
 		if len(args) == 1 {
@@ -83,7 +79,21 @@ var workspaceGetCmd = &cobra.Command{
 		}
 
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
-		workspaceio.PrintWorkspaceConfig(io.OutputFormat(outputFormat), wsCfg)
+
+		if curCtx.App != nil {
+			viewBuilder := builder.NewWorkspaceView(*curCtx, wsCfg, config.OutputFormat(outputFormat))
+			err := builder.BuildAndSetView(
+				curCtx.App,
+				viewBuilder,
+				ui.WithCurrentWorkspace(curCtx.UserConfig.CurrentWorkspace),
+				ui.WithCurrentNamespace(curCtx.UserConfig.CurrentNamespace),
+			)
+			if err != nil {
+				io.PrintErrorAndExit(err)
+			}
+		} else {
+			workspaceio.PrintWorkspaceConfig(io.OutputFormat(outputFormat), wsCfg)
+		}
 	},
 }
 
@@ -161,12 +171,11 @@ var workspaceList = &cobra.Command{
 	Short:   "ParameterList workspace configurations.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := newCtx(cmd)
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 		tagsFilter := getFlagValue[[]string](cmd, *flags.FilterTagFlag)
 
 		log.Debug().Msg("Loading workspace configs from cache")
-		workspaceCache, err := ctx.WorkspacesCache.Get()
+		workspaceCache, err := curCtx.WorkspacesCache.Get()
 		if err != nil {
 			log.Error().Err(err).Msg("failed to load workspace configs from cache")
 		}
@@ -182,7 +191,23 @@ var workspaceList = &cobra.Command{
 		if len(filteredWorkspaces) == 0 {
 			io.PrintErrorAndExit(fmt.Errorf("no workspaces found"))
 		}
-		workspaceio.PrintWorkspaceList(io.OutputFormat(outputFormat), filteredWorkspaces)
+
+		if curCtx.App != nil {
+			viewBuilder := builder.NewWorkspaceListView(*curCtx, filteredWorkspaces, config.OutputFormat(outputFormat))
+			err := builder.BuildAndSetView(
+				curCtx.App,
+				viewBuilder,
+				ui.WithCurrentWorkspace(curCtx.UserConfig.CurrentWorkspace),
+				ui.WithCurrentNamespace(curCtx.UserConfig.CurrentNamespace),
+				ui.WithCurrentFilter(tagsFilter),
+			)
+			if err != nil {
+				io.PrintErrorAndExit(err)
+			}
+			return
+		} else {
+			workspaceio.PrintWorkspaceList(io.OutputFormat(outputFormat), filteredWorkspaces)
+		}
 	},
 }
 

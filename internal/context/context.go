@@ -7,19 +7,22 @@ import (
 	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/io/ui"
 )
 
 type Context struct {
 	Ctx              context.Context
+	CancelFunc       context.CancelFunc
 	UserConfig       *config.UserConfig
 	CurrentWorkspace *config.WorkspaceConfig
 	WorkspacesCache  *cache.WorkspaceCache
 	ExecutableCache  *cache.ExecutableCache
+	App              *ui.Application
 }
 
 var log = io.Log().With().Str("scope", "context").Logger()
 
-func NewContext(ctx context.Context, syncCache bool) *Context {
+func NewContext(ctx context.Context) *Context {
 	userConfg := file.LoadUserConfig()
 	if userConfg == nil {
 		return nil
@@ -52,19 +55,10 @@ func NewContext(ctx context.Context, syncCache bool) *Context {
 		return nil
 	}
 
-	if syncCache {
-		if err := workspaceCache.Update(); err != nil {
-			log.Err(err).Msg("workspace cache update error")
-			return nil
-		}
-		if err := executableCache.Update(); err != nil {
-			log.Err(err).Msg("executable cache update error")
-			return nil
-		}
-	}
-
+	ctxx, cancel := context.WithCancel(ctx)
 	return &Context{
-		Ctx:              ctx,
+		Ctx:              ctxx,
+		CancelFunc:       cancel,
 		UserConfig:       userConfg,
 		CurrentWorkspace: wsConfg,
 		WorkspacesCache:  cache.NewWorkspaceCache(),

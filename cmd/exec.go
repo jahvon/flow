@@ -32,7 +32,6 @@ var execCmd = &cobra.Command{
 		runner.RegisterRunner(parallel.NewRunner())
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := newCtx(cmd)
 		verbStr := cmd.CalledAs()
 		verb := config.Verb(verbStr)
 		if err := verb.Validate(); err != nil {
@@ -40,8 +39,8 @@ var execCmd = &cobra.Command{
 		}
 
 		idArg := args[0]
-		ref := context.ExpandRef(ctx, config.NewRef(idArg, verb))
-		executable, err := ctx.ExecutableCache.GetExecutableByRef(ref)
+		ref := context.ExpandRef(curCtx, config.NewRef(idArg, verb))
+		executable, err := curCtx.ExecutableCache.GetExecutableByRef(ref)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		} else if executable == nil {
@@ -52,17 +51,17 @@ var execCmd = &cobra.Command{
 			io.PrintErrorAndExit(err)
 		}
 
-		if !executable.IsExecutableFromWorkspace(ctx.UserConfig.CurrentWorkspace) {
+		if !executable.IsExecutableFromWorkspace(curCtx.UserConfig.CurrentWorkspace) {
 			io.PrintErrorAndExit(
 				fmt.Errorf(
 					"executable '%s' cannot be executed from workspace %s",
 					ref,
-					ctx.UserConfig.CurrentWorkspace,
+					curCtx.UserConfig.CurrentWorkspace,
 				),
 			)
 		}
 
-		if err := runner.Exec(ctx, executable); err != nil {
+		if err := runner.Exec(curCtx, executable); err != nil {
 			io.PrintErrorAndExit(err)
 		}
 		log.Info().Msg(fmt.Sprintf("%s flow completed", ref))

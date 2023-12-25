@@ -64,8 +64,8 @@ var FilterTagFlag = &Metadata{
 var OutputFormatFlag = &Metadata{
 	Name:      "output",
 	Shorthand: "o",
-	Usage:     "Output format. One of: default, yaml, json, jsonp.",
-	Default:   "default",
+	Usage:     "Output format. One of: summary, yaml, json, jsonp.",
+	Default:   string(config.INTERACTIVE),
 	Required:  false,
 }
 
@@ -99,4 +99,11 @@ var SetWorkspaceFlag = &Metadata{
 	Usage:     "Set the workspace context",
 	Default:   "",
 	Required:  false,
+}
+
+var SetUIEnabledFlag = &Metadata{
+	Name:     "ui-enabled",
+	Usage:    "Show flow data via the terminal UI",
+	Default:  false,
+	Required: false,
 }

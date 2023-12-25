@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"slices"
@@ -8,19 +9,13 @@ import (
 	"time"
 
 	"github.com/samber/lo"
+	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/errors"
 	"github.com/jahvon/flow/internal/utils"
 )
 
 const tmpdir = "f:tmp"
-
-type ExecutableContext struct {
-	Workspace          string
-	Namespace          string
-	WorkspacePath      string
-	DefinitionFilePath string
-}
 
 type DirectoryScopedExecutable struct {
 	Directory string `yaml:"dir"`
@@ -119,11 +114,79 @@ type Executable struct {
 
 type ExecutableList []*Executable
 
+type enrichedExecutableList struct {
+	Executables []*enrichedExecutable `json:"executables"`
+}
+type enrichedExecutable struct {
+	ID   string      `json:"id"`
+	Spec *Executable `json:"spec"`
+}
+
 func (e *Executable) SetContext(workspaceName, workspacePath, namespace, definitionPath string) {
 	e.workspace = workspaceName
 	e.workspacePath = workspacePath
 	e.namespace = namespace
 	e.definitionPath = definitionPath
+}
+
+func (e *Executable) YAML() (string, error) {
+	enriched := &enrichedExecutable{
+		ID:   e.ID(),
+		Spec: e,
+	}
+	yamlBytes, err := yaml.Marshal(enriched)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable - %v", err)
+	}
+	return string(yamlBytes), nil
+}
+
+func (e *Executable) JSON(pretty bool) (string, error) {
+	var jsonBytes []byte
+	var err error
+	enriched := &enrichedExecutable{
+		ID:   e.ID(),
+		Spec: e,
+	}
+	if pretty {
+		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
+	} else {
+		jsonBytes, err = json.Marshal(enriched)
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable - %v", err)
+	}
+	return string(jsonBytes), nil
+}
+
+func (e *Executable) Map() map[string]string {
+	fields := map[string]string{
+		"ID":         e.ID(),
+		"Verb":       e.Verb.String(),
+		"Name":       e.Name,
+		"Location":   e.definitionPath,
+		"Visibility": e.Visibility.String(),
+	}
+	if e.Description != "" {
+		fields["Description"] = utils.WrapLines(e.Description, 20)
+	}
+	if len(e.Aliases) > 0 {
+		fields["Aliases"] = strings.Join(e.Aliases, ", ")
+	}
+	if len(e.Tags) > 0 {
+		fields["Tags"] = e.Tags.String()
+	}
+	if e.Timeout != 0 {
+		fields["Timeout"] = e.Timeout.String()
+	}
+	typeSpec, err := yaml.Marshal(e.Type)
+	if err != nil {
+		fields["Type"] = fmt.Sprintf("%+v", e.Type)
+		log.Error().Err(err).Msg("failed to marshal executable type")
+	} else {
+		fields["Type"] = string(typeSpec)
+	}
+	return fields
 }
 
 func (e *Executable) Ref() Ref {
@@ -262,6 +325,57 @@ func (e *Executable) IsExecutableFromWorkspace(workspace string) bool {
 	default:
 		return false
 	}
+}
+
+func (l ExecutableList) YAML() (string, error) {
+	enriched := &enrichedExecutableList{}
+	for _, exec := range l {
+		enriched.Executables = append(enriched.Executables, &enrichedExecutable{
+			ID:   exec.ID(),
+			Spec: exec,
+		})
+	}
+	yamlBytes, err := yaml.Marshal(enriched)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable list - %v", err)
+	}
+	return string(yamlBytes), nil
+}
+
+func (l ExecutableList) JSON(pretty bool) (string, error) {
+	var jsonBytes []byte
+	var err error
+	enriched := &enrichedExecutableList{}
+	for _, exec := range l {
+		enriched.Executables = append(enriched.Executables, &enrichedExecutable{
+			ID:   exec.ID(),
+			Spec: exec,
+		})
+	}
+	if pretty {
+		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
+	} else {
+		jsonBytes, err = json.Marshal(enriched)
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable list - %v", err)
+	}
+	return string(jsonBytes), nil
+}
+
+func (l ExecutableList) TableData() [][]string {
+	tableRows := [][]string{
+		{"Verb", "ID", "Tags", "Description"},
+	}
+	for _, exec := range l {
+		tableRows = append(tableRows, []string{
+			exec.Verb.String(),
+			exec.ID(),
+			exec.Tags.PreviewString(),
+			utils.ShortenString(exec.Description, 25),
+		})
+	}
+	return tableRows
 }
 
 func (l ExecutableList) FindByVerbAndID(verb Verb, id string) (*Executable, error) {

@@ -68,3 +68,44 @@ func ValidateOneOf(fieldName string, vals ...interface{}) error {
 	}
 	return nil
 }
+
+func IsMultiLine(s string) bool {
+	return NumLines(s) > 1
+}
+
+func NumLines(s string) int {
+	return strings.Count(s, "\n") + 1
+}
+
+// WrapLines Replace every n space with a newline character, leaving at most maxWords words per line.
+func WrapLines(text string, maxWords int) string {
+	trimmed := strings.TrimSpace(text)
+	words := strings.Split(trimmed, " ")
+	var lines []string
+	var line string
+	for i, word := range words {
+		if i%maxWords == 0 && i != 0 {
+			lines = append(lines, line)
+			line = ""
+		}
+		line += word + " "
+	}
+	lines = append(lines, line)
+	return strings.Join(lines, "\n")
+}
+
+// ShortenString shortens a string to maxLen characters, appending "..." if the string is longer than maxLen.
+func ShortenString(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen] + "..."
+}
+
+func DetailsString(fields map[string]string) string {
+	var details []string
+	for k, v := range fields {
+		details = append(details, fmt.Sprintf("[blue]%s: [white]%s", k, v))
+	}
+	return strings.Join(details, "\n")
+}

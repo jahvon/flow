@@ -27,8 +27,6 @@ var executableGetCmd = &cobra.Command{
 		"See" + io.DocsURL("executable-ids") + "for more information on executable IDs.",
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := newCtx(cmd)
-
 		verbStr := args[0]
 		verb := config.Verb(verbStr)
 		if err := verb.Validate(); err != nil {
@@ -37,7 +35,7 @@ var executableGetCmd = &cobra.Command{
 		id := args[1]
 		ref := config.NewRef(id, verb)
 
-		exec, err := ctx.ExecutableCache.GetExecutableByRef(ref)
+		exec, err := curCtx.ExecutableCache.GetExecutableByRef(ref)
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		} else if exec == nil {
@@ -55,22 +53,21 @@ var executablesListCmd = &cobra.Command{
 	Short:   "ParameterList executables.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := newCtx(cmd)
 		wsFilter := getFlagValue[string](cmd, *flags.FilterWorkspaceFlag)
 		if wsFilter == "." {
-			wsFilter = ctx.UserConfig.CurrentWorkspace
+			wsFilter = curCtx.UserConfig.CurrentWorkspace
 		}
 
 		nsFilter := getFlagValue[string](cmd, *flags.FilterNamespaceFlag)
 		if nsFilter == "." {
-			nsFilter = ctx.UserConfig.CurrentNamespace
+			nsFilter = curCtx.UserConfig.CurrentNamespace
 		}
 
 		verbFilter := getFlagValue[string](cmd, *flags.FilterVerbFlag)
 		tagsFilter := getFlagValue[[]string](cmd, *flags.FilterTagFlag)
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 
-		allExecs, err := ctx.ExecutableCache.GetExecutableList()
+		allExecs, err := curCtx.ExecutableCache.GetExecutableList()
 		if err != nil {
 			io.PrintErrorAndExit(err)
 		}

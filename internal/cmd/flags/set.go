@@ -45,6 +45,12 @@ func (f *FlagSet) Register(cmd *cobra.Command, flag Metadata) error {
 		} else {
 			cmd.Flags().StringArray(flag.Name, def, flag.Usage)
 		}
+	case reflect.Int:
+		if flag.Shorthand != "" {
+			cmd.Flags().IntP(flag.Name, flag.Shorthand, flag.Default.(int), flag.Usage)
+		} else {
+			cmd.Flags().Int(flag.Name, flag.Default.(int), flag.Usage)
+		}
 	default:
 		return fmt.Errorf("unexpected flag default type (%v)", reflect.TypeOf(flag.Default).Kind())
 	}
