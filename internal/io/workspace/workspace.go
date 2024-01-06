@@ -10,8 +10,9 @@ import (
 var log = io.Log()
 
 func PrintWorkspaceList(format io.OutputFormat, workspaces config.WorkspaceConfigList) {
+	log.Info().Msgf("%d workspaces", len(workspaces))
 	switch format {
-	case io.OutputFormatDefault, io.OutputFormatYAML:
+	case io.OutputFormatUnset, io.OutputFormatYAML:
 		str, err := workspaces.YAML()
 		if err != nil {
 			log.Panic().Msgf("Failed to marshal workspace list - %v", err)
@@ -38,9 +39,9 @@ func PrintWorkspaceConfig(format io.OutputFormat, ws *config.WorkspaceConfig) {
 	if ws == nil {
 		log.Panic().Msg("Workspace config is nil")
 	}
-
+	log.Info().Str("Location", ws.Location()).Msgf("Workspace %s", ws.AssignedName())
 	switch format {
-	case io.OutputFormatYAML:
+	case io.OutputFormatUnset, io.OutputFormatYAML:
 		str, err := ws.YAML()
 		if err != nil {
 			log.Panic().Msgf("Failed to marshal workspace config - %v", err)
@@ -58,8 +59,6 @@ func PrintWorkspaceConfig(format io.OutputFormat, ws *config.WorkspaceConfig) {
 			log.Panic().Msgf("Failed to marshal workspace config - %v", err)
 		}
 		fmt.Println(str)
-	case io.OutputFormatDefault:
-		io.PrintMap(ws.Map())
 	default:
 		log.Panic().Msgf("Unsupported output format %s", format)
 	}

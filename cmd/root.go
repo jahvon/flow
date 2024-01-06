@@ -14,11 +14,6 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
-var (
-	log    = io.Log()
-	curCtx *context.Context
-)
-
 var rootCmd = &cobra.Command{
 	Use:   "flow",
 	Short: "flow is a command line interface for managing and running machine commands.",

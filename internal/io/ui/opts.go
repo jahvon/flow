@@ -1,20 +1,10 @@
 package ui
 
 import (
-	"fmt"
-	"sort"
-	"strings"
-
 	"github.com/jahvon/flow/config"
 )
 
 type HeaderOption func(application *Application)
-
-func WithCurrentState(state State) HeaderOption {
-	return func(a *Application) {
-		a.curState = state
-	}
-}
 
 func WithCurrentWorkspace(workspace string) HeaderOption {
 	return func(a *Application) {
@@ -29,19 +19,14 @@ func WithCurrentNamespace(namespace string) HeaderOption {
 }
 
 func WithCurrentFilter(tags config.Tags) HeaderOption {
-	var tagStr string
-	sort.Strings(tags)
-	for _, tag := range tags {
-		tagStr += fmt.Sprintf("<%s> ", tag)
-	}
-	tagStr = strings.TrimSpace(tagStr)
 	return func(a *Application) {
-		a.curFilter = tagStr
+		a.curFilter = tags
 	}
 }
 
-func WithNotice(notice string) HeaderOption {
+func WithNotice(notice string, lvl NoticeLevel) HeaderOption {
 	return func(a *Application) {
 		a.curNotice = notice
+		a.curNoticeLvl = lvl
 	}
 }

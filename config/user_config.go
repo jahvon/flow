@@ -11,11 +11,7 @@ type UserConfig struct {
 	Workspaces       map[string]string `json:"workspaces"       yaml:"workspaces"`
 	CurrentWorkspace string            `json:"currentWorkspace" yaml:"currentWorkspace"`
 	CurrentNamespace string            `json:"currentNamespace" yaml:"currentNamespace"`
-	UIEnabled        bool              `json:"uiEnabled"        yaml:"uiEnabled"`
-	AppPreferences   struct {
-		Open string `json:"open"  yaml:"open"`
-		Edit string `json:"edit"  yaml:"edit"`
-	} `json:"appPreferences" yaml:"appPreferences"`
+	InteractiveUI    bool              `json:"interactive"        yaml:"interactive"`
 }
 
 func (c *UserConfig) Validate() error {
@@ -55,13 +51,20 @@ func (c *UserConfig) JSON(pretty bool) (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (c *UserConfig) Map() map[string]string {
-	fields := make(map[string]string)
-	fields["Current workspace"] = c.CurrentWorkspace
-	fields["Current namespace"] = c.CurrentNamespace
-	if c.CurrentNamespace == "" {
-		fields["Current namespace"] = "*"
+func (c *UserConfig) Markdown() string {
+	mkdwn := "# Global Configurations\n"
+	mkdwn += fmt.Sprintf("## Current workspace\n%s\n", c.CurrentWorkspace)
+	if c.CurrentNamespace != "" {
+		mkdwn += fmt.Sprintf("## Current namespace\n%s\n", c.CurrentNamespace)
 	}
-	fields["UI enabled"] = fmt.Sprintf("%t", c.UIEnabled)
-	return fields
+	interactive := "disabled"
+	if c.InteractiveUI {
+		interactive = "enabled"
+	}
+	mkdwn += fmt.Sprintf("## Interactive UI\n%s\n", interactive)
+	mkdwn += "## Registered Workspaces\n"
+	for name, path := range c.Workspaces {
+		mkdwn += fmt.Sprintf("- %s: %s\n", name, path)
+	}
+	return mkdwn
 }

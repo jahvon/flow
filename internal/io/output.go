@@ -17,10 +17,10 @@ var log = Log()
 type OutputFormat string
 
 const (
+	OutputFormatUnset      OutputFormat = ""
 	OutputFormatJSON       OutputFormat = "json"
 	OutputFormatPrettyJSON OutputFormat = "jsonp"
 	OutputFormatYAML       OutputFormat = "yaml"
-	OutputFormatDefault    OutputFormat = "default"
 )
 
 func Log() zerolog.Logger {

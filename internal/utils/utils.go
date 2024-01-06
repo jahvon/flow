@@ -54,6 +54,20 @@ func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string
 	return filepath.Clean(targetDir)
 }
 
+func PathFromWd(path string) string {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Warn().Err(err).Msg("unable to get working directory for relative path")
+		return path
+	}
+	relPath, err := filepath.Rel(wd, path)
+	if err != nil {
+		log.Warn().Err(err).Msg("unable to get relative path")
+		return path
+	}
+	return relPath
+}
+
 func ValidateOneOf(fieldName string, vals ...interface{}) error {
 	var count int
 	for _, val := range vals {
@@ -100,12 +114,4 @@ func ShortenString(s string, maxLen int) string {
 		return s
 	}
 	return s[:maxLen] + "..."
-}
-
-func DetailsString(fields map[string]string) string {
-	var details []string
-	for k, v := range fields {
-		details = append(details, fmt.Sprintf("[blue]%s: [white]%s", k, v))
-	}
-	return strings.Join(details, "\n")
 }

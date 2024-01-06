@@ -12,7 +12,9 @@ import (
 var log = io.Log().With().Str("scope", "main").Logger()
 
 func main() {
+	var cancel stdCtx.CancelFunc
 	ctx := context.NewContext(stdCtx.Background())
+	ctx.Ctx, cancel = stdCtx.WithCancel(ctx.Ctx)
 	if ctx == nil {
 		log.Panic().Msg("failed to initialize context")
 	}
@@ -25,14 +27,19 @@ func main() {
 		log.Panic().Err(err).Msg("user config validation error")
 	}
 
-	if cfg.UIEnabled {
-		app := ui.StartApplication(ctx.CancelFunc)
+	if cfg.InteractiveUI {
+		app := ui.StartApplication(
+			ctx.Ctx,
+			cancel,
+			ui.WithCurrentWorkspace(cfg.CurrentWorkspace),
+			ui.WithCurrentNamespace(cfg.CurrentNamespace),
+		)
 		ctx.App = app
 	}
 
 	cmd.Execute(ctx)
 
-	if cfg.UIEnabled {
+	if cfg.InteractiveUI {
 		// Keep the app running until the context is cancelled.
 		for {
 			select {

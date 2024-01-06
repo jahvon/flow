@@ -65,7 +65,7 @@ var OutputFormatFlag = &Metadata{
 	Name:      "output",
 	Shorthand: "o",
 	Usage:     "Output format. One of: summary, yaml, json, jsonp.",
-	Default:   string(config.INTERACTIVE),
+	Default:   "",
 	Required:  false,
 }
 
@@ -101,9 +101,11 @@ var SetWorkspaceFlag = &Metadata{
 	Required:  false,
 }
 
-var SetUIEnabledFlag = &Metadata{
-	Name:     "ui-enabled",
-	Usage:    "Show flow data via the terminal UI",
+var NonInteractiveFlag = &Metadata{
+	Name:      "non-interactive",
+	Shorthand: "x",
+	Usage: "Disable displaying flow output via terminal UI rendering. " +
+		"This is only needed if the interactive output is enabled by default in flow's configuration.",
 	Default:  false,
 	Required: false,
 }

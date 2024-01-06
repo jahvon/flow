@@ -15,13 +15,11 @@ func PrintUserConfig(format io.OutputFormat, userConfig *config.UserConfig) {
 	}
 
 	switch format {
-	case io.OutputFormatYAML:
+	case io.OutputFormatUnset, io.OutputFormatYAML:
 		fmt.Println(userConfig.YAML())
 	case io.OutputFormatJSON:
 		fmt.Println(userConfig.JSON(false))
 	case io.OutputFormatPrettyJSON:
 		fmt.Println(userConfig.JSON(true))
-	case io.OutputFormatDefault:
-		io.PrintMap(userConfig.Map())
 	}
 }

@@ -10,8 +10,9 @@ import (
 var log = io.Log()
 
 func PrintExecutableList(format io.OutputFormat, executables config.ExecutableList) {
+	log.Info().Msgf("%d executables", len(executables))
 	switch format {
-	case io.OutputFormatYAML:
+	case io.OutputFormatUnset, io.OutputFormatYAML:
 		str, err := executables.YAML()
 		if err != nil {
 			log.Panic().Msgf("Failed to marshal executable list - %v", err)
@@ -29,8 +30,6 @@ func PrintExecutableList(format io.OutputFormat, executables config.ExecutableLi
 			log.Panic().Msgf("Failed to marshal executable list - %v", err)
 		}
 		fmt.Println(str)
-	case io.OutputFormatDefault:
-		io.PrintTableData(executables.TableData())
 	default:
 		log.Panic().Msgf("Unsupported output format %s", format)
 	}
@@ -40,9 +39,9 @@ func PrintExecutable(format io.OutputFormat, exec *config.Executable) {
 	if exec == nil {
 		log.Panic().Msg("Executable is nil")
 	}
-
+	log.Info().Str("Location", exec.DefinitionPath()).Msgf("Executable %s", exec.ID())
 	switch format {
-	case io.OutputFormatYAML:
+	case io.OutputFormatUnset, io.OutputFormatYAML:
 		str, err := exec.YAML()
 		if err != nil {
 			log.Panic().Msgf("Failed to marshal executable - %v", err)
@@ -60,8 +59,6 @@ func PrintExecutable(format io.OutputFormat, exec *config.Executable) {
 			log.Panic().Msgf("Failed to marshal executable - %v", err)
 		}
 		fmt.Println(str)
-	case io.OutputFormatDefault:
-		io.PrintMap(exec.Map())
 	default:
 		log.Panic().Msgf("Unsupported output format %s", format)
 	}

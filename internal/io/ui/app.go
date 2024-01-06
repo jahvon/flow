@@ -3,161 +3,179 @@ package ui
 import (
 	"context"
 	"fmt"
-	"strings"
+	"math"
 
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
+	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/config"
 )
 
-var log = io.Log().With().Str("scope", "io/ui/frame").Logger()
-
-type PageKeyHandler func(event *tcell.EventKey) *tcell.EventKey
+const (
+	syncAppMsg    = "sync-app"
+	heightPadding = 5
+)
 
 type Application struct {
-	app   *tview.Application
-	pages *tview.Pages
+	ctx         context.Context
+	pendingView ViewBuilder
+	activeView  ViewBuilder
+	lastView    ViewBuilder
+	program     *tea.Program
 
-	activePage      string
-	activeView      tview.Primitive
-	lastPage        string
-	lastView        tview.Primitive
-	pageKeyHandlers map[string]PageKeyHandler
+	curWs, curNs, curNotice string
+	curNoticeLvl            NoticeLevel
+	curFilter               config.Tags
 
-	curState                           State
-	curWs, curNs, curNotice, curFilter string
+	width, height int
+	ready         bool
 }
 
-func StartApplication(cancel context.CancelFunc) *Application {
-	tviewApp := tview.NewApplication()
-	tviewApp.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyCtrlC:
-			tviewApp.Stop()
-		}
-		return event
-	})
-	pages := tview.NewPages()
-	pages.AddPage("loading", LoadingView(), true, true)
-	tviewApp.SetRoot(pages, true).EnableMouse(true).SetFocus(pages)
-
+func StartApplication(ctx context.Context, cancel context.CancelFunc, opts ...HeaderOption) *Application {
+	activeView := NewLoadingView("")
+	a := &Application{
+		ctx:          ctx,
+		curWs:        "unk",
+		curNs:        "unk",
+		curNotice:    "",
+		curNoticeLvl: NoticeLevelInfo,
+		activeView:   activeView,
+	}
+	a.SetHeader(opts...)
+	prgm := tea.NewProgram(a, tea.WithContext(ctx))
 	go func() {
-		if err := tviewApp.Run(); err != nil {
-			log.Panic().Err(err).Msg("encountered error rendering ui")
+		var err error
+		if _, err = prgm.Run(); err != nil {
+			log.Panic().Err(err).Msg("error running application")
 		}
-		// Cancel the context when the application is stopped.
-		log.Trace().Msg("stopping application")
+		log.Debug().Msg("application exited")
 		cancel()
 	}()
-
-	return &Application{
-		app:       tviewApp,
-		pages:     pages,
-		curState:  IdleState,
-		curWs:     "unk",
-		curNs:     "unk",
-		curFilter: "",
-		curNotice: "---",
-	}
+	a.program = prgm
+	return a
 }
 
-func (a *Application) Suspend(f func()) {
-	a.app.Suspend(f)
+func (a *Application) Init() tea.Cmd {
+	cmds := make([]tea.Cmd, 0)
+	if a.activeView != nil {
+		cmds = append(cmds, a.activeView.Init())
+	}
+	cmds = append(cmds, tea.SetWindowTitle("flow"))
+	return tea.Batch(cmds...)
 }
 
-func (a *Application) RegisterKeyHandler(pageTitle string, handler PageKeyHandler) {
-	if a.pageKeyHandlers == nil {
-		a.pageKeyHandlers = make(map[string]PageKeyHandler)
+func (a *Application) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	cmds := make([]tea.Cmd, 0)
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			a.activeView.Update(tea.Quit())
+			return a, tea.Quit
+		case "esc", "backspace":
+			if a.lastView == nil || a.activeView == a.lastView {
+				a.activeView.Update(tea.Quit())
+				return a, tea.Quit
+			} else {
+				a.activeView = a.lastView
+				a.lastView = nil
+				return a, nil
+			}
+		}
+	case string:
+		switch msg {
+		case syncAppMsg:
+			log.Debug().Msg("sync triggered")
+		}
+	case tea.WindowSizeMsg:
+		if !a.Ready() {
+			a.width = int(math.Floor(float64(msg.Width) * 0.75))
+			a.height = msg.Height - heightPadding
+			if a.pendingView != nil {
+				a.activeView = a.pendingView
+				a.pendingView = nil
+			}
+			a.ready = true
+		} else {
+			a.width = int(math.Floor(float64(msg.Width) * 0.75))
+			a.height = msg.Height - heightPadding
+		}
 	}
-	a.pageKeyHandlers[pageTitle] = handler
+
+	_, cmd := a.activeView.Update(msg)
+	cmds = append(cmds, cmd)
+	return a, tea.Batch(cmds...)
+}
+
+func (a *Application) Ready() bool {
+	return a.ready
+}
+
+func (a *Application) Height() int {
+	return a.height
+}
+
+func (a *Application) Width() int {
+	return a.width
+}
+
+func (a *Application) View() string {
+	header := fmt.Sprintf(
+		"%s%s%s",
+		brandStyle("flow"),
+		ContextStr(a.curWs, a.curNs),
+		FilterStr(a.curFilter),
+	)
+	var help string
+	if a.activeView.FooterEnabled() && a.activeView.HelpMsg() != "" {
+		help = helpStyle(fmt.Sprintf("\n %s | esc: back • q: quit • ↑/↓: navigate", a.activeView.HelpMsg()))
+	} else if a.activeView.FooterEnabled() {
+		help = helpStyle("\n esc: back • q: quit • ↑/↓: navigate")
+	}
+	var notice string
+	if a.curNotice != "" {
+		notice = fmt.Sprintf("\n %s", NoticeStr(a.curNotice, a.curNoticeLvl))
+	}
+
+	if !a.Ready() && a.activeView.Type() != "loading" {
+		a.activeView = NewLoadingView("")
+	}
+
+	return header + "\n" + a.activeView.View() + help + notice
 }
 
 func (a *Application) SetHeader(opts ...HeaderOption) {
 	for _, opt := range opts {
 		opt(a)
 	}
-	a.SetPage(a.activePage, a.activeView)
 }
 
-func (a *Application) ShowModal(text string) {
-	modal := tview.NewTextView().
-		SetText(text)
-	// 	AddButtons([]string{"Close"}).
-	// 	SetDoneFunc(func(_ int, _ string) {
-	// 		a.pages.SwitchToPage(a.activePage)
-	// 	})
-	// modal.SetBackgroundColor(IdleState.PrimaryBGColor())
-	// modal.SetTextColor(IdleState.PrimaryFGColor())
-
-	container := tview.NewFlex().
-		AddItem(nil, 0, 1, false).
-		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
-			AddItem(nil, 0, 1, false).
-			AddItem(modal, 40, 1, true).
-			AddItem(nil, 0, 1, false), 10, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	a.pages.AddPage("modal", container, true, true)
-	a.app.SetFocus(modal)
-}
-
-func (a *Application) SetPage(title string, view tview.Primitive) {
-	brandItem := brandTxt(a.curState)
-	contextItem := contextTxt(a.curWs, a.curNs, a.curState)
-	filterItem := filterTxt(a.curFilter, a.curState)
-	noticeItem := noticeTxt(a.curNotice, a.curState)
-
-	headerRow := tview.NewFlex().SetDirection(tview.FlexColumn).
-		AddItem(brandItem, textViewWidth(brandItem)+2, 1, false).
-		AddItem(contextItem, textViewWidth(contextItem)+4, 1, false).
-		AddItem(filterItem, textViewWidth(filterItem)+4, 1, false).
-		AddItem(noticeItem, 0, 2, false)
-
-	container := tview.NewFlex()
-	container.SetDirection(tview.FlexRow).
-		SetBorder(true).
-		SetBorderColor(tcell.ColorWhite).
-		SetTitleAlign(tview.AlignCenter).
-		SetTitleColor(a.curState.PrimaryFGColor())
-	if title != "" {
-		container.SetTitle(fmt.Sprintf(" - %s - ", strings.ToLower(title)))
+func (a *Application) BuildAndSetView(viewBuilder ViewBuilder, opts ...HeaderOption) {
+	a.SetHeader(opts...)
+	if !a.Ready() {
+		a.pendingView = viewBuilder
+		return
 	}
-	container.AddItem(view, 0, 1, false)
-
-	page := tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(headerRow, 1, 33, false).
-		AddItem(container, 0, 67, false)
-
-	if a.pageKeyHandlers != nil {
-		if handler, found := a.pageKeyHandlers[title]; found {
-			page.SetInputCapture(handler)
-		}
+	if a.activeView != nil && a.activeView.Type() != "loading" && a.activeView.Type() != viewBuilder.Type() {
+		a.lastView = a.activeView
 	}
-
-	a.pages.AddAndSwitchToPage(title, page, true)
-	a.app.SetFocus(view)
-	a.activePage = title
-	a.activeView = view
+	a.activeView = viewBuilder
+	a.Update(syncAppMsg)
 }
 
-func (a *Application) SetErrorPage(err error) {
-	a.curState = ErrorState
-	a.SetPage("error", ErrorView(err))
+func (a *Application) HandleUserError(err error) {
+	if err == nil {
+		return
+	}
+	a.curNoticeLvl = NoticeLevelWarning
+	a.curNotice = err.Error()
+	a.Update(syncAppMsg)
 }
 
-func (a *Application) Idle() {
-	a.SetHeader(WithCurrentState(IdleState))
-}
-
-func (a *Application) Progressing() {
-	a.SetHeader(WithCurrentState(ProgressingState))
-}
-
-func (a *Application) Succeeded() {
-	a.SetHeader(WithCurrentState(SuccessState))
-}
-
-func (a *Application) Errored() {
-	a.SetHeader(WithCurrentState(ErrorState))
+func (a *Application) HandleInternalError(err error) {
+	if err == nil {
+		return
+	}
+	a.curNoticeLvl = NoticeLevelError
+	a.curNotice = err.Error()
+	a.Update(syncAppMsg)
 }

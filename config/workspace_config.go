@@ -3,20 +3,19 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
-	"strings"
 
+	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/utils"
 )
 
 type WorkspaceConfig struct {
-	DisplayName string             `json:"displayName"           yaml:"displayName"`
-	Description string             `json:"description,omitempty" yaml:"description,omitempty"`
-	Tags        Tags               `json:"tags,omitempty"        yaml:"tags,omitempty"`
-	Git         *GitConfig         `json:"git,omitempty"         yaml:"git,omitempty"`
-	Executables *ExecutablesConfig `json:"executables,omitempty" yaml:"executables,omitempty"`
+	DisplayName string                    `json:"displayName"           yaml:"displayName"`
+	Description string                    `json:"description,omitempty" yaml:"description,omitempty"`
+	Tags        Tags                      `json:"tags,omitempty"        yaml:"tags,omitempty"`
+	Git         *GitConfig                `json:"git,omitempty"         yaml:"git,omitempty"`
+	Executables *ExecutableLocationConfig `json:"executables,omitempty" yaml:"executables,omitempty"`
 
 	assignedName string
 	location     string
@@ -29,9 +28,13 @@ type GitConfig struct {
 	PullOnSync bool `json:"pullOnSync,omitempty" yaml:"pullOnSync,omitempty"`
 }
 
-type ExecutablesConfig struct {
+type ExecutableLocationConfig struct {
 	Included []string `json:"included,omitempty" yaml:"included,omitempty"`
 	Excluded []string `json:"excluded,omitempty" yaml:"excluded,omitempty"`
+}
+
+type enrichedWorkspaceConfigList struct {
+	Workspaces WorkspaceConfigList `json:"workspaces" yaml:"workspaces"`
 }
 
 func (c *WorkspaceConfig) AssignedName() string {
@@ -69,47 +72,48 @@ func (c *WorkspaceConfig) JSON(pretty bool) (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (c *WorkspaceConfig) Map() map[string]string {
-	fields := make(map[string]string)
-	fields["Name"] = c.AssignedName()
-	if c.AssignedName() != c.DisplayName && c.DisplayName != "" {
-		fields["Display name"] = c.DisplayName
+func (c *WorkspaceConfig) Markdown() string {
+	var mkdwn string
+	if c.DisplayName != "" {
+		mkdwn = fmt.Sprintf("# [Workspace] %s\n", c.DisplayName)
+	} else {
+		mkdwn = fmt.Sprintf("# [Workspace] %s\n", c.AssignedName())
 	}
-	fields["Location"] = c.Location()
+
+	mkdwn += fmt.Sprintf("## Location\n%s\n", c.Location())
 	if c.Description != "" {
-		fields["Description"] = utils.WrapLines(c.Description, 20)
+		mkdwn += fmt.Sprintf("## Description\n%s\n", c.Description)
 	}
-	if c.Tags != nil {
-		fields["Tags"] = c.Tags.String()
+	if len(c.Tags) > 0 {
+		mkdwn += fmt.Sprintf("## Tags\n")
+		lo.ForEach(c.Tags, func(tag string, _ int) {
+			mkdwn += fmt.Sprintf("- %s\n", tag)
+		})
 	}
 	if c.Git != nil {
 		gitConfig, err := yaml.Marshal(c.Git)
 		if err != nil {
-			fields["Git config"] = "error"
 			log.Error().Err(err).Msg("failed to marshal git config")
+			mkdwn += fmt.Sprintf("## Git config\nerror\n")
 		} else {
-			fields["Git config"] = strings.TrimSpace(string(gitConfig))
+			mkdwn += fmt.Sprintf("## Git config\n```yaml\n%s```\n", string(gitConfig))
 		}
 	}
 	if c.Executables != nil {
 		execs, err := yaml.Marshal(c.Executables)
 		if err != nil {
-			fields["Executables"] = "error"
 			log.Error().Err(err).Msg("failed to marshal executables")
+			mkdwn += fmt.Sprintf("## Executables\nerror\n")
 		} else {
-			fields["Executables"] = string(execs)
+			mkdwn += fmt.Sprintf("## Executables\n```yaml\n%s```\n", string(execs))
 		}
 	}
-	return fields
-}
-
-func (c *WorkspaceConfig) DetailsString() string {
-	fields := c.Map()
-	return utils.DetailsString(fields)
+	return mkdwn
 }
 
 func (l WorkspaceConfigList) YAML() (string, error) {
-	yamlBytes, err := yaml.Marshal(l)
+	enriched := enrichedWorkspaceConfigList{Workspaces: l}
+	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config list - %v", err)
 	}
@@ -119,10 +123,11 @@ func (l WorkspaceConfigList) YAML() (string, error) {
 func (l WorkspaceConfigList) JSON(pretty bool) (string, error) {
 	var jsonBytes []byte
 	var err error
+	enriched := enrichedWorkspaceConfigList{Workspaces: l}
 	if pretty {
-		jsonBytes, err = json.MarshalIndent(l, "", "  ")
+		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
 	} else {
-		jsonBytes, err = json.Marshal(l)
+		jsonBytes, err = json.Marshal(enriched)
 	}
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config list - %v", err)
@@ -130,23 +135,36 @@ func (l WorkspaceConfigList) JSON(pretty bool) (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (l WorkspaceConfigList) TableData() (header []string, rows [][]string) {
-	header = []string{"Name", "Tags", "Description"}
+func (l WorkspaceConfigList) Items() []CollectionItem {
+	items := make([]CollectionItem, 0)
 	for _, ws := range l {
 		name := ws.AssignedName()
 		if ws.DisplayName != "" {
 			name = ws.DisplayName
 		}
-		rows = append(
-			rows,
-			[]string{
-				name,
-				ws.Tags.PreviewString(),
-				utils.ShortenString(ws.Description, 80),
-			})
+
+		var location string
+		if ws.Location() == "" {
+			location = "unk"
+		} else {
+			location = utils.PathFromWd(ws.Location())
+		}
+
+		item := CollectionItem{
+			Header:      name,
+			SubHeader:   location,
+			Description: ws.Description,
+			Tags:        ws.Tags,
+		}
+		items = append(items, item)
 	}
-	sort.Slice(rows, func(i, j int) bool {
-		return strings.Compare(rows[i][0], rows[j][0]) < 0
-	})
-	return
+	return items
+}
+
+func (l WorkspaceConfigList) Singular() string {
+	return "workspace"
+}
+
+func (l WorkspaceConfigList) Plural() string {
+	return "workspaces"
 }

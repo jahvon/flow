@@ -115,11 +115,11 @@ type Executable struct {
 type ExecutableList []*Executable
 
 type enrichedExecutableList struct {
-	Executables []*enrichedExecutable `json:"executables"`
+	Executables []*enrichedExecutable `json:"executables" yaml:"executables"`
 }
 type enrichedExecutable struct {
-	ID   string      `json:"id"`
-	Spec *Executable `json:"spec"`
+	ID   string      `json:"id" yaml:"id"`
+	Spec *Executable `json:"spec" yaml:"spec"`
 }
 
 func (e *Executable) SetContext(workspaceName, workspacePath, namespace, definitionPath string) {
@@ -159,34 +159,41 @@ func (e *Executable) JSON(pretty bool) (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (e *Executable) Map() map[string]string {
-	fields := map[string]string{
-		"ID":         e.ID(),
-		"Verb":       e.Verb.String(),
-		"Name":       e.Name,
-		"Location":   e.definitionPath,
-		"Visibility": e.Visibility.String(),
+func (e *Executable) Markdown() string {
+	var mkdwn string
+	mkdwn += fmt.Sprintf("# [Executable] %s %s\n", e.Verb, e.ID())
+	mkdwn += fmt.Sprintf("## Defined in\n%s\n", e.definitionPath)
+	if len(e.Aliases) > 0 {
+		mkdwn += fmt.Sprintf("## Aliases\n")
+		lo.ForEach(e.Aliases, func(alias string, _ int) {
+			mkdwn += fmt.Sprintf("- %s\n", alias)
+		})
 	}
 	if e.Description != "" {
-		fields["Description"] = utils.WrapLines(e.Description, 20)
-	}
-	if len(e.Aliases) > 0 {
-		fields["Aliases"] = strings.Join(e.Aliases, ", ")
+		mkdwn += fmt.Sprintf("## Description\n%s\n", e.Description)
 	}
 	if len(e.Tags) > 0 {
-		fields["Tags"] = e.Tags.String()
+		mkdwn += fmt.Sprintf("## Tags\n")
+		lo.ForEach(e.Tags, func(tag string, _ int) {
+			mkdwn += fmt.Sprintf("- %s\n", tag)
+		})
+	}
+	if e.Type != nil {
+		typeSpec, err := yaml.Marshal(e.Type)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to marshal type spec")
+			mkdwn += fmt.Sprintf("## Type spec\nerror\n")
+		} else {
+			mkdwn += fmt.Sprintf("## Type spec\n```yaml\n%s```\n", string(typeSpec))
+		}
+	}
+	if e.Visibility != "" {
+		mkdwn += fmt.Sprintf("## Visibility\n%s\n", e.Visibility)
 	}
 	if e.Timeout != 0 {
-		fields["Timeout"] = e.Timeout.String()
+		mkdwn += fmt.Sprintf("## Timeout\n%s\n", e.Timeout.String())
 	}
-	typeSpec, err := yaml.Marshal(e.Type)
-	if err != nil {
-		fields["Type"] = fmt.Sprintf("%+v", e.Type)
-		log.Error().Err(err).Msg("failed to marshal executable type")
-	} else {
-		fields["Type"] = string(typeSpec)
-	}
-	return fields
+	return mkdwn
 }
 
 func (e *Executable) Ref() Ref {
@@ -363,19 +370,26 @@ func (l ExecutableList) JSON(pretty bool) (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (l ExecutableList) TableData() [][]string {
-	tableRows := [][]string{
-		{"Verb", "ID", "Tags", "Description"},
-	}
+func (l ExecutableList) Items() []CollectionItem {
+	items := make([]CollectionItem, 0)
 	for _, exec := range l {
-		tableRows = append(tableRows, []string{
-			exec.Verb.String(),
-			exec.ID(),
-			exec.Tags.PreviewString(),
-			utils.ShortenString(exec.Description, 25),
-		})
+		item := CollectionItem{
+			Header:      exec.ID(),
+			SubHeader:   exec.Verb.String(),
+			Description: exec.Description,
+			Tags:        exec.Tags,
+		}
+		items = append(items, item)
 	}
-	return tableRows
+	return items
+}
+
+func (l ExecutableList) Singular() string {
+	return "executable"
+}
+
+func (l ExecutableList) Plural() string {
+	return "executables"
 }
 
 func (l ExecutableList) FindByVerbAndID(verb Verb, id string) (*Executable, error) {

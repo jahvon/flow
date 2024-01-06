@@ -106,6 +106,17 @@ func (t Tags) String() string {
 	return strings.Join(t, ", ")
 }
 
+func (t Tags) ContextString() string {
+	if len(t) == 0 {
+		return ""
+	}
+	var str string
+	lo.ForEach(t, func(tag string, i int) {
+		str += fmt.Sprintf("[%s] ", tag)
+	})
+	return str
+}
+
 func (t Tags) PreviewString() string {
 	if len(t) == 0 {
 		return ""
