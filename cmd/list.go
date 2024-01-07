@@ -17,7 +17,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
-	Short:   "Print a list of flow objects.",
+	Short:   "Print a list of flow entities.",
 }
 
 var workspaceList = &cobra.Command{

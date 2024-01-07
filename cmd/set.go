@@ -74,7 +74,7 @@ var configInteractiveSetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		enabled, err := strconv.ParseBool(args[0])
 		if err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("failed to parse boolean value: %v", err))
+			io.PrintErrorAndExit(fmt.Errorf("failed to parse boolean value: %w", err))
 		}
 
 		userConfig := file.LoadUserConfig()

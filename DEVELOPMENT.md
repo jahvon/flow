@@ -11,5 +11,3 @@ The following `make` commands are available:
 | **Test**                       | `make go/test`    |
 | **Pre-commit**                 | `make pre-commit` |
 
-
-## Debugging

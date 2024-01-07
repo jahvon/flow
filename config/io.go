@@ -6,5 +6,5 @@ const (
 	JSON          OutputFormat = "json"
 	FormattedJSON OutputFormat = "jsonp"
 	YAML          OutputFormat = "yaml"
-	UNSET         OutputFormat = "unset"
+	UNSET         OutputFormat = ""
 )

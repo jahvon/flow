@@ -19,7 +19,7 @@ import (
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
-	Short:   "Print a specific flow object.",
+	Short:   "Print a flow entity.",
 }
 
 var configGetCmd = &cobra.Command{

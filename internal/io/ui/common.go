@@ -13,7 +13,6 @@ func openInEditor(app *Application, path string) {
 		if err := open.OpenWith(preferred, path, false); err != nil {
 			log.Err(err).Msg("unable to open editor")
 			app.HandleInternalError(err)
-
 		}
 	} else {
 		cmd := exec.Command("vim", path)

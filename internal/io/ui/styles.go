@@ -12,7 +12,6 @@ var (
 	secondaryColor = lipgloss.AdaptiveColor{Dark: "#B294BB", Light: "#85678F"}
 	warningColor   = lipgloss.AdaptiveColor{Dark: "#F0C674", Light: "#DE935F"}
 	errorColor     = lipgloss.AdaptiveColor{Dark: "#CC6666", Light: "#A54242"}
-	black          = lipgloss.AdaptiveColor{Dark: "#1D1F21", Light: "#FFFFFF"}
 	white          = lipgloss.AdaptiveColor{Dark: "#FFFFFF", Light: "#C5C8C6"}
 	gray           = lipgloss.AdaptiveColor{Dark: "#373B41", Light: "#707880"}
 	lightGray      = lipgloss.AdaptiveColor{Dark: "#C5C8C6", Light: "#373B41"}
@@ -54,7 +53,7 @@ var (
 			Padding(0, 1)
 
 	//go:embed markdown.json
-	markdownStyleJson string
+	markdownStyleJSON string
 )
 
 func listStyles() list.Styles {

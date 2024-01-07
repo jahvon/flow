@@ -21,6 +21,8 @@ const (
 	NoticeLevelInfo    NoticeLevel = "info"
 	NoticeLevelWarning NoticeLevel = "warning"
 	NoticeLevelError   NoticeLevel = "error"
+
+	loadingViewType = "loading"
 )
 
 var (
@@ -82,6 +84,8 @@ func (v *LoadingView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case error:
 		v.msg = msg.Error()
+	case string:
+		v.msg = msg
 	}
 	v.spinner, cmd = v.spinner.Update(msg)
 	return v, cmd
@@ -106,7 +110,7 @@ func (v *LoadingView) FooterEnabled() bool {
 }
 
 func (v *LoadingView) Type() string {
-	return "loading"
+	return loadingViewType
 }
 
 func NewLoadingView(msg string) ViewBuilder {
@@ -122,9 +126,7 @@ func NewLoadingView(msg string) ViewBuilder {
 type EntityView struct {
 	app       *Application
 	viewport  viewport.Model
-	cursor    int
 	entity    config.Entity
-	helpMsg   string
 	format    config.OutputFormat
 	callbacks []KeyCallback
 }
@@ -153,6 +155,7 @@ func (v *EntityView) Init() tea.Cmd {
 	return nil
 }
 
+//nolint:gocognit
 func (v *EntityView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	v.viewport, cmd = v.viewport.Update(msg)
@@ -225,6 +228,8 @@ func (v *EntityView) renderedContent() string {
 	case config.FormattedJSON:
 		content, err = v.entity.JSON(true)
 		content = fmt.Sprintf("```json\n%s\n```", content)
+	case config.UNSET:
+		fallthrough
 	default:
 		content = v.entity.Markdown()
 	}
@@ -236,7 +241,7 @@ func (v *EntityView) renderedContent() string {
 	}
 
 	renderer, err := glamour.NewTermRenderer(
-		glamour.WithStylesFromJSONBytes([]byte(markdownStyleJson)),
+		glamour.WithStylesFromJSONBytes([]byte(markdownStyleJSON)),
 		glamour.WithWordWrap(v.app.Width()),
 	)
 	if err != nil {
@@ -256,7 +261,7 @@ func (v *EntityView) View() string {
 }
 
 func (v *EntityView) HelpMsg() string {
-	msg := fmt.Sprintf("y: yaml • j: json • f: formatted json")
+	msg := "y: yaml • j: json • f: formatted json"
 
 	var extendedHelp string
 	for i, cb := range v.callbacks {
@@ -277,7 +282,6 @@ func (v *EntityView) HelpMsg() string {
 
 func (v *EntityView) FooterEnabled() bool {
 	return true
-
 }
 
 func (v *EntityView) Type() string {
@@ -350,6 +354,7 @@ func (v *CollectionView) Init() tea.Cmd {
 	return nil
 }
 
+//nolint:gocognit
 func (v *CollectionView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -448,6 +453,8 @@ func (v *CollectionView) renderedContent() string {
 		content, err = v.collection.JSON(true)
 		content = fmt.Sprintf("```json\n%s\n```", content)
 		isMkdwn = true
+	case config.UNSET:
+		fallthrough
 	default:
 		v.model.SetSize(v.app.Width(), v.app.Height())
 		v.UpdateItemsFromCollections()
@@ -465,7 +472,7 @@ func (v *CollectionView) renderedContent() string {
 	}
 
 	renderer, err := glamour.NewTermRenderer(
-		glamour.WithStylesFromJSONBytes([]byte(markdownStyleJson)),
+		glamour.WithStylesFromJSONBytes([]byte(markdownStyleJSON)),
 		glamour.WithWordWrap(v.app.Width()),
 	)
 	if err != nil {
@@ -505,7 +512,6 @@ func (v *CollectionView) HelpMsg() string {
 
 func (v *CollectionView) FooterEnabled() bool {
 	return true
-
 }
 
 func (v *CollectionView) Type() string {

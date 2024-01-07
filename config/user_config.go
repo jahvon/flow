@@ -11,7 +11,7 @@ type UserConfig struct {
 	Workspaces       map[string]string `json:"workspaces"       yaml:"workspaces"`
 	CurrentWorkspace string            `json:"currentWorkspace" yaml:"currentWorkspace"`
 	CurrentNamespace string            `json:"currentNamespace" yaml:"currentNamespace"`
-	InteractiveUI    bool              `json:"interactive"        yaml:"interactive"`
+	InteractiveUI    bool              `json:"interactive"      yaml:"interactive"`
 }
 
 func (c *UserConfig) Validate() error {
@@ -32,7 +32,7 @@ func (c *UserConfig) Validate() error {
 func (c *UserConfig) YAML() (string, error) {
 	yamlBytes, err := yaml.Marshal(c)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal user config - %v", err)
+		return "", fmt.Errorf("failed to marshal user config - %w", err)
 	}
 	return string(yamlBytes), nil
 }
@@ -46,7 +46,7 @@ func (c *UserConfig) JSON(pretty bool) (string, error) {
 		jsonBytes, err = json.Marshal(c)
 	}
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal user config - %v", err)
+		return "", fmt.Errorf("failed to marshal user config - %w", err)
 	}
 	return string(jsonBytes), nil
 }

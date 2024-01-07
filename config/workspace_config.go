@@ -53,7 +53,7 @@ func (c *WorkspaceConfig) SetContext(name, location string) {
 func (c *WorkspaceConfig) YAML() (string, error) {
 	yamlBytes, err := yaml.Marshal(c)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal workspace config - %v", err)
+		return "", fmt.Errorf("failed to marshal workspace config - %w", err)
 	}
 	return string(yamlBytes), nil
 }
@@ -67,7 +67,7 @@ func (c *WorkspaceConfig) JSON(pretty bool) (string, error) {
 		jsonBytes, err = json.Marshal(c)
 	}
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal workspace config - %v", err)
+		return "", fmt.Errorf("failed to marshal workspace config - %w", err)
 	}
 	return string(jsonBytes), nil
 }
@@ -85,7 +85,7 @@ func (c *WorkspaceConfig) Markdown() string {
 		mkdwn += fmt.Sprintf("## Description\n%s\n", c.Description)
 	}
 	if len(c.Tags) > 0 {
-		mkdwn += fmt.Sprintf("## Tags\n")
+		mkdwn += "## Tags\n"
 		lo.ForEach(c.Tags, func(tag string, _ int) {
 			mkdwn += fmt.Sprintf("- %s\n", tag)
 		})
@@ -94,7 +94,7 @@ func (c *WorkspaceConfig) Markdown() string {
 		gitConfig, err := yaml.Marshal(c.Git)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to marshal git config")
-			mkdwn += fmt.Sprintf("## Git config\nerror\n")
+			mkdwn += "## Git config\nerror\n"
 		} else {
 			mkdwn += fmt.Sprintf("## Git config\n```yaml\n%s```\n", string(gitConfig))
 		}
@@ -103,7 +103,7 @@ func (c *WorkspaceConfig) Markdown() string {
 		execs, err := yaml.Marshal(c.Executables)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to marshal executables")
-			mkdwn += fmt.Sprintf("## Executables\nerror\n")
+			mkdwn += "## Executables\nerror\n"
 		} else {
 			mkdwn += fmt.Sprintf("## Executables\n```yaml\n%s```\n", string(execs))
 		}
@@ -115,7 +115,7 @@ func (l WorkspaceConfigList) YAML() (string, error) {
 	enriched := enrichedWorkspaceConfigList{Workspaces: l}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal workspace config list - %v", err)
+		return "", fmt.Errorf("failed to marshal workspace config list - %w", err)
 	}
 	return string(yamlBytes), nil
 }
@@ -130,7 +130,7 @@ func (l WorkspaceConfigList) JSON(pretty bool) (string, error) {
 		jsonBytes, err = json.Marshal(enriched)
 	}
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal workspace config list - %v", err)
+		return "", fmt.Errorf("failed to marshal workspace config list - %w", err)
 	}
 	return string(jsonBytes), nil
 }

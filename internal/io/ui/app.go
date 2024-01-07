@@ -82,9 +82,8 @@ func (a *Application) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case string:
-		switch msg {
-		case syncAppMsg:
-			log.Debug().Msg("sync triggered")
+		if msg == syncAppMsg {
+			log.Trace().Msg("sync triggered")
 		}
 	case tea.WindowSizeMsg:
 		if !a.Ready() {
@@ -136,7 +135,7 @@ func (a *Application) View() string {
 		notice = fmt.Sprintf("\n %s", NoticeStr(a.curNotice, a.curNoticeLvl))
 	}
 
-	if !a.Ready() && a.activeView.Type() != "loading" {
+	if !a.Ready() && a.activeView.Type() != loadingViewType {
 		a.activeView = NewLoadingView("")
 	}
 
@@ -155,7 +154,7 @@ func (a *Application) BuildAndSetView(viewBuilder ViewBuilder, opts ...HeaderOpt
 		a.pendingView = viewBuilder
 		return
 	}
-	if a.activeView != nil && a.activeView.Type() != "loading" && a.activeView.Type() != viewBuilder.Type() {
+	if a.activeView != nil && a.activeView.Type() != loadingViewType && a.activeView.Type() != viewBuilder.Type() {
 		a.lastView = a.activeView
 	}
 	a.activeView = viewBuilder

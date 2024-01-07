@@ -118,7 +118,7 @@ type enrichedExecutableList struct {
 	Executables []*enrichedExecutable `json:"executables" yaml:"executables"`
 }
 type enrichedExecutable struct {
-	ID   string      `json:"id" yaml:"id"`
+	ID   string      `json:"id"   yaml:"id"`
 	Spec *Executable `json:"spec" yaml:"spec"`
 }
 
@@ -136,7 +136,7 @@ func (e *Executable) YAML() (string, error) {
 	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal executable - %v", err)
+		return "", fmt.Errorf("failed to marshal executable - %w", err)
 	}
 	return string(yamlBytes), nil
 }
@@ -154,7 +154,7 @@ func (e *Executable) JSON(pretty bool) (string, error) {
 		jsonBytes, err = json.Marshal(enriched)
 	}
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal executable - %v", err)
+		return "", fmt.Errorf("failed to marshal executable - %w", err)
 	}
 	return string(jsonBytes), nil
 }
@@ -164,7 +164,7 @@ func (e *Executable) Markdown() string {
 	mkdwn += fmt.Sprintf("# [Executable] %s %s\n", e.Verb, e.ID())
 	mkdwn += fmt.Sprintf("## Defined in\n%s\n", e.definitionPath)
 	if len(e.Aliases) > 0 {
-		mkdwn += fmt.Sprintf("## Aliases\n")
+		mkdwn += "## Aliases\n"
 		lo.ForEach(e.Aliases, func(alias string, _ int) {
 			mkdwn += fmt.Sprintf("- %s\n", alias)
 		})
@@ -173,7 +173,7 @@ func (e *Executable) Markdown() string {
 		mkdwn += fmt.Sprintf("## Description\n%s\n", e.Description)
 	}
 	if len(e.Tags) > 0 {
-		mkdwn += fmt.Sprintf("## Tags\n")
+		mkdwn += "## Tags\n"
 		lo.ForEach(e.Tags, func(tag string, _ int) {
 			mkdwn += fmt.Sprintf("- %s\n", tag)
 		})
@@ -182,7 +182,7 @@ func (e *Executable) Markdown() string {
 		typeSpec, err := yaml.Marshal(e.Type)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to marshal type spec")
-			mkdwn += fmt.Sprintf("## Type spec\nerror\n")
+			mkdwn += "## Type spec\nerror\n"
 		} else {
 			mkdwn += fmt.Sprintf("## Type spec\n```yaml\n%s```\n", string(typeSpec))
 		}
@@ -344,7 +344,7 @@ func (l ExecutableList) YAML() (string, error) {
 	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal executable list - %v", err)
+		return "", fmt.Errorf("failed to marshal executable list - %w", err)
 	}
 	return string(yamlBytes), nil
 }
@@ -365,7 +365,7 @@ func (l ExecutableList) JSON(pretty bool) (string, error) {
 		jsonBytes, err = json.Marshal(enriched)
 	}
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal executable list - %v", err)
+		return "", fmt.Errorf("failed to marshal executable list - %w", err)
 	}
 	return string(jsonBytes), nil
 }

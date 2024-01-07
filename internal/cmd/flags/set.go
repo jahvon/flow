@@ -11,6 +11,7 @@ type FlagSet struct {
 	registeredFlags map[string]Metadata
 }
 
+//nolint:gocognit
 func (f *FlagSet) Register(cmd *cobra.Command, flag Metadata) error {
 	if flag.Default == nil {
 		return fmt.Errorf("flag default must be defined using explicit type")

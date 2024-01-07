@@ -41,11 +41,8 @@ func main() {
 
 	if cfg.InteractiveUI {
 		// Keep the app running until the context is cancelled.
-		for {
-			select {
-			case <-ctx.Ctx.Done():
-				return
-			}
+		for range ctx.Ctx.Done() {
+			return
 		}
 	}
 }

@@ -36,22 +36,7 @@ Running `flow open ns:config` will run the above workflow.
 
 ```bash
 flow [command]
-``` 
-
-### Available Commands
-
-**Updating configs and data used by `flow`**
-
-- `flow get` - Get current value of various configuration options and data
-- `flow set` - Update various configuration options and data
-- `flow create` - Create ...
-- `flow delete` - Delete ...
-- `flow vault` - Manage secrets stored in the vault
-
-**Executing workflows**
-
-- `flow run` - Run a workflow
-- `flow open` - Open a workflow in the browser
+```
 
 **Autocompletion**
 
