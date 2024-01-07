@@ -1,10 +1,7 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
-
-	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/io"
@@ -18,50 +15,11 @@ func PrintUserConfig(format io.OutputFormat, userConfig *config.UserConfig) {
 	}
 
 	switch format {
-	case io.OutputFormatYAML:
-		printUserConfigYAML(userConfig)
+	case io.OutputFormatUnset, io.OutputFormatYAML:
+		fmt.Println(userConfig.YAML())
 	case io.OutputFormatJSON:
-		printUserConfigJSON(userConfig, false)
+		fmt.Println(userConfig.JSON(false))
 	case io.OutputFormatPrettyJSON:
-		printUserConfigJSON(userConfig, true)
-	case io.OutputFormatDefault:
-		printUserConfigTable(userConfig)
+		fmt.Println(userConfig.JSON(true))
 	}
-}
-
-func printUserConfigYAML(rootCfg *config.UserConfig) {
-	yamlBytes, err := yaml.Marshal(rootCfg)
-	if err != nil {
-		log.Panic().Msgf("Failed to marshal config - %v", err)
-	}
-	fmt.Println(string(yamlBytes))
-}
-
-func printUserConfigJSON(rootCfg *config.UserConfig, pretty bool) {
-	var jsonBytes []byte
-	var err error
-	if pretty {
-		jsonBytes, err = json.MarshalIndent(rootCfg, "", "  ")
-	} else {
-		jsonBytes, err = json.Marshal(rootCfg)
-	}
-	if err != nil {
-		log.Panic().Msgf("Failed to marshal config - %v", err)
-	}
-	fmt.Println(string(jsonBytes))
-}
-
-func printUserConfigTable(rootCfg *config.UserConfig) {
-	workspacesYaml, err := yaml.Marshal(rootCfg.Workspaces)
-	if err != nil {
-		log.Panic().Msgf("Failed to marshal workspaces - %v", err)
-	}
-
-	tableRows := [][]string{
-		{"Key", "Value"},
-		{"Current Workspace", rootCfg.CurrentWorkspace},
-		{"Current Namespace", rootCfg.CurrentNamespace},
-		{"Workspaces", string(workspacesYaml)},
-	}
-	io.PrintTableWithHeader(tableRows)
 }

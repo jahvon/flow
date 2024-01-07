@@ -10,3 +10,4 @@ The following `make` commands are available:
 | **Build**                      | `make go/build`   |
 | **Test**                       | `make go/test`    |
 | **Pre-commit**                 | `make pre-commit` |
+

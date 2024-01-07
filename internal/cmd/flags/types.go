@@ -64,8 +64,8 @@ var FilterTagFlag = &Metadata{
 var OutputFormatFlag = &Metadata{
 	Name:      "output",
 	Shorthand: "o",
-	Usage:     "Output format. One of: default, yaml, json, jsonp.",
-	Default:   "default",
+	Usage:     "Output format. One of: summary, yaml, json, jsonp.",
+	Default:   "",
 	Required:  false,
 }
 
@@ -99,4 +99,13 @@ var SetWorkspaceFlag = &Metadata{
 	Usage:     "Set the workspace context",
 	Default:   "",
 	Required:  false,
+}
+
+var NonInteractiveFlag = &Metadata{
+	Name:      "non-interactive",
+	Shorthand: "x",
+	Usage: "Disable displaying flow output via terminal UI rendering. " +
+		"This is only needed if the interactive output is enabled by default in flow's configuration.",
+	Default:  false,
+	Required: false,
 }

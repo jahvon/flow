@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"slices"
@@ -8,19 +9,13 @@ import (
 	"time"
 
 	"github.com/samber/lo"
+	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/errors"
 	"github.com/jahvon/flow/internal/utils"
 )
 
 const tmpdir = "f:tmp"
-
-type ExecutableContext struct {
-	Workspace          string
-	Namespace          string
-	WorkspacePath      string
-	DefinitionFilePath string
-}
 
 type DirectoryScopedExecutable struct {
 	Directory string `yaml:"dir"`
@@ -119,11 +114,86 @@ type Executable struct {
 
 type ExecutableList []*Executable
 
+type enrichedExecutableList struct {
+	Executables []*enrichedExecutable `json:"executables" yaml:"executables"`
+}
+type enrichedExecutable struct {
+	ID   string      `json:"id"   yaml:"id"`
+	Spec *Executable `json:"spec" yaml:"spec"`
+}
+
 func (e *Executable) SetContext(workspaceName, workspacePath, namespace, definitionPath string) {
 	e.workspace = workspaceName
 	e.workspacePath = workspacePath
 	e.namespace = namespace
 	e.definitionPath = definitionPath
+}
+
+func (e *Executable) YAML() (string, error) {
+	enriched := &enrichedExecutable{
+		ID:   e.ID(),
+		Spec: e,
+	}
+	yamlBytes, err := yaml.Marshal(enriched)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable - %w", err)
+	}
+	return string(yamlBytes), nil
+}
+
+func (e *Executable) JSON(pretty bool) (string, error) {
+	var jsonBytes []byte
+	var err error
+	enriched := &enrichedExecutable{
+		ID:   e.ID(),
+		Spec: e,
+	}
+	if pretty {
+		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
+	} else {
+		jsonBytes, err = json.Marshal(enriched)
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable - %w", err)
+	}
+	return string(jsonBytes), nil
+}
+
+func (e *Executable) Markdown() string {
+	var mkdwn string
+	mkdwn += fmt.Sprintf("# [Executable] %s %s\n", e.Verb, e.ID())
+	mkdwn += fmt.Sprintf("## Defined in\n%s\n", e.definitionPath)
+	if len(e.Aliases) > 0 {
+		mkdwn += "## Aliases\n"
+		lo.ForEach(e.Aliases, func(alias string, _ int) {
+			mkdwn += fmt.Sprintf("- %s\n", alias)
+		})
+	}
+	if e.Description != "" {
+		mkdwn += fmt.Sprintf("## Description\n%s\n", e.Description)
+	}
+	if len(e.Tags) > 0 {
+		mkdwn += "## Tags\n"
+		lo.ForEach(e.Tags, func(tag string, _ int) {
+			mkdwn += fmt.Sprintf("- %s\n", tag)
+		})
+	}
+	if e.Type != nil {
+		typeSpec, err := yaml.Marshal(e.Type)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to marshal type spec")
+			mkdwn += "## Type spec\nerror\n"
+		} else {
+			mkdwn += fmt.Sprintf("## Type spec\n```yaml\n%s```\n", string(typeSpec))
+		}
+	}
+	if e.Visibility != "" {
+		mkdwn += fmt.Sprintf("## Visibility\n%s\n", e.Visibility)
+	}
+	if e.Timeout != 0 {
+		mkdwn += fmt.Sprintf("## Timeout\n%s\n", e.Timeout.String())
+	}
+	return mkdwn
 }
 
 func (e *Executable) Ref() Ref {
@@ -262,6 +332,64 @@ func (e *Executable) IsExecutableFromWorkspace(workspace string) bool {
 	default:
 		return false
 	}
+}
+
+func (l ExecutableList) YAML() (string, error) {
+	enriched := &enrichedExecutableList{}
+	for _, exec := range l {
+		enriched.Executables = append(enriched.Executables, &enrichedExecutable{
+			ID:   exec.ID(),
+			Spec: exec,
+		})
+	}
+	yamlBytes, err := yaml.Marshal(enriched)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable list - %w", err)
+	}
+	return string(yamlBytes), nil
+}
+
+func (l ExecutableList) JSON(pretty bool) (string, error) {
+	var jsonBytes []byte
+	var err error
+	enriched := &enrichedExecutableList{}
+	for _, exec := range l {
+		enriched.Executables = append(enriched.Executables, &enrichedExecutable{
+			ID:   exec.ID(),
+			Spec: exec,
+		})
+	}
+	if pretty {
+		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
+	} else {
+		jsonBytes, err = json.Marshal(enriched)
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal executable list - %w", err)
+	}
+	return string(jsonBytes), nil
+}
+
+func (l ExecutableList) Items() []CollectionItem {
+	items := make([]CollectionItem, 0)
+	for _, exec := range l {
+		item := CollectionItem{
+			Header:      exec.ID(),
+			SubHeader:   exec.Verb.String(),
+			Description: exec.Description,
+			Tags:        exec.Tags,
+		}
+		items = append(items, item)
+	}
+	return items
+}
+
+func (l ExecutableList) Singular() string {
+	return "executable"
+}
+
+func (l ExecutableList) Plural() string {
+	return "executables"
 }
 
 func (l ExecutableList) FindByVerbAndID(verb Verb, id string) (*Executable, error) {

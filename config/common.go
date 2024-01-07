@@ -80,6 +80,10 @@ var visibilityByLevel = []VisibilityType{
 
 type VisibilityType string
 
+func (v VisibilityType) String() string {
+	return string(v)
+}
+
 func (v VisibilityType) IsPublic() bool {
 	return v == VisibilityPublic
 }
@@ -97,6 +101,33 @@ func (v VisibilityType) IsHidden() bool {
 }
 
 type Tags []string
+
+func (t Tags) String() string {
+	return strings.Join(t, ", ")
+}
+
+func (t Tags) ContextString() string {
+	if len(t) == 0 {
+		return ""
+	}
+	var str string
+	lo.ForEach(t, func(tag string, i int) {
+		str += fmt.Sprintf("[%s] ", tag)
+	})
+	return str
+}
+
+func (t Tags) PreviewString() string {
+	if len(t) == 0 {
+		return ""
+	}
+	count := len(t)
+	if count <= 3 {
+		return strings.Join(t, ", ")
+	}
+
+	return strings.Join(t[:3], ", ") + fmt.Sprintf(" (+%d)", count-3)
+}
 
 func (t Tags) HasAnyTag(tags Tags) bool {
 	if len(tags) == 0 {

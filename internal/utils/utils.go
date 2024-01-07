@@ -54,6 +54,20 @@ func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string
 	return filepath.Clean(targetDir)
 }
 
+func PathFromWd(path string) string {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Warn().Err(err).Msg("unable to get working directory for relative path")
+		return path
+	}
+	relPath, err := filepath.Rel(wd, path)
+	if err != nil {
+		log.Warn().Err(err).Msg("unable to get relative path")
+		return path
+	}
+	return relPath
+}
+
 func ValidateOneOf(fieldName string, vals ...interface{}) error {
 	var count int
 	for _, val := range vals {
@@ -67,4 +81,37 @@ func ValidateOneOf(fieldName string, vals ...interface{}) error {
 		return fmt.Errorf("must define only one %s", fieldName)
 	}
 	return nil
+}
+
+func IsMultiLine(s string) bool {
+	return NumLines(s) > 1
+}
+
+func NumLines(s string) int {
+	return strings.Count(s, "\n") + 1
+}
+
+// WrapLines Replace every n space with a newline character, leaving at most maxWords words per line.
+func WrapLines(text string, maxWords int) string {
+	trimmed := strings.TrimSpace(text)
+	words := strings.Split(trimmed, " ")
+	var lines []string
+	var line string
+	for i, word := range words {
+		if i%maxWords == 0 && i != 0 {
+			lines = append(lines, line)
+			line = ""
+		}
+		line += word + " "
+	}
+	lines = append(lines, line)
+	return strings.Join(lines, "\n")
+}
+
+// ShortenString shortens a string to maxLen characters, appending "..." if the string is longer than maxLen.
+func ShortenString(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen] + "..."
 }
