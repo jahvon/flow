@@ -34,13 +34,9 @@ Running `flow open ns:config` will run the above workflow.
 
 ## CLI Usage
 
-```bash
-flow [command]
-```
+See [flow CLI documentation](docs/cli/flow.md) for more information.
 
 **Autocompletion**
-
-- `flow completion` - Generate shell autocompletion for `flow`
 
 Example autocompletion setup script: `flow completion zsh > ~/.oh-my-zsh/completions/_flow`
 

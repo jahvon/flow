@@ -25,6 +25,8 @@ go/build:
 ## Make sure everything is ok before a commit
 pre-commit: go/test
 	go fmt ./...
+	go mod tidy
+	go run ./tools/docsgen/main.go
 
 ## Print his help screen
 help:
