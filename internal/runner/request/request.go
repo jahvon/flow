@@ -98,11 +98,6 @@ func (r *requestRunner) Exec(_ *context.Context, executable *config.Executable) 
 	return nil
 }
 
-func isJSONString(s string) bool {
-	var js map[string]interface{}
-	return json.Unmarshal([]byte(s), &js) == nil
-}
-
 func executeJQQuery(query, resp string) (string, error) {
 	var respMap map[string]interface{}
 	err := json.Unmarshal([]byte(resp), &respMap)
@@ -133,7 +128,8 @@ func writeResponseToFile(resp, responseFile string, format config.OutputFormat) 
 	case config.UNSET:
 		formattedResp = resp
 	case config.JSON:
-		if !isJSONString(resp) {
+		var js map[string]interface{}
+		if json.Unmarshal([]byte(resp), &js) != nil {
 			return fmt.Errorf("response is not a valid JSON string")
 		}
 		formattedResp = resp
@@ -163,7 +159,7 @@ func writeResponseToFile(resp, responseFile string, format config.OutputFormat) 
 		return fmt.Errorf("unsupported output format - %s", format)
 	}
 
-	file, err := os.Create(responseFile)
+	file, err := os.Create(filepath.Clean(responseFile))
 	if err != nil {
 		return err
 	}
