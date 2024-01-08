@@ -14,7 +14,7 @@ flow list executables [flags]
   -x, --non-interactive    Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
   -o, --output string      Output format. One of: summary, yaml, json, jsonp.
   -t, --tag stringArray    Filter by tags.
-  -v, --verb string        Filter executables by verb. One of: [setup remove destroy launch exec run delete uninstall teardown open start install]
+  -v, --verb string        Filter executables by verb. One of: [setup delete remove uninstall launch start install teardown destroy open exec run]
   -w, --workspace string   Filter executables by workspace.
 ```
 

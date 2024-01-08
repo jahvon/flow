@@ -77,6 +77,27 @@ type LaunchExecutableType struct {
 	Wait bool   `yaml:"wait"`
 }
 
+type RequestResponseFile struct {
+	DirectoryScopedExecutable
+
+	Filename string       `yaml:"filename"`
+	SaveAs   OutputFormat `yaml:"saveAs"`
+}
+
+type RequestExecutableType struct {
+	ParameterizedExecutable `yaml:",inline"`
+
+	Method  string            `yaml:"method"`
+	URL     string            `yaml:"url"`
+	Body    string            `yaml:"body"`
+	Headers map[string]string `yaml:"headers"`
+	Timeout time.Duration     `yaml:"timeout"`
+
+	ResponseFile     *RequestResponseFile `yaml:"responseFile"`
+	ValidStatusCodes []int                `yaml:"validStatusCodes"`
+	LogResponse      bool                 `yaml:"logResponse"`
+}
+
 type SerialExecutableType struct {
 	ParameterizedExecutable `yaml:",inline"`
 
@@ -97,6 +118,7 @@ type ExecutableTypeSpec struct {
 	Launch   *LaunchExecutableType   `yaml:"launch,omitempty"`
 	Serial   *SerialExecutableType   `yaml:"serial,omitempty"`
 	Parallel *ParallelExecutableType `yaml:"parallel,omitempty"`
+	Request  *RequestExecutableType  `yaml:"request,omitempty"`
 }
 
 type Executable struct {
