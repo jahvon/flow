@@ -13,6 +13,7 @@ import (
 	"github.com/jahvon/flow/internal/runner/exec"
 	"github.com/jahvon/flow/internal/runner/launch"
 	"github.com/jahvon/flow/internal/runner/parallel"
+	"github.com/jahvon/flow/internal/runner/request"
 	"github.com/jahvon/flow/internal/runner/serial"
 )
 
@@ -30,6 +31,7 @@ var execCmd = &cobra.Command{
 		runner.RegisterRunner(launch.NewRunner())
 		runner.RegisterRunner(serial.NewRunner())
 		runner.RegisterRunner(parallel.NewRunner())
+		runner.RegisterRunner(request.NewRunner())
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		verbStr := cmd.CalledAs()
