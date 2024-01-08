@@ -93,9 +93,10 @@ type RequestExecutableType struct {
 	Headers map[string]string `yaml:"headers"`
 	Timeout time.Duration     `yaml:"timeout"`
 
-	ResponseFile     *RequestResponseFile `yaml:"responseFile"`
-	ValidStatusCodes []int                `yaml:"validStatusCodes"`
-	LogResponse      bool                 `yaml:"logResponse"`
+	ResponseFile      *RequestResponseFile `yaml:"responseFile"`
+	TransformResponse string               `yaml:"transformResponse"`
+	LogResponse       bool                 `yaml:"logResponse"`
+	ValidStatusCodes  []int                `yaml:"validStatusCodes"`
 }
 
 type SerialExecutableType struct {

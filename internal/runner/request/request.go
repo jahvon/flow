@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/itchyny/gojq"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
@@ -58,6 +59,13 @@ func (r *requestRunner) Exec(_ *context.Context, executable *config.Executable) 
 		return fmt.Errorf("request failed - %w", err)
 	}
 
+	if requestSpec.TransformResponse != "" {
+		resp, err = executeJQQuery(requestSpec.TransformResponse, resp)
+		if err != nil {
+			return fmt.Errorf("jq execution failed - %w", err)
+		}
+	}
+
 	if requestSpec.LogResponse {
 		log.Info().Str("response", resp).Msgf("Successfully sent request to %s", requestSpec.URL)
 	} else {
@@ -95,20 +103,45 @@ func isJSONString(s string) bool {
 	return json.Unmarshal([]byte(s), &js) == nil
 }
 
-func writeResponseToFile(resp, responseFile string, format config.OutputFormat) error {
-	if !isJSONString(resp) {
-		return fmt.Errorf("response is not a valid JSON string")
+func executeJQQuery(query, resp string) (string, error) {
+	var respMap map[string]interface{}
+	err := json.Unmarshal([]byte(resp), &respMap)
+	if err != nil {
+		return "", fmt.Errorf("response is not a valid JSON string")
 	}
 
+	jqQuery, err := gojq.Parse(query)
+	if err != nil {
+		return "", err
+	}
+
+	iter := jqQuery.Run(respMap)
+	result, ok := iter.Next()
+	if !ok {
+		return "", fmt.Errorf("unable to execute jq query")
+	}
+	if err, isErr := result.(error); isErr {
+		return "", err
+	}
+
+	return fmt.Sprintf("%v", result), nil
+}
+
+func writeResponseToFile(resp, responseFile string, format config.OutputFormat) error {
 	var formattedResp string
 	switch format {
-	case config.UNSET, config.JSON:
+	case config.UNSET:
+		formattedResp = resp
+	case config.JSON:
+		if !isJSONString(resp) {
+			return fmt.Errorf("response is not a valid JSON string")
+		}
 		formattedResp = resp
 	case config.FormattedJSON:
 		var respMap map[string]interface{}
 		err := json.Unmarshal([]byte(resp), &respMap)
 		if err != nil {
-			return err
+			return fmt.Errorf("response is not a valid JSON string")
 		}
 		formattedStr, err := json.MarshalIndent(respMap, "", "  ")
 		if err != nil {
@@ -119,7 +152,7 @@ func writeResponseToFile(resp, responseFile string, format config.OutputFormat) 
 		var respMap map[string]interface{}
 		err := json.Unmarshal([]byte(resp), &respMap)
 		if err != nil {
-			return err
+			return fmt.Errorf("response is not a valid JSON string")
 		}
 		yamlStr, err := yaml.Marshal(respMap)
 		if err != nil {
