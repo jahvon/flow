@@ -19,31 +19,25 @@ const tmpdir = "f:tmp"
 
 type DirectoryScopedExecutable struct {
 	Directory string `yaml:"dir"`
-
-	finalizerFunc func()
 }
 
-func (e *DirectoryScopedExecutable) ExpandDirectory(wsPath, execPath string, env map[string]string) (string, error) {
+func (e *DirectoryScopedExecutable) ExpandDirectory(
+	wsPath, execPath, processTmpDir string,
+	env map[string]string,
+) (dir string, isTmpDir bool, err error) {
 	if e.Directory == tmpdir {
+		if processTmpDir != "" {
+			return processTmpDir, true, nil
+		}
+
 		file, err := os.CreateTemp("", "flow")
 		if err != nil {
-			return "", err
+			return "", false, err
 		}
-		e.finalizerFunc = func() {
-			if err := os.Remove(file.Name()); err != nil {
-				log.Error().Err(err).Msgf("unable to remove temp file %s", file.Name())
-			}
-		}
-		return file.Name(), nil
+		return file.Name(), true, nil
 	}
 
-	return utils.ExpandDirectory(e.Directory, wsPath, execPath, env), nil
-}
-
-func (e *DirectoryScopedExecutable) Finalize() {
-	if e.finalizerFunc != nil {
-		e.finalizerFunc()
-	}
+	return utils.ExpandDirectory(e.Directory, wsPath, execPath, env), false, nil
 }
 
 type ParameterizedExecutable struct {
@@ -78,7 +72,7 @@ type LaunchExecutableType struct {
 }
 
 type RequestResponseFile struct {
-	DirectoryScopedExecutable
+	DirectoryScopedExecutable `yaml:",inline"`
 
 	Filename string       `yaml:"filename"`
 	SaveAs   OutputFormat `yaml:"saveAs"`
@@ -99,6 +93,14 @@ type RequestExecutableType struct {
 	ValidStatusCodes  []int                `yaml:"validStatusCodes"`
 }
 
+type RenderExecutableType struct {
+	DirectoryScopedExecutable `yaml:",inline"`
+	ParameterizedExecutable   `yaml:",inline"`
+
+	TemplateFile     string `yaml:"templateFile"`
+	TemplateDataFile string `yaml:"templateDataFile"`
+}
+
 type SerialExecutableType struct {
 	ParameterizedExecutable `yaml:",inline"`
 
@@ -117,9 +119,10 @@ type ParallelExecutableType struct {
 type ExecutableTypeSpec struct {
 	Exec     *ExecExecutableType     `yaml:"exec,omitempty"`
 	Launch   *LaunchExecutableType   `yaml:"launch,omitempty"`
+	Request  *RequestExecutableType  `yaml:"request,omitempty"`
+	Render   *RenderExecutableType   `yaml:"render,omitempty"`
 	Serial   *SerialExecutableType   `yaml:"serial,omitempty"`
 	Parallel *ParallelExecutableType `yaml:"parallel,omitempty"`
-	Request  *RequestExecutableType  `yaml:"request,omitempty"`
 }
 
 type Executable struct {
@@ -293,6 +296,8 @@ func (e *Executable) Validate() error {
 		"executable type",
 		e.Type.Exec,
 		e.Type.Launch,
+		e.Type.Request,
+		e.Type.Render,
 		e.Type.Serial,
 		e.Type.Parallel,
 	)

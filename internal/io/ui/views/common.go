@@ -1,18 +1,19 @@
-package ui
+package views
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 
+	"github.com/jahvon/flow/internal/io/ui/types"
 	"github.com/jahvon/flow/internal/services/open"
 )
 
-func openInEditor(app *Application, path string) {
+func openInEditor(parent types.ParentView, path string) {
 	preferred := os.Getenv("EDITOR")
 	if preferred != "" {
 		if err := open.OpenWith(preferred, path, false); err != nil {
-			log.Err(err).Msg("unable to open editor")
-			app.HandleInternalError(err)
+			parent.HandleInternalError(fmt.Errorf("unable to open editor: %w", err))
 		}
 	} else {
 		cmd := exec.Command("vim", path)
@@ -20,8 +21,7 @@ func openInEditor(app *Application, path string) {
 		cmd.Stdout = os.Stdout
 		err := cmd.Run()
 		if err != nil {
-			log.Err(err).Msg("unable to open vim")
-			app.HandleInternalError(err)
+			parent.HandleInternalError(fmt.Errorf("unable to open vim: %w", err))
 		}
 	}
 }

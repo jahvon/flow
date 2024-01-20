@@ -4,15 +4,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog"
-
-	"github.com/jahvon/flow/internal/utils"
 )
-
-var log = Log()
 
 type OutputFormat string
 
@@ -29,62 +24,17 @@ func Log() zerolog.Logger {
 	return context.Logger()
 }
 
-func PrintInfo(message string) {
-	log.Info().Msg(message)
-}
-
-func PrintNotice(message string) {
-	color.HiBlue(message)
-}
-
 func PrintQuestion(question string) {
 	color.HiCyan(question)
 }
 
-func PrintSuccess(message string) {
-	color.HiGreen(message)
-}
-
-func PrintWarning(message string) {
-	color.HiYellow(message)
-}
-
-func PrintErrorAndExit(err error) {
-	PrintError(err)
-	os.Exit(1)
-}
-
-func PrintError(err error) {
-	color.HiRed(err.Error())
-}
-
-func PrintMap(m map[string]string) {
-	for k, v := range m {
-		if utils.IsMultiLine(v) {
-			fmt.Printf("%s:\n%s\n", color.HiBlueString(k), v)
-		} else {
-			fmt.Printf("%s: %s\n", color.HiBlueString(k), v)
-		}
-	}
-}
-
-func PrintTableData(data [][]string) {
-	tabWriter := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	for _, row := range data {
-		_, _ = fmt.Fprintln(tabWriter, strings.Join(row, "\t"))
-	}
-	_ = tabWriter.Flush()
-}
-
 type StdOutWriter struct {
-	LogAsDebug bool
-	LogFields  map[string]interface{}
-
-	structuredLogBreak bool
+	LogFields   []any
+	Logger      *Logger
+	AsPlainText bool
 }
 
 func (w StdOutWriter) Write(p []byte) (n int, err error) {
-	stdOutLog := log.With().Fields(w.LogFields).Logger()
 	trimmedP := strings.TrimSpace(string(p))
 	if trimmedP == "" {
 		return len(p), nil
@@ -92,20 +42,22 @@ func (w StdOutWriter) Write(p []byte) (n int, err error) {
 	splitP := strings.Split(trimmedP, "\n")
 	for _, line := range splitP {
 		if line == "---break" {
-			w.structuredLogBreak = true
+			w.AsPlainText = true
 			continue
-		} else if line == "---endbreak" {
-			w.structuredLogBreak = false
+		} else if w.AsPlainText && line == "---endbreak" {
+			w.AsPlainText = false
 			continue
 		}
 
 		switch {
-		case w.structuredLogBreak:
-			_, _ = fmt.Fprintln(os.Stdout, line)
-		case w.LogAsDebug:
-			stdOutLog.Debug().Msg(line)
+		case w.AsPlainText:
+			w.Logger.AsPlainText(func() {
+				w.Logger.Infof(line)
+			})
+		case len(w.LogFields) > 0:
+			w.Logger.Infox(line, w.LogFields...)
 		default:
-			stdOutLog.Info().Msg(line)
+			w.Logger.Infof(line)
 		}
 	}
 
@@ -113,23 +65,28 @@ func (w StdOutWriter) Write(p []byte) (n int, err error) {
 }
 
 type StdErrWriter struct {
-	LogAsDebug bool
-	LogFields  map[string]interface{}
+	LogFields   []any
+	Logger      *Logger
+	AsPlainText bool
 }
 
 func (w StdErrWriter) Write(p []byte) (n int, err error) {
-	stdOutLog := log.With().Fields(w.LogFields).Logger()
 	trimmedP := strings.TrimSpace(string(p))
 	if trimmedP == "" {
 		return len(p), nil
 	}
 
-	if w.LogAsDebug {
-		stdOutLog.Debug().Msg(string(p))
-		return len(p), nil
+	switch {
+	case w.AsPlainText:
+		w.Logger.AsPlainText(func() {
+			w.Logger.Errorf(trimmedP)
+		})
+	case len(w.LogFields) > 0:
+		w.Logger.Errorx(trimmedP, w.LogFields...)
+	default:
+		w.Logger.Errorf(trimmedP)
 	}
 
-	stdOutLog.Error().Msg(string(p))
 	return len(p), nil
 }
 

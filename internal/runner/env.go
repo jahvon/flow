@@ -8,14 +8,13 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
 
-func SetEnv(exec *config.ParameterizedExecutable) error {
+func SetEnv(exec *config.ParameterizedExecutable, promptedEnv map[string]string) error {
 	var errs []error
 	for _, param := range exec.Parameters {
-		val, err := ResolveParameterValue(param)
+		val, err := ResolveParameterValue(param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -31,15 +30,18 @@ func SetEnv(exec *config.ParameterizedExecutable) error {
 	return nil
 }
 
-func ResolveParameterValue(param config.Parameter) (string, error) {
+func ResolveParameterValue(param config.Parameter, promptedEnv map[string]string) (string, error) {
 	switch {
 	case param.Text == "" && param.SecretRef == "" && param.Prompt == "":
 		return "", nil
 	case param.Text != "":
 		return param.Text, nil
 	case param.Prompt != "":
-		response := io.Ask(param.Prompt)
-		return response, nil
+		val, ok := promptedEnv[param.EnvKey]
+		if !ok {
+			return "", errors.New("failed to get value for parameter")
+		}
+		return val, nil
 	case param.SecretRef != "":
 		if err := vault.ValidateReference(param.SecretRef); err != nil {
 			return "", err
@@ -55,12 +57,12 @@ func ResolveParameterValue(param config.Parameter) (string, error) {
 	}
 }
 
-func ParametersToEnvList(exec *config.ParameterizedExecutable) ([]string, error) {
+func ParametersToEnvList(exec *config.ParameterizedExecutable, promptedEnv map[string]string) ([]string, error) {
 	params := exec.Parameters
 	var errs []error
 	env := lo.Map(params, func(param config.Parameter, _ int) string {
 		key := param.EnvKey
-		value, err := ResolveParameterValue(param)
+		value, err := ResolveParameterValue(param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 			return ""
@@ -74,11 +76,14 @@ func ParametersToEnvList(exec *config.ParameterizedExecutable) ([]string, error)
 	return env, nil
 }
 
-func ParametersToEnvMap(exec *config.ParameterizedExecutable) (map[string]string, error) {
+func ParametersToEnvMap(
+	exec *config.ParameterizedExecutable,
+	promptedEnv map[string]string,
+) (map[string]string, error) {
 	params := exec.Parameters
 	var errs []error
 	env := lo.SliceToMap(params, func(param config.Parameter) (string, string) {
-		val, err := ResolveParameterValue(param)
+		val, err := ResolveParameterValue(param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 			return param.EnvKey, ""

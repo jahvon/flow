@@ -28,9 +28,9 @@ func (r *serialRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable) error {
+func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	serialSpec := executable.Type.Serial
-	if err := runner.SetEnv(&serialSpec.ParameterizedExecutable); err != nil {
+	if err := runner.SetEnv(&serialSpec.ParameterizedExecutable, promptedEnv); err != nil {
 		return fmt.Errorf("unable to set parameters to env - %w", err)
 	}
 
@@ -52,7 +52,7 @@ func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable)
 			exec.Type.Exec.SetLogFields(fields)
 		}
 
-		if err := runner.Exec(ctx, exec); err != nil {
+		if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
 			if serialSpec.FailFast {
 				return fmt.Errorf("execution error for %s - %w", executableRef, err)
 			}

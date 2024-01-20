@@ -127,19 +127,10 @@ func (v *Vault) retrieveEncryptionKey() (string, error) {
 	}
 
 	key, found := os.LookupEnv(EncryptionKeyEnvVar)
-	if found {
-		log.Debug().Msg("using encryption key set in environment variable")
-		err := validateEncryptionKey(key)
-		if err != nil {
-			return "", err
-		}
-		return key, nil
+	if !found {
+		return "", errors.New("encryption key not set")
 	}
-
-	log.Debug().Msg("encryption key not set in environment variable")
-	key = io.AskForEncryptionKey()
-	err := validateEncryptionKey(key)
-	if err != nil {
+	if err := validateEncryptionKey(key); err != nil {
 		return "", err
 	}
 	return key, nil

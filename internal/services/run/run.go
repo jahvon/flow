@@ -16,11 +16,15 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
-var log = io.Log().With().Str("scope", "service/run").Logger()
-
 // RunCmd executes a command in the current shell in a specific directory.
-func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode, logFields map[string]interface{}) error {
-	log.Trace().Msgf("running command (%s) in dir (%s)", commandStr, dir)
+func RunCmd(
+	commandStr, dir string,
+	envList []string,
+	logMode config.LogMode,
+	logger *io.Logger,
+	logFields map[string]interface{},
+) error {
+	logger.Debugf("running command in dir (%s):\n%s", dir, strings.TrimSpace(commandStr))
 
 	ctx := context.Background()
 	parser := syntax.NewParser()
@@ -35,13 +39,17 @@ func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode, lo
 	}
 	envList = append(os.Environ(), envList...)
 
+	flattenedFields := make([]interface{}, 0)
+	for k, v := range logFields {
+		flattenedFields = append(flattenedFields, k, v)
+	}
 	runner, err := interp.New(
 		interp.Dir(dir),
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
 			io.StdInReader{},
-			stdOutWriter(logMode, logFields),
-			stdErrWriter(logMode, logFields),
+			stdOutWriter(logMode, logger, flattenedFields...),
+			stdErrWriter(logMode, logger, flattenedFields...),
 		),
 	)
 	if err != nil {
@@ -57,8 +65,14 @@ func RunCmd(commandStr, dir string, envList []string, logMode config.LogMode, lo
 }
 
 // RunFile executes a file in the current shell in a specific directory.
-func RunFile(filename, dir string, envList []string, logMode config.LogMode, logFields map[string]interface{}) error {
-	log.Trace().Msgf("executing file (%s)", filename)
+func RunFile(
+	filename, dir string,
+	envList []string,
+	logMode config.LogMode,
+	logger *io.Logger,
+	logFields map[string]interface{},
+) error {
+	logger.Debugf("executing file (%s)", filename)
 
 	ctx := context.Background()
 	fullPath := filepath.Join(dir, filename)
@@ -82,12 +96,16 @@ func RunFile(filename, dir string, envList []string, logMode config.LogMode, log
 	}
 	envList = append(os.Environ(), envList...)
 
+	flattenedFields := make([]interface{}, 0)
+	for k, v := range logFields {
+		flattenedFields = append(flattenedFields, k, v)
+	}
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
 			io.StdInReader{},
-			stdOutWriter(logMode, logFields),
-			stdErrWriter(logMode, logFields),
+			stdOutWriter(logMode, logger, flattenedFields...),
+			stdErrWriter(logMode, logger, flattenedFields...),
 		),
 	)
 	if err != nil {
@@ -101,30 +119,30 @@ func RunFile(filename, dir string, envList []string, logMode config.LogMode, log
 	return nil
 }
 
-func stdOutWriter(mode config.LogMode, logFields map[string]interface{}) stdio.Writer {
+func stdOutWriter(mode config.LogMode, logger *io.Logger, logFields ...any) stdio.Writer {
 	switch mode {
 	case config.NoLogMode:
 		return stdio.Discard
 	case config.StructuredLogMode:
-		return io.StdOutWriter{LogAsDebug: false, LogFields: logFields}
+		return io.StdOutWriter{LogFields: logFields, Logger: logger}
 	case config.RawLogMode:
-		return os.Stdout
+		return io.StdOutWriter{LogFields: logFields, Logger: logger, AsPlainText: true}
 	default:
-		log.Error().Str("mode", string(mode)).Msg("unknown log mode")
+		logger.Errorx("unknown log mode", "mode", string(mode))
 		return stdio.Discard
 	}
 }
 
-func stdErrWriter(mode config.LogMode, logFields map[string]interface{}) stdio.Writer {
+func stdErrWriter(mode config.LogMode, logger *io.Logger, logFields ...any) stdio.Writer {
 	switch mode {
 	case config.NoLogMode:
 		return stdio.Discard
 	case config.StructuredLogMode:
-		return io.StdErrWriter{LogAsDebug: false, LogFields: logFields}
+		return io.StdErrWriter{LogFields: logFields, Logger: logger}
 	case config.RawLogMode:
-		return os.Stderr
+		return io.StdErrWriter{LogFields: logFields, Logger: logger, AsPlainText: true}
 	default:
-		log.Error().Str("mode", string(mode)).Msg("unknown log mode")
+		logger.Errorx("unknown log mode", "mode", string(mode))
 		return stdio.Discard
 	}
 }

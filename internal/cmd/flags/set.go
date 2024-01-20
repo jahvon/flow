@@ -12,23 +12,26 @@ type FlagSet struct {
 }
 
 //nolint:gocognit
-func (f *FlagSet) Register(cmd *cobra.Command, flag Metadata) error {
+func (f *FlagSet) Register(cmd *cobra.Command, flag Metadata, persistent bool) error {
+	flagSet := cmd.Flags()
+	if persistent {
+		flagSet = cmd.PersistentFlags()
+	}
 	if flag.Default == nil {
 		return fmt.Errorf("flag default must be defined using explicit type")
 	}
-
 	switch reflect.TypeOf(flag.Default).Kind() { //nolint:exhaustive
 	case reflect.String:
 		if flag.Shorthand != "" {
-			cmd.Flags().StringP(flag.Name, flag.Shorthand, flag.Default.(string), flag.Usage)
+			flagSet.StringP(flag.Name, flag.Shorthand, flag.Default.(string), flag.Usage)
 		} else {
-			cmd.Flags().String(flag.Name, flag.Default.(string), flag.Usage)
+			flagSet.String(flag.Name, flag.Default.(string), flag.Usage)
 		}
 	case reflect.Bool:
 		if flag.Shorthand != "" {
-			cmd.Flags().BoolP(flag.Name, flag.Shorthand, flag.Default.(bool), flag.Usage)
+			flagSet.BoolP(flag.Name, flag.Shorthand, flag.Default.(bool), flag.Usage)
 		} else {
-			cmd.Flags().Bool(flag.Name, flag.Default.(bool), flag.Usage)
+			flagSet.Bool(flag.Name, flag.Default.(bool), flag.Usage)
 		}
 	case reflect.Slice:
 		var def []string
@@ -42,15 +45,15 @@ func (f *FlagSet) Register(cmd *cobra.Command, flag Metadata) error {
 		}
 
 		if flag.Shorthand != "" {
-			cmd.Flags().StringArrayP(flag.Name, flag.Shorthand, def, flag.Usage)
+			flagSet.StringArrayP(flag.Name, flag.Shorthand, def, flag.Usage)
 		} else {
-			cmd.Flags().StringArray(flag.Name, def, flag.Usage)
+			flagSet.StringArray(flag.Name, def, flag.Usage)
 		}
 	case reflect.Int:
 		if flag.Shorthand != "" {
-			cmd.Flags().IntP(flag.Name, flag.Shorthand, flag.Default.(int), flag.Usage)
+			flagSet.IntP(flag.Name, flag.Shorthand, flag.Default.(int), flag.Usage)
 		} else {
-			cmd.Flags().Int(flag.Name, flag.Default.(int), flag.Usage)
+			flagSet.Int(flag.Name, flag.Default.(int), flag.Usage)
 		}
 	default:
 		return fmt.Errorf("unexpected flag default type (%v)", reflect.TypeOf(flag.Default).Kind())
@@ -66,16 +69,19 @@ func (f *FlagSet) Register(cmd *cobra.Command, flag Metadata) error {
 		f.registeredFlags = make(map[string]Metadata)
 	}
 	f.registeredFlags[flag.Name] = flag
-
 	return nil
 }
 
-func (f *FlagSet) ValueFor(cmd *cobra.Command, flagName string) (interface{}, error) {
+func (f *FlagSet) ValueFor(cmd *cobra.Command, flagName string, persistent bool) (interface{}, error) {
 	metadata, found := f.registeredFlags[flagName]
 	if !found {
 		return nil, fmt.Errorf("flag %s not registered for command", flagName)
 	}
 
+	flagSet := cmd.Flags()
+	if persistent {
+		flagSet = cmd.PersistentFlags()
+	}
 	flag := cmd.Flag(flagName)
 	if flag == nil {
 		return "", nil
@@ -83,19 +89,25 @@ func (f *FlagSet) ValueFor(cmd *cobra.Command, flagName string) (interface{}, er
 
 	switch reflect.TypeOf(metadata.Default).Kind() { //nolint:exhaustive
 	case reflect.String:
-		val, err := cmd.Flags().GetString(flagName)
+		val, err := flagSet.GetString(flagName)
 		if err != nil {
 			return nil, err
 		}
 		return val, nil
 	case reflect.Bool:
-		val, err := cmd.Flags().GetBool(flagName)
+		val, err := flagSet.GetBool(flagName)
 		if err != nil {
 			return nil, err
 		}
 		return val, nil
 	case reflect.Slice:
-		val, err := cmd.Flags().GetStringArray(flagName)
+		val, err := flagSet.GetStringArray(flagName)
+		if err != nil {
+			return nil, err
+		}
+		return val, nil
+	case reflect.Int:
+		val, err := flagSet.GetInt(flagName)
 		if err != nil {
 			return nil, err
 		}

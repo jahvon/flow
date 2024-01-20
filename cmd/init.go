@@ -12,7 +12,6 @@ import (
 	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/crypto"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -26,17 +25,22 @@ var configInitCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   "Initialize the flow global configuration.",
 	Args:    cobra.NoArgs,
+	PreRun:  setTermView,
+	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
-		resp := io.AskYesNo("This will overwrite your current flow configurations. Are you sure you want to continue?")
+		logger := curCtx.Logger
+		resp := processUserConfirmation(
+			"This will overwrite your current flow configurations. Are you sure you want to continue?",
+		)
 		if !resp {
-			io.PrintWarning("Aborting")
+			logger.Warnf("Aborting")
 			return
 		}
 
 		if err := file.InitUserConfig(); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
-		io.PrintSuccess("Initialized flow global configurations")
+		logger.PlainTextSuccess("Initialized flow global configurations")
 	},
 }
 
@@ -45,20 +49,23 @@ var workspaceInitCmd = &cobra.Command{
 	Aliases: []string{"ws"},
 	Short:   "Initialize and add a workspace to the list of known workspaces.",
 	Args:    cobra.ExactArgs(2),
+	PreRun:  setTermView,
+	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		name := args[0]
 		path := args[1]
 
 		userConfig := file.LoadUserConfig()
 		if userConfig == nil {
-			io.PrintErrorAndExit(fmt.Errorf("failed to load user config"))
+			logger.Fatalf("failed to load user config")
 		}
 		if err := userConfig.Validate(); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 
 		if _, found := userConfig.Workspaces[name]; found {
-			io.PrintErrorAndExit(fmt.Errorf("workspace %s already exists at %s", name, userConfig.Workspaces[name]))
+			logger.Fatalf("workspace %s already exists at %s", name, userConfig.Workspaces[name])
 		}
 
 		if path == "" {
@@ -66,7 +73,7 @@ var workspaceInitCmd = &cobra.Command{
 		} else if path == "." || strings.HasPrefix(path, "./") {
 			wd, err := os.Getwd()
 			if err != nil {
-				io.PrintErrorAndExit(err)
+				logger.FatalErr(err)
 			}
 			if path == "." {
 				path = wd
@@ -76,7 +83,7 @@ var workspaceInitCmd = &cobra.Command{
 		} else if path == "~" || strings.HasPrefix(path, "~/") {
 			hd, err := os.UserHomeDir()
 			if err != nil {
-				io.PrintErrorAndExit(err)
+				logger.FatalErr(err)
 			}
 			if path == "~" {
 				path = hd
@@ -86,48 +93,51 @@ var workspaceInitCmd = &cobra.Command{
 		}
 
 		if err := file.InitWorkspaceConfig(name, path); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 		userConfig.Workspaces[name] = path
 
 		set := getFlagValue[bool](cmd, *flags.SetAfterCreateFlag)
 		if set {
 			userConfig.CurrentWorkspace = name
-			io.PrintInfo(fmt.Sprintf("Workspace '%s' set as current workspace", name))
+			logger.Infof("Workspace '%s' set as current workspace", name)
 		}
 
 		if err := file.WriteUserConfig(userConfig); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 
 		if err := cache.UpdateAll(); err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("failed to update cache - %w", err))
+			logger.FatalErr(fmt.Errorf("failed to update cache - %w", err))
 		}
 
-		io.PrintSuccess(fmt.Sprintf("Workspace '%s' created in %s", name, path))
+		logger.PlainTextSuccess(fmt.Sprintf("Workspace '%s' created in %s", name, path))
 	},
 }
 
 var vaultInitCmd = &cobra.Command{
-	Use:   "vault",
-	Short: "Create a new flow secret vault.",
-	Args:  cobra.NoArgs,
+	Use:     "vault",
+	Short:   "Create a new flow secret vault.",
+	Args:    cobra.NoArgs,
+	PreRun:  setTermView,
+	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		generatedKey, err := crypto.GenerateKey()
 		if err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 		if err = vault.RegisterEncryptionKey(generatedKey); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 
-		io.PrintSuccess(fmt.Sprintf("Your vault encryption key is: %s", generatedKey))
+		logger.PlainTextSuccess(fmt.Sprintf("Your vault encryption key is: %s", generatedKey))
 		newKeyMsg := fmt.Sprintf(
 			"You will need this key to modify your vault data. Store it somewhere safe!\n"+
 				"Set this value to the %s environment variable if you do not want to be prompted for it every time.",
 			vault.EncryptionKeyEnvVar,
 		)
-		io.PrintNotice(newKeyMsg)
+		logger.PlainTextInfo(newKeyMsg)
 	},
 }
 

@@ -11,12 +11,9 @@ import (
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/services/rest"
 )
-
-var log = io.Log()
 
 type requestRunner struct{}
 
@@ -35,9 +32,9 @@ func (r *requestRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *requestRunner) Exec(_ *context.Context, executable *config.Executable) error {
+func (r *requestRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	requestSpec := executable.Type.Request
-	envMap, err := runner.ParametersToEnvMap(&requestSpec.ParameterizedExecutable)
+	envMap, err := runner.ParametersToEnvMap(&requestSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
 		return fmt.Errorf("env setup failed - %w", err)
 	}
@@ -66,22 +63,25 @@ func (r *requestRunner) Exec(_ *context.Context, executable *config.Executable) 
 		}
 	}
 
+	logger := ctx.Logger
 	if requestSpec.LogResponse {
-		log.Info().Str("response", resp).Msgf("Successfully sent request to %s", requestSpec.URL)
+		logger.Infox(fmt.Sprintf("Successfully sent request to %s", requestSpec.URL), "response", resp)
 	} else {
-		log.Info().Msgf("Successfully sent request to %s", requestSpec.URL)
+		logger.Infof("Successfully sent request to %s", requestSpec.URL)
 	}
 
 	if requestSpec.ResponseFile != nil && requestSpec.ResponseFile.Filename != "" {
-		targetDir, err := requestSpec.ResponseFile.ExpandDirectory(
+		targetDir, isTmp, err := requestSpec.ResponseFile.ExpandDirectory(
 			executable.WorkspacePath(),
 			executable.DefinitionPath(),
+			ctx.ProcessTmpDir,
 			envMap,
 		)
 		if err != nil {
 			return fmt.Errorf("unable to expand directory - %w", err)
+		} else if isTmp {
+			ctx.ProcessTmpDir = targetDir
 		}
-		defer requestSpec.ResponseFile.Finalize()
 
 		err = writeResponseToFile(
 			resp,
@@ -91,7 +91,7 @@ func (r *requestRunner) Exec(_ *context.Context, executable *config.Executable) 
 		if err != nil {
 			return fmt.Errorf("unable to write response to file - %w", err)
 		} else {
-			log.Info().Msgf("Successfully saved response to %s", requestSpec.ResponseFile.Filename)
+			logger.Infof("Successfully saved response to %s", requestSpec.ResponseFile.Filename)
 		}
 	}
 

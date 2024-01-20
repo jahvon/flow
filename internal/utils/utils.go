@@ -21,7 +21,7 @@ func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string
 	var targetDir string
 	switch {
 	case dir == "":
-		targetDir = execPath
+		targetDir = filepath.Dir(execPath)
 	case strings.HasPrefix(dir, "//"):
 		targetDir = strings.Replace(dir, "//", wsPath+"/", 1)
 	case dir == "." || strings.HasPrefix(dir, "./"):

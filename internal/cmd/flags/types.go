@@ -18,7 +18,7 @@ type Metadata struct {
 var VerbosityFlag = &Metadata{
 	Name:     "verbosity",
 	Usage:    "Log verbosity level (from 0 to 4 where 4 is most verbose)",
-	Default:  2,
+	Default:  0,
 	Required: false,
 }
 
@@ -64,7 +64,7 @@ var FilterTagFlag = &Metadata{
 var OutputFormatFlag = &Metadata{
 	Name:      "output",
 	Shorthand: "o",
-	Usage:     "Output format. One of: summary, yaml, json, jsonp.",
+	Usage:     "Output format. One of: yaml, json, jsonp.",
 	Default:   "",
 	Required:  false,
 }
