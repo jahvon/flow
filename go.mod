@@ -10,7 +10,6 @@ require (
 	github.com/charmbracelet/glamour v0.6.0
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/charmbracelet/log v0.3.1
-	github.com/fatih/color v1.16.0
 	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea
 	github.com/itchyny/gojq v0.12.14
 	github.com/jahvon/open-golang v0.0.0-20200116055534-eef842397966

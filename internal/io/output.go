@@ -5,8 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/rs/zerolog"
+
+	"github.com/jahvon/flow/internal/io/styles"
 )
 
 type OutputFormat string
@@ -25,7 +26,7 @@ func Log() zerolog.Logger {
 }
 
 func PrintQuestion(question string) {
-	color.HiCyan(question)
+	styles.RenderInfo(question)
 }
 
 type StdOutWriter struct {
