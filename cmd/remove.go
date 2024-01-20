@@ -7,7 +7,6 @@ import (
 
 	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/config/file"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -23,40 +22,42 @@ var workspaceRemoveCmd = &cobra.Command{
 	Short:   "Remove an existing workspace from the list of known workspaces.",
 	Long: "Remove an existing workspace. File contents will remain in the corresponding directory but the " +
 		"workspace will be unlinked from the flow global configurations.\nNote: You cannot remove the current workspace.",
-	Args: cobra.ExactArgs(1),
+	Args:   cobra.ExactArgs(1),
+	PreRun: setTermView,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		name := args[0]
 
-		confirmed := io.AskYesNo("Are you sure you want to remove the workspace '" + name + "'?")
+		confirmed := processUserConfirmation("Are you sure you want to remove the workspace '" + name + "'?")
 		if !confirmed {
-			io.PrintWarning("Aborting")
+			logger.Warnf("Aborting")
 			return
 		}
 
 		userConfig := file.LoadUserConfig()
 		if userConfig == nil {
-			io.PrintErrorAndExit(fmt.Errorf("failed to load user config"))
+			logger.Fatalf("failed to load user config")
 		}
 		if err := userConfig.Validate(); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 
 		if name == userConfig.CurrentWorkspace {
-			io.PrintErrorAndExit(fmt.Errorf("cannot remove the current workspace"))
+			logger.Fatalf("cannot remove the current workspace")
 		}
 		if _, found := userConfig.Workspaces[name]; !found {
-			io.PrintErrorAndExit(fmt.Errorf("workspace %s was not found", name))
+			logger.Fatalf("workspace %s was not found", name)
 		}
 
 		delete(userConfig.Workspaces, name)
 		if err := file.WriteUserConfig(userConfig); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 
-		io.PrintWarning(fmt.Sprintf("Workspace '%s' removed", name))
+		logger.Warnf("Workspace '%s' removed", name)
 
 		if err := cache.UpdateAll(); err != nil {
-			io.PrintErrorAndExit(fmt.Errorf("failed to update cache - %w", err))
+			logger.FatalErr(fmt.Errorf("failed to update cache - %w", err))
 		}
 	},
 }
@@ -66,15 +67,17 @@ var vaultSecretRemoveCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Remove a secret from the vault.",
 	Args:    cobra.ExactArgs(1),
+	PreRun:  setTermView,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		reference := args[0]
 
 		v := vault.NewVault()
 		err := v.DeleteSecret(reference)
 		if err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
-		io.PrintSuccess(fmt.Sprintf("Secret %s removed from vault", reference))
+		logger.PlainTextSuccess(fmt.Sprintf("Secret %s removed from vault", reference))
 	},
 }
 

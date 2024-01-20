@@ -1,24 +1,29 @@
-package ui
+package views
 
 import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/io/ui/types"
 	"github.com/jahvon/flow/internal/services/open"
 )
 
-func NewWorkspaceView(app *Application, ws config.WorkspaceConfig, format config.OutputFormat) ViewBuilder {
-	var workspaceKeyCallbacks = []KeyCallback{
+func NewWorkspaceView(
+	parent types.ParentView,
+	ws config.WorkspaceConfig,
+	format config.OutputFormat,
+) types.ViewBuilder {
+	var workspaceKeyCallbacks = []types.KeyCallback{
 		{
 			Key: "o", Label: "open",
 			Callback: func() error {
 				if err := open.Open(ws.Location(), false); err != nil {
-					log.Err(err).Msg("unable to open workspace")
-					app.HandleInternalError(err)
+					parent.HandleInternalError(fmt.Errorf("unable to open workspace: %w", err))
 				}
 				return nil
 			},
@@ -26,7 +31,7 @@ func NewWorkspaceView(app *Application, ws config.WorkspaceConfig, format config
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				openInEditor(app, filepath.Join(ws.Location(), file.WorkspaceConfigFileName))
+				openInEditor(parent, filepath.Join(ws.Location(), file.WorkspaceConfigFileName))
 				return nil
 			},
 		},
@@ -37,28 +42,25 @@ func NewWorkspaceView(app *Application, ws config.WorkspaceConfig, format config
 				curCfg.CurrentWorkspace = ws.AssignedName()
 				if err := file.WriteUserConfig(curCfg); err != nil {
 					log.Err(err).Msg("failed to write user config")
-					app.HandleInternalError(err)
+					parent.HandleInternalError(err)
 				}
-				app.SetHeader(
-					WithCurrentWorkspace(ws.AssignedName()),
-					WithNotice("workspace updated", NoticeLevelInfo),
-				)
-				app.Update(syncAppMsg)
+				parent.SetContext(ws.AssignedName(), "")
+				parent.SetNotice("workspace updated", types.NoticeLevelInfo)
 				return nil
 			},
 		},
 	}
 
-	return NewEntityView(app, &ws, format, workspaceKeyCallbacks...)
+	return NewEntityView(parent, &ws, format, workspaceKeyCallbacks...)
 }
 
 func NewWorkspaceListView(
-	app *Application,
+	parent types.ParentView,
 	workspaces config.WorkspaceConfigList,
 	format config.OutputFormat,
-) ViewBuilder {
+) types.ViewBuilder {
 	if len(workspaces.Items()) == 0 {
-		app.HandleInternalError(fmt.Errorf("no workspaces found"))
+		parent.HandleInternalError(fmt.Errorf("no workspaces found"))
 	}
 
 	selectFunc := func(filterVal string) error {
@@ -68,9 +70,9 @@ func NewWorkspaceListView(
 		if !found {
 			return fmt.Errorf("workspace not found")
 		}
-		app.BuildAndSetView(NewWorkspaceView(app, ws, format))
+		parent.BuildAndSetView(NewWorkspaceView(parent, ws, format))
 		return nil
 	}
 
-	return NewCollectionView(app, workspaces, format, selectFunc)
+	return NewCollectionView(parent, workspaces, format, selectFunc)
 }

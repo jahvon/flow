@@ -4,18 +4,19 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config/cache"
-
-	"github.com/jahvon/flow/internal/io"
 )
 
 var syncCmd = &cobra.Command{
-	Use:   "sync",
-	Short: "Scan workspaces and update flow cache.",
+	Use:     "sync",
+	Short:   "Scan workspaces and update flow cache.",
+	PreRun:  setTermView,
+	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		if err := cache.UpdateAll(); err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
-		io.PrintInfo("Synced flow cache")
+		logger.PlainTextSuccess("Synced flow cache")
 	},
 }
 

@@ -29,6 +29,10 @@ var (
 		"destroy":   DeactivateGroupID,
 		"open":      LaunchGroupID,
 		"launch":    LaunchGroupID,
+		"edit":      LaunchGroupID,
+		"show":      LaunchGroupID,
+		"view":      LaunchGroupID,
+		"render":    LaunchGroupID,
 	}
 
 	ValidVerbs = lo.Keys(ValidVerbToGroupID)

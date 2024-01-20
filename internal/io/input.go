@@ -3,33 +3,16 @@ package io
 import (
 	"fmt"
 	"os"
-	"syscall"
-
-	"golang.org/x/term"
 )
 
-func Ask(question string) string {
-	PrintQuestion(question)
+func ProcessUserInput(prompt string) string {
+	PrintQuestion(prompt)
 	var answer string
 	_, err := fmt.Scanln(&answer)
 	if err != nil {
-		log.Panic().Err(err).Msg("unable to scan input")
+		panic(fmt.Errorf("failed to read input: %w", err))
 	}
 	return answer
-}
-
-func AskYesNo(question string) bool {
-	answer := Ask(question + " (y/n) ")
-	return answer == "y" || answer == "Y"
-}
-
-func AskForEncryptionKey() string {
-	PrintQuestion("Enter vault encryption key:")
-	passkey, err := term.ReadPassword(syscall.Stdin)
-	if err != nil {
-		os.Exit(1)
-	}
-	return string(passkey)
 }
 
 type StdInReader struct{}

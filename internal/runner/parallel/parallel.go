@@ -27,9 +27,13 @@ func (r *parallelRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *parallelRunner) Exec(ctx *context.Context, executable *config.Executable) error {
+func (r *parallelRunner) Exec(
+	ctx *context.Context,
+	executable *config.Executable,
+	promptedEnv map[string]string,
+) error {
 	parallelSpec := executable.Type.Parallel
-	if err := runner.SetEnv(&parallelSpec.ParameterizedExecutable); err != nil {
+	if err := runner.SetEnv(&parallelSpec.ParameterizedExecutable, promptedEnv); err != nil {
 		return fmt.Errorf("unable to set parameters to env - %w", err)
 	}
 
@@ -59,9 +63,9 @@ func (r *parallelRunner) Exec(ctx *context.Context, executable *config.Executabl
 
 		group.Go(func() error {
 			if parallelSpec.FailFast {
-				return runner.Exec(ctx, exec)
+				return runner.Exec(ctx, exec, promptedEnv)
 			} else {
-				err := runner.Exec(ctx, exec)
+				err := runner.Exec(ctx, exec, promptedEnv)
 				if err != nil {
 					errs = append(errs, err)
 				}

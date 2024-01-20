@@ -13,7 +13,7 @@ var log = io.Log().With().Str("scope", "runner").Logger()
 
 type Runner interface {
 	Name() string
-	Exec(ctx *context.Context, executable *config.Executable) error
+	Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error
 	IsCompatible(executable *config.Executable) bool
 }
 
@@ -27,7 +27,7 @@ func RegisterRunner(runner Runner) {
 	registeredRunners = append(registeredRunners, runner)
 }
 
-func Exec(ctx *context.Context, executable *config.Executable) error {
+func Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	var assignedRunner Runner
 	for _, runner := range registeredRunners {
 		if runner.IsCompatible(executable) {
@@ -41,12 +41,12 @@ func Exec(ctx *context.Context, executable *config.Executable) error {
 	}
 
 	if executable.Timeout == 0 {
-		return assignedRunner.Exec(ctx, executable)
+		return assignedRunner.Exec(ctx, executable, promptedEnv)
 	}
 
 	done := make(chan error, 1)
 	go func() {
-		done <- assignedRunner.Exec(ctx, executable)
+		done <- assignedRunner.Exec(ctx, executable, promptedEnv)
 	}()
 
 	select {

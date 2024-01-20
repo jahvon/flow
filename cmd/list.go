@@ -9,7 +9,7 @@ import (
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/io"
 	executableio "github.com/jahvon/flow/internal/io/executable"
-	"github.com/jahvon/flow/internal/io/ui"
+	"github.com/jahvon/flow/internal/io/ui/views"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -25,14 +25,17 @@ var workspaceList = &cobra.Command{
 	Aliases: []string{"ws"},
 	Short:   "Print a list of the registered flow workspaces.",
 	Args:    cobra.NoArgs,
+	PreRun:  startApp,
+	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 		tagsFilter := getFlagValue[[]string](cmd, *flags.FilterTagFlag)
 
-		log.Debug().Msg("Loading workspace configs from cache")
+		logger.Debugf("Loading workspace configs from cache")
 		workspaceCache, err := curCtx.WorkspacesCache.Get()
 		if err != nil {
-			log.Error().Err(err).Msg("failed to load workspace configs from cache")
+			logger.Fatalx("failed to load workspace configs from cache", "err", err)
 		}
 
 		filteredWorkspaces := make([]config.WorkspaceConfig, 0)
@@ -46,11 +49,11 @@ var workspaceList = &cobra.Command{
 		}
 
 		if len(filteredWorkspaces) == 0 {
-			io.PrintErrorAndExit(fmt.Errorf("no workspaces found"))
+			logger.Fatalf("no workspaces found")
 		}
 
-		if interactiveUIEnabled(cmd) {
-			viewBuilder := ui.NewWorkspaceListView(curCtx.App, filteredWorkspaces, config.OutputFormat(outputFormat))
+		if interactiveUIEnabled() {
+			viewBuilder := views.NewWorkspaceListView(curCtx.App, filteredWorkspaces, config.OutputFormat(outputFormat))
 			curCtx.App.BuildAndSetView(viewBuilder)
 		} else {
 			workspaceio.PrintWorkspaceList(io.OutputFormat(outputFormat), filteredWorkspaces)
@@ -63,7 +66,10 @@ var executableListCmd = &cobra.Command{
 	Aliases: []string{"execs"},
 	Short:   "Print a list of executable flows.",
 	Args:    cobra.NoArgs,
+	PreRun:  startApp,
+	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		wsFilter := getFlagValue[string](cmd, *flags.FilterWorkspaceFlag)
 		if wsFilter == "." {
 			wsFilter = curCtx.UserConfig.CurrentWorkspace
@@ -80,7 +86,7 @@ var executableListCmd = &cobra.Command{
 
 		allExecs, err := curCtx.ExecutableCache.GetExecutableList()
 		if err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 		filteredExec := allExecs
 		filteredExec = filteredExec.
@@ -89,8 +95,8 @@ var executableListCmd = &cobra.Command{
 			FilterByVerb(config.Verb(verbFilter)).
 			FilterByTags(tagsFilter)
 
-		if interactiveUIEnabled(cmd) {
-			viewBuilder := ui.NewExecutableListView(curCtx.App, filteredExec, config.OutputFormat(outputFormat))
+		if interactiveUIEnabled() {
+			viewBuilder := views.NewExecutableListView(curCtx.App, filteredExec, config.OutputFormat(outputFormat))
 			curCtx.App.BuildAndSetView(viewBuilder)
 		} else {
 			executableio.PrintExecutableList(io.OutputFormat(outputFormat), filteredExec)
@@ -103,20 +109,23 @@ var vaultSecretListCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Print a list of secrets in the flow vault.",
 	Args:    cobra.NoArgs,
+	PreRun:  setTermView,
+	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
 		asPlainText := getFlagValue[bool](cmd, *flags.OutputSecretAsPlainTextFlag)
 
 		v := vault.NewVault()
 		secrets, err := v.GetAllSecrets()
 		if err != nil {
-			io.PrintErrorAndExit(err)
+			logger.FatalErr(err)
 		}
 
 		for ref, secret := range secrets {
 			if asPlainText {
-				io.PrintNotice(fmt.Sprintf("%s: %s", ref, secret.PlainTextString()))
+				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.PlainTextString()))
 			} else {
-				io.PrintNotice(fmt.Sprintf("%s: %s", ref, secret.String()))
+				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.String()))
 			}
 		}
 	},
@@ -125,7 +134,6 @@ var vaultSecretListCmd = &cobra.Command{
 func init() {
 	registerFlagOrPanic(workspaceList, *flags.OutputFormatFlag)
 	registerFlagOrPanic(workspaceList, *flags.FilterTagFlag)
-	registerFlagOrPanic(workspaceList, *flags.NonInteractiveFlag)
 	listCmd.AddCommand(workspaceList)
 
 	registerFlagOrPanic(executableListCmd, *flags.OutputFormatFlag)
@@ -133,7 +141,6 @@ func init() {
 	registerFlagOrPanic(executableListCmd, *flags.FilterNamespaceFlag)
 	registerFlagOrPanic(executableListCmd, *flags.FilterVerbFlag)
 	registerFlagOrPanic(executableListCmd, *flags.FilterTagFlag)
-	registerFlagOrPanic(executableListCmd, *flags.NonInteractiveFlag)
 	listCmd.AddCommand(executableListCmd)
 
 	registerFlagOrPanic(vaultSecretListCmd, *flags.OutputSecretAsPlainTextFlag)

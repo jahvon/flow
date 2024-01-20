@@ -7,11 +7,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type InteractiveConfig struct {
+	Enabled            bool `json:"enabled" yaml:"enabled"`
+	NotifyOnCompletion bool `json:"notify"  yaml:"notify"`
+	SoundOnCompletion  bool `json:"sound"   yaml:"sound"`
+}
 type UserConfig struct {
-	Workspaces       map[string]string `json:"workspaces"       yaml:"workspaces"`
-	CurrentWorkspace string            `json:"currentWorkspace" yaml:"currentWorkspace"`
-	CurrentNamespace string            `json:"currentNamespace" yaml:"currentNamespace"`
-	InteractiveUI    bool              `json:"interactive"      yaml:"interactive"`
+	Workspaces       map[string]string  `json:"workspaces"       yaml:"workspaces"`
+	CurrentWorkspace string             `json:"currentWorkspace" yaml:"currentWorkspace"`
+	CurrentNamespace string             `json:"currentNamespace" yaml:"currentNamespace"`
+	Interactive      *InteractiveConfig `json:"interactive"      yaml:"interactive"`
 }
 
 func (c *UserConfig) Validate() error {
@@ -57,11 +62,15 @@ func (c *UserConfig) Markdown() string {
 	if c.CurrentNamespace != "" {
 		mkdwn += fmt.Sprintf("## Current namespace\n%s\n", c.CurrentNamespace)
 	}
-	interactive := "disabled"
-	if c.InteractiveUI {
-		interactive = "enabled"
+	if c.Interactive != nil {
+		interactiveConfig, err := yaml.Marshal(c.Interactive)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to marshal interactive config")
+			mkdwn += "## Interactive UI config\nerror\n"
+		} else {
+			mkdwn += fmt.Sprintf("## Git UI config\n```yaml\n%s```\n", string(interactiveConfig))
+		}
 	}
-	mkdwn += fmt.Sprintf("## Interactive UI\n%s\n", interactive)
 	mkdwn += "## Registered Workspaces\n"
 	for name, path := range c.Workspaces {
 		mkdwn += fmt.Sprintf("- %s: %s\n", name, path)

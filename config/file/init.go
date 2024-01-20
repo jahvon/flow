@@ -25,7 +25,9 @@ func InitUserConfig() error {
 	defaultCfg := &config.UserConfig{
 		Workspaces:       map[string]string{defaultWsName: DefaultWorkspacePath},
 		CurrentWorkspace: defaultWsName,
-		InteractiveUI:    true,
+		Interactive: &config.InteractiveConfig{
+			Enabled: true,
+		},
 	}
 
 	_, err := os.Create(UserConfigPath)

@@ -26,22 +26,29 @@ func (r *execRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *execRunner) Exec(_ *context.Context, executable *config.Executable) error {
+func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	execSpec := executable.Type.Exec
-	envMap, err := runner.ParametersToEnvMap(&execSpec.ParameterizedExecutable)
+	envMap, err := runner.ParametersToEnvMap(&execSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
 		return fmt.Errorf("env setup failed - %w", err)
 	}
-	envList, err := runner.ParametersToEnvList(&execSpec.ParameterizedExecutable)
+	envList, err := runner.ParametersToEnvList(&execSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
 		return fmt.Errorf("env setup failed  - %w", err)
 	}
 
-	targetDir, err := execSpec.ExpandDirectory(executable.WorkspacePath(), executable.DefinitionPath(), envMap)
+	targetDir, isTmp, err := execSpec.ExpandDirectory(
+		executable.WorkspacePath(),
+		executable.DefinitionPath(),
+		ctx.ProcessTmpDir,
+		envMap,
+	)
 	if err != nil {
 		return fmt.Errorf("unable to expand directory - %w", err)
+	} else if isTmp {
+		ctx.ProcessTmpDir = targetDir
 	}
-	defer execSpec.Finalize()
+
 	logMode := execSpec.LogMode
 	var logFields map[string]interface{}
 
@@ -55,9 +62,9 @@ func (r *execRunner) Exec(_ *context.Context, executable *config.Executable) err
 	case execSpec.Command != "" && execSpec.File != "":
 		return fmt.Errorf("cannot set both cmd and file")
 	case execSpec.Command != "":
-		return run.RunCmd(execSpec.Command, targetDir, envList, logMode, logFields)
+		return run.RunCmd(execSpec.Command, targetDir, envList, logMode, ctx.Logger, logFields)
 	case execSpec.File != "":
-		return run.RunFile(execSpec.File, targetDir, envList, logMode, logFields)
+		return run.RunFile(execSpec.File, targetDir, envList, logMode, ctx.Logger, logFields)
 	default:
 		return fmt.Errorf("unable to determine how executable should be run")
 	}
