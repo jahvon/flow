@@ -57,7 +57,7 @@ func NewContext(ctx context.Context) *Context {
 	}
 
 	var logger *io.Logger
-	if userConfig.InteractiveUI {
+	if userConfig.Interactive != nil && userConfig.Interactive.Enabled {
 		logger = io.NewLogger(io.HumanReadable, true)
 	} else {
 		logger = io.NewLogger(io.HumanReadable, false)

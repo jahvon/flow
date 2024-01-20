@@ -89,8 +89,11 @@ var execCmd = &cobra.Command{
 		logger.PlainTextSuccess(fmt.Sprintf("%s flow completed", ref))
 		if interactiveUIEnabled() {
 			curCtx.App.SetNotice(fmt.Sprintf("Elapsed: %s", dur.Round(time.Millisecond)), types.NoticeLevelInfo)
-			if dur > 1*time.Minute {
+			if dur > 1*time.Minute && curCtx.UserConfig.Interactive.SoundOnCompletion {
 				_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+			}
+			if dur > 1*time.Minute && curCtx.UserConfig.Interactive.NotifyOnCompletion {
+				_ = beeep.Notify("Flow", "Flow completed", "")
 			}
 		}
 	},

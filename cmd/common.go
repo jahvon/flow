@@ -22,7 +22,7 @@ var (
 
 func interactiveUIEnabled() bool {
 	disabled := getPersistentFlagValue[bool](rootCmd, *flags.NonInteractiveFlag)
-	return !disabled && curCtx.UserConfig.InteractiveUI
+	return !disabled && curCtx.UserConfig.Interactive != nil && curCtx.UserConfig.Interactive.Enabled
 }
 
 func handleError(err error) {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -93,7 +94,10 @@ var configInteractiveSetCmd = &cobra.Command{
 			logger.FatalErr(err)
 		}
 
-		userConfig.InteractiveUI = enabled
+		if userConfig.Interactive == nil {
+			userConfig.Interactive = &config.InteractiveConfig{}
+		}
+		userConfig.Interactive.Enabled = enabled
 		if err := file.WriteUserConfig(userConfig); err != nil {
 			logger.FatalErr(err)
 		}
