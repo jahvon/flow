@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/samber/lo"
@@ -33,17 +34,28 @@ var (
 		"show":      LaunchGroupID,
 		"view":      LaunchGroupID,
 		"render":    LaunchGroupID,
+		"process":   LaunchGroupID,
+		"transform": LaunchGroupID,
+		"generate":  LaunchGroupID,
 	}
-
-	ValidVerbs = lo.Keys(ValidVerbToGroupID)
 )
+
+func ValidVerbs() []string {
+	return lo.Keys(ValidVerbToGroupID)
+}
+
+func SortedValidVerbs() []string {
+	verbs := ValidVerbs()
+	slices.SortFunc(verbs, strings.Compare)
+	return verbs
+}
 
 func (v Verb) String() string {
 	return string(v)
 }
 
 func (v Verb) Validate() error {
-	if !lo.Contains(ValidVerbs, v.String()) {
+	if !lo.Contains(ValidVerbs(), v.String()) {
 		return fmt.Errorf("invalid executable verb %s", v)
 	}
 	return nil
@@ -55,7 +67,7 @@ func (v Verb) Equals(other Verb) bool {
 
 func RelatedVerbs(verb Verb) []Verb {
 	verbs := make([]Verb, 0)
-	for _, v := range ValidVerbs {
+	for _, v := range ValidVerbs() {
 		if ValidVerbToGroupID[v] == ValidVerbToGroupID[verb.String()] {
 			verbs = append(verbs, Verb(v))
 		}

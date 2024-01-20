@@ -25,7 +25,7 @@ import (
 
 var execCmd = &cobra.Command{
 	Use:     "exec <executable-id>",
-	Aliases: config.ValidVerbs,
+	Aliases: config.SortedValidVerbs(),
 	Short:   "Execute a flow by ID.",
 	Long: "Execute a flow where <executable-id> is the target executable's ID in the form of 'ws/ns:name'.\n" +
 		"The flow subcommand used should match the target executable's verb or one of its aliases.\n\n" +

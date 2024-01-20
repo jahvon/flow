@@ -48,7 +48,7 @@ var FilterNamespaceFlag = &Metadata{
 var FilterVerbFlag = &Metadata{
 	Name:      "verb",
 	Shorthand: "v",
-	Usage:     fmt.Sprintf("Filter executables by verb. One of: %s", config.ValidVerbs),
+	Usage:     fmt.Sprintf("Filter executables by verb. One of: %s", config.SortedValidVerbs()),
 	Default:   "",
 	Required:  false,
 }
