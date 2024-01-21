@@ -11,6 +11,8 @@ import (
 )
 
 type WorkspaceConfig struct {
+	// +docsgen:displayName
+	// The display name of the workspace. This is used in the interactive UI.
 	DisplayName string                    `json:"displayName"           yaml:"displayName"`
 	Description string                    `json:"description,omitempty" yaml:"description,omitempty"`
 	Tags        Tags                      `json:"tags,omitempty"        yaml:"tags,omitempty"`
@@ -24,12 +26,19 @@ type WorkspaceConfig struct {
 type WorkspaceConfigList []WorkspaceConfig
 
 type GitConfig struct {
-	Enabled    bool `json:"enabled"              yaml:"enabled"`
+	Enabled bool `json:"enabled" yaml:"enabled"`
+
+	// +docsgen:pullOnSync
+	// Whether to pull the latest changes from the remote when syncing.
 	PullOnSync bool `json:"pullOnSync,omitempty" yaml:"pullOnSync,omitempty"`
 }
 
 type ExecutableLocationConfig struct {
+	// +docsgen:included
+	// A list of directories to include in the executable search.
 	Included []string `json:"included,omitempty" yaml:"included,omitempty"`
+	// +docsgen:excluded
+	// A list of directories to exclude from the executable search.
 	Excluded []string `json:"excluded,omitempty" yaml:"excluded,omitempty"`
 }
 

@@ -1,0 +1,44 @@
+visibility: public
+namespace: docs
+tags:
+  - documentation
+executables:
+  - verb: run
+    name: gen
+    visibility: private
+    aliases:
+      - generate
+    description: Generate the Flow documentation from the source code
+    type:
+      exec:
+        dir: //
+        cmd: |
+          go run ./tools/docsgen/main.go
+  - verb: show
+    name: execs
+    aliases:
+      - executables
+      - exec
+    description: Render the Flow Executable reference documentation
+    type:
+      render:
+        dir: config
+        templateFile: executables.md
+  - verb: show
+    name: ws
+    aliases:
+      - workspaces
+    description: Render the Flow Workspace reference documentation
+    type:
+      render:
+        dir: config
+        templateFile: workspace_config.md
+  - verb: show
+    name: cfg
+    aliases:
+      - user-config
+    description: Render the Flow User Config reference documentation
+    type:
+      render:
+        dir: config
+        templateFile: user_config.md

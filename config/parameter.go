@@ -9,12 +9,22 @@ import (
 	"github.com/jahvon/flow/internal/utils"
 )
 
+// +docsgen:param
+// A parameter is a value that can be passed to an executable and all of its sub-executables.
+// Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.
 type Parameter struct {
-	// Only one of text, secretRef, or prompt should be set.
-	Text      string `yaml:"text"`
-	Prompt    string `yaml:"prompt"`
+	// +docsgen:text
+	// A static value to be passed to the executable.
+	Text string `yaml:"text"`
+	// +docsgen:secretRef
+	// A reference to a secret to be passed to the executable.
+	Prompt string `yaml:"prompt"`
+	// +docsgen:prompt
+	// A prompt to be displayed to the user to collect a value to be passed to the executable.
 	SecretRef string `yaml:"secretRef"`
 
+	// +docsgen:envKey
+	// The name of the environment variable that will be set with the value of the parameter.
 	EnvKey string `yaml:"envKey"`
 }
 
