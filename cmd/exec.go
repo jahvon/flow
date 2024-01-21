@@ -29,8 +29,8 @@ var execCmd = &cobra.Command{
 	Short:   "Execute a flow by ID.",
 	Long: "Execute a flow where <executable-id> is the target executable's ID in the form of 'ws/ns:name'.\n" +
 		"The flow subcommand used should match the target executable's verb or one of its aliases.\n\n" +
-		"See " + io.DocsURL("executable-verbs") + "for more information on executable verbs." +
-		"See " + io.DocsURL("executable-ids") + "for more information on executable IDs.",
+		"See " + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
+		"See " + io.ConfigDocsURL("executables", "Ref") + "for more information on executable IDs.",
 	Args: cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		startApp(cmd, args)

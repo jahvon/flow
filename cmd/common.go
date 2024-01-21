@@ -136,5 +136,6 @@ func exitApp(_ *cobra.Command, _ []string) {
 }
 
 func GenerateMarkdownTree(dir string) error {
+	rootCmd.DisableAutoGenTag = true
 	return doc.GenMarkdownTree(rootCmd, dir)
 }

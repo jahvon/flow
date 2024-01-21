@@ -91,6 +91,9 @@ func (w StdErrWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func DocsURL(docID string) string {
-	return fmt.Sprintf("https://github.com/jahvon/flow/blob/main/docs/%s.md", docID)
+func ConfigDocsURL(docID, anchor string) string {
+	if anchor != "" {
+		anchor = "#" + anchor
+	}
+	return fmt.Sprintf("https://github.com/jahvon/flow/blob/main/docs/config/%s.md%s", docID, anchor)
 }

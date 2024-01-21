@@ -2,5 +2,9 @@ displayName: flow
 description: |
     Source code for flow
     GitHub Repo: github.com/jahvon/flow
+    
+    **Featured Executables**
+    - `show docs:execs` - Render the docs for the Executable reference doc
+    - `run dev:pre-commit` - Run the repo's pre-commit script
 git:
     enabled: false
