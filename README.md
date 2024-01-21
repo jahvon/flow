@@ -1,4 +1,15 @@
-# flow - Local, CLI Workflow Manager
+# flow 
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/jahvon/flow)](https://goreportcard.com/report/github.com/jahvon/flow)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jahvon/flow.svg)](https://pkg.go.dev/github.com/jahvon/flow)
+[![GitHub release](https://img.shields.io/github/v/release/jahvon/flow)](https://github.com/jahvon/flow/releases)
+
+flow is a command line interface designed to make managing and running development workflows easier. It's driven by
+"executables" organized across workspaces and namespaces defined in a workspace.
+
+Some common use cases includes running a set of scripts, opening an application after running setup tasks,
+and rendering a markdown document that is dynamically generated from data in an external system.
+That's just the start; all aspects of flow are meant to be easily configurable, easily discoverable, and highly extensible.
 
 ## Configuration and Workflow Definition Files
 

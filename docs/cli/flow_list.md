@@ -18,7 +18,7 @@ Print a list of flow entities.
 
 ### SEE ALSO
 
-* [flow](flow.md)	 - flow is a command line interface for managing and running machine commands.
+* [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
 * [flow list executables](flow_list_executables.md)	 - Print a list of executable flows.
 * [flow list secrets](flow_list_secrets.md)	 - Print a list of secrets in the flow vault.
 * [flow list workspaces](flow_list_workspaces.md)	 - Print a list of the registered flow workspaces.

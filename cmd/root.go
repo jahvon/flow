@@ -14,8 +14,10 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "flow",
-	Short: "flow is a command line interface for managing and running machine commands.",
-	Long:  `Command line interface script wrapper`,
+	Short: "flow is a command line interface designed to make managing and running development workflows easier.",
+	Long: "flow is a command line interface designed to make managing and running development workflows easier." +
+		"It's driven by executables organized across workspaces and namespaces defined in a workspace.\n\n" +
+		"See github.com/jahvon/flow for more information.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbosity := getPersistentFlagValue[int](cmd.Root(), *flags.VerbosityFlag)
 		curCtx.Logger.SetLevel(verbosity)

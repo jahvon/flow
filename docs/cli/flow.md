@@ -1,10 +1,12 @@
 ## flow
 
-flow is a command line interface for managing and running machine commands.
+flow is a command line interface designed to make managing and running development workflows easier.
 
 ### Synopsis
 
-Command line interface script wrapper
+flow is a command line interface designed to make managing and running development workflows easier.It's driven by executables organized across workspaces and namespaces defined in a workspace.
+
+See github.com/jahvon/flow for more information.
 
 ### Options
 
