@@ -18,7 +18,7 @@ Update global or workspace configuration values.
 
 ### SEE ALSO
 
-* [flow](flow.md)	 - flow is a command line interface for managing and running machine commands.
+* [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
 * [flow set interactive](flow_set_interactive.md)	 - Enable or disable the interactive terminal UI experience.
 * [flow set namespace](flow_set_namespace.md)	 - Change the current namespace.
 * [flow set secret](flow_set_secret.md)	 - Update or create a secret in the flow secret vault.

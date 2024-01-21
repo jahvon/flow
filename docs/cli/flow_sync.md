@@ -22,5 +22,5 @@ flow sync [flags]
 
 ### SEE ALSO
 
-* [flow](flow.md)	 - flow is a command line interface for managing and running machine commands.
+* [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
 

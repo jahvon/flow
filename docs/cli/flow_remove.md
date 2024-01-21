@@ -18,7 +18,7 @@ Remove a flow object.
 
 ### SEE ALSO
 
-* [flow](flow.md)	 - flow is a command line interface for managing and running machine commands.
+* [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
 * [flow remove secret](flow_remove_secret.md)	 - Remove a secret from the vault.
 * [flow remove workspace](flow_remove_workspace.md)	 - Remove an existing workspace from the list of known workspaces.
 
