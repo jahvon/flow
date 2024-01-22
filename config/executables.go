@@ -18,6 +18,13 @@ import (
 const tmpdir = "f:tmp"
 
 type DirectoryScopedExecutable struct {
+	// +docsgen:dir
+	// The directory to execute the command in.
+	// If unset, the directory of the executable definition will be used.
+	// If set to `f:tmp`, a temporary directory will be created for the process.
+	// If prefixed with `./`, the path will be relative to the current working directory.
+	// If prefixed with `//`, the path will be relative to the workspace root.
+	// Environment variables in the path will be expended at runtime.
 	Directory string `yaml:"dir"`
 }
 
@@ -41,6 +48,8 @@ func (e *DirectoryScopedExecutable) ExpandDirectory(
 }
 
 type ParameterizedExecutable struct {
+	// +docsgen:params
+	// List of parameters to pass to the executable.
 	Parameters ParameterList `yaml:"params"`
 }
 
@@ -104,6 +113,8 @@ type RenderExecutableType struct {
 type SerialExecutableType struct {
 	ParameterizedExecutable `yaml:",inline"`
 
+	// +docsgen:refs
+	// List of executables references
 	ExecutableRefs []Ref `yaml:"refs"`
 	FailFast       bool  `yaml:"failFast"`
 }
@@ -117,23 +128,37 @@ type ParallelExecutableType struct {
 }
 
 type ExecutableTypeSpec struct {
-	Exec     *ExecExecutableType     `yaml:"exec,omitempty"`
-	Launch   *LaunchExecutableType   `yaml:"launch,omitempty"`
-	Request  *RequestExecutableType  `yaml:"request,omitempty"`
-	Render   *RenderExecutableType   `yaml:"render,omitempty"`
-	Serial   *SerialExecutableType   `yaml:"serial,omitempty"`
+	// +docsgen:exec
+	// Standard executable type. Runs a command/file in a subprocess.
+	Exec *ExecExecutableType `yaml:"exec,omitempty"`
+	// +docsgen:launch
+	// Launches an application or opens a URI.
+	Launch *LaunchExecutableType `yaml:"launch,omitempty"`
+	// +docsgen:request
+	// Makes an HTTP request.
+	Request *RequestExecutableType `yaml:"request,omitempty"`
+	// +docsgen:render
+	// Renders a Markdown template with provided data. Requires the Interactive UI.
+	Render *RenderExecutableType `yaml:"render,omitempty"`
+	// +docsgen:serial
+	// Runs a list of executables in serial.
+	Serial *SerialExecutableType `yaml:"serial,omitempty"`
+	// +docsgen:parallel
+	// Runs a list of executables in parallel.
 	Parallel *ParallelExecutableType `yaml:"parallel,omitempty"`
 }
 
 type Executable struct {
-	Verb        Verb                `yaml:"verb"`
-	Name        string              `yaml:"name"`
-	Aliases     []string            `yaml:"aliases"`
-	Tags        Tags                `yaml:"tags"`
-	Description string              `yaml:"description"`
-	Visibility  VisibilityType      `yaml:"visibility"`
-	Timeout     time.Duration       `yaml:"timeout"`
-	Type        *ExecutableTypeSpec `yaml:"type"`
+	Verb        Verb           `yaml:"verb"`
+	Name        string         `yaml:"name"`
+	Aliases     []string       `yaml:"aliases"`
+	Tags        Tags           `yaml:"tags"`
+	Description string         `yaml:"description"`
+	Visibility  VisibilityType `yaml:"visibility"`
+	Timeout     time.Duration  `yaml:"timeout"`
+	// +docsgen:type
+	// The type of executable. Only one type can be set.
+	Type *ExecutableTypeSpec `yaml:"type"`
 
 	workspace, namespace, workspacePath, definitionPath string
 }

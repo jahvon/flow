@@ -14,6 +14,15 @@ const (
 	LaunchGroupID     = "launch"
 )
 
+// +docsgen:verb
+// Keywords that describe the action an executable performs.
+// While executables are configured with a single verb, the verb can be aliased to related verbs.
+// For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.
+// This allows users to use the verb that best describes the action they are performing.
+//
+// **Activation verbs**: `exec`, `run`, `start`, `install`, `setup`
+// **Deactivation verbs**: `delete`, `remove`, `uninstall`, `teardown`, `destroy`
+// **Launch verbs**: `open`, `launch`, `edit`, `show`, `view`, `render`, `process`, `transform`, `generate`
 type Verb string
 
 var (
@@ -116,6 +125,9 @@ func (v VisibilityType) IsHidden() bool {
 	return v == VisibilityHidden
 }
 
+// +docsgen:tags
+// A list of tags.
+// Tags can be used with list commands to filter returned data.
 type Tags []string
 
 func (t Tags) String() string {
@@ -173,6 +185,14 @@ func (a Aliases) HasAlias(alias string) bool {
 	return false
 }
 
+// +docsgen:ref
+// A reference to an executable.
+// The format is `<verb> <workspace>/<namespace>:<executable name>`.
+// For example, `exec ws/ns:my-flow`.
+//
+// The workspace and namespace are optional.
+// If the workspace is not specified, the current workspace will be used.
+// If the namespace is not specified, the current namespace will be used.
 type Ref string
 
 func NewRef(id string, verb Verb) Ref {

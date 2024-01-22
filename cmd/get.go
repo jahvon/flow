@@ -95,8 +95,8 @@ var executableGetCmd = &cobra.Command{
 	Short:   "Print an executable flow by reference.",
 	Long: "Print an executable by the executable's verb and ID.\nThe target executable's ID should be in the  " +
 		"form of 'ws/ns:name' and the verb should match the target executable's verb or one of its aliases.\n\n" +
-		"See" + io.DocsURL("executable-verbs") + "for more information on executable verbs." +
-		"See" + io.DocsURL("executable-ids") + "for more information on executable IDs.",
+		"See" + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
+		"See" + io.ConfigDocsURL("executable", "Ref") + "for more information on executable IDs.",
 	Args:    cobra.ExactArgs(2),
 	PreRun:  startApp,
 	PostRun: waitForExit,

@@ -8,15 +8,28 @@ import (
 )
 
 type InteractiveConfig struct {
-	Enabled            bool `json:"enabled" yaml:"enabled"`
-	NotifyOnCompletion bool `json:"notify"  yaml:"notify"`
-	SoundOnCompletion  bool `json:"sound"   yaml:"sound"`
+	Enabled bool `json:"enabled" yaml:"enabled"`
+	// +docsgen:notify
+	// Whether to send a desktop notification when a command completes.
+	NotifyOnCompletion bool `json:"notify" yaml:"notify"`
+	// +docsgen:sound
+	// Whether to play a sound when a command completes.
+	SoundOnCompletion bool `json:"sound" yaml:"sound"`
 }
+
 type UserConfig struct {
-	Workspaces       map[string]string  `json:"workspaces"       yaml:"workspaces"`
-	CurrentWorkspace string             `json:"currentWorkspace" yaml:"currentWorkspace"`
-	CurrentNamespace string             `json:"currentNamespace" yaml:"currentNamespace"`
-	Interactive      *InteractiveConfig `json:"interactive"      yaml:"interactive"`
+	// +docsgen:workspaces
+	// Map of workspace names to their paths.
+	Workspaces map[string]string `json:"workspaces" yaml:"workspaces"`
+	// +docsgen:currentWorkspace
+	// The name of the current workspace. This should match a key in the `workspaces` map.
+	CurrentWorkspace string `json:"currentWorkspace" yaml:"currentWorkspace"`
+	// +docsgen:currentNamespace
+	// The name of the current namespace. This is not required to be set.
+	CurrentNamespace string `json:"currentNamespace" yaml:"currentNamespace"`
+	// +docsgen:interactive
+	// Configurations for the interactive UI.
+	Interactive *InteractiveConfig `json:"interactive" yaml:"interactive"`
 }
 
 func (c *UserConfig) Validate() error {

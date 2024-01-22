@@ -5,9 +5,23 @@ import (
 )
 
 type ExecutableDefinition struct {
-	Namespace   string         `yaml:"namespace"`
-	Tags        Tags           `yaml:"tags"`
-	Visibility  VisibilityType `yaml:"visibility"`
+	// +docsgen:namespace
+	// The namespace of the executable definition. This is used to group executables together.
+	// If not set, the executables in the definition will be grouped into the root (*) namespace.
+	// Namespaces can be reused across multiple definitions.
+	Namespace string `yaml:"namespace"`
+	Tags      Tags   `yaml:"tags"`
+	// +docsgen:visibility
+	// The visibility of the executables to Flow.
+	// If not set, the visibility will default to `public`.
+	//
+	// `public` executables can be executed and listed from anywhere.
+	// `private` executables can be executed and listed only within their own workspace.
+	// `internal` executables can be executed within their own workspace but are not listed.
+	// `hidden` executables cannot be executed or listed.
+	Visibility VisibilityType `yaml:"visibility"`
+	// +docsgen:executables
+	// A list of executables to be defined in the executable definition.
 	Executables ExecutableList `yaml:"executables"`
 
 	workspaceName, workspacePath, definitionPath string

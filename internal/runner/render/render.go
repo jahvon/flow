@@ -64,9 +64,12 @@ func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable,
 	}
 
 	contentFile := filepath.Clean(filepath.Join(targetDir, renderSpec.TemplateFile))
-	templateData, err := readDataFile(targetDir, renderSpec.TemplateDataFile)
-	if err != nil {
-		return err
+	var templateData map[string]interface{}
+	if renderSpec.TemplateDataFile != "" {
+		templateData, err = readDataFile(targetDir, renderSpec.TemplateDataFile)
+		if err != nil {
+			return err
+		}
 	}
 
 	tmpl, err := template.New(filepath.Base(renderSpec.TemplateFile)).

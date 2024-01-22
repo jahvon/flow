@@ -1,0 +1,15 @@
+visibility: private
+namespace: dev
+tags:
+  - development
+executables:
+  - verb: run
+    name: pre-commit
+    aliases:
+      - pc
+    description: Run the repo's pre-commit script
+    type:
+      exec:
+        dir: //
+        cmd: |
+          make pre-commit

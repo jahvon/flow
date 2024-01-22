@@ -18,17 +18,18 @@ import (
 // - relative path -> execPath + dir path
 // - ${envVar} -> expanded to the value from env map.
 func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string {
+	execDir := filepath.Dir(execPath)
 	var targetDir string
 	switch {
 	case dir == "":
-		targetDir = filepath.Dir(execPath)
+		targetDir = filepath.Dir(execDir)
 	case strings.HasPrefix(dir, "//"):
 		targetDir = strings.Replace(dir, "//", wsPath+"/", 1)
 	case dir == "." || strings.HasPrefix(dir, "./"):
 		wd, err := os.Getwd()
 		if err != nil {
 			log.Warn().Err(err).Msg("unable to get working directory for relative path expansion")
-			targetDir = filepath.Join(execPath, dir)
+			targetDir = filepath.Join(execDir, dir)
 		} else {
 			targetDir = filepath.Join(wd, dir[1:])
 		}
@@ -36,12 +37,12 @@ func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			log.Warn().Err(err).Msg("unable to get user home directory for relative path expansion")
-			targetDir = filepath.Join(execPath, dir)
+			targetDir = filepath.Join(execDir, dir)
 		} else {
 			targetDir = filepath.Join(homeDir, dir[2:])
 		}
 	default:
-		targetDir = execPath + "/" + targetDir
+		targetDir = execDir + "/" + dir
 	}
 
 	targetDir = os.Expand(targetDir, func(key string) string {
