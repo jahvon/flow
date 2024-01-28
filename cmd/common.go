@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -22,7 +23,8 @@ var (
 
 func interactiveUIEnabled() bool {
 	disabled := getPersistentFlagValue[bool](rootCmd, *flags.NonInteractiveFlag)
-	return !disabled && curCtx.UserConfig.Interactive != nil && curCtx.UserConfig.Interactive.Enabled
+	envDisabled, _ := strconv.ParseBool(os.Getenv("DISABLE_FLOW_INTERACTIVE"))
+	return !disabled && !envDisabled && curCtx.UserConfig.Interactive != nil && curCtx.UserConfig.Interactive.Enabled
 }
 
 func handleError(err error) {
