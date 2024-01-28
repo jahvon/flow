@@ -28,6 +28,7 @@ func (r *execRunner) IsCompatible(executable *config.Executable) bool {
 
 func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	execSpec := executable.Type.Exec
+	promptedEnv = applyBaseEnv(ctx, executable, promptedEnv)
 	envMap, err := runner.ParametersToEnvMap(&execSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
 		return fmt.Errorf("env setup failed - %w", err)
@@ -68,4 +69,18 @@ func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, p
 	default:
 		return fmt.Errorf("unable to determine how executable should be run")
 	}
+}
+
+func applyBaseEnv(ctx *context.Context, executable *config.Executable, envMap map[string]string) map[string]string {
+	if envMap == nil {
+		envMap = make(map[string]string)
+	}
+	envMap["FLOW_RUNNER"] = "true"
+	envMap["FLOW_CURRENT_WORKSPACE"] = ctx.UserConfig.CurrentWorkspace
+	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.UserConfig.CurrentNamespace
+	envMap["FLOW_EXECUTABLE_NAME"] = executable.Name
+	envMap["FLOW_DEFINITION_PATH"] = executable.DefinitionPath()
+	envMap["FLOW_WORKSPACE_PATH"] = executable.WorkspacePath()
+	envMap["DISABLE_FLOW_INTERACTIVE"] = "true"
+	return envMap
 }
