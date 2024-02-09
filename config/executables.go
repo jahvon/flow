@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jahvon/tuikit/types"
 	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 
@@ -192,18 +193,12 @@ func (e *Executable) YAML() (string, error) {
 	return string(yamlBytes), nil
 }
 
-func (e *Executable) JSON(pretty bool) (string, error) {
-	var jsonBytes []byte
-	var err error
+func (e *Executable) JSON() (string, error) {
 	enriched := &enrichedExecutable{
 		ID:   e.ID(),
 		Spec: e,
 	}
-	if pretty {
-		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
-	} else {
-		jsonBytes, err = json.Marshal(enriched)
-	}
+	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal executable - %w", err)
 	}
@@ -402,9 +397,7 @@ func (l ExecutableList) YAML() (string, error) {
 	return string(yamlBytes), nil
 }
 
-func (l ExecutableList) JSON(pretty bool) (string, error) {
-	var jsonBytes []byte
-	var err error
+func (l ExecutableList) JSON() (string, error) {
 	enriched := &enrichedExecutableList{}
 	for _, exec := range l {
 		enriched.Executables = append(enriched.Executables, &enrichedExecutable{
@@ -412,25 +405,23 @@ func (l ExecutableList) JSON(pretty bool) (string, error) {
 			Spec: exec,
 		})
 	}
-	if pretty {
-		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
-	} else {
-		jsonBytes, err = json.Marshal(enriched)
-	}
+	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal executable list - %w", err)
 	}
 	return string(jsonBytes), nil
 }
 
-func (l ExecutableList) Items() []CollectionItem {
-	items := make([]CollectionItem, 0)
+func (l ExecutableList) Items() []*types.CollectionItem {
+	items := make([]*types.CollectionItem, 0)
 	for _, exec := range l {
-		item := CollectionItem{
-			Header:      exec.ID(),
-			SubHeader:   exec.Verb.String(),
-			Description: exec.Description,
-			Tags:        exec.Tags,
+		item := &types.CollectionItem{
+			Header:    exec.ID(),
+			SubHeader: exec.Verb.String(),
+			Desc:      exec.Description,
+		}
+		if len(exec.Tags) > 0 {
+			item.Desc = fmt.Sprintf("[%s]\n", exec.Tags.PreviewString()) + exec.Description
 		}
 		items = append(items, item)
 	}

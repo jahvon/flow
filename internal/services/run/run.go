@@ -12,8 +12,9 @@ import (
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
+	"github.com/jahvon/tuikit/io"
+
 	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/internal/io"
 )
 
 // RunCmd executes a command in the current shell in a specific directory.
@@ -58,6 +59,9 @@ func RunCmd(
 
 	err = runner.Run(ctx, prog)
 	if err != nil {
+		if code, isExit := interp.IsExitStatus(err); isExit {
+			return fmt.Errorf("command exited with non-zero status %d", code)
+		}
 		return fmt.Errorf("encountered an error executing command - %w", err)
 	}
 
@@ -114,6 +118,9 @@ func RunFile(
 
 	err = runner.Run(ctx, prog)
 	if err != nil {
+		if code, isExit := interp.IsExitStatus(err); isExit {
+			return fmt.Errorf("file execution exited with non-zero status %d", code)
+		}
 		return fmt.Errorf("encountered an error executing file - %w", err)
 	}
 	return nil

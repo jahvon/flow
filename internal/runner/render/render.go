@@ -9,12 +9,12 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/jahvon/tuikit/components"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/jahvon/flow/internal/io/ui/views"
 	"github.com/jahvon/flow/internal/runner"
 )
 
@@ -38,7 +38,7 @@ func (r *renderRunner) IsCompatible(executable *config.Executable) bool {
 }
 
 func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
-	if ctx.App == nil {
+	if ctx.InteractiveContainer == nil {
 		return fmt.Errorf("unable to render when interactive mode is disabled")
 	}
 
@@ -91,7 +91,12 @@ func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable,
 	}
 
 	log.Info().Msgf("Rendering content from file %s", contentFile)
-	ctx.App.BuildAndSetView(views.NewGenericMarkdownView(ctx.App, buff.String()))
+	state := &components.TerminalState{
+		Theme:  io.Styles(),
+		Width:  ctx.InteractiveContainer.Width(),
+		Height: ctx.InteractiveContainer.Height(),
+	}
+	ctx.InteractiveContainer.SetView(components.NewMarkdownView(state, buff.String()))
 	return nil
 }
 

@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
+	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/crypto"
+	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -25,14 +28,21 @@ var configInitCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   "Initialize the flow global configuration.",
 	Args:    cobra.NoArgs,
-	PreRun:  setTermView,
-	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
-		resp := processUserConfirmation(
-			"This will overwrite your current flow configurations. Are you sure you want to continue?",
-		)
-		if !resp {
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
+		inputs, err := components.ProcessInputs(io.Styles(), components.TextInput{
+			Key:    "confirm",
+			Prompt: "This will overwrite your current flow configurations. Are you sure you want to continue? (y/n)",
+		})
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		resp := inputs.FindByKey("confirm").Value()
+		if truthy, _ := strconv.ParseBool(resp); !truthy {
 			logger.Warnf("Aborting")
 			return
 		}
@@ -49,13 +59,15 @@ var workspaceInitCmd = &cobra.Command{
 	Aliases: []string{"ws"},
 	Short:   "Initialize and add a workspace to the list of known workspaces.",
 	Args:    cobra.ExactArgs(2),
-	PreRun:  setTermView,
-	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		name := args[0]
 		path := args[1]
 
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		userConfig := file.LoadUserConfig()
 		if userConfig == nil {
 			logger.Fatalf("failed to load user config")
@@ -116,13 +128,15 @@ var workspaceInitCmd = &cobra.Command{
 }
 
 var vaultInitCmd = &cobra.Command{
-	Use:     "vault",
-	Short:   "Create a new flow secret vault.",
-	Args:    cobra.NoArgs,
-	PreRun:  setTermView,
-	PostRun: exitApp,
+	Use:   "vault",
+	Short: "Create a new flow secret vault.",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		generatedKey, err := crypto.GenerateKey()
 		if err != nil {
 			logger.FatalErr(err)

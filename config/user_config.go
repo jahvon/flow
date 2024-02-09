@@ -55,14 +55,8 @@ func (c *UserConfig) YAML() (string, error) {
 	return string(yamlBytes), nil
 }
 
-func (c *UserConfig) JSON(pretty bool) (string, error) {
-	var jsonBytes []byte
-	var err error
-	if pretty {
-		jsonBytes, err = json.MarshalIndent(c, "", "  ")
-	} else {
-		jsonBytes, err = json.Marshal(c)
-	}
+func (c *UserConfig) JSON() (string, error) {
+	jsonBytes, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal user config - %w", err)
 	}

@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"github.com/gen2brain/beeep"
+	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/jahvon/flow/internal/io/ui/types"
-	"github.com/jahvon/flow/internal/io/ui/views"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/exec"
 	"github.com/jahvon/flow/internal/runner/launch"
@@ -33,16 +32,13 @@ var execCmd = &cobra.Command{
 		"See " + io.ConfigDocsURL("executables", "Ref") + "for more information on executable IDs.",
 	Args: cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
-		startApp(cmd, args)
 		runner.RegisterRunner(exec.NewRunner())
 		runner.RegisterRunner(launch.NewRunner())
 		runner.RegisterRunner(request.NewRunner())
 		runner.RegisterRunner(render.NewRunner())
 		runner.RegisterRunner(serial.NewRunner())
 		runner.RegisterRunner(parallel.NewRunner())
-		setTermView(cmd, args)
 	},
-	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		verbStr := cmd.CalledAs()
@@ -55,40 +51,46 @@ var execCmd = &cobra.Command{
 		ref := context.ExpandRef(curCtx, config.NewRef(idArg, verb))
 		executable, err := curCtx.ExecutableCache.GetExecutableByRef(ref)
 		if err != nil {
-			handleError(err)
+			logger.FatalErr(err)
 		} else if executable == nil {
-			handleError(fmt.Errorf("executable %s not found", ref))
+			logger.FatalErr(fmt.Errorf("executable %s not found", ref))
 		}
 
 		if err := executable.Validate(); err != nil {
-			handleError(err)
+			logger.FatalErr(err)
 		}
 
 		if !executable.IsExecutableFromWorkspace(curCtx.UserConfig.CurrentWorkspace) {
-			handleError(fmt.Errorf(
+			logger.FatalErr(fmt.Errorf(
 				"executable '%s' cannot be executed from workspace %s",
 				ref,
 				curCtx.UserConfig.CurrentWorkspace,
 			))
 		}
 
-		setAuthEnv(executable)
 		if interactiveUIEnabled() {
-			curCtx.App.SetNotice("... processing ...", types.NoticeLevelInfo)
+			header := headerForCurCtx()
+			header.Notice = fmt.Sprintf("Executing %s", ref)
+			header.NoticeLevel = components.NoticeLevelInfo
+			header.Print()
 		}
+		setAuthEnv(executable)
 		textInputs := pendingTextInputs(curCtx, executable)
 		var envMap map[string]string
 		if len(textInputs) > 0 {
-			envMap = processUserInput(textInputs...)
+			inputs, err := components.ProcessInputs(io.Styles(), textInputs...)
+			if err != nil {
+				logger.FatalErr(err)
+			}
+			envMap = inputs.ValueMap()
 		}
 		startTime := time.Now()
 		if err := runner.Exec(curCtx, executable, envMap); err != nil {
-			handleError(err)
+			logger.FatalErr(err)
 		}
 		dur := time.Since(startTime)
-		logger.PlainTextSuccess(fmt.Sprintf("%s flow completed", ref))
+		logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
 		if interactiveUIEnabled() {
-			curCtx.App.SetNotice(fmt.Sprintf("Elapsed: %s", dur.Round(time.Millisecond)), types.NoticeLevelInfo)
 			if dur > 1*time.Minute && curCtx.UserConfig.Interactive.SoundOnCompletion {
 				_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 			}
@@ -105,20 +107,22 @@ func init() {
 
 func setAuthEnv(executable *config.Executable) {
 	if authRequired(curCtx, executable) {
-		if interactiveUIEnabled() {
-			curCtx.App.SetNotice("... authenticating ...", types.NoticeLevelInfo)
+		resp, err := components.ProcessInputs(
+			io.Styles(),
+			components.TextInput{
+				Key:    vault.EncryptionKeyEnvVar,
+				Prompt: "Enter vault encryption key",
+				Hidden: true,
+			})
+		if err != nil {
+			curCtx.Logger.FatalErr(err)
 		}
-		resp := processUserInput(&views.TextInput{
-			Key:    vault.EncryptionKeyEnvVar,
-			Prompt: "Enter vault encryption key",
-			Hidden: true,
-		})
-		val, ok := resp[vault.EncryptionKeyEnvVar]
-		if !ok || val == "" {
-			handleError(fmt.Errorf("vault encryption key required"))
+		val := resp.ValueMap()[vault.EncryptionKeyEnvVar]
+		if val == "" {
+			curCtx.Logger.FatalErr(fmt.Errorf("vault encryption key required"))
 		}
 		if err := os.Setenv(vault.EncryptionKeyEnvVar, val); err != nil {
-			handleError(fmt.Errorf("failed to set vault encryption key\n%w", err))
+			curCtx.Logger.FatalErr(fmt.Errorf("failed to set vault encryption key\n%w", err))
 		}
 	}
 }
@@ -188,8 +192,8 @@ func authRequired(ctx *context.Context, rootExec *config.Executable) bool {
 }
 
 //nolint:gocognit
-func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []*views.TextInput {
-	pending := make([]*views.TextInput, 0)
+func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []components.TextInput {
+	pending := make([]components.TextInput, 0)
 	if rootExec.Type == nil {
 		return nil
 	}
@@ -197,31 +201,31 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []*vie
 	case rootExec.Type.Exec != nil:
 		for _, param := range rootExec.Type.Exec.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, &views.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Launch != nil:
 		for _, param := range rootExec.Type.Launch.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, &views.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Request != nil:
 		for _, param := range rootExec.Type.Request.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, &views.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Render != nil:
 		for _, param := range rootExec.Type.Render.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, &views.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Serial != nil:
 		for _, param := range rootExec.Type.Serial.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, &views.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Type.Serial.ExecutableRefs {
@@ -235,7 +239,7 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []*vie
 	case rootExec.Type.Parallel != nil:
 		for _, param := range rootExec.Type.Parallel.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, &views.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Type.Parallel.ExecutableRefs {
