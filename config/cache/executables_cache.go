@@ -3,6 +3,8 @@ package cache
 import (
 	"fmt"
 
+	"github.com/jahvon/tuikit/io"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
@@ -38,14 +40,14 @@ func NewExecutableCache() *ExecutableCache {
 	return executableCache
 }
 
-func (c *ExecutableCache) Update() error { //nolint:gocognit
+func (c *ExecutableCache) Update(logger *io.Logger) error { //nolint:gocognit
 	if c.Data == nil {
-		log.Debug().Msg("Initializing executable cache data")
+		logger.Debugf("Initializing executable cache data")
 		c.Data = &ExecutableCacheData{
 			ExecutableMap: make(map[config.Ref]string),
 		}
 	} else {
-		log.Debug().Msg("Updating executable cache data")
+		logger.Debugf("Updating executable cache data")
 	}
 
 	if c.Data.ExecutableMap == nil {
@@ -56,9 +58,9 @@ func (c *ExecutableCache) Update() error { //nolint:gocognit
 	}
 
 	wsCache := NewWorkspaceCache()
-	wsCacheData, err := wsCache.Get()
+	wsCacheData, err := wsCache.Get(logger)
 	if err != nil {
-		return fmt.Errorf("failed to get workspace cache data - %w", err)
+		return fmt.Errorf("failed to get workspace cache data\n%w", err)
 	}
 
 	cacheData := &ExecutableCacheData{
@@ -67,9 +69,10 @@ func (c *ExecutableCache) Update() error { //nolint:gocognit
 		DefinitionMap: make(map[string]WorkspaceInfo),
 	}
 	for _, wsCfg := range wsCacheData.Workspaces {
-		definitions, err := file.LoadWorkspaceExecutableDefinitions(wsCfg)
+		definitions, err := file.LoadWorkspaceExecutableDefinitions(logger, wsCfg)
 		if err != nil {
-			return fmt.Errorf("failed to load workspace executable definitions - %w", err)
+			logger.Errorx("failed to load workspace executable definitions", "workspace", wsCfg.AssignedName(), "err", err)
+			continue
 		}
 		for _, def := range definitions {
 			if def == nil || def.Visibility == config.VisibilityHidden || len(def.Executables) == 0 {
@@ -90,30 +93,28 @@ func (c *ExecutableCache) Update() error { //nolint:gocognit
 			}
 		}
 	}
-	log.Trace().Int("executables", len(cacheData.ExecutableMap)).Msg("Successfully loaded executable definitions")
 
 	data, err := yaml.Marshal(cacheData)
 	if err != nil {
-		return fmt.Errorf("unable to encode cache data - %w", err)
+		return errors.Wrap(err, "unable to encode cache data")
 	}
 
 	err = file.WriteLatestCachedData(execCacheKey, data)
 	if err != nil {
-		return fmt.Errorf("unable to write cache data - %w", err)
+		return errors.Wrap(err, "unable to write cache data")
 	}
 
 	c.Data = cacheData
-	log.Trace().Msg("Successfully updated executable cache data")
-
+	logger.Debugx("Successfully updated executable cache data", "count", len(cacheData.ExecutableMap))
 	return nil
 }
 
-func (c *ExecutableCache) GetExecutableByRef(ref config.Ref) (*config.Executable, error) {
-	err := c.initExecutableCacheData()
+func (c *ExecutableCache) GetExecutableByRef(logger *io.Logger, ref config.Ref) (*config.Executable, error) {
+	err := c.initExecutableCacheData(logger)
 	if err != nil {
 		return nil, err
 	} else if c.Data == nil {
-		return nil, fmt.Errorf("no cached executables found")
+		return nil, errors.New("no cached executables found")
 	}
 
 	if c.Data.loadedExecutables == nil {
@@ -127,20 +128,20 @@ func (c *ExecutableCache) GetExecutableByRef(ref config.Ref) (*config.Executable
 		if primaryRef, aliasFound := c.Data.AliasMap[ref]; aliasFound {
 			definitionPath, found = c.Data.ExecutableMap[primaryRef]
 			if !found {
-				return nil, fmt.Errorf("unable to find executable with reference %s", ref)
+				return nil, NewExecutableNotFoundError(ref.String())
 			}
 		} else {
-			return nil, fmt.Errorf("unable to find executable with reference %s", ref)
+			return nil, NewExecutableNotFoundError(ref.String())
 		}
 	}
 	definition, err := file.LoadExecutableDefinition(definitionPath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to load executable definition - %w", err)
+		return nil, errors.Wrap(err, "unable to load executable definition")
 	}
 
 	wsInfo, found := c.Data.DefinitionMap[definitionPath]
 	if !found {
-		return nil, fmt.Errorf("unable to find workspace info for definition %s", definitionPath)
+		return nil, errors.Wrap(err, "unable to find workspace info for definition")
 	}
 
 	definition.SetDefaults()
@@ -150,7 +151,7 @@ func (c *ExecutableCache) GetExecutableByRef(ref config.Ref) (*config.Executable
 	if err != nil {
 		return nil, err
 	} else if executable == nil {
-		return nil, fmt.Errorf("unable to find executable with reference %s", ref)
+		return nil, NewExecutableNotFoundError(ref.String())
 	}
 
 	c.Data.loadedExecutables[ref.String()] = executable
@@ -158,23 +159,25 @@ func (c *ExecutableCache) GetExecutableByRef(ref config.Ref) (*config.Executable
 	return executable, nil
 }
 
-func (c *ExecutableCache) GetExecutableList() (config.ExecutableList, error) {
-	err := c.initExecutableCacheData()
+func (c *ExecutableCache) GetExecutableList(logger *io.Logger) (config.ExecutableList, error) {
+	err := c.initExecutableCacheData(logger)
 	if err != nil {
 		return nil, err
 	} else if c.Data == nil {
-		return nil, fmt.Errorf("no cached executables found")
+		return nil, errors.New("no cached executables found")
 	}
 
 	list := make(config.ExecutableList, 0)
 	for definitionPath := range c.Data.DefinitionMap {
 		definition, err := file.LoadExecutableDefinition(definitionPath)
 		if err != nil {
-			return nil, fmt.Errorf("unable to load executable definition - %w", err)
+			logger.Errorx("unable to load executable definition", "definitionPath", definitionPath, "err", err)
+			continue
 		}
 		wsInfo, found := c.Data.DefinitionMap[definitionPath]
 		if !found {
-			return nil, fmt.Errorf("unable to find workspace info for definition %s", definitionPath)
+			logger.Errorx("unable to find workspace info for definition", "definitionPath", definitionPath)
+			continue
 		}
 		definition.SetDefaults()
 		definition.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, definitionPath)
@@ -183,26 +186,24 @@ func (c *ExecutableCache) GetExecutableList() (config.ExecutableList, error) {
 	return list, nil
 }
 
-func (c *ExecutableCache) initExecutableCacheData() error {
+func (c *ExecutableCache) initExecutableCacheData(logger *io.Logger) error {
 	if c.Data != nil {
 		return nil
 	}
 
 	cacheData, err := file.LoadLatestCachedData(execCacheKey)
 	if err != nil {
-		return fmt.Errorf("unable to load executable cache data - %w", err)
+		return errors.Wrap(err, "unable to load executable cache data")
 	} else if cacheData == nil {
-		if err := c.Update(); err != nil {
-			return fmt.Errorf("unable to get updated workspace cache data - %w", err)
+		if err := c.Update(logger); err != nil {
+			return errors.Wrap(err, "unable to update executable cache data")
 		}
 	}
 
 	c.Data = &ExecutableCacheData{}
 	if err := yaml.Unmarshal(cacheData, c.Data); err != nil {
-		return fmt.Errorf("unable to decode executable cache data - %w", err)
+		return errors.Wrap(err, "unable to decode executable cache data")
 	}
-	log.Trace().Int("executables", len(c.Data.ExecutableMap)).Msg("Fetched executable cache data")
-
 	return nil
 }
 

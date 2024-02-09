@@ -9,6 +9,7 @@ import (
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/io"
 	"github.com/jahvon/tuikit/styles"
+	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/cache"
@@ -31,12 +32,9 @@ type Context struct {
 }
 
 func NewContext(ctx context.Context) *Context {
-	userConfig := file.LoadUserConfig()
-	if userConfig == nil {
-		panic("user config load error")
-	}
-	if err := userConfig.Validate(); err != nil {
-		panic(fmt.Sprintf("user config validation error\nconfig location: %s\n%s", file.UserConfigPath, err))
+	userConfig, err := file.LoadUserConfig()
+	if err != nil {
+		panic(errors.Wrap(err, "user config load error"))
 	}
 
 	wsConfig, err := file.LoadWorkspaceConfig(
@@ -44,9 +42,9 @@ func NewContext(ctx context.Context) *Context {
 		userConfig.Workspaces[userConfig.CurrentWorkspace],
 	)
 	if err != nil {
-		panic(fmt.Sprintf("workspace config load error\n%s", err))
+		panic(errors.Wrap(err, "workspace config load error"))
 	} else if wsConfig == nil {
-		panic(fmt.Sprintf("workspace config not found in current workspace (%s)", userConfig.CurrentWorkspace))
+		panic(fmt.Errorf("workspace config not found in current workspace (%s)", userConfig.CurrentWorkspace))
 	}
 
 	workspaceCache := cache.NewWorkspaceCache()

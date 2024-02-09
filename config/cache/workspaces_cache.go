@@ -1,13 +1,12 @@
 package cache
 
 import (
-	"fmt"
-
+	"github.com/jahvon/tuikit/io"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/file"
-	"github.com/jahvon/flow/internal/io"
 )
 
 const wsCacheKey = "workspace"
@@ -23,10 +22,6 @@ type WorkspaceCache struct {
 	Data *WorkspaceCacheData
 }
 
-var (
-	log = io.Log().With().Str("scope", "discovery/cache").Logger()
-)
-
 func NewWorkspaceCache() *WorkspaceCache {
 	if workspaceCache == nil {
 		workspaceCache = &WorkspaceCache{}
@@ -34,16 +29,16 @@ func NewWorkspaceCache() *WorkspaceCache {
 	return workspaceCache
 }
 
-func (c *WorkspaceCache) Update() error {
+func (c *WorkspaceCache) Update(logger *io.Logger) error {
 	if c.Data == nil {
-		log.Debug().Msg("Initializing workspace cache data")
+		logger.Debugf("Initializing workspace cache data")
 	} else {
-		log.Debug().Msg("Updating workspace cache data")
+		logger.Debugf("Updating workspace cache data")
 	}
 
-	userCfg := file.LoadUserConfig()
-	if userCfg == nil {
-		return fmt.Errorf("failed to load user config")
+	userCfg, err := file.LoadUserConfig()
+	if err != nil {
+		return err
 	}
 
 	cacheData := &WorkspaceCacheData{
@@ -53,51 +48,46 @@ func (c *WorkspaceCache) Update() error {
 	for name, path := range userCfg.Workspaces {
 		wsCfg, err := file.LoadWorkspaceConfig(name, path)
 		if err != nil {
-			return fmt.Errorf("failed loading workspace config: %w", err)
+			return errors.Wrap(err, "failed loading workspace config")
 		} else if wsCfg == nil {
-			log.Err(err).Msgf("config not found for workspace %s", name)
+			logger.Errorx("config not found for workspace", "name", name, "path", path)
 			continue
 		}
 		cacheData.Workspaces[name] = wsCfg
 		cacheData.WorkspaceLocations[name] = path
 	}
-	log.Trace().Int("workspaces", len(cacheData.Workspaces)).Msg("Successfully loaded workspace configs")
-
 	data, err := yaml.Marshal(cacheData)
 	if err != nil {
-		return fmt.Errorf("unable to encode cache data - %w", err)
+		return errors.Wrap(err, "unable to encode cache data")
 	}
 
 	err = file.WriteLatestCachedData(wsCacheKey, data)
 	if err != nil {
-		return fmt.Errorf("unable to write cache data - %w", err)
+		return errors.Wrap(err, "unable to write cache data")
 	}
 
 	c.Data = cacheData
-	log.Trace().Msg("Successfully updated workspace cache data")
-
+	logger.Debugx("Successfully updated workspace cache data", "count", len(cacheData.Workspaces))
 	return nil
 }
 
-func (c *WorkspaceCache) Get() (*WorkspaceCacheData, error) {
+func (c *WorkspaceCache) Get(logger *io.Logger) (*WorkspaceCacheData, error) {
 	if c.Data != nil {
 		return c.Data, nil
 	}
 
 	cacheData, err := file.LoadLatestCachedData(wsCacheKey)
 	if err != nil {
-		return nil, fmt.Errorf("unable to load workspace cache data - %w", err)
+		return nil, errors.Wrap(err, "unable to load workspace cache data")
 	} else if cacheData == nil {
-		if err := c.Update(); err != nil {
-			return nil, fmt.Errorf("unable to get updated workspace cache data - %w", err)
+		if err := c.Update(logger); err != nil {
+			return nil, errors.Wrap(err, "unable to get updated workspace cache data")
 		}
 	}
 
 	c.Data = &WorkspaceCacheData{}
 	if err := yaml.Unmarshal(cacheData, c.Data); err != nil {
-		return nil, fmt.Errorf("unable to decode workspace cache data - %w", err)
+		return nil, errors.Wrap(err, "unable to decode workspace cache data")
 	}
-	log.Trace().Int("workspaces", len(c.Data.Workspaces)).Msg("Fetched workspace cache data")
-
 	return c.Data, nil
 }

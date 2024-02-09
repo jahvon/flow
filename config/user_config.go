@@ -72,7 +72,6 @@ func (c *UserConfig) Markdown() string {
 	if c.Interactive != nil {
 		interactiveConfig, err := yaml.Marshal(c.Interactive)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to marshal interactive config")
 			mkdwn += "## Interactive UI config\nerror\n"
 		} else {
 			mkdwn += fmt.Sprintf("## Git UI config\n```yaml\n%s```\n", string(interactiveConfig))

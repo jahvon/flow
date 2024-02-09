@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/itchyny/gojq"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
@@ -34,9 +35,9 @@ func (r *requestRunner) IsCompatible(executable *config.Executable) bool {
 
 func (r *requestRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	requestSpec := executable.Type.Request
-	envMap, err := runner.ParametersToEnvMap(&requestSpec.ParameterizedExecutable, promptedEnv)
+	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &requestSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
-		return fmt.Errorf("env setup failed - %w", err)
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
 	url := expandEnvVars(envMap, requestSpec.URL)
@@ -53,13 +54,13 @@ func (r *requestRunner) Exec(ctx *context.Context, executable *config.Executable
 	}
 	resp, err := rest.SendRequest(&restRequest, requestSpec.ValidStatusCodes)
 	if err != nil {
-		return fmt.Errorf("request failed - %w", err)
+		return errors.Wrap(err, "request failed")
 	}
 
 	if requestSpec.TransformResponse != "" {
 		resp, err = executeJQQuery(requestSpec.TransformResponse, resp)
 		if err != nil {
-			return fmt.Errorf("jq execution failed - %w", err)
+			return errors.Wrap(err, "unable to transform response")
 		}
 	}
 
@@ -72,13 +73,14 @@ func (r *requestRunner) Exec(ctx *context.Context, executable *config.Executable
 
 	if requestSpec.ResponseFile != nil && requestSpec.ResponseFile.Filename != "" {
 		targetDir, isTmp, err := requestSpec.ResponseFile.ExpandDirectory(
+			ctx.Logger,
 			executable.WorkspacePath(),
 			executable.DefinitionPath(),
 			ctx.ProcessTmpDir,
 			envMap,
 		)
 		if err != nil {
-			return fmt.Errorf("unable to expand directory - %w", err)
+			return errors.Wrap(err, "unable to expand directory")
 		} else if isTmp {
 			ctx.ProcessTmpDir = targetDir
 		}
@@ -89,7 +91,7 @@ func (r *requestRunner) Exec(ctx *context.Context, executable *config.Executable
 			requestSpec.ResponseFile.SaveAs,
 		)
 		if err != nil {
-			return fmt.Errorf("unable to write response to file - %w", err)
+			return errors.Wrap(err, "unable to save response")
 		} else {
 			logger.Infof("Successfully saved response to %s", requestSpec.ResponseFile.Filename)
 		}
@@ -102,7 +104,7 @@ func executeJQQuery(query, resp string) (string, error) {
 	var respMap map[string]interface{}
 	err := json.Unmarshal([]byte(resp), &respMap)
 	if err != nil {
-		return "", fmt.Errorf("response is not a valid JSON string")
+		return "", errors.New("response is not a valid JSON string")
 	}
 
 	jqQuery, err := gojq.Parse(query)
@@ -113,7 +115,7 @@ func executeJQQuery(query, resp string) (string, error) {
 	iter := jqQuery.Run(respMap)
 	result, ok := iter.Next()
 	if !ok {
-		return "", fmt.Errorf("unable to execute jq query")
+		return "", errors.New("unable to execute jq query")
 	}
 	if err, isErr := result.(error); isErr {
 		return "", err
@@ -130,14 +132,14 @@ func writeResponseToFile(resp, responseFile string, format config.OutputFormat) 
 	case config.JSON:
 		var js map[string]interface{}
 		if json.Unmarshal([]byte(resp), &js) != nil {
-			return fmt.Errorf("response is not a valid JSON string")
+			return errors.New("response is not a valid JSON string")
 		}
 		formattedResp = resp
 	case config.FormattedJSON:
 		var respMap map[string]interface{}
 		err := json.Unmarshal([]byte(resp), &respMap)
 		if err != nil {
-			return fmt.Errorf("response is not a valid JSON string")
+			return errors.New("response is not a valid JSON string")
 		}
 		formattedStr, err := json.MarshalIndent(respMap, "", "  ")
 		if err != nil {
@@ -148,7 +150,7 @@ func writeResponseToFile(resp, responseFile string, format config.OutputFormat) 
 		var respMap map[string]interface{}
 		err := json.Unmarshal([]byte(resp), &respMap)
 		if err != nil {
-			return fmt.Errorf("response is not a valid JSON string")
+			return errors.New("response is not a valid JSON string")
 		}
 		yamlStr, err := yaml.Marshal(respMap)
 		if err != nil {

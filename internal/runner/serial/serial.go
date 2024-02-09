@@ -3,13 +3,12 @@ package serial
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
 )
-
-var log = io.Log().With().Str("scope", "runner/serial").Logger()
 
 type serialRunner struct{}
 
@@ -30,15 +29,15 @@ func (r *serialRunner) IsCompatible(executable *config.Executable) bool {
 
 func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	serialSpec := executable.Type.Serial
-	if err := runner.SetEnv(&serialSpec.ParameterizedExecutable, promptedEnv); err != nil {
-		return fmt.Errorf("unable to set parameters to env - %w", err)
+	if err := runner.SetEnv(ctx.Logger, &serialSpec.ParameterizedExecutable, promptedEnv); err != nil {
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
 	order := serialSpec.ExecutableRefs
 	for i, executableRef := range order {
-		log.Debug().Msgf("executing %s (%d/%d)", executableRef, i+1, len(order))
+		ctx.Logger.Debugf("executing %s (%d/%d)", executableRef, i+1, len(order))
 		executableRef = context.ExpandRef(ctx, executableRef)
-		exec, err := ctx.ExecutableCache.GetExecutableByRef(executableRef)
+		exec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, executableRef)
 		if err != nil {
 			return err
 		} else if exec == nil {
@@ -54,9 +53,9 @@ func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable,
 
 		if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
 			if serialSpec.FailFast {
-				return fmt.Errorf("execution error for %s - %w", executableRef, err)
+				return errors.Wrapf(err, "execution error for %s", executableRef)
 			}
-			log.Error().Err(err).Msgf("execution error for %s", executableRef)
+			ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", executableRef))
 		}
 	}
 

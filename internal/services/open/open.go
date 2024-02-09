@@ -1,24 +1,18 @@
 package open
 
 import (
-	"fmt"
-
-	open "github.com/jahvon/open-golang/open"
-
-	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/open-golang/open"
+	"github.com/pkg/errors"
 )
 
-var log = io.Log().With().Str("scope", "service/open").Logger()
-
 func Open(uri string, wait bool) error {
-	log.Trace().Msgf("opening uri (%s), wait=%v", uri, wait)
 	if wait {
 		if err := open.Run(uri); err != nil {
-			return fmt.Errorf("unable to open uri - %w", err)
+			return errors.Wrap(err, "unable to open uri")
 		}
 	} else {
 		if err := open.Start(uri); err != nil {
-			return fmt.Errorf("unable to open uri - %w", err)
+			return errors.Wrap(err, "unable to open uri")
 		}
 	}
 
@@ -26,14 +20,13 @@ func Open(uri string, wait bool) error {
 }
 
 func OpenWith(appName, uri string, wait bool) error {
-	log.Trace().Msgf("opening uri (%s) with %s, wait=%v", uri, appName, wait)
 	if wait {
 		if err := open.RunWith(uri, appName); err != nil {
-			return fmt.Errorf("unable to open uri with %s - %w", appName, err)
+			return errors.Wrapf(err, "unable to open uri with %s", appName)
 		}
 	} else {
 		if err := open.StartWith(uri, appName); err != nil {
-			return fmt.Errorf("unable to open uri with %s - %w", appName, err)
+			return errors.Wrapf(err, "unable to open uri with %s", appName)
 		}
 	}
 	return nil

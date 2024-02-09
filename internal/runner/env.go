@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jahvon/tuikit/io"
 	"github.com/samber/lo"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/vault"
 )
 
-func SetEnv(exec *config.ParameterizedExecutable, promptedEnv map[string]string) error {
+func SetEnv(logger *io.Logger, exec *config.ParameterizedExecutable, promptedEnv map[string]string) error {
 	var errs []error
 	for _, param := range exec.Parameters {
-		val, err := ResolveParameterValue(param, promptedEnv)
+		val, err := ResolveParameterValue(logger, param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -30,7 +31,7 @@ func SetEnv(exec *config.ParameterizedExecutable, promptedEnv map[string]string)
 	return nil
 }
 
-func ResolveParameterValue(param config.Parameter, promptedEnv map[string]string) (string, error) {
+func ResolveParameterValue(logger *io.Logger, param config.Parameter, promptedEnv map[string]string) (string, error) {
 	switch {
 	case param.Text == "" && param.SecretRef == "" && param.Prompt == "":
 		return "", nil
@@ -46,7 +47,7 @@ func ResolveParameterValue(param config.Parameter, promptedEnv map[string]string
 		if err := vault.ValidateReference(param.SecretRef); err != nil {
 			return "", err
 		}
-		v := vault.NewVault()
+		v := vault.NewVault(logger)
 		secret, err := v.GetSecret(param.SecretRef)
 		if err != nil {
 			return "", err
@@ -57,12 +58,16 @@ func ResolveParameterValue(param config.Parameter, promptedEnv map[string]string
 	}
 }
 
-func ParametersToEnvList(exec *config.ParameterizedExecutable, promptedEnv map[string]string) ([]string, error) {
+func ParametersToEnvList(
+	logger *io.Logger,
+	exec *config.ParameterizedExecutable,
+	promptedEnv map[string]string,
+) ([]string, error) {
 	params := exec.Parameters
 	var errs []error
 	env := lo.Map(params, func(param config.Parameter, _ int) string {
 		key := param.EnvKey
-		value, err := ResolveParameterValue(param, promptedEnv)
+		value, err := ResolveParameterValue(logger, param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 			return ""
@@ -77,13 +82,14 @@ func ParametersToEnvList(exec *config.ParameterizedExecutable, promptedEnv map[s
 }
 
 func ParametersToEnvMap(
+	logger *io.Logger,
 	exec *config.ParameterizedExecutable,
 	promptedEnv map[string]string,
 ) (map[string]string, error) {
 	params := exec.Parameters
 	var errs []error
 	env := lo.SliceToMap(params, func(param config.Parameter) (string, string) {
-		val, err := ResolveParameterValue(param, promptedEnv)
+		val, err := ResolveParameterValue(logger, param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 			return param.EnvKey, ""

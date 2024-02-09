@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jahvon/tuikit/components"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config/cache"
@@ -68,14 +69,7 @@ var workspaceInitCmd = &cobra.Command{
 			header := headerForCurCtx()
 			header.Print()
 		}
-		userConfig := file.LoadUserConfig()
-		if userConfig == nil {
-			logger.Fatalf("failed to load user config")
-		}
-		if err := userConfig.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
+		userConfig := curCtx.UserConfig
 		if _, found := userConfig.Workspaces[name]; found {
 			logger.Fatalf("workspace %s already exists at %s", name, userConfig.Workspaces[name])
 		}
@@ -119,8 +113,8 @@ var workspaceInitCmd = &cobra.Command{
 			logger.FatalErr(err)
 		}
 
-		if err := cache.UpdateAll(); err != nil {
-			logger.FatalErr(fmt.Errorf("failed to update cache - %w", err))
+		if err := cache.UpdateAll(logger); err != nil {
+			logger.FatalErr(errors.Wrap(err, "failure updating cache"))
 		}
 
 		logger.PlainTextSuccess(fmt.Sprintf("Workspace '%s' created in %s", name, path))

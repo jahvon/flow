@@ -1,7 +1,7 @@
 package launch
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
@@ -27,16 +27,22 @@ func (r *launchRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *launchRunner) Exec(_ *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
+func (r *launchRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	launchSpec := executable.Type.Launch
-	envMap, err := runner.ParametersToEnvMap(&launchSpec.ParameterizedExecutable, promptedEnv)
+	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &launchSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
-		return fmt.Errorf("env setup failed  - %w", err)
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	if err := runner.SetEnv(&launchSpec.ParameterizedExecutable, envMap); err != nil {
-		return fmt.Errorf("unable to set parameters to env - %w", err)
+	if err := runner.SetEnv(ctx.Logger, &launchSpec.ParameterizedExecutable, envMap); err != nil {
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	targetURI := utils.ExpandDirectory(launchSpec.URI, executable.WorkspacePath(), executable.DefinitionPath(), envMap)
+	targetURI := utils.ExpandDirectory(
+		ctx.Logger,
+		launchSpec.URI,
+		executable.WorkspacePath(),
+		executable.DefinitionPath(),
+		envMap,
+	)
 
 	if launchSpec.App != "" {
 		return open.OpenWith(launchSpec.App, targetURI, launchSpec.Wait)

@@ -17,7 +17,7 @@ type Metadata struct {
 
 var VerbosityFlag = &Metadata{
 	Name:     "verbosity",
-	Usage:    "Log verbosity level (from 0 to 4 where 4 is most verbose)",
+	Usage:    "Log verbosity level (-1 to 1)",
 	Default:  0,
 	Required: false,
 }

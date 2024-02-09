@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/jahvon/tuikit/components"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/io"
@@ -32,13 +32,6 @@ var configGetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		userConfig := curCtx.UserConfig
-		if userConfig == nil {
-			logger.FatalErr(fmt.Errorf("failed to load user config"))
-		}
-		if err := userConfig.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 		if interactiveUIEnabled() {
 			view := configio.NewUserConfigView(curCtx.InteractiveContainer, *userConfig, components.Format(outputFormat))
@@ -74,7 +67,7 @@ var workspaceGetCmd = &cobra.Command{
 		wsPath := userConfig.Workspaces[workspaceName]
 		wsCfg, err := file.LoadWorkspaceConfig(workspaceName, wsPath)
 		if err != nil {
-			logger.Fatalf("failed loading workspace config: %v", err)
+			logger.FatalErr(errors.Wrap(err, "failure loading workspace config"))
 		} else if wsCfg == nil {
 			logger.Fatalf("config not found for workspace %s", workspaceName)
 		}
@@ -110,7 +103,14 @@ var executableGetCmd = &cobra.Command{
 		id := args[1]
 		ref := config.NewRef(id, verb)
 
-		exec, err := curCtx.ExecutableCache.GetExecutableByRef(ref)
+		exec, err := curCtx.ExecutableCache.GetExecutableByRef(logger, ref)
+		if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
+			logger.Debugf("Executable %s not found in cache, syncing cache", ref)
+			if err := curCtx.ExecutableCache.Update(logger); err != nil {
+				logger.FatalErr(err)
+			}
+			exec, err = curCtx.ExecutableCache.GetExecutableByRef(logger, ref)
+		}
 		if err != nil {
 			logger.FatalErr(err)
 		} else if exec == nil {
@@ -141,7 +141,7 @@ var vaultGetCmd = &cobra.Command{
 			header := headerForCurCtx()
 			header.Print()
 		}
-		v := vault.NewVault()
+		v := vault.NewVault(logger)
 		secret, err := v.GetSecret(reference)
 		if err != nil {
 			logger.FatalErr(err)
