@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/jahvon/tuikit/components"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config/cache"
@@ -48,14 +49,7 @@ var workspaceRemoveCmd = &cobra.Command{
 			return
 		}
 
-		userConfig := file.LoadUserConfig()
-		if userConfig == nil {
-			logger.Fatalf("failed to load user config")
-		}
-		if err := userConfig.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
+		userConfig := curCtx.UserConfig
 		if name == userConfig.CurrentWorkspace {
 			logger.Fatalf("cannot remove the current workspace")
 		}
@@ -70,8 +64,8 @@ var workspaceRemoveCmd = &cobra.Command{
 
 		logger.Warnf("Workspace '%s' removed", name)
 
-		if err := cache.UpdateAll(); err != nil {
-			logger.FatalErr(fmt.Errorf("failed to update cache - %w", err))
+		if err := cache.UpdateAll(logger); err != nil {
+			logger.FatalErr(errors.Wrap(err, "unable to update cache"))
 		}
 	},
 }
@@ -89,7 +83,7 @@ var vaultSecretRemoveCmd = &cobra.Command{
 			header := headerForCurCtx()
 			header.Print()
 		}
-		v := vault.NewVault()
+		v := vault.NewVault(logger)
 		err := v.DeleteSecret(reference)
 		if err != nil {
 			logger.FatalErr(err)

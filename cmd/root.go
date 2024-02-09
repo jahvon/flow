@@ -21,13 +21,9 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbosity := getPersistentFlagValue[int](cmd.Root(), *flags.VerbosityFlag)
 		curCtx.Logger.SetLevel(verbosity)
-		if verbosity != 0 {
-			curCtx.Logger.Infof("Log level set to %d", verbosity)
-		}
-
 		sync := getPersistentFlagValue[bool](cmd.Root(), *flags.SyncCacheFlag)
 		if sync {
-			if err := cache.UpdateAll(); err != nil {
+			if err := cache.UpdateAll(curCtx.Logger); err != nil {
 				curCtx.Logger.FatalErr(err)
 			}
 		}

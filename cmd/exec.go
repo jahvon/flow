@@ -7,9 +7,11 @@ import (
 
 	"github.com/gen2brain/beeep"
 	"github.com/jahvon/tuikit/components"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
@@ -49,11 +51,16 @@ var execCmd = &cobra.Command{
 
 		idArg := args[0]
 		ref := context.ExpandRef(curCtx, config.NewRef(idArg, verb))
-		executable, err := curCtx.ExecutableCache.GetExecutableByRef(ref)
+		executable, err := curCtx.ExecutableCache.GetExecutableByRef(logger, ref)
+		if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
+			logger.Debugf("Executable %s not found in cache, syncing cache", ref)
+			if err := curCtx.ExecutableCache.Update(logger); err != nil {
+				logger.FatalErr(err)
+			}
+			executable, err = curCtx.ExecutableCache.GetExecutableByRef(logger, ref)
+		}
 		if err != nil {
 			logger.FatalErr(err)
-		} else if executable == nil {
-			logger.FatalErr(fmt.Errorf("executable %s not found", ref))
 		}
 
 		if err := executable.Validate(); err != nil {
@@ -164,7 +171,7 @@ func authRequired(ctx *context.Context, rootExec *config.Executable) bool {
 			}
 		}
 		for _, child := range rootExec.Type.Serial.ExecutableRefs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(child)
+			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue
 			}
@@ -179,7 +186,7 @@ func authRequired(ctx *context.Context, rootExec *config.Executable) bool {
 			}
 		}
 		for _, child := range rootExec.Type.Parallel.ExecutableRefs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(child)
+			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue
 			}
@@ -229,7 +236,7 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []comp
 			}
 		}
 		for _, child := range rootExec.Type.Serial.ExecutableRefs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(child)
+			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue
 			}
@@ -243,7 +250,7 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []comp
 			}
 		}
 		for _, child := range rootExec.Type.Parallel.ExecutableRefs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(child)
+			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue
 			}

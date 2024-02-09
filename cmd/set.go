@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config"
@@ -25,18 +26,11 @@ var configWorkspaceSetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		workspace := args[0]
-		userConfig := curCtx.UserConfig
 		if interactiveUIEnabled() {
 			header := headerForCurCtx()
 			header.Print()
 		}
-		if userConfig == nil {
-			logger.Fatalf("failed to load user config")
-		}
-		if err := userConfig.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
+		userConfig := curCtx.UserConfig
 		if _, found := userConfig.Workspaces[workspace]; !found {
 			logger.Fatalf("workspace %s not found", workspace)
 		}
@@ -57,18 +51,11 @@ var configNamespaceSetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		namespace := args[0]
-		userConfig := file.LoadUserConfig()
 		if interactiveUIEnabled() {
 			header := headerForCurCtx()
 			header.Print()
 		}
-		if userConfig == nil {
-			logger.Fatalf("failed to load user config")
-		}
-		if err := userConfig.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
+		userConfig := curCtx.UserConfig
 		userConfig.CurrentNamespace = namespace
 		if err := file.WriteUserConfig(userConfig); err != nil {
 			logger.FatalErr(err)
@@ -89,17 +76,10 @@ var configInteractiveSetCmd = &cobra.Command{
 		}
 		enabled, err := strconv.ParseBool(args[0])
 		if err != nil {
-			logger.FatalErr(fmt.Errorf("failed to parse boolean value: %w", err))
+			logger.FatalErr(errors.Wrap(err, "invalid boolean value"))
 		}
 
-		userConfig := file.LoadUserConfig()
-		if userConfig == nil {
-			logger.Fatalf("failed to load user config")
-		}
-		if err := userConfig.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
+		userConfig := curCtx.UserConfig
 		if userConfig.Interactive == nil {
 			userConfig.Interactive = &config.InteractiveConfig{}
 		}
@@ -130,7 +110,7 @@ var vaultSecretSetCmd = &cobra.Command{
 			header.Print()
 		}
 		secret := vault.Secret(value)
-		v := vault.NewVault()
+		v := vault.NewVault(logger)
 		err := v.SetSecret(reference, secret)
 		if err != nil {
 			logger.FatalErr(err)

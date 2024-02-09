@@ -39,7 +39,11 @@ func NewWorkspaceView(
 		{
 			Key: "s", Label: "set",
 			Callback: func() error {
-				curCfg := file.LoadUserConfig()
+				curCfg, err := file.LoadUserConfig()
+				if err != nil {
+					container.HandleError(err)
+					return nil
+				}
 				curCfg.CurrentWorkspace = ws.AssignedName()
 				if err := file.WriteUserConfig(curCfg); err != nil {
 					container.HandleError(err)

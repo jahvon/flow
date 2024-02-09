@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/jahvon/tuikit/components"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
@@ -17,8 +18,6 @@ import (
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
 )
-
-var log = io.Log()
 
 type renderRunner struct{}
 
@@ -43,22 +42,22 @@ func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable,
 	}
 
 	renderSpec := executable.Type.Render
-	if err := runner.SetEnv(&renderSpec.ParameterizedExecutable, promptedEnv); err != nil {
-		return fmt.Errorf("env setup failed\n%w", err)
+	if err := runner.SetEnv(ctx.Logger, &renderSpec.ParameterizedExecutable, promptedEnv); err != nil {
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envMap, err := runner.ParametersToEnvMap(&renderSpec.ParameterizedExecutable, promptedEnv)
+	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &renderSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
-		return fmt.Errorf("env setup failed\n%w", err)
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	targetDir, isTmp, err := renderSpec.ExpandDirectory(
+		ctx.Logger,
 		executable.WorkspacePath(),
 		executable.DefinitionPath(),
 		ctx.ProcessTmpDir,
 		envMap,
 	)
-
 	if err != nil {
-		return fmt.Errorf("unable to expand directory\n%w", err)
+		return errors.Wrap(err, "unable to expand directory")
 	} else if isTmp {
 		ctx.ProcessTmpDir = targetDir
 	}
@@ -82,15 +81,15 @@ func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable,
 			},
 		}).ParseFiles(contentFile)
 	if err != nil {
-		return fmt.Errorf("unable to parse template file %s\n%w", contentFile, err)
+		return errors.Wrapf(err, "unable to parse template file %s", contentFile)
 	}
 
 	var buff bytes.Buffer
 	if err = tmpl.Execute(&buff, templateData); err != nil {
-		return fmt.Errorf("unable to execute template file %s\n%w", contentFile, err)
+		return errors.Wrapf(err, "unable to execute template file %s", contentFile)
 	}
 
-	log.Info().Msgf("Rendering content from file %s", contentFile)
+	ctx.Logger.Infof("Rendering content from file %s", contentFile)
 	state := &components.TerminalState{
 		Theme:  io.Styles(),
 		Width:  ctx.InteractiveContainer.Width(),
@@ -108,22 +107,22 @@ func readDataFile(dir, path string) (map[string]interface{}, error) {
 	}
 	reader, err := os.Open(dataFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to open template data file %s\n%w", dataFilePath, err)
+		return nil, errors.Wrapf(err, "unable to open template data file %s", dataFilePath)
 	}
 	defer reader.Close()
 	data, err := stdio.ReadAll(reader)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read template data file %s\n%w", dataFilePath, err)
+		return nil, errors.Wrapf(err, "unable to read template data file %s", dataFilePath)
 	}
 	extension := filepath.Ext(dataFilePath)
 	switch extension {
 	case ".json":
 		if err = json.Unmarshal(data, &templateData); err != nil {
-			return nil, fmt.Errorf("unable to unmarshal template data file %s\n%w", dataFilePath, err)
+			return nil, errors.Wrapf(err, "unable to unmarshal template data file %s", dataFilePath)
 		}
 	case ".yaml", ".yml":
 		if err = yaml.Unmarshal(data, &templateData); err != nil {
-			return nil, fmt.Errorf("unable to unmarshal template data file %s\n%w", dataFilePath, err)
+			return nil, errors.Wrapf(err, "unable to unmarshal template data file %s", dataFilePath)
 		}
 	}
 	return templateData, nil

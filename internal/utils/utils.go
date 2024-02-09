@@ -7,7 +7,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/rs/zerolog/log"
+	"github.com/jahvon/tuikit/io"
+	"github.com/pkg/errors"
 )
 
 // ExpandDirectory expands the directory field of an executable to an absolute path.
@@ -17,18 +18,18 @@ import (
 // - . -> current working directory + dir path
 // - relative path -> execPath + dir path
 // - ${envVar} -> expanded to the value from env map.
-func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string {
+func ExpandDirectory(logger *io.Logger, dir, wsPath, execPath string, env map[string]string) string {
 	execDir := filepath.Dir(execPath)
 	var targetDir string
 	switch {
 	case dir == "":
-		targetDir = filepath.Dir(execDir)
+		targetDir = execDir
 	case strings.HasPrefix(dir, "//"):
 		targetDir = strings.Replace(dir, "//", wsPath+"/", 1)
 	case dir == "." || strings.HasPrefix(dir, "./"):
 		wd, err := os.Getwd()
 		if err != nil {
-			log.Warn().Err(err).Msg("unable to get working directory for relative path expansion")
+			logger.Warnx("unable to get working directory for relative path expansion", "err", err)
 			targetDir = filepath.Join(execDir, dir)
 		} else {
 			targetDir = filepath.Join(wd, dir[1:])
@@ -36,7 +37,7 @@ func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string
 	case strings.HasPrefix(targetDir, "~/"):
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			log.Warn().Err(err).Msg("unable to get user home directory for relative path expansion")
+			logger.Warnx("unable to get user home directory for relative path expansion", "err", err)
 			targetDir = filepath.Join(execDir, dir)
 		} else {
 			targetDir = filepath.Join(homeDir, dir[2:])
@@ -48,25 +49,23 @@ func ExpandDirectory(dir, wsPath, execPath string, env map[string]string) string
 	targetDir = os.Expand(targetDir, func(key string) string {
 		val, found := env[key]
 		if !found {
-			log.Warn().Str("key", key).Msg("unable to find env key in directory for expansion")
+			logger.Warnx("unable to find env key in directory for expansion", "key", key)
 		}
 		return val
 	})
 	return filepath.Clean(targetDir)
 }
 
-func PathFromWd(path string) string {
+func PathFromWd(path string) (string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Warn().Err(err).Msg("unable to get working directory for relative path")
-		return path
+		return path, errors.Wrap(err, "unable to get working directory")
 	}
 	relPath, err := filepath.Rel(wd, path)
 	if err != nil {
-		log.Warn().Err(err).Msg("unable to get relative path")
-		return path
+		return path, errors.Wrap(err, "unable to get relative path")
 	}
-	return relPath
+	return relPath, nil
 }
 
 func ValidateOneOf(fieldName string, vals ...interface{}) error {
@@ -82,37 +81,4 @@ func ValidateOneOf(fieldName string, vals ...interface{}) error {
 		return fmt.Errorf("must define only one %s", fieldName)
 	}
 	return nil
-}
-
-func IsMultiLine(s string) bool {
-	return NumLines(s) > 1
-}
-
-func NumLines(s string) int {
-	return strings.Count(s, "\n") + 1
-}
-
-// WrapLines Replace every n space with a newline character, leaving at most maxWords words per line.
-func WrapLines(text string, maxWords int) string {
-	trimmed := strings.TrimSpace(text)
-	words := strings.Split(trimmed, " ")
-	var lines []string
-	var line string
-	for i, word := range words {
-		if i%maxWords == 0 && i != 0 {
-			lines = append(lines, line)
-			line = ""
-		}
-		line += word + " "
-	}
-	lines = append(lines, line)
-	return strings.Join(lines, "\n")
-}
-
-// ShortenString shortens a string to maxLen characters, appending "..." if the string is longer than maxLen.
-func ShortenString(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen] + "..."
 }

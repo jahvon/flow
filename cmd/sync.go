@@ -15,7 +15,7 @@ var syncCmd = &cobra.Command{
 			header := headerForCurCtx()
 			header.Print()
 		}
-		if err := cache.UpdateAll(); err != nil {
+		if err := cache.UpdateAll(curCtx.Logger); err != nil {
 			logger.FatalErr(err)
 		}
 		logger.PlainTextSuccess("Synced flow cache")

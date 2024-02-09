@@ -1,7 +1,7 @@
 package exec
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
@@ -29,23 +29,24 @@ func (r *execRunner) IsCompatible(executable *config.Executable) bool {
 func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	execSpec := executable.Type.Exec
 	promptedEnv = applyBaseEnv(ctx, executable, promptedEnv)
-	envMap, err := runner.ParametersToEnvMap(&execSpec.ParameterizedExecutable, promptedEnv)
+	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &execSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
-		return fmt.Errorf("env setup failed - %w", err)
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envList, err := runner.ParametersToEnvList(&execSpec.ParameterizedExecutable, promptedEnv)
+	envList, err := runner.ParametersToEnvList(ctx.Logger, &execSpec.ParameterizedExecutable, promptedEnv)
 	if err != nil {
-		return fmt.Errorf("env setup failed  - %w", err)
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
 	targetDir, isTmp, err := execSpec.ExpandDirectory(
+		ctx.Logger,
 		executable.WorkspacePath(),
 		executable.DefinitionPath(),
 		ctx.ProcessTmpDir,
 		envMap,
 	)
 	if err != nil {
-		return fmt.Errorf("unable to expand directory - %w", err)
+		return errors.Wrap(err, "unable to expand directory")
 	} else if isTmp {
 		ctx.ProcessTmpDir = targetDir
 	}
@@ -59,15 +60,15 @@ func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, p
 
 	switch {
 	case execSpec.Command == "" && execSpec.File == "":
-		return fmt.Errorf("either cmd or file must be specified")
+		return errors.New("either cmd or file must be specified")
 	case execSpec.Command != "" && execSpec.File != "":
-		return fmt.Errorf("cannot set both cmd and file")
+		return errors.New("cannot set both cmd and file")
 	case execSpec.Command != "":
 		return run.RunCmd(execSpec.Command, targetDir, envList, logMode, ctx.Logger, logFields)
 	case execSpec.File != "":
 		return run.RunFile(execSpec.File, targetDir, envList, logMode, ctx.Logger, logFields)
 	default:
-		return fmt.Errorf("unable to determine how executable should be run")
+		return errors.New("unable to determine how executable should be run")
 	}
 }
 

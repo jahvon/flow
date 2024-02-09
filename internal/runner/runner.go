@@ -6,10 +6,7 @@ import (
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io"
 )
-
-var log = io.Log().With().Str("scope", "runner").Logger()
 
 type Runner interface {
 	Name() string
@@ -32,7 +29,6 @@ func Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[s
 	for _, runner := range registeredRunners {
 		if runner.IsCompatible(executable) {
 			assignedRunner = runner
-			log.Trace().Msgf("assigned %s runner", assignedRunner.Name())
 			break
 		}
 	}

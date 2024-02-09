@@ -59,7 +59,6 @@ func (l *ExecutableDefinitionList) FilterByNamespace(namespace string) Executabl
 	definitions := lo.Filter(*l, func(definition *ExecutableDefinition, _ int) bool {
 		return definition.Namespace == namespace
 	})
-	log.Trace().Int("definitions", len(definitions)).Msgf("filtered definitions by namespace %s", namespace)
 	return definitions
 }
 
@@ -67,6 +66,5 @@ func (l *ExecutableDefinitionList) FilterByTag(tag string) ExecutableDefinitionL
 	definitions := lo.Filter(*l, func(definition *ExecutableDefinition, _ int) bool {
 		return definition.Tags.HasTag(tag)
 	})
-	log.Trace().Int("definitions", len(definitions)).Msgf("filtered definitions by tag %s", tag)
 	return definitions
 }

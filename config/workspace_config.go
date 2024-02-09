@@ -97,7 +97,6 @@ func (c *WorkspaceConfig) Markdown() string {
 	if c.Git != nil {
 		gitConfig, err := yaml.Marshal(c.Git)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to marshal git config")
 			mkdwn += "## Git config\nerror\n"
 		} else {
 			mkdwn += fmt.Sprintf("## Git config\n```yaml\n%s```\n", string(gitConfig))
@@ -106,7 +105,6 @@ func (c *WorkspaceConfig) Markdown() string {
 	if c.Executables != nil {
 		execs, err := yaml.Marshal(c.Executables)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to marshal executables")
 			mkdwn += "## Executables\nerror\n"
 		} else {
 			mkdwn += fmt.Sprintf("## Executables\n```yaml\n%s```\n", string(execs))
@@ -145,7 +143,11 @@ func (l WorkspaceConfigList) Items() []*types.CollectionItem {
 		if ws.Location() == "" {
 			location = "unk"
 		} else {
-			location = utils.PathFromWd(ws.Location())
+			var err error
+			location, err = utils.PathFromWd(ws.Location())
+			if err != nil {
+				location = ws.Location()
+			}
 		}
 		if len(ws.Tags) > 0 {
 			ws.Description = fmt.Sprintf("[%s]\n", ws.Tags.PreviewString()) + ws.Description

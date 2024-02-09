@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jahvon/tuikit/io"
 	"github.com/jahvon/tuikit/types"
 	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
@@ -30,6 +31,7 @@ type DirectoryScopedExecutable struct {
 }
 
 func (e *DirectoryScopedExecutable) ExpandDirectory(
+	logger *io.Logger,
 	wsPath, execPath, processTmpDir string,
 	env map[string]string,
 ) (dir string, isTmpDir bool, err error) {
@@ -45,7 +47,7 @@ func (e *DirectoryScopedExecutable) ExpandDirectory(
 		return file.Name(), true, nil
 	}
 
-	return utils.ExpandDirectory(e.Directory, wsPath, execPath, env), false, nil
+	return utils.ExpandDirectory(logger, e.Directory, wsPath, execPath, env), false, nil
 }
 
 type ParameterizedExecutable struct {
@@ -227,7 +229,6 @@ func (e *Executable) Markdown() string {
 	if e.Type != nil {
 		typeSpec, err := yaml.Marshal(e.Type)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to marshal type spec")
 			mkdwn += "## Type spec\nerror\n"
 		} else {
 			mkdwn += fmt.Sprintf("## Type spec\n```yaml\n%s```\n", string(typeSpec))
@@ -248,10 +249,6 @@ func (e *Executable) Ref() Ref {
 
 func (e *Executable) ID() string {
 	if e.workspace == "" {
-		log.Debug().
-			Str("namespace", e.namespace).
-			Str("definitionFile", e.definitionPath).
-			Msgf("missing workspace for %s", e.Name)
 		return "unk"
 	}
 
@@ -264,10 +261,6 @@ func (e *Executable) AliasesIDs() []string {
 	}
 
 	if e.workspace == "" {
-		log.Debug().
-			Str("namespace", e.namespace).
-			Str("definitionFile", e.definitionPath).
-			Msgf("missing workspace for %s", e.Name)
 		return nil
 	}
 	aliases := make([]string, 0)
@@ -459,7 +452,6 @@ func (l ExecutableList) FilterByTags(tags Tags) ExecutableList {
 	execs := lo.Filter(l, func(exec *Executable, _ int) bool {
 		return exec.Tags.HasAnyTag(tags)
 	})
-	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by tags %v", tags)
 	return execs
 }
 
@@ -475,8 +467,6 @@ func (l ExecutableList) FilterByVerb(verb Verb) ExecutableList {
 	execs := lo.Filter(l, func(exec *Executable, _ int) bool {
 		return exec.Verb.Equals(verb)
 	})
-
-	log.Trace().Int("executables", len(execs)).Msgf("filtered executables by verb %s", verb)
 	return execs
 }
 
@@ -492,8 +482,6 @@ func (l ExecutableList) FilterByWorkspace(ws string) ExecutableList {
 	executables = lo.Filter(executables, func(executable *Executable, _ int) bool {
 		return executable.workspace == ws
 	})
-
-	log.Trace().Int("executables", len(executables)).Msgf("filtered executables by workspace %s", ws)
 	return executables
 }
 
@@ -505,8 +493,6 @@ func (l ExecutableList) FilterByNamespace(ns string) ExecutableList {
 	executables := lo.Filter(l, func(executable *Executable, _ int) bool {
 		return executable.namespace == ns
 	})
-
-	log.Trace().Int("executables", len(executables)).Msgf("filtered executables by namespace %s", ns)
 	return executables
 }
 

@@ -3,6 +3,7 @@ package parallel
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/jahvon/flow/config"
@@ -33,8 +34,8 @@ func (r *parallelRunner) Exec(
 	promptedEnv map[string]string,
 ) error {
 	parallelSpec := executable.Type.Parallel
-	if err := runner.SetEnv(&parallelSpec.ParameterizedExecutable, promptedEnv); err != nil {
-		return fmt.Errorf("unable to set parameters to env - %w", err)
+	if err := runner.SetEnv(ctx.Logger, &parallelSpec.ParameterizedExecutable, promptedEnv); err != nil {
+		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
 	refs := parallelSpec.ExecutableRefs
@@ -47,11 +48,9 @@ func (r *parallelRunner) Exec(
 	var errs []error
 	for _, ref := range refs {
 		ref = context.ExpandRef(ctx, ref)
-		exec, err := ctx.ExecutableCache.GetExecutableByRef(ref)
+		exec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, ref)
 		if err != nil {
 			return err
-		} else if executable == nil {
-			return fmt.Errorf("unable to find executable with reference %s", ref)
 		}
 
 		if exec.Type.Exec != nil {
@@ -74,7 +73,7 @@ func (r *parallelRunner) Exec(
 		})
 	}
 	if err := group.Wait(); err != nil {
-		return fmt.Errorf("unable to execute parallel executables - %w", err)
+		return errors.Wrap(err, "parallel execution error")
 	}
 
 	if len(errs) > 0 {

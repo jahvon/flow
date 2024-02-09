@@ -36,7 +36,7 @@ func headerForCurCtx() components.Header {
 	}
 	return components.Header{
 		Name:   "flow",
-		CtxKey: "ctx",
+		CtxKey: "ctx:",
 		CtxVal: fmt.Sprintf("%s/%s", ws, ns),
 		Styles: io.Styles(),
 	}

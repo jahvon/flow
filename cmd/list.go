@@ -33,9 +33,9 @@ var workspaceList = &cobra.Command{
 		tagsFilter := getFlagValue[[]string](cmd, *flags.FilterTagFlag)
 
 		logger.Debugf("Loading workspace configs from cache")
-		workspaceCache, err := curCtx.WorkspacesCache.Get()
+		workspaceCache, err := curCtx.WorkspacesCache.Get(logger)
 		if err != nil {
-			logger.Fatalx("failed to load workspace configs from cache", "err", err)
+			logger.Fatalx("failure loading workspace configs from cache", "err", err)
 		}
 
 		filteredWorkspaces := make([]config.WorkspaceConfig, 0)
@@ -88,7 +88,7 @@ var executableListCmd = &cobra.Command{
 		tagsFilter := getFlagValue[[]string](cmd, *flags.FilterTagFlag)
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 
-		allExecs, err := curCtx.ExecutableCache.GetExecutableList()
+		allExecs, err := curCtx.ExecutableCache.GetExecutableList(logger)
 		if err != nil {
 			logger.FatalErr(err)
 		}
@@ -125,7 +125,7 @@ var vaultSecretListCmd = &cobra.Command{
 			header := headerForCurCtx()
 			header.Print()
 		}
-		v := vault.NewVault()
+		v := vault.NewVault(logger)
 		secrets, err := v.GetAllSecrets()
 		if err != nil {
 			logger.FatalErr(err)

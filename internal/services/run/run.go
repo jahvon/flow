@@ -76,7 +76,7 @@ func RunFile(
 	logger *io.Logger,
 	logFields map[string]interface{},
 ) error {
-	logger.Debugf("executing file (%s)", filename)
+	logger.Debugf("executing file (%s)", filepath.Join(dir, filename))
 
 	ctx := context.Background()
 	fullPath := filepath.Join(dir, filename)
