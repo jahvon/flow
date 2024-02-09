@@ -6,22 +6,24 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/io"
+	"github.com/jahvon/tuikit/styles"
+
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/config/file"
-	"github.com/jahvon/flow/internal/io"
-	"github.com/jahvon/flow/internal/io/ui"
 )
 
 type Context struct {
-	Ctx              context.Context
-	CancelFunc       context.CancelFunc
-	Logger           *io.Logger
-	UserConfig       *config.UserConfig
-	CurrentWorkspace *config.WorkspaceConfig
-	WorkspacesCache  *cache.WorkspaceCache
-	ExecutableCache  *cache.ExecutableCache
-	App              *ui.Application
+	Ctx                  context.Context
+	CancelFunc           context.CancelFunc
+	Logger               *io.Logger
+	UserConfig           *config.UserConfig
+	CurrentWorkspace     *config.WorkspaceConfig
+	WorkspacesCache      *cache.WorkspaceCache
+	ExecutableCache      *cache.ExecutableCache
+	InteractiveContainer *components.ContainerView
 
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
 	// used to store temporary files all executable runs when the tmpDir value is specified.
@@ -56,14 +58,8 @@ func NewContext(ctx context.Context) *Context {
 		panic("executable cache initialization error")
 	}
 
-	var logger *io.Logger
-	if userConfig.Interactive != nil && userConfig.Interactive.Enabled {
-		logger = io.NewLogger(io.HumanReadable, true)
-	} else {
-		logger = io.NewLogger(io.HumanReadable, false)
-	}
-
 	ctxx, cancel := context.WithCancel(ctx)
+	theme := styles.BaseTheme()
 	return &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
@@ -71,7 +67,7 @@ func NewContext(ctx context.Context) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  cache.NewWorkspaceCache(),
 		ExecutableCache:  cache.NewExecutableCache(),
-		Logger:           logger,
+		Logger:           io.NewLogger(theme, ""),
 	}
 }
 
@@ -91,6 +87,12 @@ func (ctx *Context) Finalize() {
 		if err := os.Remove(ctx.ProcessTmpDir); err != nil {
 			ctx.Logger.Error(err, fmt.Sprintf("unable to remove temp dir %s", ctx.ProcessTmpDir))
 		}
+	}
+	if ctx.InteractiveContainer != nil {
+		ctx.InteractiveContainer.Finalize()
+	}
+	if err := ctx.Logger.Close(); err != nil {
+		panic(err)
 	}
 }
 

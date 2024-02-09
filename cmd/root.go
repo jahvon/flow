@@ -32,6 +32,9 @@ var rootCmd = &cobra.Command{
 			}
 		}
 	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		curCtx.Finalize()
+	},
 	Version: version.String(),
 }
 

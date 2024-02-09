@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/jahvon/tuikit/types"
 	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
 
@@ -67,14 +68,8 @@ func (c *WorkspaceConfig) YAML() (string, error) {
 	return string(yamlBytes), nil
 }
 
-func (c *WorkspaceConfig) JSON(pretty bool) (string, error) {
-	var jsonBytes []byte
-	var err error
-	if pretty {
-		jsonBytes, err = json.MarshalIndent(c, "", "  ")
-	} else {
-		jsonBytes, err = json.Marshal(c)
-	}
+func (c *WorkspaceConfig) JSON() (string, error) {
+	jsonBytes, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config - %w", err)
 	}
@@ -129,23 +124,17 @@ func (l WorkspaceConfigList) YAML() (string, error) {
 	return string(yamlBytes), nil
 }
 
-func (l WorkspaceConfigList) JSON(pretty bool) (string, error) {
-	var jsonBytes []byte
-	var err error
+func (l WorkspaceConfigList) JSON() (string, error) {
 	enriched := enrichedWorkspaceConfigList{Workspaces: l}
-	if pretty {
-		jsonBytes, err = json.MarshalIndent(enriched, "", "  ")
-	} else {
-		jsonBytes, err = json.Marshal(enriched)
-	}
+	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config list - %w", err)
 	}
 	return string(jsonBytes), nil
 }
 
-func (l WorkspaceConfigList) Items() []CollectionItem {
-	items := make([]CollectionItem, 0)
+func (l WorkspaceConfigList) Items() []*types.CollectionItem {
+	items := make([]*types.CollectionItem, 0)
 	for _, ws := range l {
 		name := ws.AssignedName()
 		if ws.DisplayName != "" {
@@ -158,14 +147,16 @@ func (l WorkspaceConfigList) Items() []CollectionItem {
 		} else {
 			location = utils.PathFromWd(ws.Location())
 		}
-
-		item := CollectionItem{
-			Header:      name,
-			SubHeader:   location,
-			Description: ws.Description,
-			Tags:        ws.Tags,
+		if len(ws.Tags) > 0 {
+			ws.Description = fmt.Sprintf("[%s]\n", ws.Tags.PreviewString()) + ws.Description
 		}
-		items = append(items, item)
+
+		item := types.CollectionItem{
+			Header:    name,
+			SubHeader: location,
+			Desc:      ws.Description,
+		}
+		items = append(items, &item)
 	}
 	return items
 }

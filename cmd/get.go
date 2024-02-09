@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config"
@@ -11,7 +12,6 @@ import (
 	"github.com/jahvon/flow/internal/io"
 	configio "github.com/jahvon/flow/internal/io/config"
 	executableio "github.com/jahvon/flow/internal/io/executable"
-	"github.com/jahvon/flow/internal/io/ui/views"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -27,7 +27,7 @@ var configGetCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   "Print the current global configuration values.",
 	Args:    cobra.NoArgs,
-	PreRun:  startApp,
+	PreRun:  initInteractiveContainer,
 	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
@@ -41,10 +41,10 @@ var configGetCmd = &cobra.Command{
 
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 		if interactiveUIEnabled() {
-			viewBuilder := views.NewUserConfigView(curCtx.App, *userConfig, config.OutputFormat(outputFormat))
-			curCtx.App.BuildAndSetView(viewBuilder)
+			view := configio.NewUserConfigView(curCtx.InteractiveContainer, *userConfig, components.Format(outputFormat))
+			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			configio.PrintUserConfig(io.OutputFormat(outputFormat), userConfig)
+			configio.PrintUserConfig(logger, io.OutputFormat(outputFormat), userConfig)
 		}
 	},
 }
@@ -54,7 +54,7 @@ var workspaceGetCmd = &cobra.Command{
 	Aliases: []string{"ws"},
 	Short:   "Print a workspace's configuration. If the name is omitted, the current workspace is used.",
 	Args:    cobra.MaximumNArgs(1),
-	PreRun:  startApp,
+	PreRun:  initInteractiveContainer,
 	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
@@ -81,10 +81,10 @@ var workspaceGetCmd = &cobra.Command{
 
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 		if interactiveUIEnabled() {
-			viewBuilder := views.NewWorkspaceView(curCtx.App, *wsCfg, config.OutputFormat(outputFormat))
-			curCtx.App.BuildAndSetView(viewBuilder)
+			view := workspaceio.NewWorkspaceView(curCtx.InteractiveContainer, *wsCfg, components.Format(outputFormat))
+			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			workspaceio.PrintWorkspaceConfig(io.OutputFormat(outputFormat), wsCfg)
+			workspaceio.PrintWorkspaceConfig(logger, io.OutputFormat(outputFormat), wsCfg)
 		}
 	},
 }
@@ -98,7 +98,7 @@ var executableGetCmd = &cobra.Command{
 		"See" + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
 		"See" + io.ConfigDocsURL("executable", "Ref") + "for more information on executable IDs.",
 	Args:    cobra.ExactArgs(2),
-	PreRun:  startApp,
+	PreRun:  initInteractiveContainer,
 	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
@@ -119,10 +119,10 @@ var executableGetCmd = &cobra.Command{
 
 		outputFormat := getFlagValue[string](cmd, *flags.OutputFormatFlag)
 		if interactiveUIEnabled() {
-			viewBuilder := views.NewExecutableView(curCtx.App, *exec, config.OutputFormat(outputFormat))
-			curCtx.App.BuildAndSetView(viewBuilder)
+			view := executableio.NewExecutableView(curCtx.InteractiveContainer, *exec, components.Format(outputFormat))
+			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			executableio.PrintExecutable(io.OutputFormat(outputFormat), exec)
+			executableio.PrintExecutable(logger, io.OutputFormat(outputFormat), exec)
 		}
 	},
 }
@@ -132,13 +132,15 @@ var vaultGetCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Print the value of a secret in the flow secret vault.",
 	Args:    cobra.ExactArgs(1),
-	PreRun:  setTermView,
-	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		reference := args[0]
 		asPlainText := getFlagValue[bool](cmd, *flags.OutputSecretAsPlainTextFlag)
 
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		v := vault.NewVault()
 		secret, err := v.GetSecret(reference)
 		if err != nil {

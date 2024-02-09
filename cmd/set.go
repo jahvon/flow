@@ -22,12 +22,14 @@ var configWorkspaceSetCmd = &cobra.Command{
 	Aliases: []string{"ws"},
 	Short:   "Change the current workspace.",
 	Args:    cobra.ExactArgs(1),
-	PreRun:  setTermView,
-	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		workspace := args[0]
 		userConfig := curCtx.UserConfig
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		if userConfig == nil {
 			logger.Fatalf("failed to load user config")
 		}
@@ -52,12 +54,14 @@ var configNamespaceSetCmd = &cobra.Command{
 	Aliases: []string{"ns"},
 	Short:   "Change the current namespace.",
 	Args:    cobra.ExactArgs(1),
-	PreRun:  setTermView,
-	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		namespace := args[0]
 		userConfig := file.LoadUserConfig()
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		if userConfig == nil {
 			logger.Fatalf("failed to load user config")
 		}
@@ -74,13 +78,15 @@ var configNamespaceSetCmd = &cobra.Command{
 }
 
 var configInteractiveSetCmd = &cobra.Command{
-	Use:     "interactive <true|false>",
-	Short:   "Enable or disable the interactive terminal UI experience.",
-	Args:    cobra.ExactArgs(1),
-	PreRun:  setTermView,
-	PostRun: exitApp,
+	Use:   "interactive <true|false>",
+	Short: "Enable or disable the interactive terminal UI experience.",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		enabled, err := strconv.ParseBool(args[0])
 		if err != nil {
 			logger.FatalErr(fmt.Errorf("failed to parse boolean value: %w", err))
@@ -114,13 +120,15 @@ var vaultSecretSetCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Update or create a secret in the flow secret vault.",
 	Args:    cobra.ExactArgs(2),
-	PreRun:  setTermView,
-	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		reference := args[0]
 		value := args[1]
 
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		secret := vault.Secret(value)
 		v := vault.NewVault()
 		err := v.SetSecret(reference, secret)

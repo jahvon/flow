@@ -2,11 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 
+	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -22,13 +25,24 @@ var workspaceRemoveCmd = &cobra.Command{
 	Short:   "Remove an existing workspace from the list of known workspaces.",
 	Long: "Remove an existing workspace. File contents will remain in the corresponding directory but the " +
 		"workspace will be unlinked from the flow global configurations.\nNote: You cannot remove the current workspace.",
-	Args:   cobra.ExactArgs(1),
-	PreRun: setTermView,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		name := args[0]
 
-		confirmed := processUserConfirmation("Are you sure you want to remove the workspace '" + name + "'?")
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
+		inputs, err := components.ProcessInputs(io.Styles(), components.TextInput{
+			Key:    "confirm",
+			Prompt: fmt.Sprintf("Are you sure you want to remove the workspace '%s'? (y/n)", name),
+		})
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		resp := inputs.FindByKey("confirm").Value()
+		confirmed, _ := strconv.ParseBool(resp)
 		if !confirmed {
 			logger.Warnf("Aborting")
 			return
@@ -67,11 +81,14 @@ var vaultSecretRemoveCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Remove a secret from the vault.",
 	Args:    cobra.ExactArgs(1),
-	PreRun:  setTermView,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		reference := args[0]
 
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		v := vault.NewVault()
 		err := v.DeleteSecret(reference)
 		if err != nil {

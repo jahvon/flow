@@ -3,13 +3,13 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/cmd/flags"
 	"github.com/jahvon/flow/internal/io"
 	executableio "github.com/jahvon/flow/internal/io/executable"
-	"github.com/jahvon/flow/internal/io/ui/views"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -25,7 +25,7 @@ var workspaceList = &cobra.Command{
 	Aliases: []string{"ws"},
 	Short:   "Print a list of the registered flow workspaces.",
 	Args:    cobra.NoArgs,
-	PreRun:  startApp,
+	PreRun:  initInteractiveContainer,
 	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
@@ -53,10 +53,14 @@ var workspaceList = &cobra.Command{
 		}
 
 		if interactiveUIEnabled() {
-			viewBuilder := views.NewWorkspaceListView(curCtx.App, filteredWorkspaces, config.OutputFormat(outputFormat))
-			curCtx.App.BuildAndSetView(viewBuilder)
+			view := workspaceio.NewWorkspaceListView(
+				curCtx.InteractiveContainer,
+				filteredWorkspaces,
+				components.Format(outputFormat),
+			)
+			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			workspaceio.PrintWorkspaceList(io.OutputFormat(outputFormat), filteredWorkspaces)
+			workspaceio.PrintWorkspaceList(logger, io.OutputFormat(outputFormat), filteredWorkspaces)
 		}
 	},
 }
@@ -66,7 +70,7 @@ var executableListCmd = &cobra.Command{
 	Aliases: []string{"execs"},
 	Short:   "Print a list of executable flows.",
 	Args:    cobra.NoArgs,
-	PreRun:  startApp,
+	PreRun:  initInteractiveContainer,
 	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
@@ -96,10 +100,14 @@ var executableListCmd = &cobra.Command{
 			FilterByTags(tagsFilter)
 
 		if interactiveUIEnabled() {
-			viewBuilder := views.NewExecutableListView(curCtx.App, filteredExec, config.OutputFormat(outputFormat))
-			curCtx.App.BuildAndSetView(viewBuilder)
+			view := executableio.NewExecutableListView(
+				curCtx.InteractiveContainer,
+				filteredExec,
+				components.Format(outputFormat),
+			)
+			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			executableio.PrintExecutableList(io.OutputFormat(outputFormat), filteredExec)
+			executableio.PrintExecutableList(logger, io.OutputFormat(outputFormat), filteredExec)
 		}
 	},
 }
@@ -109,12 +117,14 @@ var vaultSecretListCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Print a list of secrets in the flow vault.",
 	Args:    cobra.NoArgs,
-	PreRun:  setTermView,
-	PostRun: exitApp,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		asPlainText := getFlagValue[bool](cmd, *flags.OutputSecretAsPlainTextFlag)
 
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
 		v := vault.NewVault()
 		secrets, err := v.GetAllSecrets()
 		if err != nil {
