@@ -12,7 +12,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.30.0
 	github.com/rs/zerolog v1.31.0
-	github.com/samber/lo v1.38.1
+	github.com/samber/lo v1.39.0
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/crypto v0.17.0
 	golang.org/x/sync v0.6.0
