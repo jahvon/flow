@@ -23,12 +23,12 @@ func OpenInEditor(container *components.ContainerView, path string) {
 		if preferred == "" {
 			preferred = "vim"
 		}
-		cmd := exec.Command(preferred, path)
+		cmd := exec.Command(preferred, path) // #nosec G204
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		err := cmd.Run()
 		if err != nil {
-			container.HandleError(fmt.Errorf("unable to open vim: %w", err))
+			container.HandleError(fmt.Errorf("unable to open %s: %w", preferred, err))
 		}
 	}
 }
