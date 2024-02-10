@@ -15,6 +15,7 @@ var (
 	UserConfigPath       = ConfigDirPath() + "/config.yaml"
 	DefaultWorkspacePath = CachedDataDirPath() + "/default"
 	LatestCacheDataPath  = CachedDataDirPath() + "/latestcache"
+	LogsDirPath          = CachedDataDirPath() + "/logs"
 )
 
 func ConfigDirPath() string {
@@ -91,6 +92,18 @@ func EnsureWorkspaceConfig(workspaceName, workspacePath string) error {
 		return InitWorkspaceConfig(workspaceName, workspacePath)
 	} else if err != nil {
 		return errors.Wrapf(err, "unable to check for workspace %s config file", workspaceName)
+	}
+	return nil
+}
+
+func EnsureLogsDir() error {
+	if _, err := os.Stat(LogsDirPath); os.IsNotExist(err) {
+		err = os.MkdirAll(LogsDirPath, 0750)
+		if err != nil {
+			return errors.Wrap(err, "unable to create logs directory")
+		}
+	} else if err != nil {
+		return errors.Wrap(err, "unable to check for logs directory")
 	}
 	return nil
 }

@@ -85,27 +85,18 @@ var SetAfterCreateFlag = &Metadata{
 	Required:  false,
 }
 
-var SetNamespaceFlag = &Metadata{
-	Name:      "namespace",
-	Shorthand: "n",
-	Usage:     "Set the namespace context for the current workspace",
-	Default:   "",
-	Required:  false,
-}
-
-var SetWorkspaceFlag = &Metadata{
-	Name:      "workspace",
-	Shorthand: "w",
-	Usage:     "Set the workspace context",
-	Default:   "",
-	Required:  false,
-}
-
 var NonInteractiveFlag = &Metadata{
 	Name:      "non-interactive",
 	Shorthand: "x",
 	Usage: "Disable displaying flow output via terminal UI rendering. " +
 		"This is only needed if the interactive output is enabled by default in flow's configuration.",
+	Default:  false,
+	Required: false,
+}
+
+var LastLogEntryFlag = &Metadata{
+	Name:     "last",
+	Usage:    "Print the last execution's logs",
 	Default:  false,
 	Required: false,
 }

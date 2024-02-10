@@ -37,7 +37,7 @@ func (r *renderRunner) IsCompatible(executable *config.Executable) bool {
 }
 
 func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
-	if ctx.InteractiveContainer == nil {
+	if ctx.UserConfig.Interactive != nil && !ctx.UserConfig.Interactive.Enabled {
 		return fmt.Errorf("unable to render when interactive mode is disabled")
 	}
 
@@ -90,12 +90,9 @@ func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable,
 	}
 
 	ctx.Logger.Infof("Rendering content from file %s", contentFile)
-	state := &components.TerminalState{
-		Theme:  io.Styles(),
-		Width:  ctx.InteractiveContainer.Width(),
-		Height: ctx.InteractiveContainer.Height(),
+	if err = components.RunMarkdownView(io.Styles(), buff.String()); err != nil {
+		return errors.Wrap(err, "unable to render content")
 	}
-	ctx.InteractiveContainer.SetView(components.NewMarkdownView(state, buff.String()))
 	return nil
 }
 

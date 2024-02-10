@@ -35,7 +35,7 @@ var configInitCmd = &cobra.Command{
 			header := headerForCurCtx()
 			header.Print()
 		}
-		inputs, err := components.ProcessInputs(io.Styles(), components.TextInput{
+		inputs, err := components.ProcessInputs(io.Styles(), &components.TextInput{
 			Key:    "confirm",
 			Prompt: "This will overwrite your current flow configurations. Are you sure you want to continue? (y/n)",
 		})
