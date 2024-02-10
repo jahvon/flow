@@ -65,7 +65,7 @@ func NewContext(ctx context.Context) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  cache.NewWorkspaceCache(),
 		ExecutableCache:  cache.NewExecutableCache(),
-		Logger:           io.NewLogger(theme, ""),
+		Logger:           io.NewLogger(theme, file.LogsDirPath),
 	}
 }
 
@@ -89,7 +89,10 @@ func (ctx *Context) Finalize() {
 	if ctx.InteractiveContainer != nil {
 		ctx.InteractiveContainer.Finalize()
 	}
-	if err := ctx.Logger.Close(); err != nil {
+	if err := ctx.Logger.Flush(); err != nil {
+		if errors.Is(err, os.ErrClosed) {
+			return
+		}
 		panic(err)
 	}
 }

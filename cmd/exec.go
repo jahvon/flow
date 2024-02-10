@@ -116,7 +116,7 @@ func setAuthEnv(executable *config.Executable) {
 	if authRequired(curCtx, executable) {
 		resp, err := components.ProcessInputs(
 			io.Styles(),
-			components.TextInput{
+			&components.TextInput{
 				Key:    vault.EncryptionKeyEnvVar,
 				Prompt: "Enter vault encryption key",
 				Hidden: true,
@@ -199,8 +199,8 @@ func authRequired(ctx *context.Context, rootExec *config.Executable) bool {
 }
 
 //nolint:gocognit
-func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []components.TextInput {
-	pending := make([]components.TextInput, 0)
+func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []*components.TextInput {
+	pending := make([]*components.TextInput, 0)
 	if rootExec.Type == nil {
 		return nil
 	}
@@ -208,31 +208,31 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []comp
 	case rootExec.Type.Exec != nil:
 		for _, param := range rootExec.Type.Exec.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Launch != nil:
 		for _, param := range rootExec.Type.Launch.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Request != nil:
 		for _, param := range rootExec.Type.Request.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Render != nil:
 		for _, param := range rootExec.Type.Render.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 	case rootExec.Type.Serial != nil:
 		for _, param := range rootExec.Type.Serial.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Type.Serial.ExecutableRefs {
@@ -246,7 +246,7 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []comp
 	case rootExec.Type.Parallel != nil:
 		for _, param := range rootExec.Type.Parallel.Parameters {
 			if param.Prompt != "" {
-				pending = append(pending, components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Type.Parallel.ExecutableRefs {

@@ -35,7 +35,7 @@ var workspaceRemoveCmd = &cobra.Command{
 			header := headerForCurCtx()
 			header.Print()
 		}
-		inputs, err := components.ProcessInputs(io.Styles(), components.TextInput{
+		inputs, err := components.ProcessInputs(io.Styles(), &components.TextInput{
 			Key:    "confirm",
 			Prompt: fmt.Sprintf("Are you sure you want to remove the workspace '%s'? (y/n)", name),
 		})
