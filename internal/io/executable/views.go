@@ -5,6 +5,7 @@ import (
 
 	"github.com/jahvon/tuikit/components"
 	"github.com/samber/lo"
+	"golang.design/x/clipboard"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/io"
@@ -17,14 +18,18 @@ func NewExecutableView(
 	format components.Format,
 ) components.TeaModel {
 	var executableKeyCallbacks = []components.KeyCallback{
-		// TODO: implement run key that will run the executable
-		//	- this will require come exec command logic to be moved to the runner package
-		// {
-		// 	Key: "r", Label: "run",
-		// 	Callback: func() error {
-		// 		return nil
-		// 	},
-		// },
+		{
+			Key: "c", Label: "copy ref",
+			Callback: func() error {
+				err := clipboard.Init()
+				if err != nil {
+					panic(err)
+				}
+				clipboard.Write(clipboard.FmtText, []byte(exec.Ref().String()))
+				container.SetNotice("copied reference to clipboard", components.NoticeLevelInfo)
+				return nil
+			},
+		},
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {

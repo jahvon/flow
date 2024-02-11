@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/itchyny/gojq"
 	"github.com/pkg/errors"
@@ -124,18 +125,18 @@ func executeJQQuery(query, resp string) (string, error) {
 	return fmt.Sprintf("%v", result), nil
 }
 
-func writeResponseToFile(resp, responseFile string, format config.OutputFormat) error {
+func writeResponseToFile(resp, responseFile string, format string) error {
 	var formattedResp string
-	switch format {
-	case config.UNSET:
+	switch strings.ToLower(format) {
+	case "", "raw":
 		formattedResp = resp
-	case config.JSON:
+	case "json":
 		var js map[string]interface{}
 		if json.Unmarshal([]byte(resp), &js) != nil {
 			return errors.New("response is not a valid JSON string")
 		}
 		formattedResp = resp
-	case config.FormattedJSON:
+	case "indent-json", "indented-json", "formatted-json":
 		var respMap map[string]interface{}
 		err := json.Unmarshal([]byte(resp), &respMap)
 		if err != nil {
@@ -146,7 +147,7 @@ func writeResponseToFile(resp, responseFile string, format config.OutputFormat) 
 			return err
 		}
 		formattedResp = string(formattedStr)
-	case config.YAML:
+	case "yaml", "yml":
 		var respMap map[string]interface{}
 		err := json.Unmarshal([]byte(resp), &respMap)
 		if err != nil {

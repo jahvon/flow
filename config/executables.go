@@ -86,8 +86,8 @@ type LaunchExecutableType struct {
 type RequestResponseFile struct {
 	DirectoryScopedExecutable `yaml:",inline"`
 
-	Filename string       `yaml:"filename"`
-	SaveAs   OutputFormat `yaml:"saveAs"`
+	Filename string `yaml:"filename"`
+	SaveAs   string `yaml:"saveAs"`
 }
 
 type RequestExecutableType struct {

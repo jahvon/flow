@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/jahvon/tuikit/components"
 	tuikitIO "github.com/jahvon/tuikit/io"
@@ -42,14 +43,20 @@ var logsCmd = &cobra.Command{
 			curCtx.Logger.PlainTextInfo("No logs entries found")
 		}
 		if lastEntry {
-			data, err := tuikitIO.ReadArchiveEntry(entries[0])
+			data, err := entries[0].Read()
 			if err != nil {
 				curCtx.Logger.FatalErr(err)
 			}
 			_, _ = fmt.Fprint(os.Stdout, data)
 		} else {
 			for _, entry := range entries {
-				_, _ = fmt.Fprint(os.Stdout, entry)
+				entryStr := fmt.Sprintf(
+					"%s (%s)\n%s\n\n",
+					entry.Args,
+					entry.Time.Local().Format(time.RFC822),
+					entry.Path,
+				)
+				_, _ = fmt.Fprint(os.Stdout, entryStr)
 			}
 		}
 	},

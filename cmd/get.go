@@ -37,7 +37,7 @@ var configGetCmd = &cobra.Command{
 			view := configio.NewUserConfigView(curCtx.InteractiveContainer, *userConfig, components.Format(outputFormat))
 			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			configio.PrintUserConfig(logger, io.OutputFormat(outputFormat), userConfig)
+			configio.PrintUserConfig(logger, outputFormat, userConfig)
 		}
 	},
 }
@@ -77,7 +77,7 @@ var workspaceGetCmd = &cobra.Command{
 			view := workspaceio.NewWorkspaceView(curCtx.InteractiveContainer, *wsCfg, components.Format(outputFormat))
 			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			workspaceio.PrintWorkspaceConfig(logger, io.OutputFormat(outputFormat), wsCfg)
+			workspaceio.PrintWorkspaceConfig(logger, outputFormat, wsCfg)
 		}
 	},
 }
@@ -122,7 +122,7 @@ var executableGetCmd = &cobra.Command{
 			view := executableio.NewExecutableView(curCtx.InteractiveContainer, *exec, components.Format(outputFormat))
 			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			executableio.PrintExecutable(logger, io.OutputFormat(outputFormat), exec)
+			executableio.PrintExecutable(logger, outputFormat, exec)
 		}
 	},
 }
