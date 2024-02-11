@@ -8,7 +8,6 @@ import (
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/cmd/flags"
-	"github.com/jahvon/flow/internal/io"
 	executableio "github.com/jahvon/flow/internal/io/executable"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
@@ -60,7 +59,7 @@ var workspaceList = &cobra.Command{
 			)
 			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			workspaceio.PrintWorkspaceList(logger, io.OutputFormat(outputFormat), filteredWorkspaces)
+			workspaceio.PrintWorkspaceList(logger, outputFormat, filteredWorkspaces)
 		}
 	},
 }
@@ -107,7 +106,7 @@ var executableListCmd = &cobra.Command{
 			)
 			curCtx.InteractiveContainer.SetView(view)
 		} else {
-			executableio.PrintExecutableList(logger, io.OutputFormat(outputFormat), filteredExec)
+			executableio.PrintExecutableList(logger, outputFormat, filteredExec)
 		}
 	},
 }

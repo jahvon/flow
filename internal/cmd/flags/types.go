@@ -64,7 +64,7 @@ var FilterTagFlag = &Metadata{
 var OutputFormatFlag = &Metadata{
 	Name:      "output",
 	Shorthand: "o",
-	Usage:     "Output format. One of: yaml, json, jsonp.",
+	Usage:     "Output format. One of: yaml, json, doc, or list.",
 	Default:   "",
 	Required:  false,
 }

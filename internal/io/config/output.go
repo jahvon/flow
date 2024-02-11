@@ -2,22 +2,22 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
 
 	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/internal/io"
 )
 
-func PrintUserConfig(logger *tuikitIO.Logger, format io.OutputFormat, userConfig *config.UserConfig) {
+func PrintUserConfig(logger *tuikitIO.Logger, format string, userConfig *config.UserConfig) {
 	if userConfig == nil {
 		logger.Fatalf("Config is nil")
 	}
 
-	switch format {
-	case io.OutputFormatDocument, io.OutputFormatYAML:
+	switch strings.ToLower(format) {
+	case "", "yaml", "yml":
 		fmt.Println(userConfig.YAML())
-	case io.OutputFormatJSON:
+	case "json":
 		fmt.Println(userConfig.JSON())
 	default:
 		logger.Fatalf("Unsupported output format %s", format)
