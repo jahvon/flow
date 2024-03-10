@@ -34,7 +34,7 @@ func (r *parallelRunner) Exec(
 	promptedEnv map[string]string,
 ) error {
 	parallelSpec := executable.Type.Parallel
-	if err := runner.SetEnv(ctx.Logger, &parallelSpec.ParameterizedExecutable, promptedEnv); err != nil {
+	if err := runner.SetEnv(ctx.Logger, &parallelSpec.ExecutableEnvironment, promptedEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 

@@ -27,13 +27,18 @@ func (r *launchRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *launchRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
+func (r *launchRunner) Exec(ctx *context.Context, executable *config.Executable, inputEnv map[string]string) error {
 	launchSpec := executable.Type.Launch
-	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &launchSpec.ParameterizedExecutable, promptedEnv)
+	envMap, err := runner.BuildEnvMap(
+		ctx.Logger,
+		&launchSpec.ExecutableEnvironment,
+		inputEnv,
+		runner.DefaultEnv(ctx, executable),
+	)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	if err := runner.SetEnv(ctx.Logger, &launchSpec.ParameterizedExecutable, envMap); err != nil {
+	if err := runner.SetEnv(ctx.Logger, &launchSpec.ExecutableEnvironment, envMap); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	targetURI := utils.ExpandDirectory(

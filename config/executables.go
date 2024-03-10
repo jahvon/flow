@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ import (
 
 const tmpdir = "f:tmp"
 
-type DirectoryScopedExecutable struct {
+type ExecutableDirectory struct {
 	// +docsgen:dir
 	// The directory to execute the command in.
 	// If unset, the directory of the executable definition will be used.
@@ -30,7 +31,7 @@ type DirectoryScopedExecutable struct {
 	Directory string `yaml:"dir"`
 }
 
-func (e *DirectoryScopedExecutable) ExpandDirectory(
+func (e *ExecutableDirectory) ExpandDirectory(
 	logger *io.Logger,
 	wsPath, execPath, processTmpDir string,
 	env map[string]string,
@@ -50,15 +51,18 @@ func (e *DirectoryScopedExecutable) ExpandDirectory(
 	return utils.ExpandDirectory(logger, e.Directory, wsPath, execPath, env), false, nil
 }
 
-type ParameterizedExecutable struct {
+type ExecutableEnvironment struct {
 	// +docsgen:params
 	// List of parameters to pass to the executable.
 	Parameters ParameterList `yaml:"params"`
+	// +docgen:args
+	// List of arguments to pass to the executable.
+	Args ArgumentList `yaml:"args"`
 }
 
 type ExecExecutableType struct {
-	DirectoryScopedExecutable `yaml:",inline"`
-	ParameterizedExecutable   `yaml:",inline"`
+	ExecutableDirectory   `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
 	Command string  `yaml:"cmd"`
 	File    string  `yaml:"file"`
@@ -76,7 +80,7 @@ func (e *ExecExecutableType) GetLogFields() map[string]interface{} {
 }
 
 type LaunchExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
 	App  string `yaml:"app"`
 	URI  string `yaml:"uri"`
@@ -84,14 +88,14 @@ type LaunchExecutableType struct {
 }
 
 type RequestResponseFile struct {
-	DirectoryScopedExecutable `yaml:",inline"`
+	ExecutableDirectory `yaml:",inline"`
 
 	Filename string `yaml:"filename"`
 	SaveAs   string `yaml:"saveAs"`
 }
 
 type RequestExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
 	Method  string            `yaml:"method"`
 	URL     string            `yaml:"url"`
@@ -106,15 +110,15 @@ type RequestExecutableType struct {
 }
 
 type RenderExecutableType struct {
-	DirectoryScopedExecutable `yaml:",inline"`
-	ParameterizedExecutable   `yaml:",inline"`
+	ExecutableDirectory   `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
 	TemplateFile     string `yaml:"templateFile"`
 	TemplateDataFile string `yaml:"templateDataFile"`
 }
 
 type SerialExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
 	// +docsgen:refs
 	// List of executables references
@@ -123,7 +127,7 @@ type SerialExecutableType struct {
 }
 
 type ParallelExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
 	ExecutableRefs []Ref `yaml:"refs"`
 	MaxThreads     int   `yaml:"maxThreads"`
@@ -253,6 +257,24 @@ func (e *Executable) ID() string {
 	}
 
 	return NewExecutableID(e.workspace, e.namespace, e.Name)
+}
+
+func (e *Executable) Env() *ExecutableEnvironment {
+	v := reflect.ValueOf(e.Type)
+	if v.Kind() != reflect.Ptr {
+		return nil
+	}
+	typeElem := v.Elem()
+	for field := 0; field < typeElem.NumField(); field++ {
+		if typeElem.Field(field).Kind() == reflect.Ptr && !typeElem.Field(field).IsNil() {
+			elem := typeElem.Field(field).Elem()
+			envField := elem.FieldByName("ExecutableEnvironment")
+			if envField.IsValid() {
+				return envField.Addr().Interface().(*ExecutableEnvironment)
+			}
+		}
+	}
+	return nil
 }
 
 func (e *Executable) AliasesIDs() []string {

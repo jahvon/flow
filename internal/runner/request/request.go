@@ -34,9 +34,14 @@ func (r *requestRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *requestRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
+func (r *requestRunner) Exec(ctx *context.Context, executable *config.Executable, inputEnv map[string]string) error {
 	requestSpec := executable.Type.Request
-	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &requestSpec.ParameterizedExecutable, promptedEnv)
+	envMap, err := runner.BuildEnvMap(
+		ctx.Logger,
+		&requestSpec.ExecutableEnvironment,
+		inputEnv,
+		runner.DefaultEnv(ctx, executable),
+	)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}

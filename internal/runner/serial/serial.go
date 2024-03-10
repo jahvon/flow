@@ -29,7 +29,7 @@ func (r *serialRunner) IsCompatible(executable *config.Executable) bool {
 
 func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
 	serialSpec := executable.Type.Serial
-	if err := runner.SetEnv(ctx.Logger, &serialSpec.ParameterizedExecutable, promptedEnv); err != nil {
+	if err := runner.SetEnv(ctx.Logger, &serialSpec.ExecutableEnvironment, promptedEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 

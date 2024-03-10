@@ -36,16 +36,21 @@ func (r *renderRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
+func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable, inputEnv map[string]string) error {
 	if ctx.UserConfig.Interactive != nil && !ctx.UserConfig.Interactive.Enabled {
 		return fmt.Errorf("unable to render when interactive mode is disabled")
 	}
 
 	renderSpec := executable.Type.Render
-	if err := runner.SetEnv(ctx.Logger, &renderSpec.ParameterizedExecutable, promptedEnv); err != nil {
+	if err := runner.SetEnv(ctx.Logger, &renderSpec.ExecutableEnvironment, inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &renderSpec.ParameterizedExecutable, promptedEnv)
+	envMap, err := runner.BuildEnvMap(
+		ctx.Logger,
+		&renderSpec.ExecutableEnvironment,
+		inputEnv,
+		runner.DefaultEnv(ctx, executable),
+	)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
