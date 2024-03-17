@@ -59,6 +59,9 @@ func (c *UserConfig) Validate() error {
 	if _, wsFound := c.Workspaces[c.CurrentWorkspace]; !wsFound {
 		return fmt.Errorf("current workspace %s does not exist", c.CurrentWorkspace)
 	}
+	if c.WorkspaceMode != "" && c.WorkspaceMode != WorkspaceModeFixed && c.WorkspaceMode != WorkspaceModeDynamic {
+		return fmt.Errorf("invalid workspace mode %s", c.WorkspaceMode)
+	}
 
 	return nil
 }
