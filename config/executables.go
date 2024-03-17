@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ import (
 
 const tmpdir = "f:tmp"
 
-type DirectoryScopedExecutable struct {
+type ExecutableDirectory struct {
 	// +docsgen:dir
 	// The directory to execute the command in.
 	// If unset, the directory of the executable definition will be used.
@@ -27,10 +28,10 @@ type DirectoryScopedExecutable struct {
 	// If prefixed with `./`, the path will be relative to the current working directory.
 	// If prefixed with `//`, the path will be relative to the workspace root.
 	// Environment variables in the path will be expended at runtime.
-	Directory string `yaml:"dir"`
+	Directory string `yaml:"dir,omitempty"`
 }
 
-func (e *DirectoryScopedExecutable) ExpandDirectory(
+func (e *ExecutableDirectory) ExpandDirectory(
 	logger *io.Logger,
 	wsPath, execPath, processTmpDir string,
 	env map[string]string,
@@ -50,19 +51,22 @@ func (e *DirectoryScopedExecutable) ExpandDirectory(
 	return utils.ExpandDirectory(logger, e.Directory, wsPath, execPath, env), false, nil
 }
 
-type ParameterizedExecutable struct {
+type ExecutableEnvironment struct {
 	// +docsgen:params
 	// List of parameters to pass to the executable.
-	Parameters ParameterList `yaml:"params"`
+	Parameters ParameterList `yaml:"params,omitempty"`
+	// +docgen:args
+	// List of arguments to pass to the executable.
+	Args ArgumentList `yaml:"args,omitempty"`
 }
 
 type ExecExecutableType struct {
-	DirectoryScopedExecutable `yaml:",inline"`
-	ParameterizedExecutable   `yaml:",inline"`
+	ExecutableDirectory   `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
-	Command string  `yaml:"cmd"`
-	File    string  `yaml:"file"`
-	LogMode LogMode `yaml:"logMode"`
+	Command string  `yaml:"cmd,omitempty"`
+	File    string  `yaml:"file,omitempty"`
+	LogMode LogMode `yaml:"logMode,omitempty"`
 
 	logFields map[string]interface{}
 }
@@ -76,58 +80,58 @@ func (e *ExecExecutableType) GetLogFields() map[string]interface{} {
 }
 
 type LaunchExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
-	App  string `yaml:"app"`
-	URI  string `yaml:"uri"`
-	Wait bool   `yaml:"wait"`
+	App  string `yaml:"app,omitempty"`
+	URI  string `yaml:"uri,omitempty"`
+	Wait bool   `yaml:"wait,omitempty"`
 }
 
 type RequestResponseFile struct {
-	DirectoryScopedExecutable `yaml:",inline"`
+	ExecutableDirectory `yaml:",inline"`
 
-	Filename string `yaml:"filename"`
-	SaveAs   string `yaml:"saveAs"`
+	Filename string `yaml:"filename,omitempty"`
+	SaveAs   string `yaml:"saveAs,omitempty"`
 }
 
 type RequestExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
-	Method  string            `yaml:"method"`
-	URL     string            `yaml:"url"`
-	Body    string            `yaml:"body"`
-	Headers map[string]string `yaml:"headers"`
-	Timeout time.Duration     `yaml:"timeout"`
+	Method  string            `yaml:"method,omitempty"`
+	URL     string            `yaml:"url,omitempty"`
+	Body    string            `yaml:"body,omitempty"`
+	Headers map[string]string `yaml:"headers,omitempty"`
+	Timeout time.Duration     `yaml:"timeout,omitempty"`
 
-	ResponseFile      *RequestResponseFile `yaml:"responseFile"`
-	TransformResponse string               `yaml:"transformResponse"`
-	LogResponse       bool                 `yaml:"logResponse"`
-	ValidStatusCodes  []int                `yaml:"validStatusCodes"`
+	ResponseFile      *RequestResponseFile `yaml:"responseFile,omitempty"`
+	TransformResponse string               `yaml:"transformResponse,omitempty"`
+	LogResponse       bool                 `yaml:"logResponse,omitempty"`
+	ValidStatusCodes  []int                `yaml:"validStatusCodes,omitempty"`
 }
 
 type RenderExecutableType struct {
-	DirectoryScopedExecutable `yaml:",inline"`
-	ParameterizedExecutable   `yaml:",inline"`
+	ExecutableDirectory   `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
-	TemplateFile     string `yaml:"templateFile"`
-	TemplateDataFile string `yaml:"templateDataFile"`
+	TemplateFile     string `yaml:"templateFile,omitempty"`
+	TemplateDataFile string `yaml:"templateDataFile,omitempty"`
 }
 
 type SerialExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
 	// +docsgen:refs
 	// List of executables references
-	ExecutableRefs []Ref `yaml:"refs"`
-	FailFast       bool  `yaml:"failFast"`
+	ExecutableRefs []Ref `yaml:"refs,omitempty"`
+	FailFast       bool  `yaml:"failFast,omitempty"`
 }
 
 type ParallelExecutableType struct {
-	ParameterizedExecutable `yaml:",inline"`
+	ExecutableEnvironment `yaml:",inline"`
 
-	ExecutableRefs []Ref `yaml:"refs"`
-	MaxThreads     int   `yaml:"maxThreads"`
-	FailFast       bool  `yaml:"failFast"`
+	ExecutableRefs []Ref `yaml:"refs,omitempty"`
+	MaxThreads     int   `yaml:"maxThreads,omitempty"`
+	FailFast       bool  `yaml:"failFast,omitempty"`
 }
 
 type ExecutableTypeSpec struct {
@@ -152,16 +156,16 @@ type ExecutableTypeSpec struct {
 }
 
 type Executable struct {
-	Verb        Verb           `yaml:"verb"`
-	Name        string         `yaml:"name"`
-	Aliases     []string       `yaml:"aliases"`
-	Tags        Tags           `yaml:"tags"`
-	Description string         `yaml:"description"`
-	Visibility  VisibilityType `yaml:"visibility"`
-	Timeout     time.Duration  `yaml:"timeout"`
+	Verb        Verb           `yaml:"verb,omitempty"`
+	Name        string         `yaml:"name,omitempty"`
+	Aliases     []string       `yaml:"aliases,omitempty"`
+	Tags        Tags           `yaml:"tags,omitempty"`
+	Description string         `yaml:"description,omitempty"`
+	Visibility  VisibilityType `yaml:"visibility,omitempty"`
+	Timeout     time.Duration  `yaml:"timeout,omitempty"`
 	// +docsgen:type
 	// The type of executable. Only one type can be set.
-	Type *ExecutableTypeSpec `yaml:"type"`
+	Type *ExecutableTypeSpec `yaml:"type,omitempty"`
 
 	workspace, namespace, workspacePath, definitionPath string
 }
@@ -253,6 +257,24 @@ func (e *Executable) ID() string {
 	}
 
 	return NewExecutableID(e.workspace, e.namespace, e.Name)
+}
+
+func (e *Executable) Env() *ExecutableEnvironment {
+	v := reflect.ValueOf(e.Type)
+	if v.Kind() != reflect.Ptr {
+		return nil
+	}
+	typeElem := v.Elem()
+	for field := 0; field < typeElem.NumField(); field++ {
+		if typeElem.Field(field).Kind() == reflect.Ptr && !typeElem.Field(field).IsNil() {
+			elem := typeElem.Field(field).Elem()
+			envField := elem.FieldByName("ExecutableEnvironment")
+			if envField.IsValid() {
+				return envField.Addr().Interface().(*ExecutableEnvironment)
+			}
+		}
+	}
+	return nil
 }
 
 func (e *Executable) AliasesIDs() []string {

@@ -68,7 +68,8 @@ func (c *ExecutableCache) Update(logger *io.Logger) error { //nolint:gocognit
 		AliasMap:      make(map[config.Ref]config.Ref),
 		DefinitionMap: make(map[string]WorkspaceInfo),
 	}
-	for _, wsCfg := range wsCacheData.Workspaces {
+	for name, wsCfg := range wsCacheData.Workspaces {
+		wsCfg.SetContext(name, wsCacheData.WorkspaceLocations[name])
 		definitions, err := file.LoadWorkspaceExecutableDefinitions(logger, wsCfg)
 		if err != nil {
 			logger.Errorx("failed to load workspace executable definitions", "workspace", wsCfg.AssignedName(), "err", err)

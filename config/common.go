@@ -12,6 +12,7 @@ const (
 	ActivateGroupID   = "activate"
 	DeactivateGroupID = "deactivate"
 	LaunchGroupID     = "launch"
+	CreationGroupID   = "creation"
 )
 
 // +docsgen:verb
@@ -45,7 +46,9 @@ var (
 		"render":    LaunchGroupID,
 		"process":   LaunchGroupID,
 		"transform": LaunchGroupID,
-		"generate":  LaunchGroupID,
+		"generate":  CreationGroupID,
+		"add":       CreationGroupID,
+		"new":       CreationGroupID,
 	}
 )
 

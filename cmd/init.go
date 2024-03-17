@@ -121,6 +121,107 @@ var workspaceInitCmd = &cobra.Command{
 	},
 }
 
+var execsInitCmd = &cobra.Command{
+	Use:     "executables WORKSPACE_NAME DEFINITION_NAME [-p SUB_PATH] [-f FILE] [-t TEMPLATE]",
+	Aliases: []string{"execs", "definitions", "defs"},
+	Short:   "Add rendered executables from an executable definition template to a workspace",
+	//nolint:lll
+	Long: `Add rendered executables from an executable definition template to a workspace.
+
+The WORKSPACE_NAME is the name of the workspace to initialize the executables in.
+The DEFINITION_NAME is the name of the definition to use in rendering the template. 
+This name will become the name of the file containing the copied executable definition.
+
+One one of -f or -t must be provided and must point to a valid executable definition template.
+The -p flag can be used to specify a sub-path within the workspace to create the executable definition and its artifacts.`,
+	Args: cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
+		workspaceName := args[0]
+		definitionName := args[1]
+		subPath := getFlagValue[string](cmd, *flags.SubPathFlag)
+
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Notice = fmt.Sprintf("Adding '%s' executables to '%s' workspace", definitionName, workspaceName)
+			header.Print()
+		}
+
+		templateFlag := getFlagValue[string](cmd, *flags.TemplateFlag)
+		fileFlag := getFlagValue[string](cmd, *flags.FileFlag)
+		var definitionPath string
+		switch {
+		case templateFlag == "" && fileFlag == "":
+			logger.Fatalf("one of -f or -t must be provided")
+		case templateFlag != "" && fileFlag != "":
+			logger.Fatalf("only one of -f or -t can be provided")
+		case templateFlag != "":
+			if curCtx.UserConfig.Templates == nil {
+				logger.Fatalf("template %s not found", templateFlag)
+			}
+			if path, found := curCtx.UserConfig.Templates[templateFlag]; !found {
+				logger.Fatalf("template %s not found", templateFlag)
+			} else if found {
+				definitionPath = path
+			}
+		case fileFlag != "":
+			if _, err := os.Stat(fileFlag); os.IsNotExist(err) {
+				logger.Fatalf("file %s not found", fileFlag)
+			}
+			definitionPath = fileFlag
+		}
+		execTemplate, err := file.LoadExecutableDefinitionTemplate(definitionPath)
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		if err := execTemplate.Validate(); err != nil {
+			logger.FatalErr(err)
+		}
+		execTemplate.SetContext(definitionPath)
+
+		wsPath, wsFound := curCtx.UserConfig.Workspaces[workspaceName]
+		if !wsFound {
+			logger.Fatalf("workspace %s not found", workspaceName)
+		}
+		ws, err := file.LoadWorkspaceConfig(workspaceName, wsPath)
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		ws.SetContext(workspaceName, wsPath)
+
+		if len(execTemplate.Data) != 0 {
+			var inputs []*components.TextInput
+			for _, entry := range execTemplate.Data {
+				inputs = append(inputs, &components.TextInput{
+					Key:         entry.Key,
+					Prompt:      entry.Prompt,
+					Placeholder: entry.Default,
+				})
+			}
+			inputs, err = components.ProcessInputs(io.Styles(), inputs...)
+			if err != nil {
+				logger.FatalErr(err)
+			}
+			for _, input := range inputs {
+				execTemplate.Data.Set(input.Key, input.Value())
+			}
+			if err := execTemplate.Data.ValidateValues(); err != nil {
+				logger.FatalErr(err)
+			}
+		}
+
+		if err := file.InitExecutables(execTemplate, ws, definitionName, subPath); err != nil {
+			logger.FatalErr(err)
+		}
+
+		logger.PlainTextSuccess(
+			fmt.Sprintf(
+				"Executables from %s added to %s\nPath: %s",
+				definitionName, workspaceName, definitionPath,
+			))
+	},
+}
+
 var vaultInitCmd = &cobra.Command{
 	Use:   "vault",
 	Short: "Create a new flow secret vault.",
@@ -154,6 +255,15 @@ func init() {
 
 	registerFlagOrPanic(workspaceInitCmd, *flags.SetAfterCreateFlag)
 	initCmd.AddCommand(workspaceInitCmd)
+
+	registerFlagOrPanic(execsInitCmd, *flags.SubPathFlag)
+	registerFlagOrPanic(execsInitCmd, *flags.TemplateFlag)
+	registerFlagOrPanic(execsInitCmd, *flags.FileFlag)
+	execsInitCmd.MarkFlagsMutuallyExclusive(flags.TemplateFlag.Name, flags.FileFlag.Name)
+	execsInitCmd.MarkFlagsOneRequired(flags.TemplateFlag.Name, flags.FileFlag.Name)
+	_ = execsInitCmd.MarkFlagFilename(flags.FileFlag.Name)
+	_ = execsInitCmd.MarkFlagFilename(flags.SubPathFlag.Name)
+	initCmd.AddCommand(execsInitCmd)
 
 	initCmd.AddCommand(vaultInitCmd)
 

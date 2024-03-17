@@ -95,6 +95,37 @@ var configInteractiveSetCmd = &cobra.Command{
 	},
 }
 
+var configTemplateSetCmd = &cobra.Command{
+	Use:   "template NAME DEFINITION_TEMPLATE_PATH",
+	Short: "Set a template definition for use in flow.",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
+		name := args[0]
+		definitionPath := args[1]
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
+		loadedTemplates, err := file.LoadExecutableDefinitionTemplate(definitionPath)
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		if err := loadedTemplates.Validate(); err != nil {
+			logger.FatalErr(err)
+		}
+		userConfig := curCtx.UserConfig
+		if userConfig.Templates == nil {
+			userConfig.Templates = map[string]string{}
+		}
+		userConfig.Templates[name] = definitionPath
+		if err := file.WriteUserConfig(userConfig); err != nil {
+			logger.FatalErr(err)
+		}
+		logger.PlainTextSuccess(fmt.Sprintf("Template %s set to %s", name, definitionPath))
+	},
+}
+
 var vaultSecretSetCmd = &cobra.Command{
 	Use:     "secret <name> <value>",
 	Aliases: []string{"scrt"},
@@ -123,6 +154,7 @@ func init() {
 	setCmd.AddCommand(configWorkspaceSetCmd)
 	setCmd.AddCommand(configNamespaceSetCmd)
 	setCmd.AddCommand(configInteractiveSetCmd)
+	setCmd.AddCommand(configTemplateSetCmd)
 	setCmd.AddCommand(vaultSecretSetCmd)
 
 	rootCmd.AddCommand(setCmd)

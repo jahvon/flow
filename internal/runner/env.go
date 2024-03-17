@@ -6,13 +6,13 @@ import (
 	"os"
 
 	"github.com/jahvon/tuikit/io"
-	"github.com/samber/lo"
 
 	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/vault"
 )
 
-func SetEnv(logger *io.Logger, exec *config.ParameterizedExecutable, promptedEnv map[string]string) error {
+func SetEnv(logger *io.Logger, exec *config.ExecutableEnvironment, promptedEnv map[string]string) error {
 	var errs []error
 	for _, param := range exec.Parameters {
 		val, err := ResolveParameterValue(logger, param, promptedEnv)
@@ -58,48 +58,78 @@ func ResolveParameterValue(logger *io.Logger, param config.Parameter, promptedEn
 	}
 }
 
-func ParametersToEnvList(
+func BuildEnvList(
 	logger *io.Logger,
-	exec *config.ParameterizedExecutable,
-	promptedEnv map[string]string,
+	exec *config.ExecutableEnvironment,
+	inputEnv map[string]string,
+	defaultEnv map[string]string,
 ) ([]string, error) {
-	params := exec.Parameters
+	envList := make([]string, 0)
 	var errs []error
-	env := lo.Map(params, func(param config.Parameter, _ int) string {
-		key := param.EnvKey
-		value, err := ResolveParameterValue(logger, param, promptedEnv)
+
+	for k, v := range defaultEnv {
+		if _, ok := inputEnv[k]; !ok {
+			envList = append(envList, fmt.Sprintf("%s=%s", k, v))
+		}
+	}
+	for _, param := range exec.Parameters {
+		val, err := ResolveParameterValue(logger, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
-			return ""
+			continue
 		}
-		return fmt.Sprintf("%s=%s", key, value)
-	})
+		envList = append(envList, fmt.Sprintf("%s=%s", param.EnvKey, val))
+	}
+	for _, arg := range exec.Args {
+		envList = append(envList, fmt.Sprintf("%s=%s", arg.EnvKey, arg.Value()))
+	}
 
 	if len(errs) > 0 {
 		return nil, fmt.Errorf("failed to get values for parameters: %v", errs)
 	}
-	return env, nil
+	return envList, nil
 }
 
-func ParametersToEnvMap(
+func BuildEnvMap(
 	logger *io.Logger,
-	exec *config.ParameterizedExecutable,
-	promptedEnv map[string]string,
+	exec *config.ExecutableEnvironment,
+	inputEnv map[string]string,
+	defaultEnv map[string]string,
 ) (map[string]string, error) {
-	params := exec.Parameters
+	envMap := make(map[string]string)
 	var errs []error
-	env := lo.SliceToMap(params, func(param config.Parameter) (string, string) {
-		val, err := ResolveParameterValue(logger, param, promptedEnv)
+
+	for k, v := range defaultEnv {
+		if _, ok := envMap[k]; !ok {
+			envMap[k] = v
+		}
+	}
+	for _, param := range exec.Parameters {
+		val, err := ResolveParameterValue(logger, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
-			return param.EnvKey, ""
+			continue
 		}
-
-		return param.EnvKey, val
-	})
+		envMap[param.EnvKey] = val
+	}
+	for _, arg := range exec.Args {
+		envMap[arg.EnvKey] = arg.Value()
+	}
 
 	if len(errs) > 0 {
 		return nil, fmt.Errorf("failed to get values for parameters: %v", errs)
 	}
-	return env, nil
+	return envMap, nil
+}
+
+func DefaultEnv(ctx *context.Context, executable *config.Executable) map[string]string {
+	envMap := make(map[string]string)
+	envMap["FLOW_RUNNER"] = "true"
+	envMap["FLOW_CURRENT_WORKSPACE"] = ctx.UserConfig.CurrentWorkspace
+	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.UserConfig.CurrentNamespace
+	envMap["FLOW_EXECUTABLE_NAME"] = executable.Name
+	envMap["FLOW_DEFINITION_PATH"] = executable.DefinitionPath()
+	envMap["FLOW_WORKSPACE_PATH"] = executable.WorkspacePath()
+	envMap["DISABLE_FLOW_INTERACTIVE"] = "true"
+	return envMap
 }

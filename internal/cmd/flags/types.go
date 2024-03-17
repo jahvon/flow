@@ -1,4 +1,4 @@
-//nolint:cyclop
+//nolint:cyclop,lll
 package flags
 
 import (
@@ -99,4 +99,28 @@ var LastLogEntryFlag = &Metadata{
 	Usage:    "Print the last execution's logs",
 	Default:  false,
 	Required: false,
+}
+
+var SubPathFlag = &Metadata{
+	Name:      "subPath",
+	Shorthand: "p",
+	Usage:     "Sub-path within the workspace to create the executable definition and its artifacts.",
+	Default:   "",
+	Required:  false,
+}
+
+var TemplateFlag = &Metadata{
+	Name:      "template",
+	Shorthand: "t",
+	Usage:     "Template to use as the template for the executables. Templates are registered in the flow configuration file.",
+	Default:   "",
+	Required:  false,
+}
+
+var FileFlag = &Metadata{
+	Name:      "file",
+	Shorthand: "f",
+	Usage:     "File to use as the template for the executables. It must be a valid executable definition template.",
+	Default:   "",
+	Required:  false,
 }
