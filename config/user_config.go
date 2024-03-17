@@ -84,7 +84,7 @@ func (c *UserConfig) Markdown() string {
 	for name, path := range c.Workspaces {
 		mkdwn += fmt.Sprintf("- %s: %s\n", name, path)
 	}
-	
+
 	if len(c.Templates) > 0 {
 		mkdwn += "## Registered Templates\n"
 		for name, path := range c.Templates {
