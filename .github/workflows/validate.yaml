@@ -32,7 +32,7 @@ jobs:
 
       - name: Verify clean state
         run: |
-          if [[ `git status . --porcelain` ]]; then
+          if [[ `git status . --porcelain -- ':!internal/cmd/version'` ]]; then
             echo "Uncommitted changes found"
             git status
             exit 1

@@ -42,7 +42,6 @@ jobs:
           commit_message: "release: update version files"
           branch: main
           commit_author: "Release Bot"
-          commit_user_email: "bot@jahvon.dev"
 
       - uses: wangyoucao577/go-release-action@v1
         with:
