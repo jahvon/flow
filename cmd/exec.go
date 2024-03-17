@@ -67,7 +67,7 @@ var execCmd = &cobra.Command{
 			logger.FatalErr(err)
 		}
 
-		if !executable.IsExecutableFromWorkspace(curCtx.UserConfig.CurrentWorkspace) {
+		if !executable.IsExecutableFromWorkspace(curCtx.CurrentWorkspace.AssignedName()) {
 			logger.FatalErr(fmt.Errorf(
 				"executable '%s' cannot be executed from workspace %s",
 				ref,

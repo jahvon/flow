@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/io"
@@ -37,10 +38,7 @@ func NewContext(ctx context.Context) *Context {
 		panic(errors.Wrap(err, "user config load error"))
 	}
 
-	wsConfig, err := file.LoadWorkspaceConfig(
-		userConfig.CurrentWorkspace,
-		userConfig.Workspaces[userConfig.CurrentWorkspace],
-	)
+	wsConfig, err := currentWorkspace(userConfig)
 	if err != nil {
 		panic(errors.Wrap(err, "workspace config load error"))
 	} else if wsConfig == nil {
@@ -107,4 +105,44 @@ func ExpandRef(ctx *Context, ref config.Ref) config.Ref {
 		ns = ctx.UserConfig.CurrentNamespace
 	}
 	return config.NewRef(config.NewExecutableID(ws, ns, name), ref.GetVerb())
+}
+
+func currentWorkspace(userConfig *config.UserConfig) (*config.WorkspaceConfig, error) {
+	var ws, wsPath string
+	mode := userConfig.WorkspaceMode
+	if mode == "" {
+		mode = config.WorkspaceModeDynamic
+	}
+
+	switch mode {
+	case config.WorkspaceModeDynamic:
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+
+		for wsName, path := range userConfig.Workspaces {
+			rel, err := filepath.Rel(filepath.Clean(path), filepath.Clean(wd))
+			if err != nil {
+				return nil, err
+			}
+			if !strings.HasPrefix(rel, "..") {
+				ws = wsName
+				wsPath = path
+				break
+			}
+		}
+		fallthrough
+	case config.WorkspaceModeFixed:
+		if ws != "" && wsPath != "" {
+			break
+		}
+		ws = userConfig.CurrentWorkspace
+		wsPath = userConfig.Workspaces[ws]
+	}
+	if ws == "" || wsPath == "" {
+		return nil, fmt.Errorf("current workspace not found")
+	}
+
+	return file.LoadWorkspaceConfig(ws, wsPath)
 }

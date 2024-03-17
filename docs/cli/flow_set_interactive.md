@@ -3,7 +3,7 @@
 Enable or disable the interactive terminal UI experience.
 
 ```
-flow set interactive <true|false> [flags]
+flow set interactive (true|false) [flags]
 ```
 
 ### Options

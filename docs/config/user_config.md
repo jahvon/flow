@@ -21,8 +21,10 @@ This config is stored in the user's flow cache directory (e.g. `$HOME/Library/Ap
 | ---- | ---- | ----------- |
 | workspaces | Map (string -> string) | Map of workspace names to their paths. |
 | currentWorkspace | String | The name of the current workspace. This should match a key in the `workspaces` map. |
+| workspaceMode | [WorkspaceMode](#WorkspaceMode) |  |
 | currentNamespace | String | The name of the current namespace. This is not required to be set. |
 | interactive | [InteractiveConfig](#InteractiveConfig) |  |
+| templates | Map (string -> string) | A map of executable definition template names to their paths. |
 
 
 -------
@@ -40,6 +42,13 @@ Configurations for the interactive UI.
 | notify | Boolean | Whether to send a desktop notification when a command completes. |
 | sound | Boolean | Whether to play a sound when a command completes. |
 
+
+-------
+## WorkspaceMode
+
+**Type**: WorkspaceMode
+
+The mode of the workspace. This can be either `fixed` or `dynamic`.<br>In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.<br>In `dynamic` mode, the current workspace used at runtime is determined by the current directory.<br>If the current directory is within a workspace, that workspace is used.
 
 
 

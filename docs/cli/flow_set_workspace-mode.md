@@ -1,15 +1,15 @@
-## flow set secret
+## flow set workspace-mode
 
-Update or create a secret in the flow secret vault.
+Switch between fixed and dynamic workspace modes.
 
 ```
-flow set secret NAME VALUE [flags]
+flow set workspace-mode (fixed|dynamic) [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for secret
+  -h, --help   help for workspace-mode
 ```
 
 ### Options inherited from parent commands

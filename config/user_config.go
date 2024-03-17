@@ -7,6 +7,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type WorkspaceMode string
+
+const (
+	WorkspaceModeFixed   WorkspaceMode = "fixed"
+	WorkspaceModeDynamic WorkspaceMode = "dynamic"
+)
+
 type InteractiveConfig struct {
 	Enabled bool `json:"enabled" yaml:"enabled"`
 	// +docsgen:notify
@@ -24,6 +31,12 @@ type UserConfig struct {
 	// +docsgen:currentWorkspace
 	// The name of the current workspace. This should match a key in the `workspaces` map.
 	CurrentWorkspace string `json:"currentWorkspace" yaml:"currentWorkspace"`
+	// +docsgen:workspaceMode
+	// The mode of the workspace. This can be either `fixed` or `dynamic`.
+	// In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.
+	// In `dynamic` mode, the current workspace used at runtime is determined by the current directory.
+	// If the current directory is within a workspace, that workspace is used.
+	WorkspaceMode WorkspaceMode `json:"workspaceMode" yaml:"workspaceMode"`
 	// +docsgen:currentNamespace
 	// The name of the current namespace. This is not required to be set.
 	CurrentNamespace string `json:"currentNamespace" yaml:"currentNamespace"`
@@ -45,6 +58,9 @@ func (c *UserConfig) Validate() error {
 	}
 	if _, wsFound := c.Workspaces[c.CurrentWorkspace]; !wsFound {
 		return fmt.Errorf("current workspace %s does not exist", c.CurrentWorkspace)
+	}
+	if c.WorkspaceMode != "" && c.WorkspaceMode != WorkspaceModeFixed && c.WorkspaceMode != WorkspaceModeDynamic {
+		return fmt.Errorf("invalid workspace mode %s", c.WorkspaceMode)
 	}
 
 	return nil
@@ -69,6 +85,14 @@ func (c *UserConfig) JSON() (string, error) {
 func (c *UserConfig) Markdown() string {
 	mkdwn := "# Global Configurations\n"
 	mkdwn += fmt.Sprintf("## Current workspace\n%s\n", c.CurrentWorkspace)
+	if c.WorkspaceMode == WorkspaceModeFixed {
+		mkdwn += "**Workspace mode is set to fixed. This means that your working directory will have no impact on the " +
+			"current workspace.**\n"
+	} else if c.WorkspaceMode == WorkspaceModeDynamic {
+		mkdwn += "**Workspace mode is set to dynamic. This means that your current workspace is also determined by " +
+			"your working directory.**\n"
+	}
+
 	if c.CurrentNamespace != "" {
 		mkdwn += fmt.Sprintf("## Current namespace\n%s\n", c.CurrentNamespace)
 	}

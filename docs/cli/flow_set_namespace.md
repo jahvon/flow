@@ -3,7 +3,7 @@
 Change the current namespace.
 
 ```
-flow set namespace <name> [flags]
+flow set namespace NAME [flags]
 ```
 
 ### Options

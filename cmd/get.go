@@ -51,20 +51,15 @@ var workspaceGetCmd = &cobra.Command{
 	PostRun: waitForExit,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
-		userConfig := curCtx.UserConfig
-
-		var workspaceName string
+		var workspaceName, wsPath string
 		if len(args) == 1 {
 			workspaceName = args[0]
+			wsPath = curCtx.UserConfig.Workspaces[workspaceName]
 		} else {
-			workspaceName = userConfig.CurrentWorkspace
+			workspaceName = curCtx.CurrentWorkspace.AssignedName()
+			wsPath = curCtx.CurrentWorkspace.Location()
 		}
 
-		if _, found := userConfig.Workspaces[workspaceName]; !found {
-			logger.Fatalf("workspace '%s' not found", workspaceName)
-		}
-
-		wsPath := userConfig.Workspaces[workspaceName]
 		wsCfg, err := file.LoadWorkspaceConfig(workspaceName, wsPath)
 		if err != nil {
 			logger.FatalErr(errors.Wrap(err, "failure loading workspace config"))

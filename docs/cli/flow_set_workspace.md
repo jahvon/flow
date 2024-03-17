@@ -3,7 +3,7 @@
 Change the current workspace.
 
 ```
-flow set workspace <name> [flags]
+flow set workspace NAME [flags]
 ```
 
 ### Options
