@@ -21,12 +21,23 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.21.1"
+          go-version: "^1.22.1"
 
       - name: Init project
         run: |
           go mod tidy
+          go fmt ./...
           go generate ./...
+
+      - name: Verify clean state
+        run: |
+          if [[ `git status . --porcelain -- ':!internal/cmd/version'` ]]; then
+            echo "Uncommitted changes found"
+            git status
+            exit 1
+          else
+            echo "No uncommitted changes"
+          fi
 
       #   ____                       _ _
       #  / ___|  ___  ___ _   _ _ __(_) |_ _   _

@@ -1,15 +1,16 @@
-## flow set workspace
+## flow logs
 
-Change the current workspace.
+List and view logs for previous flow executions.
 
 ```
-flow set workspace <name> [flags]
+flow logs [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for workspace
+  -h, --help   help for logs
+      --last   Print the last execution's logs
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +23,5 @@ flow set workspace <name> [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
 

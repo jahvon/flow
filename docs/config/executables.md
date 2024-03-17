@@ -214,7 +214,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | ---- | ---- | ----------- |
 | dir | String | The directory to execute the command in.<br>If unset, the directory of the executable definition will be used.<br>If set to `f:tmp`, a temporary directory will be created for the process.<br>If prefixed with `./`, the path will be relative to the current working directory.<br>If prefixed with `//`, the path will be relative to the workspace root.<br>Environment variables in the path will be expended at runtime. |
 | filename | String |  |
-| saveAs | [SaveAs](#SaveAs) |  |
+| saveAs | String |  |
 
 
 
