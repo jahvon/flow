@@ -43,18 +43,25 @@ jobs:
         with:
           go-version: "^1.22.1"
 
-      # This linux dependency is required for the clipboard package
-      - name: Install X11 Dev dependency
-        if: matrix.goos == 'linux'
-        run: |
-          sudo apt-get update
-          sudo apt install libx11-dev
-
       - name: Generate Version Files
         run: |
             go generate ./internal/cmd/version
 
-      - uses: wangyoucao577/go-release-action@v1
+      - name: Release for Linux
+        uses: wangyoucao577/go-release-action@v1
+        if: matrix.goos == 'linux'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: "1.22.1"
+          extra_files: LICENSE README.md
+          # This linux dependency is required for the clipboard package
+          pre_command: "apt-get update && apt-get -y install libx11-dev"
+
+      - name: Release for MacOS
+        uses: wangyoucao577/go-release-action@v1
+        if: matrix.goos == 'darwin'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
