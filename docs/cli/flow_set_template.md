@@ -1,15 +1,15 @@
-## flow set secret
+## flow set template
 
-Update or create a secret in the flow secret vault.
+Set a template definition for use in flow.
 
 ```
-flow set secret NAME VALUE [flags]
+flow set template NAME DEFINITION_TEMPLATE_PATH [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for secret
+  -h, --help   help for template
 ```
 
 ### Options inherited from parent commands

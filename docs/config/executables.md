@@ -144,6 +144,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | ---- | ---- | ----------- |
 | dir | String | The directory to execute the command in.<br>If unset, the directory of the executable definition will be used.<br>If set to `f:tmp`, a temporary directory will be created for the process.<br>If prefixed with `./`, the path will be relative to the current working directory.<br>If prefixed with `//`, the path will be relative to the workspace root.<br>Environment variables in the path will be expended at runtime. |
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
 | cmd | String |  |
 | file | String |  |
 | logMode | [LogMode](#LogMode) |  |
@@ -171,6 +172,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | Key | Type | Description |
 | ---- | ---- | ----------- |
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
 | app | String |  |
 | uri | String |  |
 | wait | Boolean |  |
@@ -191,6 +193,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | Key | Type | Description |
 | ---- | ---- | ----------- |
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
 | method | String |  |
 | url | String |  |
 | body | String |  |
@@ -233,6 +236,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | ---- | ---- | ----------- |
 | dir | String | The directory to execute the command in.<br>If unset, the directory of the executable definition will be used.<br>If set to `f:tmp`, a temporary directory will be created for the process.<br>If prefixed with `./`, the path will be relative to the current working directory.<br>If prefixed with `//`, the path will be relative to the workspace root.<br>Environment variables in the path will be expended at runtime. |
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
 | templateFile | String |  |
 | templateDataFile | String |  |
 
@@ -252,6 +256,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | Key | Type | Description |
 | ---- | ---- | ----------- |
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
 | refs | Array ([Ref](#Ref)) | List of executables references |
 | failFast | Boolean |  |
 
@@ -271,6 +276,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | Key | Type | Description |
 | ---- | ---- | ----------- |
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
 | refs | Array ([Ref](#Ref)) | List of executables references |
 | maxThreads | Integer |  |
 | failFast | Boolean |  |
