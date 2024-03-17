@@ -31,8 +31,9 @@ var osArch = fmt.Sprintf("%s %s", runtime.GOOS, runtime.GOARCH)
 
 // generateOutput return the output of the version command.
 func generateOutput() string {
-	return fmt.Sprintf(`flow - %s
+	return fmt.Sprintf(`
 
+Version: %s
 Git Commit: %s
 Build date: %s
 Go version: %s
@@ -42,9 +43,4 @@ OS / Arch : %s
 
 func String() string {
 	return generateOutput()
-}
-
-// Print the current version.
-func Print() {
-	fmt.Println(generateOutput())
 }

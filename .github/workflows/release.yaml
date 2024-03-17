@@ -23,16 +23,31 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.21.1"
+          go-version: "^1.22.1"
+
+      # This linux dependency is required for the clipboard package
+      - name: Install X11 Dev dependency
+        if: matrix.goos == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt install libx11-dev
 
       - name: Generate Version Files
         run: |
             go generate ./internal/cmd/version
+
+      - name: Commit Version Files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "release: update version files"
+          branch: main
+          commit_author: "Release Bot"
+          commit_user_email: "bot@jahvon.dev"
 
       - uses: wangyoucao577/go-release-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "1.21.1"
+          goversion: "1.22.1"
           extra_files: LICENSE README.md

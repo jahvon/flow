@@ -1,6 +1,6 @@
 BIN_NAME=flow
 BIN_PATH=${GOPATH}/bin
-GO_VERSION=1.21.1
+GO_VERSION=1.22.1
 
 default: help
 

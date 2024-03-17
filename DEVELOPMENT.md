@@ -11,3 +11,11 @@ The following `make` commands are available:
 | **Test**                       | `make go/test`    |
 | **Pre-commit**                 | `make pre-commit` |
 
+# Installing via Source
+
+```bash
+$ git clone github.com/jahvon/flow
+$ cd flow
+$ go generate ./...
+$ go install
+```

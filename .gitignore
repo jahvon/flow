@@ -22,11 +22,7 @@ coverage.txt
 .idea
 
 # build files
-internal/cmd/version/commit.txt
-internal/cmd/version/version.txt
-internal/cmd/version/build_date.txt
 flow
-!docs/pilotcli
 flow*.tar.gz
 dist
 completions/

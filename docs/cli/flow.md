@@ -14,7 +14,7 @@ See github.com/jahvon/flow for more information.
   -h, --help              help for flow
   -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
       --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (from 0 to 4 where 4 is most verbose)
+      --verbosity int     Log verbosity level (-1 to 1)
 ```
 
 ### SEE ALSO
@@ -23,8 +23,8 @@ See github.com/jahvon/flow for more information.
 * [flow get](flow_get.md)	 - Print a flow entity.
 * [flow init](flow_init.md)	 - Initialize or restore the flow application state.
 * [flow list](flow_list.md)	 - Print a list of flow entities.
+* [flow logs](flow_logs.md)	 - List and view logs for previous flow executions.
 * [flow remove](flow_remove.md)	 - Remove a flow object.
 * [flow set](flow_set.md)	 - Update global or workspace configuration values.
 * [flow sync](flow_sync.md)	 - Scan workspaces and update flow cache.
-* [flow version](flow_version.md)	 - Print the current flow version.
 

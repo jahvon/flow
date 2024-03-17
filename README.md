@@ -15,36 +15,20 @@ That's just the start; all aspects of flow are meant to be easily configurable, 
 
 ### Installation
 
-You can install the pre-compiled binary or compile from source.
+You can install the pre-compiled binary or compile from source. To install the latest pre-compiled binary,
+run the following command:
 
-#### via Go Install
+```bash
+curl -sSL https://raw.githubusercontent.com/jahvon/flow/main/scripts/install.sh | bash
+```
+
+Alternatively, you can install the binary via Go using the following command:
 
 ```bash
 go install github.com/jahvon/flow@latest
 ```
 
-#### via GitHub Releases
-
-Download the pre-compiled binaries from the [release page](https://github.com/jahvon/flow/releases) page and copy them to the desired location.
-
-```bash
-$ VERSION=v1.0.0
-$ OS=Linux
-$ ARCH=x86_64
-$ TAR_FILE=flow_${OS}_${ARCH}.tar.gz
-$ wget https://github.com/jahvon/flow/releases/download/${VERSION}/${TAR_FILE}
-$ sudo tar xvf ${TAR_FILE} flow -C /usr/local/bin
-$ rm -f ${TAR_FILE}
-```
-
-#### via Source
-
-```bash
-$ git clone github.com/jahvon/flow
-$ cd flow
-$ go generate ./...
-$ go install
-```
+See the [Development](DEVELOPMENT.md) guide for more information on how to build from source.
 
 ### Setting up a Workspace
 

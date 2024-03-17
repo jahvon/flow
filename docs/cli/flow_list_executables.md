@@ -11,7 +11,7 @@ flow list executables [flags]
 ```
   -h, --help               help for executables
   -n, --namespace string   Filter executables by namespace.
-  -o, --output string      Output format. One of: yaml, json, jsonp.
+  -o, --output string      Output format. One of: yaml, json, doc, or list.
   -t, --tag stringArray    Filter by tags.
   -v, --verb string        Filter executables by verb. One of: [delete destroy edit exec generate install launch open process remove render run setup show start teardown transform uninstall view]
   -w, --workspace string   Filter executables by workspace.
@@ -22,7 +22,7 @@ flow list executables [flags]
 ```
   -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
       --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (from 0 to 4 where 4 is most verbose)
+      --verbosity int     Log verbosity level (-1 to 1)
 ```
 
 ### SEE ALSO
