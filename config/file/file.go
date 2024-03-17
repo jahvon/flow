@@ -371,17 +371,11 @@ func findDefinitionFiles(logger *io.Logger, workspaceCfg *config.WorkspaceConfig
 
 	var definitionPaths []string
 	walkDirFunc := func(path string, entry fs.DirEntry, err error) error {
-<<<<<<< HEAD
-		if entry == nil {
-			return nil
-		} else if err != nil {
-=======
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				logger.Debugx("definition path does not exist", "path", path)
 				return nil
 			}
->>>>>>> origin/main
 			return err
 		}
 		if isPathIncluded(logger, path, workspaceCfg.Location(), includePaths) {
