@@ -41,7 +41,6 @@ jobs:
         with:
           commit_message: "release: update version files"
           branch: main
-          commit_author: "Release Bot"
 
       - uses: wangyoucao577/go-release-action@v1
         with:
