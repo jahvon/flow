@@ -26,14 +26,14 @@ func (r *execRunner) IsCompatible(executable *config.Executable) bool {
 	return true
 }
 
-func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
+func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, inputEnv map[string]string) error {
 	execSpec := executable.Type.Exec
-	promptedEnv = applyBaseEnv(ctx, executable, promptedEnv)
-	envMap, err := runner.ParametersToEnvMap(ctx.Logger, &execSpec.ParameterizedExecutable, promptedEnv)
+	defaultEnv := runner.DefaultEnv(ctx, executable)
+	envMap, err := runner.BuildEnvMap(ctx.Logger, &execSpec.ExecutableEnvironment, inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envList, err := runner.ParametersToEnvList(ctx.Logger, &execSpec.ParameterizedExecutable, promptedEnv)
+	envList, err := runner.BuildEnvList(ctx.Logger, &execSpec.ExecutableEnvironment, inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
@@ -70,18 +70,4 @@ func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, p
 	default:
 		return errors.New("unable to determine how executable should be run")
 	}
-}
-
-func applyBaseEnv(ctx *context.Context, executable *config.Executable, envMap map[string]string) map[string]string {
-	if envMap == nil {
-		envMap = make(map[string]string)
-	}
-	envMap["FLOW_RUNNER"] = "true"
-	envMap["FLOW_CURRENT_WORKSPACE"] = ctx.UserConfig.CurrentWorkspace
-	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.UserConfig.CurrentNamespace
-	envMap["FLOW_EXECUTABLE_NAME"] = executable.Name
-	envMap["FLOW_DEFINITION_PATH"] = executable.DefinitionPath()
-	envMap["FLOW_WORKSPACE_PATH"] = executable.WorkspacePath()
-	envMap["DISABLE_FLOW_INTERACTIVE"] = "true"
-	return envMap
 }

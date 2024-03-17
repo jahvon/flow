@@ -2,12 +2,14 @@ package file
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/jahvon/tuikit/io"
 	"github.com/pkg/errors"
@@ -114,6 +116,145 @@ func LoadWorkspaceConfig(workspaceName, workspacePath string) (*config.Workspace
 
 	wsCfg.SetContext(workspaceName, workspacePath)
 	return wsCfg, nil
+}
+
+func WriteExecutableDefinition(definitionFile string, definition *config.ExecutableDefinition) error {
+	file, err := os.OpenFile(filepath.Clean(definitionFile), os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		return errors.Wrap(err, "unable to open definition file")
+	}
+	defer file.Close()
+
+	if err := file.Truncate(0); err != nil {
+		return errors.Wrap(err, "unable to truncate definition file")
+	}
+
+	err = yaml.NewEncoder(file).Encode(definition)
+	if err != nil {
+		return errors.Wrap(err, "unable to encode definition file")
+	}
+
+	return nil
+}
+
+func RenderAndWriteExecutablesTemplate(
+	definitionTemplate *config.ExecutableDefinitionTemplate,
+	ws *config.WorkspaceConfig,
+	name, subPath string,
+) error {
+	if err := EnsureExecutableDir(ws.Location(), subPath); err != nil {
+		return errors.Wrap(err, "unable to ensure existence of executable directory")
+	}
+
+	executablesPath := filepath.Join(ws.Location(), subPath)
+	definitionYaml, err := yaml.Marshal(definitionTemplate.ExecutableDefinition)
+	if err != nil {
+		return errors.Wrap(err, "unable to marshal executable definition")
+	}
+	templateData := definitionTemplate.Data.MapInterface()
+	templateData["Workspace"] = ws.AssignedName()
+	templateData["WorkspaceLocation"] = ws.Location()
+	templateData["ExecutablePath"] = executablesPath
+	t, err := template.New("definition").Parse(string(definitionYaml))
+	if err != nil {
+		return errors.Wrap(err, "unable to parse definition template")
+	}
+
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, templateData); err != nil {
+		return errors.Wrap(err, "unable to execute definition template")
+	}
+
+	filename := strings.ToLower(name)
+	filename = strings.ReplaceAll(filename, " ", "_")
+	if !strings.HasSuffix(filename, ExecutableDefinitionExt) {
+		filename += ExecutableDefinitionExt
+	}
+	file, err := os.Create(filepath.Clean(filepath.Join(executablesPath, filename)))
+	if err != nil {
+		return errors.Wrap(err, "unable to create rendered definition file")
+	}
+	defer file.Close()
+
+	if _, err := file.Write(buf.Bytes()); err != nil {
+		return errors.Wrap(err, "unable to write rendered definition file")
+	}
+
+	if err := copyExecutableDefinitionTemplateAssets(definitionTemplate, executablesPath); err != nil {
+		return errors.Wrap(err, "unable to copy template assets")
+	}
+
+	return nil
+}
+
+func LoadExecutableDefinitionTemplate(templateFile string) (*config.ExecutableDefinitionTemplate, error) {
+	file, err := os.Open(filepath.Clean(templateFile))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to open template file")
+	}
+	defer file.Close()
+
+	definitionTemplate := &config.ExecutableDefinitionTemplate{}
+	err = yaml.NewDecoder(file).Decode(definitionTemplate)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode template file")
+	}
+	return definitionTemplate, nil
+}
+
+func copyExecutableDefinitionTemplateAssets(
+	definitionTemplate *config.ExecutableDefinitionTemplate,
+	destinationPath string,
+) error {
+	sourcePath := filepath.Dir(definitionTemplate.Location())
+	sourceFiles, err := expandArtifactFiles(sourcePath, definitionTemplate.Artifacts)
+	if err != nil {
+		return errors.Wrap(err, "unable to expand artifact files")
+	}
+
+	for _, file := range sourceFiles {
+		relPath, err := filepath.Rel(sourcePath, file)
+		if err != nil {
+			return errors.Wrap(err, "unable to get relative path")
+		}
+		destPath := filepath.Join(destinationPath, relPath)
+		if err := os.MkdirAll(filepath.Dir(destPath), 0750); err != nil {
+			return errors.Wrap(err, "unable to create destination directory")
+		}
+		if err := copyFile(file, destPath); err != nil {
+			return errors.Wrap(err, "unable to copy file")
+		}
+	}
+	return nil
+}
+
+func expandArtifactFiles(rootPath string, artifacts []string) ([]string, error) {
+	var collectedFiles []string
+	for _, file := range artifacts {
+		fullPath := filepath.Join(rootPath, file)
+		//nolint:gocritic,nestif
+		if info, err := os.Stat(fullPath); os.IsNotExist(err) {
+			return nil, errors.Errorf("file does not exist: %s", fullPath)
+		} else if err != nil {
+			return nil, errors.Wrap(err, "unable to stat file")
+		} else if info.IsDir() {
+			err := filepath.WalkDir(fullPath, func(path string, entry fs.DirEntry, err error) error {
+				if err != nil {
+					return err
+				} else if entry.IsDir() {
+					return nil
+				}
+				collectedFiles = append(collectedFiles, path)
+				return nil
+			})
+			if err != nil {
+				return nil, errors.Wrap(err, "unable to walk directory")
+			}
+		} else {
+			collectedFiles = append(collectedFiles, fullPath)
+		}
+	}
+	return collectedFiles, nil
 }
 
 func LoadExecutableDefinition(definitionFile string) (*config.ExecutableDefinition, error) {
@@ -230,6 +371,13 @@ func findDefinitionFiles(logger *io.Logger, workspaceCfg *config.WorkspaceConfig
 
 	var definitionPaths []string
 	walkDirFunc := func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				logger.Debugx("definition path does not exist", "path", path)
+				return nil
+			}
+			return err
+		}
 		if isPathIncluded(logger, path, workspaceCfg.Location(), includePaths) {
 			if isPathExcluded(logger, path, workspaceCfg.Location(), excludedPaths) {
 				return filepath.SkipDir
@@ -308,4 +456,27 @@ func isPathExcluded(logger *io.Logger, path, basePath string, excludedPaths []st
 		return isMatch
 	}
 	return false
+}
+
+func copyFile(src, dst string) error {
+	in, err := os.Open(filepath.Clean(src))
+	if err != nil {
+		return errors.Wrap(err, "unable to open source file")
+	}
+	defer in.Close()
+
+	data := make([]byte, 0)
+	_, err = in.Read(data)
+	if err != nil {
+		return errors.Wrap(err, "unable to read source file")
+	}
+
+	if _, err = os.Stat(dst); err == nil {
+		return fmt.Errorf("file already exists: %s", dst)
+	}
+	if err = os.WriteFile(filepath.Clean(dst), data, 0600); err != nil {
+		return errors.Wrap(err, "unable to write file")
+	}
+
+	return nil
 }

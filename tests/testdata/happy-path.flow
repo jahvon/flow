@@ -80,3 +80,22 @@ executables:
         params:
           - secretRef: flowTestSecret
             envKey: TEST_SECRET
+  - verb: run
+    name: arg-echo
+    description: |
+      Echo the value of the provided arguments
+    type:
+      exec:
+        cmd: |
+          echo "Arg1: $TEST_ARG1, Arg2: $TEST_ARG2, Arg3: $TEST_ARG3"
+        args:
+          - envKey: TEST_ARG1
+            pos: 1
+            required: true
+          - envKey: TEST_ARG2
+            pos: 2
+            required: false
+            default: "green"
+          - envKey: TEST_ARG3
+            flag: arg3
+            default: "grape"

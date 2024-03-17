@@ -53,3 +53,17 @@ func InitWorkspaceConfig(name, path string) error {
 	}
 	return nil
 }
+
+func InitExecutables(
+	template *config.ExecutableDefinitionTemplate,
+	ws *config.WorkspaceConfig,
+	name, subPath string,
+) error {
+	if err := EnsureExecutableDir(ws.Location(), subPath); err != nil {
+		return errors.Wrap(err, "unable to ensure executable directory")
+	}
+	if err := RenderAndWriteExecutablesTemplate(template, ws, name, subPath); err != nil {
+		return errors.Wrap(err, "unable to write executable definition template")
+	}
+	return nil
+}

@@ -30,6 +30,9 @@ type UserConfig struct {
 	// +docsgen:interactive
 	// Configurations for the interactive UI.
 	Interactive *InteractiveConfig `json:"interactive" yaml:"interactive"`
+	// +docsgen:templates
+	// A map of executable definition template names to their paths.
+	Templates map[string]string `json:"templates,omitempty" yaml:"templates,omitempty"`
 }
 
 func (c *UserConfig) Validate() error {
@@ -81,5 +84,13 @@ func (c *UserConfig) Markdown() string {
 	for name, path := range c.Workspaces {
 		mkdwn += fmt.Sprintf("- %s: %s\n", name, path)
 	}
+
+	if len(c.Templates) > 0 {
+		mkdwn += "## Registered Templates\n"
+		for name, path := range c.Templates {
+			mkdwn += fmt.Sprintf("- %s: %s\n", name, path)
+		}
+	}
+
 	return mkdwn
 }
