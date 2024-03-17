@@ -96,6 +96,16 @@ func EnsureWorkspaceConfig(workspaceName, workspacePath string) error {
 	return nil
 }
 
+func EnsureExecutableDir(workspacePath, subPath string) error {
+	if _, err := os.Stat(filepath.Join(workspacePath, subPath)); os.IsNotExist(err) {
+		err = os.MkdirAll(filepath.Join(workspacePath, subPath), 0750)
+		if err != nil {
+			return errors.Wrap(err, "unable to create executable directory")
+		}
+	}
+	return nil
+}
+
 func EnsureLogsDir() error {
 	if _, err := os.Stat(LogsDirPath); os.IsNotExist(err) {
 		err = os.MkdirAll(LogsDirPath, 0750)

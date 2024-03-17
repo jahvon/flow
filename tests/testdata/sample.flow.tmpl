@@ -1,0 +1,18 @@
+data:
+  - key: Color
+    prompt: What is your favorite color?
+    default: blue
+artifacts:
+  - message.txt
+
+visibility: private
+namespace: tests
+tags:
+  - testdata
+executables:
+  - verb: run
+    name: "{{ .Color }}-msg"
+    description: Created from a template in {{ .Workspace }}
+    type:
+      exec:
+        cmd: cat message.txt

@@ -28,7 +28,7 @@ type ExecutableDirectory struct {
 	// If prefixed with `./`, the path will be relative to the current working directory.
 	// If prefixed with `//`, the path will be relative to the workspace root.
 	// Environment variables in the path will be expended at runtime.
-	Directory string `yaml:"dir"`
+	Directory string `yaml:"dir,omitempty"`
 }
 
 func (e *ExecutableDirectory) ExpandDirectory(
@@ -54,19 +54,19 @@ func (e *ExecutableDirectory) ExpandDirectory(
 type ExecutableEnvironment struct {
 	// +docsgen:params
 	// List of parameters to pass to the executable.
-	Parameters ParameterList `yaml:"params"`
+	Parameters ParameterList `yaml:"params,omitempty"`
 	// +docgen:args
 	// List of arguments to pass to the executable.
-	Args ArgumentList `yaml:"args"`
+	Args ArgumentList `yaml:"args,omitempty"`
 }
 
 type ExecExecutableType struct {
 	ExecutableDirectory   `yaml:",inline"`
 	ExecutableEnvironment `yaml:",inline"`
 
-	Command string  `yaml:"cmd"`
-	File    string  `yaml:"file"`
-	LogMode LogMode `yaml:"logMode"`
+	Command string  `yaml:"cmd,omitempty"`
+	File    string  `yaml:"file,omitempty"`
+	LogMode LogMode `yaml:"logMode,omitempty"`
 
 	logFields map[string]interface{}
 }
@@ -82,39 +82,39 @@ func (e *ExecExecutableType) GetLogFields() map[string]interface{} {
 type LaunchExecutableType struct {
 	ExecutableEnvironment `yaml:",inline"`
 
-	App  string `yaml:"app"`
-	URI  string `yaml:"uri"`
-	Wait bool   `yaml:"wait"`
+	App  string `yaml:"app,omitempty"`
+	URI  string `yaml:"uri,omitempty"`
+	Wait bool   `yaml:"wait,omitempty"`
 }
 
 type RequestResponseFile struct {
 	ExecutableDirectory `yaml:",inline"`
 
-	Filename string `yaml:"filename"`
-	SaveAs   string `yaml:"saveAs"`
+	Filename string `yaml:"filename,omitempty"`
+	SaveAs   string `yaml:"saveAs,omitempty"`
 }
 
 type RequestExecutableType struct {
 	ExecutableEnvironment `yaml:",inline"`
 
-	Method  string            `yaml:"method"`
-	URL     string            `yaml:"url"`
-	Body    string            `yaml:"body"`
-	Headers map[string]string `yaml:"headers"`
-	Timeout time.Duration     `yaml:"timeout"`
+	Method  string            `yaml:"method,omitempty"`
+	URL     string            `yaml:"url,omitempty"`
+	Body    string            `yaml:"body,omitempty"`
+	Headers map[string]string `yaml:"headers,omitempty"`
+	Timeout time.Duration     `yaml:"timeout,omitempty"`
 
-	ResponseFile      *RequestResponseFile `yaml:"responseFile"`
-	TransformResponse string               `yaml:"transformResponse"`
-	LogResponse       bool                 `yaml:"logResponse"`
-	ValidStatusCodes  []int                `yaml:"validStatusCodes"`
+	ResponseFile      *RequestResponseFile `yaml:"responseFile,omitempty"`
+	TransformResponse string               `yaml:"transformResponse,omitempty"`
+	LogResponse       bool                 `yaml:"logResponse,omitempty"`
+	ValidStatusCodes  []int                `yaml:"validStatusCodes,omitempty"`
 }
 
 type RenderExecutableType struct {
 	ExecutableDirectory   `yaml:",inline"`
 	ExecutableEnvironment `yaml:",inline"`
 
-	TemplateFile     string `yaml:"templateFile"`
-	TemplateDataFile string `yaml:"templateDataFile"`
+	TemplateFile     string `yaml:"templateFile,omitempty"`
+	TemplateDataFile string `yaml:"templateDataFile,omitempty"`
 }
 
 type SerialExecutableType struct {
@@ -122,16 +122,16 @@ type SerialExecutableType struct {
 
 	// +docsgen:refs
 	// List of executables references
-	ExecutableRefs []Ref `yaml:"refs"`
-	FailFast       bool  `yaml:"failFast"`
+	ExecutableRefs []Ref `yaml:"refs,omitempty"`
+	FailFast       bool  `yaml:"failFast,omitempty"`
 }
 
 type ParallelExecutableType struct {
 	ExecutableEnvironment `yaml:",inline"`
 
-	ExecutableRefs []Ref `yaml:"refs"`
-	MaxThreads     int   `yaml:"maxThreads"`
-	FailFast       bool  `yaml:"failFast"`
+	ExecutableRefs []Ref `yaml:"refs,omitempty"`
+	MaxThreads     int   `yaml:"maxThreads,omitempty"`
+	FailFast       bool  `yaml:"failFast,omitempty"`
 }
 
 type ExecutableTypeSpec struct {
@@ -156,16 +156,16 @@ type ExecutableTypeSpec struct {
 }
 
 type Executable struct {
-	Verb        Verb           `yaml:"verb"`
-	Name        string         `yaml:"name"`
-	Aliases     []string       `yaml:"aliases"`
-	Tags        Tags           `yaml:"tags"`
-	Description string         `yaml:"description"`
-	Visibility  VisibilityType `yaml:"visibility"`
-	Timeout     time.Duration  `yaml:"timeout"`
+	Verb        Verb           `yaml:"verb,omitempty"`
+	Name        string         `yaml:"name,omitempty"`
+	Aliases     []string       `yaml:"aliases,omitempty"`
+	Tags        Tags           `yaml:"tags,omitempty"`
+	Description string         `yaml:"description,omitempty"`
+	Visibility  VisibilityType `yaml:"visibility,omitempty"`
+	Timeout     time.Duration  `yaml:"timeout,omitempty"`
 	// +docsgen:type
 	// The type of executable. Only one type can be set.
-	Type *ExecutableTypeSpec `yaml:"type"`
+	Type *ExecutableTypeSpec `yaml:"type,omitempty"`
 
 	workspace, namespace, workspacePath, definitionPath string
 }
