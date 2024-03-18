@@ -77,7 +77,7 @@ type TemplateDataEntry struct {
 	// The key to associate the data with. This is used as the key in the template data map.
 	Key string `yaml:"key"`
 	// +docsgen:prompt
-	// The prompt to display when asking for the value of the template data.
+	// A prompt to be displayed to the user when collecting an input value.
 	Prompt string `yaml:"prompt"`
 	// +docsgen:default
 	// The default value to use if the template data is not set.

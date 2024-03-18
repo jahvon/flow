@@ -103,9 +103,9 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 | Key | Type | Description |
 | ---- | ---- | ----------- |
 | text | String | A static value to be passed to the executable. |
-| prompt | String | The prompt to display when asking for the value of the template data. |
+| prompt | String | A prompt to be displayed to the user when collecting an input value. |
 | secretRef | String | A reference to a secret to be passed to the executable. |
-| envKey | String | The name of the environment variable that will be set with the value of the argument. |
+| envKey | String | The name of the environment variable that will be assigned the value. |
 
 
 
