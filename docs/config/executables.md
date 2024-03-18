@@ -89,7 +89,7 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 
 **Type**: Object
 
-The type of executable. Only one type can be set.
+
 
 ### Fields
 
@@ -132,9 +132,9 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 | Key | Type | Description |
 | ---- | ---- | ----------- |
 | envKey | String | The name of the environment variable that will be assigned the value. |
-| type | String | The type of the argument. This is used to determine how to parse the value of the argument.<br>String is the default type. |
-| default | String | The default value of the argument. If the argument is not set, this value will be used. |
-| required | Boolean | If true, the template data must be set. If false, the default value will be used if the template data is not set. |
+| type | String |  |
+| default | String | The default value to use if the template data is not set. |
+| required | Boolean | If true, the argument must be set. If false, the default value will be used if the argument is not set. |
 | flag | String | The flag to use when setting the argument from the command line.<br>Either `flag` or `pos` must be set, but not both. |
 | pos | Integer | The position of the argument in the command line arguments. Values start at 1.<br>Either `flag` or `pos` must be set, but not both. |
 
