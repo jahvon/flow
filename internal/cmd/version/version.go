@@ -7,6 +7,7 @@ import (
 	_ "embed"
 	"fmt"
 	"runtime"
+	"strings"
 )
 
 var (
@@ -38,7 +39,7 @@ Git Commit: %s
 Build date: %s
 Go version: %s
 OS / Arch : %s
-`, version, gitCommit, buildDate, goVersion, osArch)
+`, strings.TrimSpace(version), strings.TrimSpace(gitCommit), strings.TrimSpace(buildDate), goVersion, osArch)
 }
 
 func String() string {

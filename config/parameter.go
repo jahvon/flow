@@ -16,15 +16,14 @@ type Parameter struct {
 	// +docsgen:text
 	// A static value to be passed to the executable.
 	Text string `yaml:"text"`
+	// +docsgen:prompt
+	// A prompt to be displayed to the user when collecting an input value.
+	Prompt string `yaml:"prompt"`
 	// +docsgen:secretRef
 	// A reference to a secret to be passed to the executable.
-	Prompt string `yaml:"prompt"`
-	// +docsgen:prompt
-	// A prompt to be displayed to the user to collect a value to be passed to the executable.
 	SecretRef string `yaml:"secretRef"`
-
 	// +docsgen:envKey
-	// The name of the environment variable that will be set with the value of the parameter.
+	// The name of the environment variable that will be assigned the value.
 	EnvKey string `yaml:"envKey"`
 }
 

@@ -163,7 +163,7 @@ type Executable struct {
 	Description string         `yaml:"description,omitempty"`
 	Visibility  VisibilityType `yaml:"visibility,omitempty"`
 	Timeout     time.Duration  `yaml:"timeout,omitempty"`
-	// +docsgen:type
+	// +docsgen:typeExec
 	// The type of executable. Only one type can be set.
 	Type *ExecutableTypeSpec `yaml:"type,omitempty"`
 
