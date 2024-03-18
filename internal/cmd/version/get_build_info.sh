@@ -14,5 +14,5 @@ if [ $current_branch = 'main' ]; then
 else
   # If the current branch is not main, fetch the latest values from the main branch and write those to the files
   echo "non-main branch detected, fetching build info from main branch..."
-  git checkout main -- ./commit.txt ./version.txt ./build_date.txt
+  git checkout origin/main -- ./commit.txt ./version.txt ./build_date.txt
 fi
