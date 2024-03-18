@@ -8,9 +8,9 @@ import (
 
 type Argument struct {
 	// +docsgen:envKey
-	// The name of the environment variable that will be set with the value of the argument.
+	// The name of the environment variable that will be assigned the value.
 	EnvKey string `yaml:"envKey"`
-	// +docsgen:type
+	// +docsgen:typeArg
 	// The type of the argument. This is used to determine how to parse the value of the argument.
 	// String is the default type.
 	Type string `yaml:"type"`

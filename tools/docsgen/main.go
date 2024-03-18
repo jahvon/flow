@@ -114,7 +114,9 @@ var (
 				"These files can be located anywhere in the workspace directory.",
 			Types: []any{
 				&config.ExecutableDefinition{},
+				&config.ExecutableDefinitionTemplate{},
 				&config.Executable{},
+				&config.Argument{},
 				&config.Parameter{},
 				new(config.Ref),
 				new(config.Verb),
