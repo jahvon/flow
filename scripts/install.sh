@@ -48,8 +48,8 @@ INSTALL_DIR="/usr/local/bin"
 echo "Installing $CLI_BINARY $VERSION to $INSTALL_DIR..."
 tar -xzf "$TMP_DIR/$CLI_BINARY-$VERSION-$OS-$ARCH.tar.gz" -C "$TMP_DIR"
 
-mv "$TMP_DIR/$CLI_BINARY" "$INSTALL_DIR/$CLI_BINARY"
-chmod +x "$INSTALL_DIR/$CLI_BINARY"
+chmod +x "$TMP_DIR/$CLI_BINARY"
+sudo mv "$TMP_DIR/$CLI_BINARY" "$INSTALL_DIR/$CLI_BINARY"
 
 echo "$CLI_BINARY was installed successfully to $INSTALL_DIR/$CLI_BINARY"
 if command -v $CLI_BINARY --version >/dev/null; then
