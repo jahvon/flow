@@ -10,7 +10,7 @@ require (
 	github.com/jahvon/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/jahvon/tuikit v0.0.5
 	github.com/onsi/ginkgo/v2 v2.16.0
-	github.com/onsi/gomega v1.31.1
+	github.com/onsi/gomega v1.32.0
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cobra v1.8.0
