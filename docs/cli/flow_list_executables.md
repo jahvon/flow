@@ -13,7 +13,7 @@ flow list executables [flags]
   -n, --namespace string   Filter executables by namespace.
   -o, --output string      Output format. One of: yaml, json, doc, or list.
   -t, --tag stringArray    Filter by tags.
-  -v, --verb string        Filter executables by verb. One of: [add delete destroy edit exec generate install launch new open process remove render run setup show start teardown transform uninstall view]
+  -v, --verb string        Filter executables by verb. One of: [add apply build configure delete deploy destroy edit exec generate install launch manage monitor new open refresh release reload remove render run setup show start transform undeploy uninstall update upgrade view]
   -w, --workspace string   Filter executables by workspace.
 ```
 
