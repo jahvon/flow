@@ -46,6 +46,10 @@ type UserConfig struct {
 	// +docsgen:templates
 	// A map of executable definition template names to their paths.
 	Templates map[string]string `json:"templates,omitempty" yaml:"templates,omitempty"`
+	// +docsgen:usePlainTextLogger
+	// Whether to use the plain text logger. If set to false, the log output will include
+	// log level and timestamp.
+	UsePlainTextLogger bool `json:"usePlainTextLogger" yaml:"usePlainTextLogger"`
 }
 
 func (c *UserConfig) Validate() error {
