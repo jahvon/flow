@@ -108,7 +108,7 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 
 **Type**: Verb
 
-Keywords that describe the action an executable performs.<br>While executables are configured with a single verb, the verb can be aliased to related verbs.<br>For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.<br>This allows users to use the verb that best describes the action they are performing.<br><br>**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`<br>**Deactivation verbs**: `delete`, `remove`, `uninstall`, `teardown`, `destroy`<br>**Launch verbs**: `open`, `launch`, `edit`, `show`, `view`, `render`, `process`, `transform`, `generate`
+Keywords that describe the action an executable performs.<br>While executables are configured with a single verb, the verb can be aliased to related verbs.<br>For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.<br>This allows users to use the verb that best describes the action they are performing.<br><br>**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`<br>**Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`<br>**Update verbs**: `update`, `upgrade`, `refresh`, `reload`<br>**Management verbs**: `manage`, `configure`, `monitor`, `edit`<br>**Launch verbs**: `open`, `launch`, `show`, `view`, `render`<br>**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`
 
 -------
 ## Visibility
@@ -133,7 +133,7 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 | ---- | ---- | ----------- |
 | envKey | String | The name of the environment variable that will be assigned the value. |
 | type | String |  |
-| default | String | The default value to use if the template data is not set. |
+| default | String | The default value of the argument. If the argument is not set, this value will be used. |
 | required | Boolean | If true, the argument must be set. If false, the default value will be used if the argument is not set. |
 | flag | String | The flag to use when setting the argument from the command line.<br>Either `flag` or `pos` must be set, but not both. |
 | pos | Integer | The position of the argument in the command line arguments. Values start at 1.<br>Either `flag` or `pos` must be set, but not both. |
@@ -177,7 +177,7 @@ A reference to an executable.<br>The format is `<verb> <workspace>/<namespace>:<
 
 **Type**: Verb
 
-Keywords that describe the action an executable performs.<br>While executables are configured with a single verb, the verb can be aliased to related verbs.<br>For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.<br>This allows users to use the verb that best describes the action they are performing.<br><br>**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`<br>**Deactivation verbs**: `delete`, `remove`, `uninstall`, `teardown`, `destroy`<br>**Launch verbs**: `open`, `launch`, `edit`, `show`, `view`, `render`, `process`, `transform`, `generate`
+Keywords that describe the action an executable performs.<br>While executables are configured with a single verb, the verb can be aliased to related verbs.<br>For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.<br>This allows users to use the verb that best describes the action they are performing.<br><br>**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`<br>**Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`<br>**Update verbs**: `update`, `upgrade`, `refresh`, `reload`<br>**Management verbs**: `manage`, `configure`, `monitor`, `edit`<br>**Launch verbs**: `open`, `launch`, `show`, `view`, `render`<br>**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`
 
 
 

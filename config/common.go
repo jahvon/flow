@@ -11,6 +11,8 @@ import (
 const (
 	ActivateGroupID   = "activate"
 	DeactivateGroupID = "deactivate"
+	UpdateGroupID     = "update"
+	ManageGroupID     = "manage"
 	LaunchGroupID     = "launch"
 	CreationGroupID   = "creation"
 )
@@ -21,9 +23,12 @@ const (
 // For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.
 // This allows users to use the verb that best describes the action they are performing.
 //
-// **Activation verbs**: `exec`, `run`, `start`, `install`, `setup`
-// **Deactivation verbs**: `delete`, `remove`, `uninstall`, `teardown`, `destroy`
-// **Launch verbs**: `open`, `launch`, `edit`, `show`, `view`, `render`, `process`, `transform`, `generate`
+// **Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`
+// **Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`
+// **Update verbs**: `update`, `upgrade`, `refresh`, `reload`
+// **Management verbs**: `manage`, `configure`, `monitor`, `edit`
+// **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
+// **Creation verbs**: `generate`, `add`, `new`, `build`, `transform`
 type Verb string
 
 var (
@@ -33,22 +38,32 @@ var (
 		"start":     ActivateGroupID,
 		"install":   ActivateGroupID,
 		"setup":     ActivateGroupID,
+		"release":   ActivateGroupID,
+		"deploy":    ActivateGroupID,
+		"apply":     ActivateGroupID,
 		"delete":    DeactivateGroupID,
 		"remove":    DeactivateGroupID,
 		"uninstall": DeactivateGroupID,
-		"teardown":  DeactivateGroupID,
 		"destroy":   DeactivateGroupID,
+		"undeploy":  DeactivateGroupID,
+		"update":    UpdateGroupID,
+		"upgrade":   UpdateGroupID,
+		"refresh":   UpdateGroupID,
+		"reload":    UpdateGroupID,
+		"manage":    ManageGroupID,
+		"configure": ManageGroupID,
+		"monitor":   ManageGroupID,
+		"edit":      ManageGroupID,
 		"open":      LaunchGroupID,
 		"launch":    LaunchGroupID,
-		"edit":      LaunchGroupID,
 		"show":      LaunchGroupID,
 		"view":      LaunchGroupID,
 		"render":    LaunchGroupID,
-		"process":   LaunchGroupID,
-		"transform": LaunchGroupID,
 		"generate":  CreationGroupID,
 		"add":       CreationGroupID,
 		"new":       CreationGroupID,
+		"transform": CreationGroupID,
+		"build":     CreationGroupID,
 	}
 )
 
