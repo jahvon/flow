@@ -151,6 +151,36 @@ var configTemplateSetCmd = &cobra.Command{
 	},
 }
 
+var configPlaintextLoggerSetCmd = &cobra.Command{
+	Use:   "use-plain-text-logger (true|false)",
+	Short: "Enable or disable the plain text logger.",
+	Long: "Enable or disable the plain text logger. " +
+		"When enabled, the log output will include log level and timestamp.",
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		logger := curCtx.Logger
+		if interactiveUIEnabled() {
+			header := headerForCurCtx()
+			header.Print()
+		}
+		enabled, err := strconv.ParseBool(args[0])
+		if err != nil {
+			logger.FatalErr(errors.Wrap(err, "invalid boolean value"))
+		}
+
+		userConfig := curCtx.UserConfig
+		userConfig.UsePlainTextLogger = enabled
+		if err := file.WriteUserConfig(userConfig); err != nil {
+			logger.FatalErr(err)
+		}
+		strVal := "disabled"
+		if enabled {
+			strVal = "enabled"
+		}
+		logger.PlainTextSuccess("Plain text logger " + strVal)
+	},
+}
+
 var vaultSecretSetCmd = &cobra.Command{
 	Use:     "secret NAME VALUE",
 	Aliases: []string{"scrt"},
@@ -181,6 +211,7 @@ func init() {
 	setCmd.AddCommand(configWorkspaceModeSetCmd)
 	setCmd.AddCommand(configInteractiveSetCmd)
 	setCmd.AddCommand(configTemplateSetCmd)
+	setCmd.AddCommand(configPlaintextLoggerSetCmd)
 	setCmd.AddCommand(vaultSecretSetCmd)
 
 	rootCmd.AddCommand(setCmd)
