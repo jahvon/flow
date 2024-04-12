@@ -343,9 +343,6 @@ func (e *Executable) Validate() error {
 	if e.workspace == "" {
 		return fmt.Errorf("workspace was not set")
 	}
-	if e.namespace == "" {
-		return fmt.Errorf("namespace was not set")
-	}
 	if e.definitionPath == "" {
 		return fmt.Errorf("definition path was not set")
 	}
@@ -361,9 +358,17 @@ func (e *Executable) MergeTags(tags Tags) {
 	e.Tags = lo.Uniq(append(e.Tags, tags...))
 }
 
+// MergeVisibility merges the visibility of the executable with the given visibility.
+// Private < Internal < Public < Hidden
+// The visibility will be set to the highest level of the two.
 func (e *Executable) MergeVisibility(visibility VisibilityType) {
 	curLevel := slices.Index(visibilityByLevel, e.Visibility)
 	vLevel := slices.Index(visibilityByLevel, visibility)
+	if curLevel == 0 {
+		return
+	} else if vLevel == 0 {
+		e.Visibility = visibility
+	}
 	if vLevel > curLevel {
 		e.Visibility = visibility
 	}
@@ -536,7 +541,7 @@ func ParseExecutableID(id string) (workspace, namespace, name string) {
 }
 
 func NewExecutableID(workspace, namespace, name string) string {
-	if namespace == "" {
+	if namespace == "" || namespace == "*" {
 		return fmt.Sprintf("%s/%s", workspace, name)
 	}
 	return fmt.Sprintf("%s/%s:%s", workspace, namespace, name)
