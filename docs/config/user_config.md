@@ -25,6 +25,7 @@ This config is stored in the user's flow cache directory (e.g. `$HOME/Library/Ap
 | currentNamespace | String | The name of the current namespace. This is not required to be set. |
 | interactive | [InteractiveConfig](#InteractiveConfig) |  |
 | templates | Map (string -> string) | A map of executable definition template names to their paths. |
+| usePlainTextLogger | Boolean | Whether to use the plain text logger. If set to false, the log output will include<br>log level and timestamp. |
 
 
 -------

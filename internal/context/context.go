@@ -56,6 +56,7 @@ func NewContext(ctx context.Context) *Context {
 
 	ctxx, cancel := context.WithCancel(ctx)
 	theme := styles.BaseTheme()
+	theme.UsePlainTextLogger = userConfig.UsePlainTextLogger
 	return &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
