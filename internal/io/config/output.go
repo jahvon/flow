@@ -9,7 +9,7 @@ import (
 	"github.com/jahvon/flow/config"
 )
 
-func PrintUserConfig(logger *tuikitIO.Logger, format string, userConfig *config.UserConfig) {
+func PrintUserConfig(logger tuikitIO.Logger, format string, userConfig *config.UserConfig) {
 	if userConfig == nil {
 		logger.Fatalf("Config is nil")
 	}

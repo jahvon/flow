@@ -26,7 +26,7 @@ const (
 type Vault struct {
 	cachedEncryptionKey string
 	cachedData          *data
-	logger              *io.Logger
+	logger              io.Logger
 }
 
 // Represents the data stored in the vault data file.
@@ -56,7 +56,7 @@ func RegisterEncryptionKey(key string) error {
 	return nil
 }
 
-func NewVault(logger *io.Logger) *Vault {
+func NewVault(logger io.Logger) *Vault {
 	return &Vault{logger: logger}
 }
 

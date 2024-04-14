@@ -104,42 +104,42 @@ func RelatedVerbs(verb Verb) []Verb {
 
 const (
 	// VisibilityPublic is executable and visible across all workspaces.
-	VisibilityPublic VisibilityType = "public"
+	VisibilityPublic Visibility = "public"
 	// VisibilityPrivate is executable and visible only within it's own workspace.
-	VisibilityPrivate VisibilityType = "private"
+	VisibilityPrivate Visibility = "private"
 	// VisibilityInternal is not visible but can be executed within a workspace.
-	VisibilityInternal VisibilityType = "internal"
+	VisibilityInternal Visibility = "internal"
 	// VisibilityHidden is not executable or visible.
-	VisibilityHidden VisibilityType = "hidden"
+	VisibilityHidden Visibility = "hidden"
 )
 
 // From highest the visible [0] to the lowest visible [n-1].
-var visibilityByLevel = []VisibilityType{
+var visibilityByLevel = []Visibility{
 	VisibilityPublic,
 	VisibilityPrivate,
 	VisibilityInternal,
 	VisibilityHidden,
 }
 
-type VisibilityType string
+type Visibility string
 
-func (v VisibilityType) String() string {
+func (v Visibility) String() string {
 	return string(v)
 }
 
-func (v VisibilityType) IsPublic() bool {
+func (v Visibility) IsPublic() bool {
 	return v == VisibilityPublic
 }
 
-func (v VisibilityType) IsPrivate() bool {
+func (v Visibility) IsPrivate() bool {
 	return v == VisibilityPrivate
 }
 
-func (v VisibilityType) IsInternal() bool {
+func (v Visibility) IsInternal() bool {
 	return v == VisibilityInternal
 }
 
-func (v VisibilityType) IsHidden() bool {
+func (v Visibility) IsHidden() bool {
 	return v == VisibilityHidden
 }
 

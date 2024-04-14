@@ -32,7 +32,7 @@ type ExecutableDirectory struct {
 }
 
 func (e *ExecutableDirectory) ExpandDirectory(
-	logger *io.Logger,
+	logger io.Logger,
 	wsPath, execPath, processTmpDir string,
 	env map[string]string,
 ) (dir string, isTmpDir bool, err error) {
@@ -156,13 +156,13 @@ type ExecutableTypeSpec struct {
 }
 
 type Executable struct {
-	Verb        Verb           `yaml:"verb,omitempty"`
-	Name        string         `yaml:"name,omitempty"`
-	Aliases     []string       `yaml:"aliases,omitempty"`
-	Tags        Tags           `yaml:"tags,omitempty"`
-	Description string         `yaml:"description,omitempty"`
-	Visibility  VisibilityType `yaml:"visibility,omitempty"`
-	Timeout     time.Duration  `yaml:"timeout,omitempty"`
+	Verb        Verb          `yaml:"verb,omitempty"`
+	Name        string        `yaml:"name,omitempty"`
+	Aliases     []string      `yaml:"aliases,omitempty"`
+	Tags        Tags          `yaml:"tags,omitempty"`
+	Description string        `yaml:"description,omitempty"`
+	Visibility  Visibility    `yaml:"visibility,omitempty"`
+	Timeout     time.Duration `yaml:"timeout,omitempty"`
 	// +docsgen:typeExec
 	// The type of executable. Only one type can be set.
 	Type *ExecutableTypeSpec `yaml:"type,omitempty"`
@@ -319,9 +319,13 @@ func (e *Executable) SetDefaults() {
 func (e *Executable) Validate() error {
 	if e.Verb == "" {
 		return fmt.Errorf("verb cannot be empty")
+	} else if err := e.Verb.Validate(); err != nil {
+		return err
 	}
 	if e.Name == "" {
 		return fmt.Errorf("name cannot be empty")
+	} else if strings.Contains(e.Name, " ") {
+		return fmt.Errorf("name cannot contain spaces")
 	}
 
 	if e.Type == nil {
@@ -361,7 +365,7 @@ func (e *Executable) MergeTags(tags Tags) {
 // MergeVisibility merges the visibility of the executable with the given visibility.
 // Private < Internal < Public < Hidden
 // The visibility will be set to the highest level of the two.
-func (e *Executable) MergeVisibility(visibility VisibilityType) {
+func (e *Executable) MergeVisibility(visibility Visibility) {
 	curLevel := slices.Index(visibilityByLevel, e.Visibility)
 	vLevel := slices.Index(visibilityByLevel, visibility)
 	if curLevel == 0 {
