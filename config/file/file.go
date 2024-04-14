@@ -273,7 +273,7 @@ func LoadExecutableDefinition(definitionFile string) (*config.ExecutableDefiniti
 }
 
 func LoadWorkspaceExecutableDefinitions(
-	logger *io.Logger,
+	logger io.Logger,
 	workspaceCfg *config.WorkspaceConfig,
 ) (config.ExecutableDefinitionList, error) {
 	definitionFiles, err := findDefinitionFiles(logger, workspaceCfg)
@@ -356,7 +356,7 @@ func LoadLatestCachedData(cacheKey string) ([]byte, error) {
 	return data, nil
 }
 
-func findDefinitionFiles(logger *io.Logger, workspaceCfg *config.WorkspaceConfig) ([]string, error) {
+func findDefinitionFiles(logger io.Logger, workspaceCfg *config.WorkspaceConfig) ([]string, error) {
 	var includePaths, excludedPaths []string
 	if workspaceCfg.Executables != nil {
 		includePaths = workspaceCfg.Executables.Included
@@ -397,7 +397,7 @@ func findDefinitionFiles(logger *io.Logger, workspaceCfg *config.WorkspaceConfig
 }
 
 // IsPathIn returns true if the path is in any of the include paths.
-func isPathIncluded(logger *io.Logger, path, basePath string, includePaths []string) bool {
+func isPathIncluded(logger io.Logger, path, basePath string, includePaths []string) bool {
 	if includePaths == nil {
 		return true
 	}
@@ -428,7 +428,7 @@ func isPathIncluded(logger *io.Logger, path, basePath string, includePaths []str
 }
 
 // IsPathExcluded returns true if the path is in any of the excluded paths.
-func isPathExcluded(logger *io.Logger, path, basePath string, excludedPaths []string) bool {
+func isPathExcluded(logger io.Logger, path, basePath string, excludedPaths []string) bool {
 	if excludedPaths == nil {
 		return false
 	}

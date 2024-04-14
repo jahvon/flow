@@ -14,7 +14,7 @@ import (
 	"github.com/jahvon/flow/internal/vault"
 )
 
-func SetEnv(logger *io.Logger, exec *config.ExecutableEnvironment, promptedEnv map[string]string) error {
+func SetEnv(logger io.Logger, exec *config.ExecutableEnvironment, promptedEnv map[string]string) error {
 	var errs []error
 	for _, param := range exec.Parameters {
 		val, err := ResolveParameterValue(logger, param, promptedEnv)
@@ -33,7 +33,7 @@ func SetEnv(logger *io.Logger, exec *config.ExecutableEnvironment, promptedEnv m
 	return nil
 }
 
-func ResolveParameterValue(logger *io.Logger, param config.Parameter, promptedEnv map[string]string) (string, error) {
+func ResolveParameterValue(logger io.Logger, param config.Parameter, promptedEnv map[string]string) (string, error) {
 	switch {
 	case param.Text == "" && param.SecretRef == "" && param.Prompt == "":
 		return "", nil
@@ -61,7 +61,7 @@ func ResolveParameterValue(logger *io.Logger, param config.Parameter, promptedEn
 }
 
 func BuildEnvList(
-	logger *io.Logger,
+	logger io.Logger,
 	exec *config.ExecutableEnvironment,
 	inputEnv map[string]string,
 	defaultEnv map[string]string,
@@ -93,7 +93,7 @@ func BuildEnvList(
 }
 
 func BuildEnvMap(
-	logger *io.Logger,
+	logger io.Logger,
 	exec *config.ExecutableEnvironment,
 	inputEnv map[string]string,
 	defaultEnv map[string]string,

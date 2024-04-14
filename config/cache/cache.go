@@ -9,7 +9,7 @@ var (
 	executableCache *ExecutableCache
 )
 
-func UpdateAll(logger *io.Logger) error {
+func UpdateAll(logger io.Logger) error {
 	wsCache := NewWorkspaceCache()
 	if err := wsCache.Update(logger); err != nil {
 		return err

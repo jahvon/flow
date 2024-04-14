@@ -22,7 +22,10 @@ type ExecutableDefinition struct {
 	// `private` executables can be executed and listed only within their own workspace.
 	// `internal` executables can be executed within their own workspace but are not listed.
 	// `hidden` executables cannot be executed or listed.
-	Visibility VisibilityType `yaml:"visibility,omitempty"`
+	Visibility Visibility `yaml:"visibility,omitempty"`
+	// +docsgen:fromFiles
+	// A list of `.sh` files to convert into executables within the definition.
+	FromFiles []string `yaml:"fromFile,omitempty"`
 	// +docsgen:executables
 	// A list of executables to be defined in the executable definition.
 	Executables ExecutableList `yaml:"executables,omitempty"`

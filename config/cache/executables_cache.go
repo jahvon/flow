@@ -40,7 +40,7 @@ func NewExecutableCache() *ExecutableCache {
 	return executableCache
 }
 
-func (c *ExecutableCache) Update(logger *io.Logger) error { //nolint:gocognit
+func (c *ExecutableCache) Update(logger io.Logger) error { //nolint:gocognit
 	if c.Data == nil {
 		logger.Debugf("Initializing executable cache data")
 		c.Data = &ExecutableCacheData{
@@ -76,6 +76,18 @@ func (c *ExecutableCache) Update(logger *io.Logger) error { //nolint:gocognit
 			continue
 		}
 		for _, def := range definitions {
+			if len(def.FromFiles) > 0 {
+				generated, err := generatedExecutables(logger, def.FromFiles)
+				if err != nil {
+					logger.Errorx(
+						"failed to generate executables from files",
+						"definitionPath", def.DefinitionPath(),
+						"err", err,
+					)
+				}
+				def.Executables = append(def.Executables, generated...)
+			}
+
 			if def == nil || def.Visibility == config.VisibilityHidden || len(def.Executables) == 0 {
 				continue
 			}
@@ -110,7 +122,7 @@ func (c *ExecutableCache) Update(logger *io.Logger) error { //nolint:gocognit
 	return nil
 }
 
-func (c *ExecutableCache) GetExecutableByRef(logger *io.Logger, ref config.Ref) (*config.Executable, error) {
+func (c *ExecutableCache) GetExecutableByRef(logger io.Logger, ref config.Ref) (*config.Executable, error) {
 	err := c.initExecutableCacheData(logger)
 	if err != nil {
 		return nil, err
@@ -148,6 +160,16 @@ func (c *ExecutableCache) GetExecutableByRef(logger *io.Logger, ref config.Ref) 
 	definition.SetDefaults()
 	definition.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, definitionPath)
 
+	generated, err := generatedExecutables(logger, definition.FromFiles)
+	if err != nil {
+		logger.Warnx(
+			"failed to generate executables from files",
+			"definitionPath", definitionPath,
+			"err", err,
+		)
+	}
+	definition.Executables = append(definition.Executables, generated...)
+
 	executable, err := definition.Executables.FindByVerbAndID(ref.GetVerb(), ref.GetID())
 	if err != nil {
 		return nil, err
@@ -160,7 +182,7 @@ func (c *ExecutableCache) GetExecutableByRef(logger *io.Logger, ref config.Ref) 
 	return executable, nil
 }
 
-func (c *ExecutableCache) GetExecutableList(logger *io.Logger) (config.ExecutableList, error) {
+func (c *ExecutableCache) GetExecutableList(logger io.Logger) (config.ExecutableList, error) {
 	err := c.initExecutableCacheData(logger)
 	if err != nil {
 		return nil, err
@@ -182,12 +204,23 @@ func (c *ExecutableCache) GetExecutableList(logger *io.Logger) (config.Executabl
 		}
 		definition.SetDefaults()
 		definition.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, definitionPath)
+
+		generated, err := generatedExecutables(logger, definition.FromFiles)
+		if err != nil {
+			logger.Warnx(
+				"failed to generate executables from files",
+				"definitionPath", definitionPath,
+				"err", err,
+			)
+		}
+		definition.Executables = append(definition.Executables, generated...)
+
 		list = append(list, definition.Executables...)
 	}
 	return list, nil
 }
 
-func (c *ExecutableCache) initExecutableCacheData(logger *io.Logger) error {
+func (c *ExecutableCache) initExecutableCacheData(logger io.Logger) error {
 	if c.Data != nil {
 		return nil
 	}

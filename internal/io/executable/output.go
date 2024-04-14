@@ -9,7 +9,7 @@ import (
 	"github.com/jahvon/flow/config"
 )
 
-func PrintExecutableList(logger *tuikitIO.Logger, format string, executables config.ExecutableList) {
+func PrintExecutableList(logger tuikitIO.Logger, format string, executables config.ExecutableList) {
 	logger.Infof("listing %d executables", len(executables))
 	switch strings.ToLower(format) {
 	case "", "yaml", "yml":
@@ -29,7 +29,7 @@ func PrintExecutableList(logger *tuikitIO.Logger, format string, executables con
 	}
 }
 
-func PrintExecutable(logger *tuikitIO.Logger, format string, exec *config.Executable) {
+func PrintExecutable(logger tuikitIO.Logger, format string, exec *config.Executable) {
 	if exec == nil {
 		logger.Fatalf("Executable is nil")
 	}

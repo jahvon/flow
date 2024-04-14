@@ -9,7 +9,7 @@ import (
 	"github.com/jahvon/flow/config"
 )
 
-func PrintWorkspaceList(logger *tuikitIO.Logger, format string, workspaces config.WorkspaceConfigList) {
+func PrintWorkspaceList(logger tuikitIO.Logger, format string, workspaces config.WorkspaceConfigList) {
 	logger.Infof("listing %d workspaces", len(workspaces))
 	switch strings.ToLower(format) {
 	case "", "yaml", "yml":
@@ -29,7 +29,7 @@ func PrintWorkspaceList(logger *tuikitIO.Logger, format string, workspaces confi
 	}
 }
 
-func PrintWorkspaceConfig(logger *tuikitIO.Logger, format string, ws *config.WorkspaceConfig) {
+func PrintWorkspaceConfig(logger tuikitIO.Logger, format string, ws *config.WorkspaceConfig) {
 	if ws == nil {
 		logger.Fatalf("Workspace config is nil")
 	}
