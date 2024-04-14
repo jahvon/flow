@@ -22,7 +22,7 @@ func RunCmd(
 	commandStr, dir string,
 	envList []string,
 	logMode config.LogMode,
-	logger *io.Logger,
+	logger io.Logger,
 	logFields map[string]interface{},
 ) error {
 	logger.Debugf("running command in dir (%s):\n%s", dir, strings.TrimSpace(commandStr))
@@ -73,7 +73,7 @@ func RunFile(
 	filename, dir string,
 	envList []string,
 	logMode config.LogMode,
-	logger *io.Logger,
+	logger io.Logger,
 	logFields map[string]interface{},
 ) error {
 	logger.Debugf("executing file (%s)", filepath.Join(dir, filename))
@@ -126,7 +126,7 @@ func RunFile(
 	return nil
 }
 
-func stdOutWriter(mode config.LogMode, logger *io.Logger, logFields ...any) stdio.Writer {
+func stdOutWriter(mode config.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
 	switch mode {
 	case config.NoLogMode:
 		return stdio.Discard
@@ -140,7 +140,7 @@ func stdOutWriter(mode config.LogMode, logger *io.Logger, logFields ...any) stdi
 	}
 }
 
-func stdErrWriter(mode config.LogMode, logger *io.Logger, logFields ...any) stdio.Writer {
+func stdErrWriter(mode config.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
 	switch mode {
 	case config.NoLogMode:
 		return stdio.Discard

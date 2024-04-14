@@ -18,7 +18,7 @@ import (
 // - . -> current working directory + dir path
 // - relative path -> execPath + dir path
 // - ${envVar} -> expanded to the value from env map.
-func ExpandDirectory(logger *io.Logger, dir, wsPath, execPath string, env map[string]string) string {
+func ExpandDirectory(logger io.Logger, dir, wsPath, execPath string, env map[string]string) string {
 	execDir := filepath.Dir(execPath)
 	var targetDir string
 	switch {

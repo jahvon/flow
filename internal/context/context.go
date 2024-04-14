@@ -20,7 +20,7 @@ import (
 type Context struct {
 	Ctx                  context.Context
 	CancelFunc           context.CancelFunc
-	Logger               *io.Logger
+	Logger               io.Logger
 	UserConfig           *config.UserConfig
 	CurrentWorkspace     *config.WorkspaceConfig
 	WorkspacesCache      *cache.WorkspaceCache

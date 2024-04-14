@@ -29,7 +29,7 @@ func NewWorkspaceCache() *WorkspaceCache {
 	return workspaceCache
 }
 
-func (c *WorkspaceCache) Update(logger *io.Logger) error {
+func (c *WorkspaceCache) Update(logger io.Logger) error {
 	if c.Data == nil {
 		logger.Debugf("Initializing workspace cache data")
 	} else {
@@ -71,7 +71,7 @@ func (c *WorkspaceCache) Update(logger *io.Logger) error {
 	return nil
 }
 
-func (c *WorkspaceCache) Get(logger *io.Logger) (*WorkspaceCacheData, error) {
+func (c *WorkspaceCache) Get(logger io.Logger) (*WorkspaceCacheData, error) {
 	if c.Data != nil {
 		return c.Data, nil
 	}
