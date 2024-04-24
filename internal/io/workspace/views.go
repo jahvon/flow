@@ -32,7 +32,7 @@ func NewWorkspaceView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				common.OpenInEditor(container, filepath.Join(ws.Location(), file.WorkspaceConfigFileName))
+				common.DeprecatedOpenInEditor(container, filepath.Join(ws.Location(), file.WorkspaceConfigFileName))
 				return nil
 			},
 		},

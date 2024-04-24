@@ -1,0 +1,256 @@
+package library
+
+import (
+	"path/filepath"
+	"time"
+
+	"github.com/charmbracelet/bubbles/viewport"
+	"github.com/charmbracelet/bubbletea"
+	"github.com/jahvon/tuikit/components"
+	"golang.design/x/clipboard"
+
+	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/io/common"
+	"github.com/jahvon/flow/internal/services/open"
+)
+
+func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	cmds := make([]tea.Cmd, 0)
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		l.termWidth = msg.Width - widthPadding
+		l.termHeight = msg.Height - heightPadding
+		p0, p1, p2 := calculateViewportWidths(l.termWidth)
+		l.paneZeroViewport.Width = p0
+		l.paneOneViewport.Width = p1
+		l.paneTwoViewport.Width = p2
+		l.paneZeroViewport.Height = l.termHeight
+		l.paneOneViewport.Height = l.termHeight
+		l.paneTwoViewport.Height = l.termHeight
+		l.loadingScreen = nil
+	case components.TickMsg:
+		cmds = append(cmds, tea.Tick(time.Second, func(t time.Time) tea.Msg {
+			return components.TickMsg(t)
+		}))
+	case tea.Cmd:
+		cmds = append(cmds, msg)
+	case tea.KeyMsg:
+		key := msg.String()
+		switch key {
+		case "ctrl+c", "q":
+			return l, tea.Quit
+		case tea.KeyLeft.String():
+			if l.currentPane == 0 {
+				break
+			}
+			l.currentPane--
+		case tea.KeyRight.String():
+			if l.currentPane == 2 {
+				break
+			}
+			l.currentPane++
+		case "h":
+			l.showHelp = !l.showHelp
+		}
+	}
+
+	if l.loadingScreen != nil {
+		updatedModel, cmd := l.loadingScreen.Update(msg)
+		l.loadingScreen = updatedModel
+		return l, cmd
+	}
+
+	wsPane, wsCmd := l.updateWsPane(msg)
+	l.paneZeroViewport = wsPane
+	execPane, execCmd := l.updateExecPanes(msg)
+	if l.currentPane == 1 {
+		l.paneOneViewport = execPane
+	} else if l.currentPane == 2 {
+		l.paneTwoViewport = execPane
+	}
+
+	l.setVisibleWorkspaces()
+	l.setVisibleNamespaces()
+	l.setVisibleExecs()
+
+	cmds = append(cmds, wsCmd, execCmd)
+	return l, tea.Batch(cmds...)
+
+}
+
+func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
+	if l.loadingScreen != nil || l.currentPane != 0 {
+		return l.paneZeroViewport, nil
+	}
+
+	numWs := len(l.visibleWorkspaces)
+	numNs := len(l.visibleNamespaces)
+	if numWs == 0 {
+		return l.paneZeroViewport, nil
+	}
+
+	curWs := l.visibleWorkspaces[l.currentWorkspace]
+	curWsCfg := l.curWsConfig
+	wsCanMoveUp := numWs > 1 && l.currentWorkspace >= 1 && l.currentWorkspace < uint(numWs)
+	wsCanMoveDown := numWs > 1 && l.currentWorkspace >= 0 && l.currentWorkspace < uint(numWs-1)
+
+	var curNs string
+	if len(l.visibleNamespaces) > 0 {
+		curNs = l.visibleNamespaces[l.currentNamespace]
+	}
+	nsCanMoveUp := curNs != "" && numNs > 1 && l.currentNamespace >= 1 && l.currentNamespace < uint(numNs)
+	nsCanMoveDown := curNs != "" && numNs > 1 && l.currentNamespace >= 0 && l.currentNamespace < uint(numNs-1)
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		key := msg.String()
+
+		switch key {
+		case tea.KeyDown.String():
+			if l.showNamespaces && nsCanMoveDown {
+				l.currentNamespace++
+			} else if !l.showNamespaces && wsCanMoveDown {
+				l.currentWorkspace++
+			}
+		case tea.KeyUp.String():
+			if l.showNamespaces && nsCanMoveUp {
+				l.currentNamespace--
+			} else if !l.showNamespaces && wsCanMoveUp {
+				l.currentWorkspace--
+			}
+		case tea.KeySpace.String():
+			if numNs > 0 {
+				l.showNamespaces = !l.showNamespaces
+				l.currentNamespace = 0
+			}
+		case "o":
+			if curWsCfg == nil {
+				l.SetNotice("no workspace selected", components.NoticeLevelError)
+				break
+			}
+
+			if err := open.Open(curWsCfg.Location(), false); err != nil {
+				l.ctx.Logger.Error(err, "unable to open workspace")
+				l.SetNotice("unable to open workspace", components.NoticeLevelError)
+			}
+		case "e":
+			if curWsCfg == nil {
+				l.SetNotice("no workspace selected", components.NoticeLevelError)
+				break
+			}
+
+			if err := common.OpenInEditor(
+				filepath.Join(curWsCfg.Location(), file.WorkspaceConfigFileName),
+			); err != nil {
+				l.ctx.Logger.Error(err, "unable to open workspace in editor")
+				l.SetNotice("unable to open workspace in editor", components.NoticeLevelError)
+			}
+		case "s":
+			if curWsCfg == nil {
+				l.SetNotice("no workspace selected", components.NoticeLevelError)
+				break
+			}
+
+			curCfg, err := file.LoadUserConfig()
+			if err != nil {
+				l.ctx.Logger.Error(err, "unable to load user config")
+				l.SetNotice("unable to load user config", components.NoticeLevelError)
+				break
+			}
+
+			switch {
+			case l.showNamespaces && curNs == withoutNamespaceLabel:
+				curCfg.CurrentNamespace = ""
+			case l.showNamespaces && curNs == allNamespacesLabel:
+				l.SetNotice("no namespace selected", components.NoticeLevelError)
+				break
+			case l.showNamespaces && curNs != "":
+				curCfg.CurrentNamespace = curNs
+			case !l.showNamespaces && curWs == allWorkspacesLabel:
+				l.SetNotice("no workspace selected", components.NoticeLevelError)
+				break
+			case !l.showNamespaces && curWs != "":
+				if curWs != curWsCfg.AssignedName() {
+					l.SetNotice("current workspace out of sync", components.NoticeLevelError)
+					break
+				}
+				curCfg.CurrentWorkspace = curWsCfg.AssignedName()
+			}
+
+			if err := file.WriteUserConfig(curCfg); err != nil {
+				l.ctx.Logger.Error(err, "unable to write user config")
+				l.SetNotice("unable to write user config", components.NoticeLevelError)
+				break
+			}
+
+			l.headerModel.CtxVal = ctxVal(curCfg.CurrentWorkspace, curCfg.CurrentNamespace)
+			l.SetNotice("context updated", components.NoticeLevelInfo)
+		}
+	}
+
+	return l.paneZeroViewport.Update(msg)
+}
+
+func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
+	if l.loadingScreen != nil || (l.currentPane != 1 && l.currentPane != 2) {
+		return l.paneOneViewport, nil
+	}
+
+	var pane viewport.Model
+	if l.currentPane == 1 {
+		pane = l.paneOneViewport
+	} else if l.currentPane == 2 {
+		pane = l.paneTwoViewport
+	}
+
+	numExecs := len(l.visibleExecutables)
+	if numExecs == 0 {
+		return pane, nil
+	}
+
+	curExec := l.visibleExecutables[l.currentExecutable]
+	canMoveUp := numExecs > 1 && l.currentExecutable >= 1 && l.currentExecutable < uint(numExecs)
+	canMoveDown := numExecs > 1 && l.currentExecutable >= 0 && l.currentExecutable < uint(numExecs-1)
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		key := msg.String()
+
+		switch key {
+		case tea.KeyDown.String():
+			if l.currentPane == 1 && canMoveDown {
+				l.currentExecutable++
+			}
+		case tea.KeyUp.String():
+			if l.currentPane == 1 && canMoveUp {
+				l.currentExecutable--
+			}
+		case "e":
+			if curExec == nil {
+				l.SetNotice("no executable selected", components.NoticeLevelError)
+				break
+			}
+
+			if err := common.OpenInEditor(curExec.DefinitionPath()); err != nil {
+				l.ctx.Logger.Error(err, "unable to open executable in editor")
+				l.SetNotice("unable to open executable in editor", components.NoticeLevelError)
+			}
+		case "c":
+			if curExec == nil {
+				l.SetNotice("no executable selected", components.NoticeLevelError)
+				break
+			}
+
+			if err := clipboard.Init(); err != nil {
+				l.ctx.Logger.Error(err, "unable to initialize clipboard")
+				l.SetNotice("unable to initialize clipboard", components.NoticeLevelError)
+				break
+			}
+
+			clipboard.Write(clipboard.FmtText, []byte(curExec.Ref().String()))
+			l.SetNotice("copied reference to clipboard", components.NoticeLevelInfo)
+		}
+	}
+
+	return pane.Update(msg)
+}

@@ -33,7 +33,7 @@ func NewExecutableView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				common.OpenInEditor(container, exec.DefinitionPath())
+				common.DeprecatedOpenInEditor(container, exec.DefinitionPath())
 				return nil
 			},
 		},
