@@ -83,7 +83,7 @@ type TemplateDataEntry struct {
 	// A prompt to be displayed to the user when collecting an input value.
 	Prompt string `yaml:"prompt"`
 	// +docsgen:default
-	// The default value to use if the template data is not set.
+	// The default value to use if a value is not set.
 	Default string `yaml:"default"`
 	// +docsgen:required
 	// If true, the template data must be set. If false, the default value will be used if the template data is not set.
