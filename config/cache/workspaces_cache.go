@@ -91,3 +91,17 @@ func (c *WorkspaceCache) Get(logger io.Logger) (*WorkspaceCacheData, error) {
 	}
 	return c.Data, nil
 }
+
+func (c *WorkspaceCache) GetWorkspaceConfigList(logger io.Logger) (config.WorkspaceConfigList, error) {
+	cache, err := c.Get(logger)
+	if err != nil {
+		return nil, err
+	}
+
+	wsCfgs := make(config.WorkspaceConfigList, 0, len(c.Data.Workspaces))
+	for wsName, wsCfg := range cache.Workspaces {
+		wsCfg.SetContext(wsName, cache.WorkspaceLocations[wsName])
+		wsCfgs = append(wsCfgs, *wsCfg)
+	}
+	return wsCfgs, nil
+}

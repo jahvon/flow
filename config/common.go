@@ -252,6 +252,18 @@ func (r Ref) GetID() string {
 	return refParts[1]
 }
 
+func (r Ref) GetNamespace() string {
+	id := r.GetID()
+	_, ns, _ := ParseExecutableID(id)
+	return ns
+}
+
+func (r Ref) GetWorkspace() string {
+	id := r.GetID()
+	ws, _, _ := ParseExecutableID(id)
+	return ws
+}
+
 func (r Ref) Equals(other Ref) bool {
 	rVerb := r.GetVerb()
 	oVerb := other.GetVerb()
