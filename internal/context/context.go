@@ -100,7 +100,7 @@ func ExpandRef(ctx *Context, ref config.Ref) config.Ref {
 	id := ref.GetID()
 	ws, ns, name := config.ParseExecutableID(id)
 	if ws == "" {
-		ws = ctx.UserConfig.CurrentWorkspace
+		ws = ctx.CurrentWorkspace.AssignedName()
 	}
 	if ns == "" {
 		ns = ctx.UserConfig.CurrentNamespace
