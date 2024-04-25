@@ -36,7 +36,7 @@ func ExecConfigMapFromFile(logger io.Logger, file string) (map[string]string, er
 		return nil, err
 	}
 
-	fileBytes, err := os.ReadFile(file)
+	fileBytes, err := os.ReadFile(filepath.Clean(file))
 	if err != nil {
 		return nil, err
 	}
