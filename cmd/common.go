@@ -26,7 +26,7 @@ func interactiveUIEnabled() bool {
 }
 
 func headerForCurCtx() components.Header {
-	ws := curCtx.UserConfig.CurrentWorkspace
+	ws := curCtx.CurrentWorkspace.AssignedName()
 	ns := curCtx.UserConfig.CurrentNamespace
 	if ws == "" {
 		ws = "unk"
