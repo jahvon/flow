@@ -9,7 +9,7 @@ require (
 	github.com/itchyny/gojq v0.12.14
 	github.com/jahvon/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/jahvon/tuikit v0.0.8
-	github.com/onsi/ginkgo/v2 v2.16.0
+	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.31.1
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.39.0
