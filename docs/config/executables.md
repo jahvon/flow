@@ -136,7 +136,7 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 | envKey | String | The name of the environment variable that will be assigned the value. |
 | type | String |  |
 | default | String | The default value to use if a value is not set. |
-| required | Boolean | If true, the argument must be set. If false, the default value will be used if the argument is not set. |
+| required | Boolean | If true, a value must be set. If false, the default value will be used if a value is not set. |
 | flag | String | The flag to use when setting the argument from the command line.<br>Either `flag` or `pos` must be set, but not both. |
 | pos | Integer | The position of the argument in the command line arguments. Values start at 1.<br>Either `flag` or `pos` must be set, but not both. |
 

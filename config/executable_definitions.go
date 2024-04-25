@@ -86,7 +86,7 @@ type TemplateDataEntry struct {
 	// The default value to use if a value is not set.
 	Default string `yaml:"default"`
 	// +docsgen:required
-	// If true, the template data must be set. If false, the default value will be used if the template data is not set.
+	// If true, a value must be set. If false, the default value will be used if a value is not set.
 	Required bool `yaml:"required"`
 
 	value string
