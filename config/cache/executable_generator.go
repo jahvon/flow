@@ -33,10 +33,15 @@ func executablesFromFile(logger io.Logger, shFile string) (*config.Executable, e
 		return nil, err
 	}
 
-	filename := filepath.Base(filepath.Base(shFile))
+	filename := filepath.Base(shFile)
 	executable := &config.Executable{
 		Verb: config.Verb("exec"),
-		Name: filename,
+		Name: filepath.Base(filename),
+		Type: &config.ExecutableTypeSpec{
+			Exec: &config.ExecExecutableType{
+				File: filename,
+			},
+		},
 	}
 	for key, value := range configMap {
 		switch key {
