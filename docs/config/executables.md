@@ -22,13 +22,14 @@ A workspace can have multiple executable definition files. Each executable defin
 | namespace | String | The namespace of the executable definition. This is used to group executables together.<br>If not set, the executables in the definition will be grouped into the root (*) namespace.<br>Namespaces can be reused across multiple definitions. |
 | tags | Array (string) | A list of tags.<br>Tags can be used with list commands to filter returned data. |
 | visibility | [Visibility](#Visibility) |  |
+| fromFile | Array (string) |  |
 | executables | Array ([Executable](#Executable)) | A list of executables to be defined in the executable definition. |
 
 
 -------
 ## Visibility
 
-**Type**: VisibilityType
+**Type**: Visibility
 
 The visibility of the executables to Flow.<br>If not set, the visibility will default to `public`.<br><br>`public` executables can be executed and listed from anywhere.<br>`private` executables can be executed and listed only within their own workspace.<br>`internal` executables can be executed within their own workspace but are not listed.<br>`hidden` executables cannot be executed or listed.
 
@@ -51,13 +52,14 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 | namespace | String | The namespace of the executable definition. This is used to group executables together.<br>If not set, the executables in the definition will be grouped into the root (*) namespace.<br>Namespaces can be reused across multiple definitions. |
 | tags | Array (string) | A list of tags.<br>Tags can be used with list commands to filter returned data. |
 | visibility | [Visibility](#Visibility) |  |
+| fromFile | Array (string) |  |
 | executables | Array ([Executable](#Executable)) | A list of executables to be defined in the executable definition. |
 
 
 -------
 ## Visibility
 
-**Type**: VisibilityType
+**Type**: Visibility
 
 The visibility of the executables to Flow.<br>If not set, the visibility will default to `public`.<br><br>`public` executables can be executed and listed from anywhere.<br>`private` executables can be executed and listed only within their own workspace.<br>`internal` executables can be executed within their own workspace but are not listed.<br>`hidden` executables cannot be executed or listed.
 
@@ -113,7 +115,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 -------
 ## Visibility
 
-**Type**: VisibilityType
+**Type**: Visibility
 
 The visibility of the executables to Flow.<br>If not set, the visibility will default to `public`.<br><br>`public` executables can be executed and listed from anywhere.<br>`private` executables can be executed and listed only within their own workspace.<br>`internal` executables can be executed within their own workspace but are not listed.<br>`hidden` executables cannot be executed or listed.
 
@@ -133,7 +135,7 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 | ---- | ---- | ----------- |
 | envKey | String | The name of the environment variable that will be assigned the value. |
 | type | String |  |
-| default | String | The default value to use if the template data is not set. |
+| default | String | The default value of the argument. If the argument is not set, this value will be used. |
 | required | Boolean | If true, the argument must be set. If false, the default value will be used if the argument is not set. |
 | flag | String | The flag to use when setting the argument from the command line.<br>Either `flag` or `pos` must be set, but not both. |
 | pos | Integer | The position of the argument in the command line arguments. Values start at 1.<br>Either `flag` or `pos` must be set, but not both. |
