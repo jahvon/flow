@@ -15,7 +15,7 @@ require (
 	github.com/jahvon/tuikit v0.0.9
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/onsi/ginkgo/v2 v2.17.2
-	github.com/onsi/gomega v1.33.0
+	github.com/onsi/gomega v1.33.1
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cobra v1.8.0
