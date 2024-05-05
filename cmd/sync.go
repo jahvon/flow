@@ -7,14 +7,11 @@ import (
 )
 
 var syncCmd = &cobra.Command{
-	Use:   "sync",
-	Short: "Scan workspaces and update flow cache.",
+	Use:    "sync",
+	Short:  "Scan workspaces and update flow cache.",
+	PreRun: initInteractiveCommand,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Print()
-		}
 		if err := cache.UpdateAll(curCtx.Logger); err != nil {
 			logger.FatalErr(err)
 		}

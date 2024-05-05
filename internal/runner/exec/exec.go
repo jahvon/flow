@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"github.com/jahvon/tuikit/io"
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/config"
@@ -53,8 +54,7 @@ func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, i
 
 	logMode := execSpec.LogMode
 	var logFields map[string]interface{}
-
-	if logMode == config.StructuredLogMode {
+	if logMode == io.JSON || logMode == io.Logfmt {
 		logFields = execSpec.GetLogFields()
 	}
 

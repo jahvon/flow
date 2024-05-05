@@ -64,9 +64,9 @@ type ExecExecutableType struct {
 	ExecutableDirectory   `yaml:",inline"`
 	ExecutableEnvironment `yaml:",inline"`
 
-	Command string  `yaml:"cmd,omitempty"`
-	File    string  `yaml:"file,omitempty"`
-	LogMode LogMode `yaml:"logMode,omitempty"`
+	Command string     `yaml:"cmd,omitempty"`
+	File    string     `yaml:"file,omitempty"`
+	LogMode io.LogMode `yaml:"logMode,omitempty"`
 
 	logFields map[string]interface{}
 }
@@ -309,10 +309,6 @@ func (e *Executable) SetDefaults() {
 	}
 	if e.Timeout == 0 {
 		e.Timeout = DefaultTimeout
-	}
-
-	if e.Type != nil && e.Type.Exec != nil && e.Type.Exec.LogMode == "" {
-		e.Type.Exec.LogMode = StructuredLogMode
 	}
 }
 

@@ -127,15 +127,12 @@ var vaultGetCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Print the value of a secret in the flow secret vault.",
 	Args:    cobra.ExactArgs(1),
+	PreRun:  initInteractiveCommand,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		reference := args[0]
 		asPlainText := getFlagValue[bool](cmd, *flags.OutputSecretAsPlainTextFlag)
 
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Print()
-		}
 		v := vault.NewVault(logger)
 		secret, err := v.GetSecret(reference)
 		if err != nil {

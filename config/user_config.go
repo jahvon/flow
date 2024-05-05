@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/jahvon/tuikit/io"
 	"gopkg.in/yaml.v3"
 )
 
@@ -46,10 +47,10 @@ type UserConfig struct {
 	// +docsgen:templates
 	// A map of executable definition template names to their paths.
 	Templates map[string]string `json:"templates,omitempty" yaml:"templates,omitempty"`
-	// +docsgen:usePlainTextLogger
-	// Whether to use the plain text logger. If set to false, the log output will include
-	// log level and timestamp.
-	UsePlainTextLogger bool `json:"usePlainTextLogger" yaml:"usePlainTextLogger"`
+	// +docsgen:defaultLogMode
+	// The default log mode to use when running executables.
+	// This can either be `hidden`, `json`, `logfmt` or `text`
+	DefaultLogMode io.LogMode `json:"defaultLogMode,omitempty" yaml:"defaultLogMode,omitempty"`
 }
 
 func (c *UserConfig) Validate() error {
@@ -65,6 +66,9 @@ func (c *UserConfig) Validate() error {
 	}
 	if c.WorkspaceMode != "" && c.WorkspaceMode != WorkspaceModeFixed && c.WorkspaceMode != WorkspaceModeDynamic {
 		return fmt.Errorf("invalid workspace mode %s", c.WorkspaceMode)
+	}
+	if err := c.DefaultLogMode.Validate(); err != nil {
+		return err
 	}
 
 	return nil

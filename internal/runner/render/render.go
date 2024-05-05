@@ -19,6 +19,8 @@ import (
 	"github.com/jahvon/flow/internal/runner"
 )
 
+const appName = "flow renderer"
+
 type renderRunner struct{}
 
 func NewRunner() runner.Runner {
@@ -95,7 +97,8 @@ func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable,
 	}
 
 	ctx.Logger.Infof("Rendering content from file %s", contentFile)
-	if err = components.RunMarkdownView(io.Styles(), buff.String()); err != nil {
+	filename := filepath.Base(contentFile)
+	if err = components.RunMarkdownView(io.Theme(), appName, "file", filename, buff.String()); err != nil {
 		return errors.Wrap(err, "unable to render content")
 	}
 	return nil

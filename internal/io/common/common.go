@@ -25,7 +25,6 @@ func OpenInEditor(path string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
-
 }
 
 func DeprecatedOpenInEditor(container *components.ContainerView, path string) {

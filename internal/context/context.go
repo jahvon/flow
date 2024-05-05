@@ -55,8 +55,8 @@ func NewContext(ctx context.Context) *Context {
 	}
 
 	ctxx, cancel := context.WithCancel(ctx)
-	theme := styles.BaseTheme()
-	theme.UsePlainTextLogger = userConfig.UsePlainTextLogger
+	theme := styles.EverforestTheme()
+	logMode := userConfig.DefaultLogMode
 	return &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
@@ -64,7 +64,7 @@ func NewContext(ctx context.Context) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  cache.NewWorkspaceCache(),
 		ExecutableCache:  cache.NewExecutableCache(),
-		Logger:           io.NewLogger(theme, file.LogsDirPath),
+		Logger:           io.NewLogger(theme, logMode, file.LogsDirPath),
 	}
 }
 
@@ -85,9 +85,6 @@ func (ctx *Context) Finalize() {
 			ctx.Logger.Error(err, fmt.Sprintf("unable to remove temp dir %s", ctx.ProcessTmpDir))
 		}
 	}
-	if ctx.InteractiveContainer != nil {
-		ctx.InteractiveContainer.Finalize()
-	}
 	if err := ctx.Logger.Flush(); err != nil {
 		if errors.Is(err, os.ErrClosed) {
 			return
@@ -100,7 +97,7 @@ func ExpandRef(ctx *Context, ref config.Ref) config.Ref {
 	id := ref.GetID()
 	ws, ns, name := config.ParseExecutableID(id)
 	if ws == "" {
-		ws = ctx.UserConfig.CurrentWorkspace
+		ws = ctx.CurrentWorkspace.AssignedName()
 	}
 	if ns == "" {
 		ns = ctx.UserConfig.CurrentNamespace

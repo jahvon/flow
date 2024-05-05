@@ -1,3 +1,4 @@
+//nolint:gocritic
 package library
 
 import (
@@ -52,7 +53,7 @@ func (l *Library) setVisibleExecs() {
 	}
 
 	curNs := l.filter.Namespace
-	if l.showNamespaces && len(l.visibleNamespaces) > 0 {
+	if l.showNamespaces && len(l.visibleNamespaces) > 0 { //nolint:nestif
 		if label := l.visibleNamespaces[l.currentNamespace]; label != "" {
 			if label == withoutNamespaceLabel {
 				curNs = ""
@@ -102,7 +103,7 @@ func (l *Library) setVisibleWorkspaces() {
 		labels = append(labels, ws.AssignedName())
 	}
 	slices.Sort(labels)
-	l.visibleWorkspaces = append(prepend, labels...)
+	l.visibleWorkspaces = append(prepend, labels...) //nolint:gocritic
 }
 
 func (l *Library) setVisibleNamespaces() {
@@ -139,5 +140,5 @@ func (l *Library) setVisibleNamespaces() {
 	if someWithoutNs {
 		prepend = append(prepend, withoutNamespaceLabel)
 	}
-	l.visibleNamespaces = append(prepend, labels...)
+	l.visibleNamespaces = append(prepend, labels...) //nolint:gocritic
 }

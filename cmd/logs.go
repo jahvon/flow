@@ -28,7 +28,7 @@ var logsCmd = &cobra.Command{
 		}
 		if interactiveUIEnabled() {
 			state := &components.TerminalState{
-				Theme:  io.Styles(),
+				Theme:  io.Theme(),
 				Height: curCtx.InteractiveContainer.Height(),
 				Width:  curCtx.InteractiveContainer.Width(),
 			}

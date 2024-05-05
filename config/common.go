@@ -273,11 +273,3 @@ func (r Ref) Equals(other Ref) bool {
 
 	return r.GetID() == other.GetID()
 }
-
-type LogMode string
-
-const (
-	NoLogMode         LogMode = "none"
-	StructuredLogMode LogMode = "structured"
-	RawLogMode        LogMode = "raw"
-)

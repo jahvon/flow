@@ -13,7 +13,7 @@ func NewUserConfigView(
 	format components.Format,
 ) components.TeaModel {
 	state := &components.TerminalState{
-		Theme:  io.Styles(),
+		Theme:  io.Theme(),
 		Height: container.Height(),
 		Width:  container.Width(),
 	}

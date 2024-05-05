@@ -1,3 +1,4 @@
+//nolint:gocognit,gocritic,nestif
 package library
 
 import (
@@ -8,17 +9,14 @@ import (
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/styles"
 
 	"github.com/jahvon/flow/config"
 )
 
 const (
-	// heightPadding is used when determining the height of the panes.
-	// It is used to account for the header and footer
-	heightPadding = 4
 	// widthPadding is used when determining the width of the panes.
-	// It is used to account for the padding on the left and right of the panes
+	// It is used to account for the spacing on left/right spacing of the panes
 	widthPadding = 4
 
 	allWorkspacesLabel    = "all workspaces"
@@ -32,20 +30,27 @@ const (
 	paneTwoAndThreeHelp = "[ e: edit ] [ c: copy ref ]  ● [ f: change format ]"
 )
 
+var (
+	// heightPadding is used when determining the height of the panes.
+	// It is used to account for the header and footer
+	heightPadding = styles.HeaderHeight + styles.FooterHeight
+)
+
 func (l *Library) View() string {
 	if l.loadingScreen != nil {
 		return l.loadingScreen.View()
 	}
 
-	l.paneZeroViewport.Style = paneStyle(l.currentPane == 0, 0)
+	l.paneZeroViewport.Style = paneStyle(0, l.theme)
 	l.paneZeroViewport.SetContent(l.paneZeroContent())
 
-	l.paneOneViewport.Style = paneStyle(l.currentPane == 1, 1)
+	l.paneOneViewport.Style = paneStyle(1, l.theme)
 	l.paneOneViewport.SetContent(l.paneOneContent())
 
-	l.paneTwoViewport.Style = paneStyle(l.currentPane == 2, 2)
+	l.paneTwoViewport.Style = paneStyle(2, l.theme)
 	l.paneTwoViewport.SetContent(l.paneTwoContent())
-	header := renderHeader(ctxVal(l.ctx.UserConfig.CurrentWorkspace, l.ctx.UserConfig.CurrentNamespace))
+	v := ctxVal(l.ctx.UserConfig.CurrentWorkspace, l.ctx.UserConfig.CurrentNamespace)
+	header := l.theme.RenderHeader(appName, "ctx", v, l.termWidth)
 	panes := lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		l.paneZeroViewport.View(),
@@ -55,28 +60,25 @@ func (l *Library) View() string {
 	footer := l.footerContent()
 
 	return lipgloss.JoinVertical(lipgloss.Top, header, panes, footer)
-
 }
 
-func (l *Library) SetNotice(notice string, level components.NoticeLevel) {
+func (l *Library) SetNotice(notice string, level styles.NoticeLevel) {
 	if level == "" {
-		level = components.NoticeLevelInfo
+		level = styles.NoticeLevelInfo
 	}
-	l.headerModel.Notice = notice
-	l.headerModel.NoticeLevel = level
-
+	l.noticeText = l.theme.RenderNotice(notice, level)
 }
 
 func (l *Library) paneZeroContent() string {
 	var sb strings.Builder
 	workspaces := l.visibleWorkspaces
 	namespaces := l.visibleNamespaces
-	sb.WriteString(renderPaneTitle("Workspaces", len(workspaces), l.currentPane == 0))
+	sb.WriteString(renderPaneTitle("Workspaces", len(workspaces), l.currentPane == 0, l.theme))
 
 	numWs := len(workspaces)
 	numNs := len(namespaces)
 	if numWs == 0 {
-		sb.WriteString(styles.RenderError("No workspaces found"))
+		sb.WriteString(l.theme.RenderError("No workspaces found"))
 		return sb.String()
 	}
 	paneWidth, _, _ := calculateViewportWidths(l.termWidth)
@@ -90,27 +92,27 @@ func (l *Library) paneZeroContent() string {
 		}
 
 		if uint(i) == l.currentWorkspace {
-			sb.WriteString(renderSelection(prefix + truncateText(ws, paneWidth)))
+			sb.WriteString(renderSelection(prefix+truncateText(ws, paneWidth), l.theme))
 			sb.WriteString("\n")
 			if numNs == 1 {
-				sb.WriteString(renderDescription(fmt.Sprintf("  %d namespace", numNs)))
+				sb.WriteString(renderDescription(fmt.Sprintf("  %d namespace", numNs), l.theme))
 			} else {
-				sb.WriteString(renderDescription(fmt.Sprintf("  %d namespaces", numNs)))
+				sb.WriteString(renderDescription(fmt.Sprintf("  %d namespaces", numNs), l.theme))
 			}
 			sb.WriteString("\n")
 
 			if l.showNamespaces {
 				for j, ns := range namespaces {
 					if uint(j) == l.currentNamespace {
-						sb.WriteString(renderSecondarySelection("  > " + truncateText(ns, paneWidth)))
+						sb.WriteString(renderSecondarySelection("  > "+truncateText(ns, paneWidth), l.theme))
 					} else {
-						sb.WriteString(renderInactive("    " + truncateText(ns, paneWidth)))
+						sb.WriteString(renderInactive("    "+truncateText(ns, paneWidth), l.theme))
 					}
 					sb.WriteString("\n")
 				}
 			}
 		} else {
-			sb.WriteString(renderInactive(prefix + truncateText(ws, paneWidth)))
+			sb.WriteString(renderInactive(prefix+truncateText(ws, paneWidth), l.theme))
 			sb.WriteString("\n")
 		}
 		sb.WriteString("\n")
@@ -121,9 +123,9 @@ func (l *Library) paneZeroContent() string {
 
 func (l *Library) paneOneContent() string {
 	var sb strings.Builder
-	sb.WriteString(renderPaneTitle("Executables", len(l.visibleExecutables), l.currentPane == 1))
+	sb.WriteString(renderPaneTitle("Executables", len(l.visibleExecutables), l.currentPane == 1, l.theme))
 	if len(l.visibleExecutables) == 0 {
-		sb.WriteString(styles.RenderError("No executables found"))
+		sb.WriteString(l.theme.RenderError("No executables found"))
 		return sb.String()
 	}
 
@@ -131,9 +133,9 @@ func (l *Library) paneOneContent() string {
 
 	for i, ex := range l.visibleExecutables {
 		if uint(i) == l.currentExecutable {
-			sb.WriteString(renderSelection("* " + truncateText(ex.Ref().GetID(), paneWidth)))
+			sb.WriteString(renderSelection("* "+truncateText(ex.Ref().GetID(), paneWidth), l.theme))
 		} else {
-			sb.WriteString(renderInactive("  " + truncateText(ex.Ref().GetID(), paneWidth)))
+			sb.WriteString(renderInactive("  "+truncateText(ex.Ref().GetID(), paneWidth), l.theme))
 		}
 		sb.WriteString("\n")
 	}
@@ -146,21 +148,23 @@ func (l *Library) paneTwoContent() string {
 	}
 
 	_, _, maxWidth := calculateViewportWidths(l.termWidth)
+	mdStyles, err := l.theme.MarkdownStyleJSON()
+	if err != nil {
+		return l.theme.RenderError(fmt.Sprintf("unable to render markdown: %s", err.Error()))
+	}
 	renderer, err := glamour.NewTermRenderer(
-		glamour.WithStylesFromJSONBytes([]byte(styles.MarkdownStyleJSON)),
+		glamour.WithStylesFromJSONBytes([]byte(mdStyles)),
 		glamour.WithWordWrap(maxWidth-2),
 	)
 	if err != nil {
-		l.ctx.Logger.Error(err, "unable to create term renderer")
-		return styles.RenderError("unable to render markdown")
+		return l.theme.RenderError(fmt.Sprintf("unable to render markdown: %s", err.Error()))
 	}
 
 	ex := l.visibleExecutables[l.currentExecutable]
 	content := ex.Markdown()
 	viewStr, err := renderer.Render(content)
 	if err != nil {
-		l.ctx.Logger.Error(err, "unable to render markdown")
-		return styles.RenderError("unable to render markdown")
+		return l.theme.RenderError(fmt.Sprintf("unable to render markdown: %s", err.Error()))
 	}
 
 	return viewStr
@@ -171,18 +175,20 @@ func (l *Library) footerContent() string {
 	switch l.currentPane {
 	case 0:
 		if help && l.showNamespaces {
-			return renderFooter(fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, paneOneExpandedHelp))
+			return l.theme.RenderFooter(
+				fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, paneOneExpandedHelp), l.termWidth,
+			)
 		} else if help {
-			return renderFooter(fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, paneOneHelp))
+			return l.theme.RenderFooter(fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, paneOneHelp), l.termWidth)
 		} else if l.currentWorkspace < uint(len(l.visibleWorkspaces)) {
 			ws := l.visibleWorkspaces[l.currentWorkspace]
 			if ws == allWorkspacesLabel {
 				break
 			}
 			var wsCfg *config.WorkspaceConfig
-			for _, w := range l.allWorkspaces {
+			for i, w := range l.allWorkspaces {
 				if w.AssignedName() == ws {
-					wsCfg = &w
+					wsCfg = &l.allWorkspaces[i]
 				}
 			}
 			if wsCfg == nil {
@@ -201,11 +207,13 @@ func (l *Library) footerContent() string {
 			} else {
 				info = fmt.Sprintf("%s -> %s", wsCfg.DisplayName, path)
 			}
-			return renderFooter(fmt.Sprintf("%s ● %s", footerPrefix, info))
+			return l.theme.RenderFooter(fmt.Sprintf("%s ● %s", footerPrefix, info), l.termWidth)
 		}
 	case 1, 2:
 		if help {
-			return renderFooter(fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, paneTwoAndThreeHelp))
+			return l.theme.RenderFooter(
+				fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, paneTwoAndThreeHelp), l.termWidth,
+			)
 		} else if l.currentExecutable < uint(len(l.visibleExecutables)) {
 			exec := l.visibleExecutables[l.currentExecutable]
 			path, err := relativePathFromWd(exec.DefinitionPath())
@@ -213,10 +221,10 @@ func (l *Library) footerContent() string {
 				l.ctx.Logger.Error(err, "unable to get relative path from wd")
 				break
 			}
-			return renderFooter(fmt.Sprintf("%s ● %s", footerPrefix, path))
+			return l.theme.RenderFooter(fmt.Sprintf("%s ● %s", footerPrefix, path), l.termWidth)
 		}
 	}
-	return renderFooter(footerPrefix)
+	return l.theme.RenderFooter(footerPrefix, l.termWidth)
 }
 
 func relativePathFromWd(path string) (string, error) {

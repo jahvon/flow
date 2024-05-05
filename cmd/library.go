@@ -8,6 +8,7 @@ import (
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/cmd/flags"
+	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/library"
 )
 
@@ -51,7 +52,9 @@ var libraryCmd = &cobra.Command{
 				Namespace: nsFilter,
 				Verb:      config.Verb(verbFilter),
 				Tags:      tagsFilter,
-			})
+			},
+			io.Theme(),
+		)
 		program := tea.NewProgram(
 			libraryModel,
 			tea.WithAltScreen(),

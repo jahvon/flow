@@ -3,92 +3,51 @@ package library
 import (
 	"fmt"
 	"math"
-	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	tuikitStyles "github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/styles"
+	"github.com/mattn/go-runewidth"
 )
 
-var styles = tuikitStyles.BaseTheme()
-
-func renderSelection(s string) string {
-	color := styles.PrimaryColor
-	style := lipgloss.NewStyle().Foreground(color)
+func renderSelection(s string, theme styles.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.PrimaryColor)
 	return style.Render(s)
 }
 
-func renderSecondarySelection(s string) string {
-	color := styles.SecondaryColor
-	style := lipgloss.NewStyle().Foreground(color)
+func renderSecondarySelection(s string, theme styles.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.TertiaryColor)
 	return style.Render(s)
 }
 
-func renderInactive(s string) string {
-	color := styles.White
-	style := lipgloss.NewStyle().Foreground(color)
+func renderInactive(s string, theme styles.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.Gray)
 	return style.Render(s)
 }
 
-func renderDescription(s string) string {
-	color := styles.Gray
-	style := lipgloss.NewStyle().Foreground(color)
+func renderDescription(s string, theme styles.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.BodyColor)
 	return style.Render(s)
 }
 
-func renderPaneTitle(s string, count int, active bool) string {
-	var bg, fg lipgloss.AdaptiveColor
+func renderPaneTitle(s string, count int, active bool, theme styles.Theme) string {
 	var title string
-	if active {
-		bg = styles.PrimaryColor
-	} else {
-		bg = styles.TertiaryColor
-	}
-	fg = styles.Black
-
 	if count == 0 {
 		title = s
 	} else {
 		title = fmt.Sprintf("%s (%d)", s, count)
 	}
-	style := lipgloss.NewStyle().Background(bg).Foreground(fg).Padding(0, 1)
+	style := lipgloss.NewStyle().Foreground(theme.SecondaryColor).Padding(0, 1).Bold(true)
+	if active {
+		style = style.Underline(true)
+	}
 	return style.Render(title) + "\n\n"
-
 }
 
-func renderHeader(ctx string) string {
-	prefixBlock := lipgloss.NewStyle().
-		Width(1).Height(1).
-		Background(styles.Gray).
-		Foreground(styles.Gray).
-		BorderStyle(lipgloss.RoundedBorder()).Inline(true).Faint(true)
-	prefix := strings.Repeat(prefixBlock.Render("+"), 20)
-	style := lipgloss.NewStyle().Padding(0, 2).
-		Background(styles.PrimaryColor).
-		Foreground(styles.TertiaryColor).Inline(true)
-	style = style.Align(lipgloss.Center)
-	return prefix + style.Bold(true).Render("flow") + style.Render(ctx)
-}
-
-func renderFooter(s string) string {
-	style := lipgloss.NewStyle().Padding(1, 1).Foreground(styles.Gray)
-	return style.Render(s)
-}
-
-func paneStyle(active bool, pos int) lipgloss.Style {
+func paneStyle(pos int, theme styles.Theme) lipgloss.Style {
 	style := lipgloss.NewStyle().Padding(0, 1)
-	switch pos {
-	case 0:
-		style = style.BorderStyle(lipgloss.NormalBorder()).
-			BorderTop(true).BorderBottom(true).
-			BorderRight(false).BorderLeft(true)
-	case 1:
-		style = style.BorderStyle(lipgloss.NormalBorder()).
-			BorderTop(true).BorderBottom(true).
-			BorderRight(false).BorderLeft(false)
-	case 2:
-		style = style.BorderStyle(lipgloss.NormalBorder()).
-			BorderTop(true).BorderBottom(true).
-			BorderRight(true).BorderLeft(true)
+	if pos == 2 {
+		style = style.BorderStyle(lipgloss.OuterHalfBlockBorder()).
+			BorderForeground(theme.BorderColor).BorderLeft(true)
 	}
 
 	return style
@@ -102,12 +61,20 @@ func calculateViewportWidths(termWidth int) (int, int, int) {
 }
 
 func truncateText(s string, w int) string {
-	if len(s) < 10 {
-		// Don't truncate very short strings
+	padding := 10
+	if runewidth.StringWidth(s) <= w-padding {
+		// Don't truncate strings that fit
 		return s
 	}
-	if len(s) > w {
-		return s[:w-3] + "..."
+
+	runes := []rune(s)
+	width := 0
+	for i := len(runes) - 1; i >= 0; i-- {
+		r := runes[i]
+		width += runewidth.RuneWidth(r)
+		if width >= w-padding {
+			return "..." + string(runes[i+1:])
+		}
 	}
-	return s
+	return string(runes)
 }

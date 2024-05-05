@@ -6,32 +6,34 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/styles"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 )
 
+const (
+	appName = "flow library"
+)
+
 type Library struct {
-	ctx                   *context.Context
-	termWidth, termHeight int
+	ctx                      *context.Context
+	termWidth, termHeight    int
+	noticeText               string
+	showHelp, showNamespaces bool
 
-	allWorkspaces  config.WorkspaceConfigList
-	allExecutables config.ExecutableList
-	curWsConfig    *config.WorkspaceConfig
-
-	filter             Filter
-	showNamespaces     bool
 	visibleWorkspaces  []string
 	visibleNamespaces  []string
 	visibleExecutables config.ExecutableList
+	allWorkspaces      config.WorkspaceConfigList
+	allExecutables     config.ExecutableList
+	filter             Filter
+	theme              styles.Theme
+	selectedWsConfig   *config.WorkspaceConfig
 
-	headerModel   components.Header
-	loadingScreen tea.Model
-	infoText      string
-	showHelp      bool
-
-	paneZeroViewport, paneOneViewport, paneTwoViewport                 viewport.Model
 	currentPane, currentWorkspace, currentNamespace, currentExecutable uint
+	paneZeroViewport, paneOneViewport, paneTwoViewport                 viewport.Model
+	loadingScreen                                                      tea.Model
 }
 
 type Filter struct {
@@ -45,28 +47,23 @@ func NewLibrary(
 	workspaces config.WorkspaceConfigList,
 	execs config.ExecutableList,
 	filter Filter,
+	theme styles.Theme,
 ) *Library {
 	p1 := viewport.New(0, 0)
 	p2 := viewport.New(0, 0)
 	p3 := viewport.New(0, 0)
-	headerModel := components.Header{
-		Styles: styles,
-		Name:   "flow",
-		CtxKey: "ctx",
-		CtxVal: ctxVal(ctx.UserConfig.CurrentWorkspace, ctx.UserConfig.CurrentNamespace),
-	}
-	loadingModel := components.NewLoadingView("Loading...", styles)
+	loadingModel := components.NewLoadingView("Loading...", theme)
 
 	return &Library{
 		ctx:              ctx,
 		allWorkspaces:    workspaces,
 		allExecutables:   execs,
 		filter:           filter,
-		headerModel:      headerModel,
 		loadingScreen:    loadingModel,
 		paneZeroViewport: p1,
 		paneOneViewport:  p2,
 		paneTwoViewport:  p3,
+		theme:            theme,
 	}
 }
 

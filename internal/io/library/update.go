@@ -1,3 +1,4 @@
+//nolint:funlen,gocritic,gocognit,gocyclo,cyclop
 package library
 
 import (
@@ -5,8 +6,9 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
-	"github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/styles"
 	"golang.design/x/clipboard"
 
 	"github.com/jahvon/flow/config/file"
@@ -18,15 +20,15 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds := make([]tea.Cmd, 0)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		l.termWidth = msg.Width - widthPadding
-		l.termHeight = msg.Height - heightPadding
-		p0, p1, p2 := calculateViewportWidths(l.termWidth)
+		l.termWidth = msg.Width
+		l.termHeight = msg.Height
+		p0, p1, p2 := calculateViewportWidths(l.termWidth - widthPadding)
 		l.paneZeroViewport.Width = p0
 		l.paneOneViewport.Width = p1
 		l.paneTwoViewport.Width = p2
-		l.paneZeroViewport.Height = l.termHeight
-		l.paneOneViewport.Height = l.termHeight
-		l.paneTwoViewport.Height = l.termHeight
+		l.paneZeroViewport.Height = l.termHeight - heightPadding
+		l.paneOneViewport.Height = l.termHeight - heightPadding
+		l.paneTwoViewport.Height = l.termHeight - heightPadding
 		l.loadingScreen = nil
 	case components.TickMsg:
 		cmds = append(cmds, tea.Tick(time.Second, func(t time.Time) tea.Msg {
@@ -44,6 +46,12 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				break
 			}
 			l.currentPane--
+
+			// Reset the current executable when switching back to the workspaces pane
+			if l.currentPane == 0 {
+				l.currentExecutable = 0
+				l.paneOneViewport.GotoTop()
+			}
 		case tea.KeyRight.String():
 			if l.currentPane == 2 {
 				break
@@ -75,7 +83,6 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	cmds = append(cmds, wsCmd, execCmd)
 	return l, tea.Batch(cmds...)
-
 }
 
 func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
@@ -90,16 +97,16 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 	}
 
 	curWs := l.visibleWorkspaces[l.currentWorkspace]
-	curWsCfg := l.curWsConfig
+	curWsCfg := l.selectedWsConfig
 	wsCanMoveUp := numWs > 1 && l.currentWorkspace >= 1 && l.currentWorkspace < uint(numWs)
-	wsCanMoveDown := numWs > 1 && l.currentWorkspace >= 0 && l.currentWorkspace < uint(numWs-1)
+	wsCanMoveDown := numWs > 1 && l.currentWorkspace < uint(numWs-1)
 
 	var curNs string
 	if len(l.visibleNamespaces) > 0 {
 		curNs = l.visibleNamespaces[l.currentNamespace]
 	}
 	nsCanMoveUp := curNs != "" && numNs > 1 && l.currentNamespace >= 1 && l.currentNamespace < uint(numNs)
-	nsCanMoveDown := curNs != "" && numNs > 1 && l.currentNamespace >= 0 && l.currentNamespace < uint(numNs-1)
+	nsCanMoveDown := curNs != "" && numNs > 1 && l.currentNamespace < uint(numNs-1)
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -125,17 +132,17 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			}
 		case "o":
 			if curWsCfg == nil {
-				l.SetNotice("no workspace selected", components.NoticeLevelError)
+				l.SetNotice("no workspace selected", styles.NoticeLevelError)
 				break
 			}
 
 			if err := open.Open(curWsCfg.Location(), false); err != nil {
 				l.ctx.Logger.Error(err, "unable to open workspace")
-				l.SetNotice("unable to open workspace", components.NoticeLevelError)
+				l.SetNotice("unable to open workspace", styles.NoticeLevelError)
 			}
 		case "e":
 			if curWsCfg == nil {
-				l.SetNotice("no workspace selected", components.NoticeLevelError)
+				l.SetNotice("no workspace selected", styles.NoticeLevelError)
 				break
 			}
 
@@ -143,18 +150,18 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				filepath.Join(curWsCfg.Location(), file.WorkspaceConfigFileName),
 			); err != nil {
 				l.ctx.Logger.Error(err, "unable to open workspace in editor")
-				l.SetNotice("unable to open workspace in editor", components.NoticeLevelError)
+				l.SetNotice("unable to open workspace in editor", styles.NoticeLevelError)
 			}
 		case "s":
 			if curWsCfg == nil {
-				l.SetNotice("no workspace selected", components.NoticeLevelError)
+				l.SetNotice("no workspace selected", styles.NoticeLevelError)
 				break
 			}
 
 			curCfg, err := file.LoadUserConfig()
 			if err != nil {
 				l.ctx.Logger.Error(err, "unable to load user config")
-				l.SetNotice("unable to load user config", components.NoticeLevelError)
+				l.SetNotice("unable to load user config", styles.NoticeLevelError)
 				break
 			}
 
@@ -162,16 +169,14 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			case l.showNamespaces && curNs == withoutNamespaceLabel:
 				curCfg.CurrentNamespace = ""
 			case l.showNamespaces && curNs == allNamespacesLabel:
-				l.SetNotice("no namespace selected", components.NoticeLevelError)
-				break
+				l.SetNotice("no namespace selected", styles.NoticeLevelError)
 			case l.showNamespaces && curNs != "":
 				curCfg.CurrentNamespace = curNs
 			case !l.showNamespaces && curWs == allWorkspacesLabel:
-				l.SetNotice("no workspace selected", components.NoticeLevelError)
-				break
+				l.SetNotice("no workspace selected", styles.NoticeLevelError)
 			case !l.showNamespaces && curWs != "":
 				if curWs != curWsCfg.AssignedName() {
-					l.SetNotice("current workspace out of sync", components.NoticeLevelError)
+					l.SetNotice("current workspace out of sync", styles.NoticeLevelError)
 					break
 				}
 				curCfg.CurrentWorkspace = curWsCfg.AssignedName()
@@ -179,12 +184,13 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 
 			if err := file.WriteUserConfig(curCfg); err != nil {
 				l.ctx.Logger.Error(err, "unable to write user config")
-				l.SetNotice("unable to write user config", components.NoticeLevelError)
+				l.SetNotice("unable to write user config", styles.NoticeLevelError)
 				break
 			}
 
-			l.headerModel.CtxVal = ctxVal(curCfg.CurrentWorkspace, curCfg.CurrentNamespace)
-			l.SetNotice("context updated", components.NoticeLevelInfo)
+			l.ctx.UserConfig.CurrentWorkspace = curCfg.CurrentWorkspace
+			l.ctx.UserConfig.CurrentNamespace = curCfg.CurrentNamespace
+			l.SetNotice("context updated", styles.NoticeLevelInfo)
 		}
 	}
 
@@ -210,9 +216,9 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 
 	curExec := l.visibleExecutables[l.currentExecutable]
 	canMoveUp := numExecs > 1 && l.currentExecutable >= 1 && l.currentExecutable < uint(numExecs)
-	canMoveDown := numExecs > 1 && l.currentExecutable >= 0 && l.currentExecutable < uint(numExecs-1)
+	canMoveDown := numExecs > 1 && l.currentExecutable < uint(numExecs-1)
 
-	switch msg := msg.(type) {
+	switch msg := msg.(type) { //nolint:gocritic
 	case tea.KeyMsg:
 		key := msg.String()
 
@@ -227,28 +233,28 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			}
 		case "e":
 			if curExec == nil {
-				l.SetNotice("no executable selected", components.NoticeLevelError)
+				l.SetNotice("no executable selected", styles.NoticeLevelError)
 				break
 			}
 
 			if err := common.OpenInEditor(curExec.DefinitionPath()); err != nil {
 				l.ctx.Logger.Error(err, "unable to open executable in editor")
-				l.SetNotice("unable to open executable in editor", components.NoticeLevelError)
+				l.SetNotice("unable to open executable in editor", styles.NoticeLevelError)
 			}
 		case "c":
 			if curExec == nil {
-				l.SetNotice("no executable selected", components.NoticeLevelError)
+				l.SetNotice("no executable selected", styles.NoticeLevelError)
 				break
 			}
 
 			if err := clipboard.Init(); err != nil {
 				l.ctx.Logger.Error(err, "unable to initialize clipboard")
-				l.SetNotice("unable to initialize clipboard", components.NoticeLevelError)
+				l.SetNotice("unable to initialize clipboard", styles.NoticeLevelError)
 				break
 			}
 
 			clipboard.Write(clipboard.FmtText, []byte(curExec.Ref().String()))
-			l.SetNotice("copied reference to clipboard", components.NoticeLevelInfo)
+			l.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
 		}
 	}
 

@@ -29,13 +29,10 @@ var configInitCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   "Initialize the flow global configuration.",
 	Args:    cobra.NoArgs,
+	PreRun:  initInteractiveCommand,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Print()
-		}
-		inputs, err := components.ProcessInputs(io.Styles(), &components.TextInput{
+		inputs, err := components.ProcessInputs(io.Theme(), &components.TextInput{
 			Key:    "confirm",
 			Prompt: "This will overwrite your current flow configurations. Are you sure you want to continue? (y/n)",
 		})
@@ -60,15 +57,12 @@ var workspaceInitCmd = &cobra.Command{
 	Aliases: []string{"ws"},
 	Short:   "Initialize and add a workspace to the list of known workspaces.",
 	Args:    cobra.ExactArgs(2),
+	PreRun:  initInteractiveCommand,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		name := args[0]
 		path := args[1]
 
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Print()
-		}
 		userConfig := curCtx.UserConfig
 		if _, found := userConfig.Workspaces[name]; found {
 			logger.Fatalf("workspace %s already exists at %s", name, userConfig.Workspaces[name])
@@ -134,19 +128,15 @@ This name will become the name of the file containing the copied executable defi
 
 One one of -f or -t must be provided and must point to a valid executable definition template.
 The -p flag can be used to specify a sub-path within the workspace to create the executable definition and its artifacts.`,
-	Args: cobra.ExactArgs(2),
+	Args:   cobra.ExactArgs(2),
+	PreRun: initInteractiveCommand,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		workspaceName := args[0]
 		definitionName := args[1]
 		subPath := getFlagValue[string](cmd, *flags.SubPathFlag)
 
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Notice = fmt.Sprintf("Adding '%s' executables to '%s' workspace", definitionName, workspaceName)
-			header.Print()
-		}
-
+		logger.Infof("Adding '%s' executables to '%s' workspace", definitionName, workspaceName)
 		templateFlag := getFlagValue[string](cmd, *flags.TemplateFlag)
 		fileFlag := getFlagValue[string](cmd, *flags.FileFlag)
 		var definitionPath string
@@ -198,7 +188,7 @@ The -p flag can be used to specify a sub-path within the workspace to create the
 					Placeholder: entry.Default,
 				})
 			}
-			inputs, err = components.ProcessInputs(io.Styles(), inputs...)
+			inputs, err = components.ProcessInputs(io.Theme(), inputs...)
 			if err != nil {
 				logger.FatalErr(err)
 			}
@@ -223,15 +213,12 @@ The -p flag can be used to specify a sub-path within the workspace to create the
 }
 
 var vaultInitCmd = &cobra.Command{
-	Use:   "vault",
-	Short: "Create a new flow secret vault.",
-	Args:  cobra.NoArgs,
+	Use:    "vault",
+	Short:  "Create a new flow secret vault.",
+	Args:   cobra.NoArgs,
+	PreRun: initInteractiveCommand,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Print()
-		}
 		generatedKey, err := crypto.GenerateKey()
 		if err != nil {
 			logger.FatalErr(err)
