@@ -165,7 +165,7 @@ type Executable struct {
 	Timeout     time.Duration `yaml:"timeout,omitempty"`
 	// +docsgen:typeExec
 	// The type of executable. Only one type can be set.
-	Type *ExecutableTypeSpec `yaml:"type,omitempty"`
+	Type *ExecutableTypeSpec `yaml:",inline,omitempty"`
 
 	workspace, namespace, workspacePath, definitionPath string
 }

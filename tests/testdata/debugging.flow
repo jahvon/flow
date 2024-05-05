@@ -6,9 +6,8 @@ executables:
   - verb: run
     name: shell-input
     description: Accept user input from the shell
-    type:
-      exec:
-        cmd: |
-            echo "Enter your name:"
-            read name
-            echo "Hello, $name!"
+    exec:
+      cmd: |
+          echo "Enter your name:"
+          read name
+          echo "Hello, $name!"

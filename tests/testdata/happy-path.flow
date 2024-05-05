@@ -8,94 +8,86 @@ executables:
     aliases:
       - ip
     description: Print a simple message from an inline exec definition
-    type:
-      exec:
-        cmd: |
-          echo "Hello from an inline definition!"
+    exec:
+      cmd: |
+        echo "Hello from an inline definition!"
   - verb: run
     name: file-print
     aliases:
       - fp
     description: Print a simple message from a file exec definition
-    type:
-      exec:
-        file: hello.sh
-        params:
-          - text: flow
-            envKey: NAME
+    exec:
+      file: hello.sh
+      params:
+        - text: flow
+          envKey: NAME
   - verb: start
     name: serial-print
     aliases:
       - sp
     description: Print a series of messages from a serial exec definition
-    type:
-      serial:
-        refs:
-          - run tests:inline-print
-          - run tests:file-print
+    serial:
+      refs:
+        - run tests:inline-print
+        - run tests:file-print
   - verb: start
     name: parallel-print
     aliases:
       - pp
     description: Print a messages in parallel from a parallel exec definition
-    type:
-      parallel:
-        refs:
-          - run tests:inline-print
-          - run tests:file-print
+    parallel:
+      refs:
+        - run tests:inline-print
+        - run tests:file-print
   - verb: run
     name: simple-request
     description: Send a simple REST request
-    type:
-      request:
-        method: POST
-        url: https://httpbin.org/post
-        headers:
-          Content-Type: application/json
-        body: '{"hello": "world"}'
-        logResponse: true
-        validStatusCodes:
-          - 200
+    request:
+      method: POST
+      url: https://httpbin.org/post
+      headers:
+        Content-Type: application/json
+      body: '{"hello": "world"}'
+      logResponse: true
+      validStatusCodes:
+        - 200
   - verb: show
     name: welcome
     description: Render an example markdown template
-    type:
-      render:
-        templateFile: template.md
-        templateDataFile: template-data.yaml
-        params:
-          - prompt: What is your name?
-            envKey: NAME
-          - text: Hi
-            envKey: GREETING
+    render:
+      templateFile: template.md
+      templateDataFile: template-data.yaml
+      params:
+        - prompt: What is your name?
+          envKey: NAME
+        - text: Hi
+          envKey: GREETING
   - verb: run
     name: secret-printer
     description: |
       Print a secret stored in the vault.
       This required the flowTestSecret to be set in the vault.
-    type:
-      exec:
-        cmd: |
-          echo "Value: ${TEST_SECRET}"
-        params:
-          - secretRef: flowTestSecret
-            envKey: TEST_SECRET
+    exec:
+      cmd: |
+        echo "Value: ${TEST_SECRET}"
+      params:
+        - secretRef: flowTestSecret
+          envKey: TEST_SECRET
   - verb: run
     name: arg-echo
     description: |
       Echo the value of the provided arguments
-    type:
-      exec:
-        cmd: |
-          echo "Arg1: $TEST_ARG1, Arg2: $TEST_ARG2, Arg3: $TEST_ARG3"
-        args:
-          - envKey: TEST_ARG1
-            pos: 1
-            required: true
-          - envKey: TEST_ARG2
-            pos: 2
-            required: false
-            default: "green"
-          - envKey: TEST_ARG3
-            flag: arg3
-            default: "grape"
+    exec:
+      cmd: |
+        echo "Arg1: $TEST_ARG1, Arg2: $TEST_ARG2, Arg3: $TEST_ARG3"
+      args:
+        - envKey: TEST_ARG1
+          pos: 1
+          required: true
+        - envKey: TEST_ARG2
+          pos: 2
+          required: false
+          default: "green"
+        - envKey: TEST_ARG3
+          flag: arg3
+          default: "grape"

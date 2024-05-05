@@ -83,26 +83,125 @@ The visibility of the executables to Flow.<br>If not set, the visibility will de
 | tags | Array (string) | A list of tags.<br>Tags can be used with list commands to filter returned data. |
 | description | String |  |
 | visibility | [Visibility](#Visibility) |  |
-| type | [ExecutableTypeSpec](#ExecutableTypeSpec) |  |
-
-
--------
-## ExecutableTypeSpec
-
-**Type**: Object
-
-
-
-### Fields
-
-| Key | Type | Description |
-| ---- | ---- | ----------- |
 | exec | [ExecExecutableType](#ExecExecutableType) |  |
 | launch | [LaunchExecutableType](#LaunchExecutableType) |  |
 | request | [RequestExecutableType](#RequestExecutableType) |  |
 | render | [RenderExecutableType](#RenderExecutableType) |  |
 | serial | [SerialExecutableType](#SerialExecutableType) |  |
 | parallel | [ParallelExecutableType](#ParallelExecutableType) |  |
+
+
+-------
+## ExecExecutableType
+
+**Type**: Object
+
+Standard executable type. Runs a command/file in a subprocess.
+
+### Fields
+
+| Key | Type | Description |
+| ---- | ---- | ----------- |
+| dir | String | The directory to execute the command in.<br>If unset, the directory of the executable definition will be used.<br>If set to `f:tmp`, a temporary directory will be created for the process.<br>If prefixed with `./`, the path will be relative to the current working directory.<br>If prefixed with `//`, the path will be relative to the workspace root.<br>Environment variables in the path will be expended at runtime. |
+| params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
+| cmd | String |  |
+| file | String |  |
+| logMode | [LogMode](#LogMode) |  |
+
+
+-------
+## LaunchExecutableType
+
+**Type**: Object
+
+Launches an application or opens a URI.
+
+### Fields
+
+| Key | Type | Description |
+| ---- | ---- | ----------- |
+| params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
+| app | String |  |
+| uri | String |  |
+| wait | Boolean |  |
+
+
+-------
+## ParallelExecutableType
+
+**Type**: Object
+
+Runs a list of executables in parallel.
+
+### Fields
+
+| Key | Type | Description |
+| ---- | ---- | ----------- |
+| params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
+| refs | Array ([Ref](#Ref)) | List of executables references |
+| maxThreads | Integer |  |
+| failFast | Boolean |  |
+
+
+-------
+## RenderExecutableType
+
+**Type**: Object
+
+Renders a Markdown template with provided data. Requires the Interactive UI.
+
+### Fields
+
+| Key | Type | Description |
+| ---- | ---- | ----------- |
+| dir | String | The directory to execute the command in.<br>If unset, the directory of the executable definition will be used.<br>If set to `f:tmp`, a temporary directory will be created for the process.<br>If prefixed with `./`, the path will be relative to the current working directory.<br>If prefixed with `//`, the path will be relative to the workspace root.<br>Environment variables in the path will be expended at runtime. |
+| params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
+| templateFile | String |  |
+| templateDataFile | String |  |
+
+
+-------
+## RequestExecutableType
+
+**Type**: Object
+
+Makes an HTTP request.
+
+### Fields
+
+| Key | Type | Description |
+| ---- | ---- | ----------- |
+| params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
+| method | String |  |
+| url | String |  |
+| body | String |  |
+| headers | Map (string -> string) |  |
+| responseFile | [RequestResponseFile](#RequestResponseFile) |  |
+| transformResponse | String |  |
+| logResponse | Boolean |  |
+| validStatusCodes | Array (int) |  |
+
+
+-------
+## SerialExecutableType
+
+**Type**: Object
+
+Runs a list of executables in serial.
+
+### Fields
+
+| Key | Type | Description |
+| ---- | ---- | ----------- |
+| params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
+| args | Array ([Argument](#Argument)) |  |
+| refs | Array ([Ref](#Ref)) | List of executables references |
+| failFast | Boolean |  |
 
 
 -------
