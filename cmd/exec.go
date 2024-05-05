@@ -40,6 +40,7 @@ var execCmd = &cobra.Command{
 		runner.RegisterRunner(render.NewRunner())
 		runner.RegisterRunner(serial.NewRunner())
 		runner.RegisterRunner(parallel.NewRunner())
+		initInteractiveCommand(cmd, args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
@@ -80,17 +81,14 @@ var execCmd = &cobra.Command{
 		if err != nil {
 			logger.FatalErr(err)
 		}
-
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Notice = fmt.Sprintf("Executing %s", ref)
-			header.NoticeLevel = components.NoticeLevelInfo
-			header.Print()
+		if envMap == nil {
+			envMap = make(map[string]string)
 		}
+
 		setAuthEnv(executable)
 		textInputs := pendingTextInputs(curCtx, executable)
 		if len(textInputs) > 0 {
-			inputs, err := components.ProcessInputs(io.Styles(), textInputs...)
+			inputs, err := components.ProcessInputs(io.Theme(), textInputs...)
 			if err != nil {
 				logger.FatalErr(err)
 			}
@@ -122,7 +120,7 @@ func init() {
 func setAuthEnv(executable *config.Executable) {
 	if authRequired(curCtx, executable) {
 		resp, err := components.ProcessInputs(
-			io.Styles(),
+			io.Theme(),
 			&components.TextInput{
 				Key:    vault.EncryptionKeyEnvVar,
 				Prompt: "Enter vault encryption key",

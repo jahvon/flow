@@ -29,6 +29,7 @@ func InitUserConfig() error {
 		Interactive: &config.InteractiveConfig{
 			Enabled: true,
 		},
+		DefaultLogMode: "logfmt",
 	}
 
 	_, err := os.Create(UserConfigPath)

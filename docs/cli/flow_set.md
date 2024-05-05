@@ -20,10 +20,10 @@ Update global or workspace configuration values.
 
 * [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
 * [flow set interactive](flow_set_interactive.md)	 - Enable or disable the interactive terminal UI experience.
+* [flow set log-mode](flow_set_log-mode.md)	 - Set the default log mode.
 * [flow set namespace](flow_set_namespace.md)	 - Change the current namespace.
 * [flow set secret](flow_set_secret.md)	 - Update or create a secret in the flow secret vault.
 * [flow set template](flow_set_template.md)	 - Set a template definition for use in flow.
-* [flow set use-plain-text-logger](flow_set_use-plain-text-logger.md)	 - Enable or disable the plain text logger.
 * [flow set workspace](flow_set_workspace.md)	 - Change the current workspace.
 * [flow set workspace-mode](flow_set_workspace-mode.md)	 - Switch between fixed and dynamic workspace modes.
 

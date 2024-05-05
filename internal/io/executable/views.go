@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/styles"
 	"github.com/samber/lo"
 	"golang.design/x/clipboard"
 
@@ -26,20 +27,20 @@ func NewExecutableView(
 					panic(err)
 				}
 				clipboard.Write(clipboard.FmtText, []byte(exec.Ref().String()))
-				container.SetNotice("copied reference to clipboard", components.NoticeLevelInfo)
+				container.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
 				return nil
 			},
 		},
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				common.OpenInEditor(container, exec.DefinitionPath())
+				common.DeprecatedOpenInEditor(container, exec.DefinitionPath())
 				return nil
 			},
 		},
 	}
 	state := &components.TerminalState{
-		Theme:  io.Styles(),
+		Theme:  io.Theme(),
 		Height: container.Height(),
 		Width:  container.Width(),
 	}
@@ -72,7 +73,7 @@ func NewExecutableListView(
 	}
 
 	state := &components.TerminalState{
-		Theme:  io.Styles(),
+		Theme:  io.Theme(),
 		Height: container.Height(),
 		Width:  container.Width(),
 	}

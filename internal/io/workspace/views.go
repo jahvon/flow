@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/styles"
 	"github.com/samber/lo"
 
 	"github.com/jahvon/flow/config"
@@ -32,7 +33,7 @@ func NewWorkspaceView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				common.OpenInEditor(container, filepath.Join(ws.Location(), file.WorkspaceConfigFileName))
+				common.DeprecatedOpenInEditor(container, filepath.Join(ws.Location(), file.WorkspaceConfigFileName))
 				return nil
 			},
 		},
@@ -49,14 +50,14 @@ func NewWorkspaceView(
 					container.HandleError(err)
 				}
 				container.SetContext(fmt.Sprintf("%s/*", ws.AssignedName()))
-				container.SetNotice("workspace updatedd", components.NoticeLevelInfo)
+				container.SetNotice("workspace updatedd", styles.NoticeLevelInfo)
 				return nil
 			},
 		},
 	}
 
 	state := &components.TerminalState{
-		Theme:  io.Styles(),
+		Theme:  io.Theme(),
 		Height: container.Height(),
 		Width:  container.Width(),
 	}
@@ -79,12 +80,13 @@ func NewWorkspaceListView(
 		if !found {
 			return fmt.Errorf("workspace not found")
 		}
+
 		container.SetView(NewWorkspaceView(container, ws, format))
 		return nil
 	}
 
 	state := &components.TerminalState{
-		Theme:  io.Styles(),
+		Theme:  io.Theme(),
 		Height: container.Height(),
 		Width:  container.Width(),
 	}

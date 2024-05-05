@@ -15,6 +15,11 @@ import (
 	"github.com/jahvon/flow/internal/io"
 )
 
+const (
+	appName      = "flow"
+	headerCtxKey = "ctx"
+)
+
 var (
 	curCtx *context.Context
 )
@@ -25,7 +30,23 @@ func interactiveUIEnabled() bool {
 	return !disabled && !envDisabled && curCtx.UserConfig.Interactive != nil && curCtx.UserConfig.Interactive.Enabled
 }
 
-func headerForCurCtx() components.Header {
+func initInteractiveCommand(_ *cobra.Command, _ []string) {
+	if interactiveUIEnabled() {
+		_, _ = fmt.Fprintln(os.Stdout, io.Theme().RenderHeader(appName, headerCtxKey, headerCtxVal(), 0))
+	}
+}
+
+func initInteractiveContainer(_ *cobra.Command, _ []string) {
+	enabled := interactiveUIEnabled()
+	if enabled && curCtx.InteractiveContainer == nil {
+		container := components.InitalizeContainer(
+			curCtx.Ctx, curCtx.CancelFunc, appName, headerCtxKey, headerCtxVal(), io.Theme(),
+		)
+		curCtx.InteractiveContainer = container
+	}
+}
+
+func headerCtxVal() string {
 	ws := curCtx.CurrentWorkspace.AssignedName()
 	ns := curCtx.UserConfig.CurrentNamespace
 	if ws == "" {
@@ -34,20 +55,7 @@ func headerForCurCtx() components.Header {
 	if ns == "" {
 		ns = "*"
 	}
-	return components.Header{
-		Name:   "flow",
-		CtxKey: "ctx",
-		CtxVal: fmt.Sprintf("%s/%s", ws, ns),
-		Styles: io.Styles(),
-	}
-}
-
-func initInteractiveContainer(_ *cobra.Command, _ []string) {
-	enabled := interactiveUIEnabled()
-	if enabled && curCtx.InteractiveContainer == nil {
-		container := components.InitalizeContainer(curCtx.Ctx, curCtx.CancelFunc, headerForCurCtx(), io.Styles())
-		curCtx.InteractiveContainer = container
-	}
+	return fmt.Sprintf("%s/%s", ws, ns)
 }
 
 func waitForExit(_ *cobra.Command, _ []string) {

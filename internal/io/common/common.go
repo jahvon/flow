@@ -13,7 +13,21 @@ import (
 
 var termEditors = []string{"vim", "nvim", "emacs", "nano"}
 
-func OpenInEditor(container *components.ContainerView, path string) {
+func OpenInEditor(path string) error {
+	preferred := os.Getenv("EDITOR")
+	if preferred != "" && !slices.Contains(termEditors, preferred) {
+		return open.OpenWith(preferred, path, false)
+	}
+	if preferred == "" {
+		preferred = "vim"
+	}
+	cmd := exec.Command(preferred, path) // #nosec G204
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
+func DeprecatedOpenInEditor(container *components.ContainerView, path string) {
 	preferred := os.Getenv("EDITOR")
 	if preferred != "" && !slices.Contains(termEditors, preferred) {
 		if err := open.OpenWith(preferred, path, false); err != nil {

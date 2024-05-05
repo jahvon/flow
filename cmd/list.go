@@ -116,14 +116,11 @@ var vaultSecretListCmd = &cobra.Command{
 	Aliases: []string{"scrt"},
 	Short:   "Print a list of secrets in the flow vault.",
 	Args:    cobra.NoArgs,
+	PreRun:  initInteractiveCommand,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := curCtx.Logger
 		asPlainText := getFlagValue[bool](cmd, *flags.OutputSecretAsPlainTextFlag)
 
-		if interactiveUIEnabled() {
-			header := headerForCurCtx()
-			header.Print()
-		}
 		v := vault.NewVault(logger)
 		secrets, err := v.GetAllSecrets()
 		if err != nil {

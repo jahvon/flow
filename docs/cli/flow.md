@@ -22,6 +22,7 @@ See github.com/jahvon/flow for more information.
 * [flow exec](flow_exec.md)	 - Execute a flow by ID.
 * [flow get](flow_get.md)	 - Print a flow entity.
 * [flow init](flow_init.md)	 - Initialize or restore the flow application state.
+* [flow library](flow_library.md)	 - View and manage your library of workspaces and executables.
 * [flow list](flow_list.md)	 - Print a list of flow entities.
 * [flow logs](flow_logs.md)	 - List and view logs for previous flow executions.
 * [flow remove](flow_remove.md)	 - Remove a flow object.

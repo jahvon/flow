@@ -13,15 +13,13 @@ import (
 	"mvdan.cc/sh/v3/syntax"
 
 	"github.com/jahvon/tuikit/io"
-
-	"github.com/jahvon/flow/config"
 )
 
 // RunCmd executes a command in the current shell in a specific directory.
 func RunCmd(
 	commandStr, dir string,
 	envList []string,
-	logMode config.LogMode,
+	logMode io.LogMode,
 	logger io.Logger,
 	logFields map[string]interface{},
 ) error {
@@ -72,7 +70,7 @@ func RunCmd(
 func RunFile(
 	filename, dir string,
 	envList []string,
-	logMode config.LogMode,
+	logMode io.LogMode,
 	logger io.Logger,
 	logFields map[string]interface{},
 ) error {
@@ -126,30 +124,10 @@ func RunFile(
 	return nil
 }
 
-func stdOutWriter(mode config.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
-	switch mode {
-	case config.NoLogMode:
-		return stdio.Discard
-	case config.StructuredLogMode:
-		return io.StdOutWriter{LogFields: logFields, Logger: logger}
-	case config.RawLogMode:
-		return io.StdOutWriter{LogFields: logFields, Logger: logger, AsPlainText: true}
-	default:
-		logger.Errorx("unknown log mode", "mode", string(mode))
-		return stdio.Discard
-	}
+func stdOutWriter(mode io.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
+	return io.StdOutWriter{LogFields: logFields, Logger: logger, LogMode: mode}
 }
 
-func stdErrWriter(mode config.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
-	switch mode {
-	case config.NoLogMode:
-		return stdio.Discard
-	case config.StructuredLogMode:
-		return io.StdErrWriter{LogFields: logFields, Logger: logger}
-	case config.RawLogMode:
-		return io.StdErrWriter{LogFields: logFields, Logger: logger, AsPlainText: true}
-	default:
-		logger.Errorx("unknown log mode", "mode", string(mode))
-		return stdio.Discard
-	}
+func stdErrWriter(mode io.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
+	return io.StdErrWriter{LogFields: logFields, Logger: logger, LogMode: mode}
 }
