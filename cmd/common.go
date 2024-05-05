@@ -47,7 +47,7 @@ func initInteractiveContainer(_ *cobra.Command, _ []string) {
 }
 
 func headerCtxVal() string {
-	ws := curCtx.UserConfig.CurrentWorkspace
+	ws := curCtx.CurrentWorkspace.AssignedName()
 	ns := curCtx.UserConfig.CurrentNamespace
 	if ws == "" {
 		ws = "unk"

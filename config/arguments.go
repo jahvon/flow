@@ -15,10 +15,10 @@ type Argument struct {
 	// String is the default type.
 	Type string `yaml:"type"`
 	// +docsgen:default
-	// The default value of the argument. If the argument is not set, this value will be used.
+	// The default value to use if a value is not set.
 	Default string `yaml:"default"`
 	// +docsgen:required
-	// If true, the argument must be set. If false, the default value will be used if the argument is not set.
+	// If true, a value must be set. If false, the default value will be used if a value is not set.
 	Required bool `yaml:"required"`
 
 	// +docsgen:flag
