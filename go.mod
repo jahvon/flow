@@ -10,7 +10,7 @@ require (
 	github.com/charmbracelet/glamour v0.7.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea
-	github.com/itchyny/gojq v0.12.14
+	github.com/itchyny/gojq v0.12.15
 	github.com/jahvon/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/jahvon/tuikit v0.0.9
 	github.com/mattn/go-runewidth v0.0.15
