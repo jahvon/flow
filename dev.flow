@@ -8,8 +8,7 @@ executables:
     aliases:
       - pc
     description: Run the repo's pre-commit script
-    type:
-      exec:
-        dir: //
-        cmd: |
-          make pre-commit
+    exec:
+      dir: //
+      cmd: |
+        make pre-commit

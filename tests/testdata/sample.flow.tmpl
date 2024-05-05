@@ -13,6 +13,5 @@ executables:
   - verb: run
     name: "{{ .Color }}-msg"
     description: Created from a template in {{ .Workspace }}
-    type:
-      exec:
-        cmd: cat message.txt
+    exec:
+      cmd: cat message.txt
