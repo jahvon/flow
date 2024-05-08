@@ -1,0 +1,44 @@
+visibility: private
+namespace: examples
+executables:
+  - verb: run
+    name: output-exec
+    description: Print a simple message from an inline exec definition
+    exec:
+      cmd: echo "Hello from an inline definition!"
+
+  - verb: run
+    name: input-exec
+    description: Accept user input from the shell
+    exec:
+      cmd: |
+        echo "Enter your name:"
+        read name
+        echo "Hello, $name!"
+
+  - verb: run
+    name: process-exec
+    aliases:
+      - np
+    exec:
+      cmd: |
+        echo "Opening vim..."
+        vim
+        echo "Vim closed."
+
+  - verb: run
+    name: file-exec
+    exec:
+      file: simple-script.sh
+
+  - verb: run
+    name: hidden-exec
+    visibility: hidden
+    exec:
+      file: simple-script.sh
+
+  - verb: run
+    name: internal-exec
+    visibility: internal
+    exec:
+      file: simple-script.sh

@@ -1,0 +1,4 @@
+visibility: private
+namespace: examples
+fromFile:
+  - generated.sh

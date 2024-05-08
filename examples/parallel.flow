@@ -1,0 +1,10 @@
+visibility: private
+namespace: examples
+executables:
+  - verb: start
+    name: parallel-exec
+    parallel:
+      refs:
+        - run examples:output-exec
+        - run examples:input-exec
+        - run examples:internal-exec
