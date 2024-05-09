@@ -1,0 +1,13 @@
+visibility: private
+namespace: example
+executables:
+  - verb: show
+    name: markdown
+    render:
+      templateFile: template.md
+      templateDataFile: template-data.yaml
+      params:
+        - prompt: What is your name?
+          envKey: NAME
+        - text: Hi
+          envKey: GREETING

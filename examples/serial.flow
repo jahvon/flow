@@ -1,0 +1,10 @@
+visibility: private
+namespace: examples
+executables:
+  - verb: start
+    name: serial-exec
+    serial:
+      refs:
+        - run examples:output-exec
+        - run examples:input-exec
+        - run examples:internal-exec

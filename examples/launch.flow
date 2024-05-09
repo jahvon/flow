@@ -1,0 +1,18 @@
+visibility: private
+namespace: examples
+executables:
+  - verb: open
+    name: github
+    launch:
+      uri: https://www.github.com
+
+  - verb: open
+    name: mac-settings
+    launch:
+      app: System Preferences
+
+  - verb: open
+    name: ws-config
+    launch:
+      uri: $FLOW_WORKSPACE_PATH
+      wait: true

@@ -1,0 +1,60 @@
+visibility: private
+namespace: examples
+executables:
+  - verb: run
+    name: simple-request
+    request:
+      method: POST
+      url: https://httpbin.org/post
+      headers:
+        Content-Type: application/json
+      body: '{"hello": "world"}'
+      logResponse: true
+
+  - verb: run
+    name: failed-request
+    request:
+      url: https://httpbin.org/status/500
+      logResponse: true
+      validStatusCodes: [200]
+
+  - verb: run
+    name: saved-request
+    request:
+      method: POST
+      url: https://httpbin.org/post
+      headers:
+        Content-Type: application/json
+      body: '{"hello": "world"}'
+      responseFile:
+        dir: /
+        filename: savedResponse.yaml
+        saveAs: yaml
+
+  - verb: run
+    name: transformed-request
+    request:
+      method: POST
+      url: https://httpbin.org/post
+      body: '{"hello": "world"}'
+      logResponse: true
+      transformResponse: .args.hello = "universe" | .args
+
+  - verb: run
+    name: param-request
+    request:
+      params:
+        - text: flow
+          envKey: NAME
+      method: POST
+      url: https://httpbin.org/anything/$NAME
+      headers:
+        Application: $NAME
+      body: '{"hello": "$NAME"}'
+      logResponse: true
+
+  - verb: run
+    name: timeout-request
+    request:
+      url: https://httpbin.org/delay/10
+      timeout: 5s
