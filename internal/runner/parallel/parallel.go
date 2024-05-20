@@ -67,6 +67,7 @@ func (r *parallelRunner) Exec(
 				err := runner.Exec(ctx, exec, promptedEnv)
 				if err != nil {
 					errs = append(errs, err)
+					ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", ref))
 				}
 				return nil
 			}

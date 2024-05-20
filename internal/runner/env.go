@@ -129,6 +129,9 @@ func DefaultEnv(ctx *context.Context, executable *config.Executable) map[string]
 	envMap["FLOW_RUNNER"] = "true"
 	envMap["FLOW_CURRENT_WORKSPACE"] = ctx.CurrentWorkspace.AssignedName()
 	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.UserConfig.CurrentNamespace
+	if ctx.ProcessTmpDir != "" {
+		envMap["FLOW_TMP_DIRECTORY"] = ctx.ProcessTmpDir
+	}
 	envMap["FLOW_EXECUTABLE_NAME"] = executable.Name
 	envMap["FLOW_DEFINITION_PATH"] = executable.DefinitionPath()
 	envMap["FLOW_DEFINITION_DIR"] = filepath.Dir(executable.DefinitionPath())

@@ -64,9 +64,9 @@ func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, i
 	case execSpec.Command != "" && execSpec.File != "":
 		return errors.New("cannot set both cmd and file")
 	case execSpec.Command != "":
-		return run.RunCmd(execSpec.Command, targetDir, envList, logMode, ctx.Logger, logFields)
+		return run.RunCmd(execSpec.Command, targetDir, envList, logMode, ctx.Logger, ctx.StdIn(), logFields)
 	case execSpec.File != "":
-		return run.RunFile(execSpec.File, targetDir, envList, logMode, ctx.Logger, logFields)
+		return run.RunFile(execSpec.File, targetDir, envList, logMode, ctx.Logger, ctx.StdIn(), logFields)
 	default:
 		return errors.New("unable to determine how executable should be run")
 	}

@@ -34,6 +34,7 @@ func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable,
 	}
 
 	order := serialSpec.ExecutableRefs
+	var errs []error
 	for i, executableRef := range order {
 		ctx.Logger.Debugf("executing %s (%d/%d)", executableRef, i+1, len(order))
 		executableRef = context.ExpandRef(ctx, executableRef)
@@ -55,9 +56,13 @@ func (r *serialRunner) Exec(ctx *context.Context, executable *config.Executable,
 			if serialSpec.FailFast {
 				return errors.Wrapf(err, "execution error for %s", executableRef)
 			}
+			errs = append(errs, err)
 			ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", executableRef))
 		}
 	}
 
+	if len(errs) > 0 {
+		return fmt.Errorf("%d execution errors - %v", len(errs), errs)
+	}
 	return nil
 }
