@@ -34,7 +34,7 @@ func ExpandDirectory(logger io.Logger, dir, wsPath, execPath string, env map[str
 		} else {
 			targetDir = filepath.Join(wd, dir[1:])
 		}
-	case strings.HasPrefix(targetDir, "~/"):
+	case strings.HasPrefix(dir, "~/"):
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			logger.Warnx("unable to get user home directory for relative path expansion", "err", err)
@@ -42,6 +42,8 @@ func ExpandDirectory(logger io.Logger, dir, wsPath, execPath string, env map[str
 		} else {
 			targetDir = filepath.Join(homeDir, dir[2:])
 		}
+	case strings.HasPrefix(dir, "/"):
+		targetDir = dir
 	default:
 		targetDir = execDir + "/" + dir
 	}
@@ -71,7 +73,13 @@ func PathFromWd(path string) (string, error) {
 func ValidateOneOf(fieldName string, vals ...interface{}) error {
 	var count int
 	for _, val := range vals {
-		if val != nil && (reflect.ValueOf(val).Kind() == reflect.Ptr && !reflect.ValueOf(val).IsNil()) {
+		if val == nil {
+			continue
+		}
+
+		isPtr := reflect.ValueOf(val).Kind() == reflect.Ptr && !reflect.ValueOf(val).IsNil()
+		isVal := reflect.ValueOf(val).Kind() != reflect.Ptr && !reflect.ValueOf(val).IsZero()
+		if isPtr || isVal {
 			count++
 		}
 	}
