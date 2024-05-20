@@ -1,18 +1,19 @@
-package cmd
+package internal
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/gen2brain/beeep"
 	"github.com/jahvon/tuikit/components"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	argUtils "github.com/jahvon/flow/cmd/internal/args"
+	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/cache"
-	argUtils "github.com/jahvon/flow/internal/cmd/args"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
@@ -25,100 +26,115 @@ import (
 	"github.com/jahvon/flow/internal/vault"
 )
 
-var execCmd = &cobra.Command{
-	Use:     "exec EXECUTABLE_ID [args...]",
-	Aliases: config.SortedValidVerbs(),
-	Short:   "Execute a flow by ID.",
-	Long: execDocumentation + "\n\n" + execExamples + "\n\n" +
-		"See " + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
-		"See " + io.ConfigDocsURL("executables", "Ref") + "for more information on executable IDs.",
-	Args: cobra.MinimumNArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		runner.RegisterRunner(exec.NewRunner())
-		runner.RegisterRunner(launch.NewRunner())
-		runner.RegisterRunner(request.NewRunner())
-		runner.RegisterRunner(render.NewRunner())
-		runner.RegisterRunner(serial.NewRunner())
-		runner.RegisterRunner(parallel.NewRunner())
-		initInteractiveCommand(cmd, args)
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		logger := curCtx.Logger
-		verbStr := cmd.CalledAs()
-		verb := config.Verb(verbStr)
-		if err := verb.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
-		idArg := args[0]
-		ref := context.ExpandRef(curCtx, config.NewRef(idArg, verb))
-		executable, err := curCtx.ExecutableCache.GetExecutableByRef(logger, ref)
-		if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
-			logger.Debugf("Executable %s not found in cache, syncing cache", ref)
-			if err := curCtx.ExecutableCache.Update(logger); err != nil {
-				logger.FatalErr(err)
-			}
-			executable, err = curCtx.ExecutableCache.GetExecutableByRef(logger, ref)
-		}
-		if err != nil {
-			logger.FatalErr(err)
-		}
-
-		if err := executable.Validate(); err != nil {
-			logger.FatalErr(err)
-		}
-
-		if !executable.IsExecutableFromWorkspace(curCtx.CurrentWorkspace.AssignedName()) {
-			logger.FatalErr(fmt.Errorf(
-				"executable '%s' cannot be executed from workspace %s",
-				ref,
-				curCtx.UserConfig.CurrentWorkspace,
-			))
-		}
-
-		execArgs := args[1:]
-		envMap, err := processExecArgs(executable, execArgs)
-		if err != nil {
-			logger.FatalErr(err)
-		}
-		if envMap == nil {
-			envMap = make(map[string]string)
-		}
-
-		setAuthEnv(executable)
-		textInputs := pendingTextInputs(curCtx, executable)
-		if len(textInputs) > 0 {
-			inputs, err := components.ProcessInputs(io.Theme(), textInputs...)
+func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
+	subCmd := &cobra.Command{
+		Use:     "exec EXECUTABLE_ID [args...]",
+		Aliases: config.SortedValidVerbs(),
+		Short:   "Execute a flow by ID.",
+		Long: execDocumentation + "\n\n" + execExamples + "\n\n" +
+			"See " + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
+			"See " + io.ConfigDocsURL("executables", "Ref") + "for more information on executable IDs.",
+		Args: cobra.MinimumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
 			if err != nil {
-				logger.FatalErr(err)
+				return nil, cobra.ShellCompDirectiveError
 			}
-			for _, input := range inputs {
-				envMap[input.Key] = input.Value()
+			execIDs := make([]string, 0, len(execList))
+			for _, e := range execList {
+				execIDs = append(execIDs, e.ID())
 			}
-		}
-		startTime := time.Now()
-		if err := runner.Exec(curCtx, executable, envMap); err != nil {
+			return execIDs, cobra.ShellCompDirectiveNoFileComp
+		},
+		PreRun: func(cmd *cobra.Command, args []string) {
+			runner.RegisterRunner(exec.NewRunner())
+			runner.RegisterRunner(launch.NewRunner())
+			runner.RegisterRunner(request.NewRunner())
+			runner.RegisterRunner(render.NewRunner())
+			runner.RegisterRunner(serial.NewRunner())
+			runner.RegisterRunner(parallel.NewRunner())
+			interactive.InitInteractiveCommand(ctx, cmd)
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			execFunc(ctx, cmd, args)
+		},
+	}
+	rootCmd.AddCommand(subCmd)
+}
+
+//nolint:gocognit
+func execFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+	logger := ctx.Logger
+	verbStr := cmd.CalledAs()
+	verb := config.Verb(verbStr)
+	if err := verb.Validate(); err != nil {
+		logger.FatalErr(err)
+	}
+
+	idArg := args[0]
+	ref := context.ExpandRef(ctx, config.NewRef(idArg, verb))
+	executable, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
+	if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
+		logger.Debugf("Executable %s not found in cache, syncing cache", ref)
+		if err := ctx.ExecutableCache.Update(logger); err != nil {
 			logger.FatalErr(err)
 		}
-		dur := time.Since(startTime)
-		logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
-		if interactiveUIEnabled() {
-			if dur > 1*time.Minute && curCtx.UserConfig.Interactive.SoundOnCompletion {
-				_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
-			}
-			if dur > 1*time.Minute && curCtx.UserConfig.Interactive.NotifyOnCompletion {
-				_ = beeep.Notify("Flow", "Flow completed", "")
-			}
+		executable, err = ctx.ExecutableCache.GetExecutableByRef(logger, ref)
+	}
+	if err != nil {
+		logger.FatalErr(err)
+	}
+
+	if err := executable.Validate(); err != nil {
+		logger.FatalErr(err)
+	}
+
+	if !executable.IsExecutableFromWorkspace(ctx.CurrentWorkspace.AssignedName()) {
+		logger.FatalErr(fmt.Errorf(
+			"executable '%s' cannot be executed from workspace %s",
+			ref,
+			ctx.UserConfig.CurrentWorkspace,
+		))
+	}
+
+	execArgs := args[1:]
+	envMap, err := processExecArgs(executable, execArgs)
+	if err != nil {
+		logger.FatalErr(err)
+	}
+	if envMap == nil {
+		envMap = make(map[string]string)
+	}
+
+	setAuthEnv(ctx, executable)
+	textInputs := pendingTextInputs(ctx, executable)
+	if len(textInputs) > 0 {
+		inputs, err := components.ProcessInputs(io.Theme(), textInputs...)
+		if err != nil {
+			logger.FatalErr(err)
 		}
-	},
+		for _, input := range inputs {
+			envMap[input.Key] = input.Value()
+		}
+	}
+	startTime := time.Now()
+	if err := runner.Exec(ctx, executable, envMap); err != nil {
+		logger.FatalErr(err)
+	}
+	dur := time.Since(startTime)
+	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
+	if interactive.UIEnabled(ctx, cmd) {
+		if dur > 1*time.Minute && ctx.UserConfig.Interactive.SoundOnCompletion {
+			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+		}
+		if dur > 1*time.Minute && ctx.UserConfig.Interactive.NotifyOnCompletion {
+			_ = beeep.Notify("Flow", "Flow completed", "")
+		}
+	}
 }
 
-func init() {
-	rootCmd.AddCommand(execCmd)
-}
-
-func setAuthEnv(executable *config.Executable) {
-	if authRequired(curCtx, executable) {
+func setAuthEnv(ctx *context.Context, executable *config.Executable) {
+	if authRequired(ctx, executable) {
 		resp, err := components.ProcessInputs(
 			io.Theme(),
 			&components.TextInput{
@@ -127,14 +143,14 @@ func setAuthEnv(executable *config.Executable) {
 				Hidden: true,
 			})
 		if err != nil {
-			curCtx.Logger.FatalErr(err)
+			ctx.Logger.FatalErr(err)
 		}
 		val := resp.ValueMap()[vault.EncryptionKeyEnvVar]
 		if val == "" {
-			curCtx.Logger.FatalErr(fmt.Errorf("vault encryption key required"))
+			ctx.Logger.FatalErr(fmt.Errorf("vault encryption key required"))
 		}
 		if err := os.Setenv(vault.EncryptionKeyEnvVar, val); err != nil {
-			curCtx.Logger.FatalErr(fmt.Errorf("failed to set vault encryption key\n%w", err))
+			ctx.Logger.FatalErr(fmt.Errorf("failed to set vault encryption key\n%w", err))
 		}
 	}
 }
