@@ -21,6 +21,7 @@ func RunCmd(
 	envList []string,
 	logMode io.LogMode,
 	logger io.Logger,
+	stdIn *os.File,
 	logFields map[string]interface{},
 ) error {
 	logger.Debugf("running command in dir (%s):\n%s", dir, strings.TrimSpace(commandStr))
@@ -46,7 +47,7 @@ func RunCmd(
 		interp.Dir(dir),
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
-			io.StdInReader{},
+			io.StdInReader{StdIn: stdIn},
 			stdOutWriter(logMode, logger, flattenedFields...),
 			stdErrWriter(logMode, logger, flattenedFields...),
 		),
@@ -72,6 +73,7 @@ func RunFile(
 	envList []string,
 	logMode io.LogMode,
 	logger io.Logger,
+	stdIn *os.File,
 	logFields map[string]interface{},
 ) error {
 	logger.Debugf("executing file (%s)", filepath.Join(dir, filename))
@@ -105,7 +107,7 @@ func RunFile(
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
-			io.StdInReader{},
+			io.StdInReader{StdIn: stdIn},
 			stdOutWriter(logMode, logger, flattenedFields...),
 			stdErrWriter(logMode, logger, flattenedFields...),
 		),
