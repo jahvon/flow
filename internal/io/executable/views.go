@@ -9,22 +9,24 @@ import (
 	"golang.design/x/clipboard"
 
 	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/common"
 )
 
 func NewExecutableView(
-	container *components.ContainerView,
+	ctx *context.Context,
 	exec config.Executable,
 	format components.Format,
 ) components.TeaModel {
+	container := ctx.InteractiveContainer
 	var executableKeyCallbacks = []components.KeyCallback{
 		{
 			Key: "c", Label: "copy ref",
 			Callback: func() error {
 				err := clipboard.Init()
 				if err != nil {
-					panic(err)
+					return err
 				}
 				clipboard.Write(clipboard.FmtText, []byte(exec.Ref().String()))
 				container.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
@@ -34,7 +36,9 @@ func NewExecutableView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				common.DeprecatedOpenInEditor(container, exec.DefinitionPath())
+				if err := common.OpenInEditor(exec.DefinitionPath(), ctx.StdIn(), ctx.StdOut()); err != nil {
+					container.HandleError(fmt.Errorf("unable to open executable: %w", err))
+				}
 				return nil
 			},
 		},
@@ -53,10 +57,11 @@ func NewExecutableView(
 }
 
 func NewExecutableListView(
-	container *components.ContainerView,
+	ctx *context.Context,
 	executables config.ExecutableList,
 	format components.Format,
 ) components.TeaModel {
+	container := ctx.InteractiveContainer
 	if len(executables.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no workspaces found"))
 	}
@@ -68,7 +73,7 @@ func NewExecutableListView(
 		if !found {
 			return fmt.Errorf("executable not found")
 		}
-		container.SetView(NewExecutableView(container, *exec, format))
+		container.SetView(NewExecutableView(ctx, *exec, format))
 		return nil
 	}
 

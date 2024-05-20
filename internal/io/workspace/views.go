@@ -10,16 +10,18 @@ import (
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/common"
 	"github.com/jahvon/flow/internal/services/open"
 )
 
 func NewWorkspaceView(
-	container *components.ContainerView,
+	ctx *context.Context,
 	ws config.WorkspaceConfig,
 	format components.Format,
 ) components.TeaModel {
+	container := ctx.InteractiveContainer
 	var workspaceKeyCallbacks = []components.KeyCallback{
 		{
 			Key: "o", Label: "open",
@@ -33,7 +35,10 @@ func NewWorkspaceView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				common.DeprecatedOpenInEditor(container, filepath.Join(ws.Location(), file.WorkspaceConfigFileName))
+				fullPath := filepath.Join(ws.Location(), file.WorkspaceConfigFileName)
+				if err := common.OpenInEditor(fullPath, ctx.StdIn(), ctx.StdOut()); err != nil {
+					container.HandleError(fmt.Errorf("unable to open workspace: %w", err))
+				}
 				return nil
 			},
 		},
@@ -65,10 +70,11 @@ func NewWorkspaceView(
 }
 
 func NewWorkspaceListView(
-	container *components.ContainerView,
+	ctx *context.Context,
 	workspaces config.WorkspaceConfigList,
 	format components.Format,
 ) components.TeaModel {
+	container := ctx.InteractiveContainer
 	if len(workspaces.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no workspaces found"))
 	}
@@ -81,7 +87,7 @@ func NewWorkspaceListView(
 			return fmt.Errorf("workspace not found")
 		}
 
-		container.SetView(NewWorkspaceView(container, ws, format))
+		container.SetView(NewWorkspaceView(ctx, ws, format))
 		return nil
 	}
 

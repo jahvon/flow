@@ -148,6 +148,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 
 			if err := common.OpenInEditor(
 				filepath.Join(curWsCfg.Location(), file.WorkspaceConfigFileName),
+				l.ctx.StdIn(), l.ctx.StdOut(),
 			); err != nil {
 				l.ctx.Logger.Error(err, "unable to open workspace in editor")
 				l.SetNotice("unable to open workspace in editor", styles.NoticeLevelError)
@@ -237,7 +238,7 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				break
 			}
 
-			if err := common.OpenInEditor(curExec.DefinitionPath()); err != nil {
+			if err := common.OpenInEditor(curExec.DefinitionPath(), l.ctx.StdIn(), l.ctx.StdOut()); err != nil {
 				l.ctx.Logger.Error(err, "unable to open executable in editor")
 				l.SetNotice("unable to open executable in editor", styles.NoticeLevelError)
 			}
