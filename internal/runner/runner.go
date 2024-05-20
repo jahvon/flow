@@ -8,6 +8,7 @@ import (
 	"github.com/jahvon/flow/internal/context"
 )
 
+//go:generate mockgen -destination=mocks/mock_runner.go -package=mocks github.com/jahvon/flow/internal/runner Runner
 type Runner interface {
 	Name() string
 	Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error
@@ -33,7 +34,7 @@ func Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[s
 		}
 	}
 	if assignedRunner == nil {
-		return fmt.Errorf("comptatible runner not found for executable %s", executable.ID())
+		return fmt.Errorf("compatible runner not found for executable %s", executable.ID())
 	}
 
 	if executable.Timeout == 0 {
@@ -51,4 +52,8 @@ func Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[s
 	case <-time.After(executable.Timeout):
 		return fmt.Errorf("timeout after %v", executable.Timeout)
 	}
+}
+
+func Reset() {
+	registeredRunners = make([]Runner, 0)
 }
