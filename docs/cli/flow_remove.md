@@ -1,6 +1,6 @@
 ## flow remove
 
-Remove a flow object.
+Remove a flow entity.
 
 ### Options
 

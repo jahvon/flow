@@ -3,7 +3,7 @@
 Set the default log mode.
 
 ```
-flow set log-mode (logfmt|json|text|hidden) [flags]
+flow set log-mode [logfmt|json|text|hidden] [flags]
 ```
 
 ### Options

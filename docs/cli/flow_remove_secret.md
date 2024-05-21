@@ -22,5 +22,5 @@ flow remove secret <name> [flags]
 
 ### SEE ALSO
 
-* [flow remove](flow_remove.md)	 - Remove a flow object.
+* [flow remove](flow_remove.md)	 - Remove a flow entity.
 

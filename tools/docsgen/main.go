@@ -4,6 +4,7 @@ package main
 
 import (
 	"bytes"
+	stdCtx "context"
 	"fmt"
 	"go/parser"
 	"go/token"
@@ -16,8 +17,11 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/spf13/cobra/doc"
+
 	"github.com/jahvon/flow/cmd"
 	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/internal/context"
 )
 
 const (
@@ -133,7 +137,13 @@ var (
 
 func main() {
 	fmt.Println("Generating CLI docs...")
-	if err := cmd.GenerateMarkdownTree(filepath.Join(Root, DocsDir, "cli")); err != nil {
+	ctx := context.NewContext(stdCtx.Background(), os.Stdin, os.Stdout)
+	defer ctx.Finalize()
+
+	rootCmd := cmd.NewRootCmd(ctx)
+	cmd.RegisterSubCommands(ctx, rootCmd)
+	rootCmd.DisableAutoGenTag = true
+	if err := doc.GenMarkdownTree(rootCmd, filepath.Join(Root, DocsDir, "cli")); err != nil {
 		panic(err)
 	}
 

@@ -3,7 +3,7 @@
 Update or create a secret in the flow secret vault.
 
 ```
-flow set secret NAME VALUE [flags]
+flow set secret NAME [VALUE] [flags]
 ```
 
 ### Options

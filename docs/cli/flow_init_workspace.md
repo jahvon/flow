@@ -3,7 +3,7 @@
 Initialize and add a workspace to the list of known workspaces.
 
 ```
-flow init workspace <name> <path> [flags]
+flow init workspace NAME PATH [flags]
 ```
 
 ### Options

@@ -10,14 +10,13 @@ The target executable's ID should be in the  form of 'ws/ns:name' and the verb s
 Seehttps://github.com/jahvon/flow/blob/main/docs/config/executables.md#Verbfor more information on executable verbs.Seehttps://github.com/jahvon/flow/blob/main/docs/config/executable.md#Reffor more information on executable IDs.
 
 ```
-flow get executable <verb> <id> [flags]
+flow get executable VERB ID [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for executable
-  -o, --output string   Output format. One of: yaml, json, doc, or list.
+  -h, --help   help for executable
 ```
 
 ### Options inherited from parent commands

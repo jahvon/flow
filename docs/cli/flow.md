@@ -25,7 +25,7 @@ See github.com/jahvon/flow for more information.
 * [flow library](flow_library.md)	 - View and manage your library of workspaces and executables.
 * [flow list](flow_list.md)	 - Print a list of flow entities.
 * [flow logs](flow_logs.md)	 - List and view logs for previous flow executions.
-* [flow remove](flow_remove.md)	 - Remove a flow object.
+* [flow remove](flow_remove.md)	 - Remove a flow entity.
 * [flow set](flow_set.md)	 - Update global or workspace configuration values.
 * [flow sync](flow_sync.md)	 - Scan workspaces and update flow cache.
 
