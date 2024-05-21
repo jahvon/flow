@@ -249,6 +249,10 @@ func (r Ref) GetVerb() Verb {
 
 func (r Ref) GetID() string {
 	refParts := strings.Split(string(r), " ")
+	if len(refParts) != 2 {
+		// TODO: return or log error
+		return ""
+	}
 	return refParts[1]
 }
 

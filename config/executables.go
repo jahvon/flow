@@ -18,7 +18,7 @@ import (
 	"github.com/jahvon/flow/internal/utils"
 )
 
-const tmpdir = "f:tmp"
+const TmpDirLabel = "f:tmp"
 
 type ExecutableDirectory struct {
 	// +docsgen:dir
@@ -36,16 +36,16 @@ func (e *ExecutableDirectory) ExpandDirectory(
 	wsPath, execPath, processTmpDir string,
 	env map[string]string,
 ) (dir string, isTmpDir bool, err error) {
-	if e.Directory == tmpdir {
+	if e.Directory == TmpDirLabel {
 		if processTmpDir != "" {
 			return processTmpDir, true, nil
 		}
 
-		file, err := os.CreateTemp("", "flow")
+		td, err := os.MkdirTemp("", "flow")
 		if err != nil {
 			return "", false, err
 		}
-		return file.Name(), true, nil
+		return td, true, nil
 	}
 
 	return utils.ExpandDirectory(logger, e.Directory, wsPath, execPath, env), false, nil

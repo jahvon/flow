@@ -14,10 +14,11 @@ import (
 
 const generatedTag = "generated"
 
-func generatedExecutables(logger io.Logger, files []string) (config.ExecutableList, error) {
+func generatedExecutables(logger io.Logger, definitionPath string, files []string) (config.ExecutableList, error) {
 	executables := make(config.ExecutableList, 0)
 	for _, file := range files {
-		executable, err := executablesFromFile(logger, file)
+		shFile := filepath.Join(filepath.Dir(definitionPath), file)
+		executable, err := executablesFromFile(logger, shFile)
 		if err != nil {
 			return nil, err
 		}
