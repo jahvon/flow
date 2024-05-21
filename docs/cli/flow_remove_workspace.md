@@ -8,7 +8,7 @@ Remove an existing workspace. File contents will remain in the corresponding dir
 Note: You cannot remove the current workspace.
 
 ```
-flow remove workspace <name> [flags]
+flow remove workspace NAME [flags]
 ```
 
 ### Options
@@ -27,5 +27,5 @@ flow remove workspace <name> [flags]
 
 ### SEE ALSO
 
-* [flow remove](flow_remove.md)	 - Remove a flow object.
+* [flow remove](flow_remove.md)	 - Remove a flow entity.
 

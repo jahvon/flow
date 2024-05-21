@@ -3,7 +3,7 @@
 Print a workspace's configuration. If the name is omitted, the current workspace is used.
 
 ```
-flow get workspace <name> [flags]
+flow get workspace [NAME] [flags]
 ```
 
 ### Options

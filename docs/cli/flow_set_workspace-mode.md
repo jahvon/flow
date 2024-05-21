@@ -3,7 +3,7 @@
 Switch between fixed and dynamic workspace modes.
 
 ```
-flow set workspace-mode (fixed|dynamic) [flags]
+flow set workspace-mode [fixed|dynamic] [flags]
 ```
 
 ### Options

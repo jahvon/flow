@@ -9,8 +9,7 @@ flow get config [flags]
 ### Options
 
 ```
-  -h, --help            help for config
-  -o, --output string   Output format. One of: yaml, json, doc, or list.
+  -h, --help   help for config
 ```
 
 ### Options inherited from parent commands

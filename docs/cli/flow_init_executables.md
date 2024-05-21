@@ -7,7 +7,7 @@ Add rendered executables from an executable definition template to a workspace
 Add rendered executables from an executable definition template to a workspace.
 
 The WORKSPACE_NAME is the name of the workspace to initialize the executables in.
-The DEFINITION_NAME is the name of the definition to use in rendering the template. 
+The DEFINITION_NAME is the name of the definition to use in rendering the template.
 This name will become the name of the file containing the copied executable definition.
 
 One one of -f or -t must be provided and must point to a valid executable definition template.
