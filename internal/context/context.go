@@ -30,9 +30,11 @@ type Context struct {
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
 	// used to store temporary files all executable runs when the tmpDir value is specified.
 	ProcessTmpDir string
+
+	stdOut, stdIn *os.File
 }
 
-func NewContext(ctx context.Context) *Context {
+func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 	userConfig, err := file.LoadUserConfig()
 	if err != nil {
 		panic(errors.Wrap(err, "user config load error"))
@@ -64,11 +66,32 @@ func NewContext(ctx context.Context) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  cache.NewWorkspaceCache(),
 		ExecutableCache:  cache.NewExecutableCache(),
-		Logger:           io.NewLogger(theme, logMode, file.LogsDirPath),
+		Logger:           io.NewLogger(stdOut, theme, logMode, file.LogsDir()),
+		stdOut:           stdOut,
+		stdIn:            stdIn,
 	}
 }
 
+func (ctx *Context) StdOut() *os.File {
+	return ctx.stdOut
+}
+
+func (ctx *Context) StdIn() *os.File {
+	return ctx.stdIn
+}
+
+// SetIO sets the standard input and output for the context
+// This function should NOT be used outside of tests! The standard input and output
+// should be set when creating the context.
+func (ctx *Context) SetIO(stdIn, stdOut *os.File) {
+	ctx.stdIn = stdIn
+	ctx.stdOut = stdOut
+}
+
 func (ctx *Context) Finalize() {
+	_ = ctx.stdIn.Close()
+	_ = ctx.stdOut.Close()
+
 	if ctx.ProcessTmpDir != "" {
 		files, err := filepath.Glob(filepath.Join(ctx.ProcessTmpDir, "*"))
 		if err != nil {
