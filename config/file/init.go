@@ -14,8 +14,8 @@ func InitUserConfig() error {
 		return errors.Wrap(err, "unable to ensure default workspace")
 	}
 	defaultWsName := "default"
-	if _, err := os.Stat(filepath.Join(DefaultWorkspacePath, WorkspaceConfigFileName)); os.IsNotExist(err) {
-		if err := InitWorkspaceConfig(defaultWsName, DefaultWorkspacePath); err != nil {
+	if _, err := os.Stat(filepath.Join(DefaultWorkspaceDir(), WorkspaceConfigFileName)); os.IsNotExist(err) {
+		if err := InitWorkspaceConfig(defaultWsName, DefaultWorkspaceDir()); err != nil {
 			return errors.Wrap(err, "unable to initialize default workspace config")
 		}
 	} else if err != nil {
@@ -23,7 +23,7 @@ func InitUserConfig() error {
 	}
 
 	defaultCfg := &config.UserConfig{
-		Workspaces:       map[string]string{defaultWsName: DefaultWorkspacePath},
+		Workspaces:       map[string]string{defaultWsName: DefaultWorkspaceDir()},
 		CurrentWorkspace: defaultWsName,
 		WorkspaceMode:    config.WorkspaceModeDynamic,
 		Interactive: &config.InteractiveConfig{
@@ -32,7 +32,7 @@ func InitUserConfig() error {
 		DefaultLogMode: "logfmt",
 	}
 
-	_, err := os.Create(UserConfigPath)
+	_, err := os.Create(UserConfigFilePath())
 	if err != nil {
 		return errors.Wrap(err, "unable to create config file")
 	}

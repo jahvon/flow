@@ -77,7 +77,7 @@ func (c *ExecutableCache) Update(logger io.Logger) error { //nolint:gocognit
 		}
 		for _, def := range definitions {
 			if len(def.FromFiles) > 0 {
-				generated, err := generatedExecutables(logger, def.FromFiles)
+				generated, err := generatedExecutables(logger, def.DefinitionPath(), def.FromFiles)
 				if err != nil {
 					logger.Errorx(
 						"failed to generate executables from files",
@@ -160,7 +160,7 @@ func (c *ExecutableCache) GetExecutableByRef(logger io.Logger, ref config.Ref) (
 	definition.SetDefaults()
 	definition.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, definitionPath)
 
-	generated, err := generatedExecutables(logger, definition.FromFiles)
+	generated, err := generatedExecutables(logger, definition.DefinitionPath(), definition.FromFiles)
 	if err != nil {
 		logger.Warnx(
 			"failed to generate executables from files",
@@ -205,7 +205,7 @@ func (c *ExecutableCache) GetExecutableList(logger io.Logger) (config.Executable
 		definition.SetDefaults()
 		definition.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, definitionPath)
 
-		generated, err := generatedExecutables(logger, definition.FromFiles)
+		generated, err := generatedExecutables(logger, definition.DefinitionPath(), definition.FromFiles)
 		if err != nil {
 			logger.Warnx(
 				"failed to generate executables from files",

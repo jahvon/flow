@@ -24,7 +24,7 @@ const (
 )
 
 func WriteUserConfig(config *config.UserConfig) error {
-	file, err := os.OpenFile(filepath.Clean(UserConfigPath), os.O_WRONLY|os.O_CREATE, 0600)
+	file, err := os.OpenFile(filepath.Clean(UserConfigFilePath()), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return errors.Wrap(err, "unable to open config file")
 	}
@@ -47,7 +47,7 @@ func LoadUserConfig() (*config.UserConfig, error) {
 		return nil, errors.Wrap(err, "unable to ensure existence of config directory")
 	}
 
-	if _, err := os.Stat(UserConfigPath); os.IsNotExist(err) {
+	if _, err := os.Stat(UserConfigFilePath()); os.IsNotExist(err) {
 		if err := InitUserConfig(); err != nil {
 			return nil, errors.Wrap(err, "unable to initialize config file")
 		}
@@ -55,7 +55,7 @@ func LoadUserConfig() (*config.UserConfig, error) {
 		return nil, errors.Wrap(err, "unable to stat config file")
 	}
 
-	file, err := os.Open(UserConfigPath)
+	file, err := os.Open(UserConfigFilePath())
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to open config file")
 	}

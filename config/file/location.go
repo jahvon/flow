@@ -9,16 +9,28 @@ import (
 
 const (
 	flowDirName = "flow"
+
+	FlowConfigDirEnvVar = "FLOW_CONFIG_DIR"
+	FlowCacheDirEnvVar  = "FLOW_CACHE_DIR"
 )
 
-var (
-	UserConfigPath       = ConfigDirPath() + "/config.yaml"
-	DefaultWorkspacePath = CachedDataDirPath() + "/default"
-	LatestCacheDataPath  = CachedDataDirPath() + "/latestcache"
-	LogsDirPath          = CachedDataDirPath() + "/logs"
-)
+func UserConfigFilePath() string {
+	return ConfigDirPath() + "/config.yaml"
+}
+
+func DefaultWorkspaceDir() string {
+	return CachedDataDirPath() + "/default"
+}
+
+func LogsDir() string {
+	return CachedDataDirPath() + "/logs"
+}
 
 func ConfigDirPath() string {
+	if dir := os.Getenv(FlowConfigDirEnvVar); dir != "" {
+		return dir
+	}
+
 	dirname, err := os.UserConfigDir()
 	if err != nil {
 		panic(errors.Wrap(err, "unable to get config directory"))
@@ -27,6 +39,10 @@ func ConfigDirPath() string {
 }
 
 func CachedDataDirPath() string {
+	if dir := os.Getenv(FlowCacheDirEnvVar); dir != "" {
+		return dir
+	}
+
 	dirname, err := os.UserCacheDir()
 	if err != nil {
 		panic(errors.Wrap(err, "unable to get cache directory"))
@@ -34,8 +50,12 @@ func CachedDataDirPath() string {
 	return filepath.Join(dirname, flowDirName)
 }
 
+func LatestCachedDataDir() string {
+	return CachedDataDirPath() + "/latestcache"
+}
+
 func LatestCachedDataFilePath(cacheKey string) string {
-	return filepath.Join(LatestCacheDataPath, cacheKey)
+	return filepath.Join(LatestCachedDataDir(), cacheKey)
 }
 
 func EnsureConfigDir() error {
@@ -51,8 +71,8 @@ func EnsureConfigDir() error {
 }
 
 func EnsureCachedDataDir() error {
-	if _, err := os.Stat(LatestCacheDataPath); os.IsNotExist(err) {
-		err = os.MkdirAll(LatestCacheDataPath, 0750)
+	if _, err := os.Stat(LatestCachedDataDir()); os.IsNotExist(err) {
+		err = os.MkdirAll(LatestCachedDataDir(), 0750)
 		if err != nil {
 			return errors.Wrap(err, "unable to create cache directory")
 		}
@@ -64,8 +84,8 @@ func EnsureCachedDataDir() error {
 }
 
 func EnsureDefaultWorkspace() error {
-	if _, err := os.Stat(DefaultWorkspacePath); os.IsNotExist(err) {
-		err = os.MkdirAll(DefaultWorkspacePath, 0750)
+	if _, err := os.Stat(DefaultWorkspaceDir()); os.IsNotExist(err) {
+		err = os.MkdirAll(DefaultWorkspaceDir(), 0750)
 		if err != nil {
 			return errors.Wrap(err, "unable to create default workspace directory")
 		}
@@ -107,8 +127,8 @@ func EnsureExecutableDir(workspacePath, subPath string) error {
 }
 
 func EnsureLogsDir() error {
-	if _, err := os.Stat(LogsDirPath); os.IsNotExist(err) {
-		err = os.MkdirAll(LogsDirPath, 0750)
+	if _, err := os.Stat(LogsDir()); os.IsNotExist(err) {
+		err = os.MkdirAll(LogsDir(), 0750)
 		if err != nil {
 			return errors.Wrap(err, "unable to create logs directory")
 		}
