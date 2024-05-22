@@ -118,7 +118,7 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	}
 
 	tmpWsDir := filepath.Join(tmpDir, TestWorkspaceName)
-	if err := os.Mkdir(filepath.Join(tmpDir, TestWorkspaceName), 0755); err != nil {
+	if err := os.Mkdir(filepath.Join(tmpDir, TestWorkspaceName), 0600); err != nil {
 		t.Fatalf("unable to create workspace directory: %v", err)
 	}
 	if err := copy.Copy(srcWsDir, tmpWsDir); err != nil {
@@ -196,12 +196,12 @@ func examplesDir() string {
 
 func setTestEnv(t ginkgo.FullGinkgoTInterface, configDir, cacheDir string) {
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(configDir, 0755); err != nil {
+		if err := os.MkdirAll(configDir, 0600); err != nil {
 			t.Fatalf("unable to create config directory: %v", err)
 		}
 	}
 	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		if err := os.MkdirAll(cacheDir, 0600); err != nil {
 			t.Fatalf("unable to create cache directory: %v", err)
 		}
 	}

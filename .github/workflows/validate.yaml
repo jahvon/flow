@@ -67,9 +67,9 @@ jobs:
       #  |_____|_|_| |_|\__|
       #
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.54.2
+          version: v1.57.2
 
       #   _____         _
       #  |_   _|__  ___| |_
