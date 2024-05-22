@@ -58,8 +58,8 @@ github.com/itchyny/timefmt-go v0.1.5 h1:G0INE2la8S6ru/ZI5JecgyzbbJNs5lG1RcBqa7Jm
 github.com/itchyny/timefmt-go v0.1.5/go.mod h1:nEP7L+2YmAbT2kZ2HfSs1d8Xtw9LY8D2stDBckWakZ8=
 github.com/jahvon/glamour v0.7.1-patch1 h1:v3btiQx2OB0ETStjkXciUjwZBO9fXfSv5flZllVysnI=
 github.com/jahvon/glamour v0.7.1-patch1/go.mod h1:jUMh5MeihljJPQbJ/wf4ldw2+yBP59+ctV36jASy7ps=
-github.com/jahvon/open-golang v0.0.0-20240515012214-e6e9cc4f13a9 h1:Is1wZ4LmUqS+lU4UsVhU+IZGFH/PZFK0sAx39EVA+7M=
-github.com/jahvon/open-golang v0.0.0-20240515012214-e6e9cc4f13a9/go.mod h1:dUmuT5CN6osIeLSRtTPJOf0Yz+qAbcyU6omnCzI+ZfQ=
+github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef h1:4PS/MNVT6Rsv15x5Rtwaw971e6kFvNUAf9nvUsZ5hcc=
+github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef/go.mod h1:dUmuT5CN6osIeLSRtTPJOf0Yz+qAbcyU6omnCzI+ZfQ=
 github.com/jahvon/tuikit v0.0.10 h1:LC77FujYyiIcltlfpmqX8ppk87RgfGWttpliegbRpFs=
 github.com/jahvon/tuikit v0.0.10/go.mod h1:6T4MFGAy4aSlDLV5Ka1FUd+TOt/fCXBrsibRpM1I3mI=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
