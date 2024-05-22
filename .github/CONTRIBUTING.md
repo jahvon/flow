@@ -1,64 +1,33 @@
 # Contributing
 
-By participating in this project, you agree to abide our
-[code of conduct](https://github.com/jahvon/flow/blob/main/.github/CODE_OF_CONDUCT.md).
+## How We Develop
 
-## Set up your machine
+This projects uses GitHub to host code, to track issues and feature requests, and to open and review pull requests.
+We follow [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow) to manage our development process.
 
-`flow` is written in [Go](https://golang.org/).
+By participating in this project, you agree to abide our [code of conduct](CODE_OF_CONDUCT.md).
 
-Prerequisites:
+### Submitting a Bug Report or Feature Request
 
-- [Go 1.20+](https://golang.org/doc/install)
+We use GitHub issues to track public bugs and feature requests. Please fill out as much as you can in the issue template, 
+and provide as much context as possible.
 
-Other things you might need to run the tests:
+### Submitting Pull Requests
 
-- [Docker](https://www.docker.com/)
+We actively welcome pull requests. Here are the steps to contribute:
 
-Clone `flow` anywhere:
+1. Fork the repo and create your branch from `main`.
+2. If you've added code that should be tested, add tests.
+3. If you've changed Configs/APIs, update the documentation.
+4. Ensure the pre-commit commands pass. This includes tests, linting, and code generation. See the [Development](DEVELOPMENT.md) guide for more information.
+5. Open that pull request!
+    - Please ensure that your PR is up-to-date with the latest changes from the main branch.
+    - Please ensure that your PR has a clear description of the problem and solution.
+    - Please ensure that your PR has a clear title (not a generic one like "Fixes issue").
 
-```sh
-git clone git@github.com:jahvon/flow.git
-```
+**PRs and issues will be reviewed by the maintainers as soon as possible. Please be patient when waiting for a response.**
 
-`cd` into the directory and install the dependencies:
+## License
 
-```sh
-make local/deps
-```
-
-## Test your change
-
-You can create a branch for your changes and try to build from the source as you go:
-
-```sh
-make go/build
-```
-
-When you are satisfied with the changes, we suggest you run:
-
-```sh
-make go/test
-```
-
-Before you commit the changes, we also suggest you run:
-
-```sh
-make pre-commit
-```
-
-## Create a commit
-
-Commit messages should be well formatted, and to make that "standardized", we
-are using Conventional Commits.
-
-You can follow the documentation on
-[their website](https://www.conventionalcommits.org).
-
-## Submit a pull request
-
-Push your branch to your `flow` fork and open a pull request against the main branch.
-
-## Credit
-
-This CONTRIBUTING guideline is very inspired by the [goreleaser](https://github.com/goreleaser/goreleaser/blob/main/CONTRIBUTING.md). Thanks `goreleaser`.
+Any contributions you make will be under the Apache 2.0 Software License. 
+In short, when you submit code changes, your submissions are understood to be under the same [Apache License](https://choosealicense.com/licenses/apache-2.0/) that covers the project. 

@@ -4,14 +4,30 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/jahvon/flow.svg)](https://pkg.go.dev/github.com/jahvon/flow)
 [![GitHub release](https://img.shields.io/github/v/release/jahvon/flow)](https://github.com/jahvon/flow/releases)
 
-flow is a command line interface designed to make managing and running development workflows easier. It's driven by
-"executables" organized across workspaces and namespaces defined in a workspace.
+flow is a versatile Command Line Interface (CLI) tool designed to streamline and enhance your local development and operations
+workflows. Whether you're running scripts, transforming API responses, or opening applications, flow has you covered. 
+It's driven by "executable" YAML configurations organized across workspaces and namespaces defined in a workspace, easily
+discoverable from anywhere on your system.
 
-Some common use cases includes running a set of scripts, opening an application after running setup tasks,
-and rendering a markdown document that is dynamically generated from data in an external system.
-That's just the start; all aspects of flow are meant to be easily configurable, easily discoverable, and highly extensible.
+## Key Features
+
+- **Workflow Runner**: Easily define, manage, and run your workflows from the command line. Example use cases includes running a set of scripts, opening an application after running setup tasks,
+  and rendering a markdown document that is dynamically generated from data in an external system.
+- **Secret Management**: Safely store sensitive secrets in an encrypted local vault, easily referencable in your executable configurations.
+- **Input Handling**: Pass values into executables via environment variables defined by configuration, flags, or interactive prompts, ensuring your workflows are flexible and easy to use.
+- **Executable Organization**: Group your executables into workspace and namespace, making them easily discoverable and accessible from anywhere on your system. Tag your executables and workspaces for easy filtering and searching.
+- **Customizable TUI**: Enjoy a seamless TUI experience with log formatting, log archiving, and execution notifications, enhancing your productivity.
+- **Generate w/ Templates and Comments**: Automatically generate executable configurations from flow templates or comments in your script files, making it easy to onboard new executables.
+- **Comprehensive Commands**:
+    - `get` and `list`: Retrieve and display executable details, formatted as markdown documentation, YAML, or JSON.
+    - `library`: Access a fully searchable and interactive TUI for running and exploring executables.
 
 ## Getting Started
+
+### System Requirements
+
+At this time, flow is only supported on Linux and MacOS systems. 
+While it may work on Windows, it has not been tested and is not officially supported.
 
 ### Installation
 
@@ -30,14 +46,16 @@ go install github.com/jahvon/flow@latest
 
 See the [Development](DEVELOPMENT.md) guide for more information on how to build from source.
 
-### Setting up a Workspace
+### Basic Usage
 
-A Workspace is a directory that contains workflows and configuration files for `flow` to manage.
-A workspace can be created anywhere on your system but must be registered in the User Config file in order to
-have executables discovered by `flow`.
+#### Setting up a Workspace
+
+A Workspace is a directory that contains workflows and configuration files for flow to manage.
+A workspace can be created anywhere on your system but must be registered in the user config file in order to
+have executables discovered by flow.
 
 To create a new workspace:
-    
+
 ```bash
 flow init workspace <name> <path>
 ```
@@ -45,24 +63,43 @@ flow init workspace <name> <path>
 This command will register the Workspace and create the root config file for you.
 For more information on Workspaces and it's config, see [Workspaces](docs/config/workspace_config.md).
 
-### Defining Executables
+#### Defining Executables
 
-Executables are the core of `flow`. They are the workflows that `flow` will execute when running a workflow.
-Each executable is driven by its definition within an executable definition file (`*.flow` file). There are
-several types of executables that can be defined. 
+Executables are the core of flow. Each executable is driven by its definition within an executable definition file 
+(`*.flow` file). There are several types of executables that can be defined.
 For more information on Executables and it's config, see [Executables](docs/config/executables.md).
 
-
-### Running and managing workflows
+#### Running and managing workflows
 
 The main command for running workflows is `flow exec`. This command will execute the workflow with the provided
-executable ID. `exec` can be replaced with any verb but should match the verb defined in the executable's definition or
-an alias of the verb.
+executable ID. `exec` can be replaced with any verb known to flow but should match the verb defined in the executable's 
+definition or an alias of the verb.
 
 As you make changes to executables on your system, you can run `flow sync` to trigger a re-index of your executables.
 
+#### Autocompletion
+
+flow supports autocompletion for bash, zsh, and fish shells. Setup depends on the shell you are using. For instance, if
+you are using zsh with oh-my-zsh, you can run the following command to generate the autocompletion script:
+
+```bash
+flow completion zsh > ~/.oh-my-zsh/completions/_flow
+```
+
+## Documentation
+
 See [flow CLI documentation](docs/cli/flow.md) for more information on all available commands.
+See [flow Configuration documentation](docs/config/config.md) for more information on the configuration file options.
 
-**Autocompletion**
+### Examples
 
-Example autocompletion setup script: `flow completion zsh > ~/.oh-my-zsh/completions/_flow`
+Check out some example configurations and workflows in the [examples](examples/) directory. You can clone this repository
+and follow the workspace setup instructions above to run these examples on your system.
+
+## Contributing
+
+We welcome contributions from the community! Please see our [Contributing Guide](link_to_contributing_guide) for more details on how to get involved.
+
+
+
+
