@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea
 	github.com/itchyny/gojq v0.12.15
-	github.com/jahvon/open-golang v0.0.0-20240515012214-e6e9cc4f13a9
+	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
 	github.com/jahvon/tuikit v0.0.10
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/onsi/ginkgo/v2 v2.17.2
