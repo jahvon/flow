@@ -1,6 +1,6 @@
 # flow Development
 
-Before getting started, please read the [Code of Conduct](.github/CODE_OF_CONDUCT.md) and [Contributing](.github/CONTRIBUTING.md) guidelines.
+Before getting started, please read the [Code of Conduct](.github/CODE_OF_CONDUCT.md) and [Contributing Guidelines](.github/CONTRIBUTING.md).
 
 flow is written in [Go](https://golang.org/). See the [go.mod](go.mod) file for the current Go version used in 
 building the project.
@@ -11,6 +11,10 @@ The following tools are required for development:
 
 - [mockgen](https://github.com/uber-go/mock) for generating test mocks
 - [golangci-lint](https://golangci-lint.run/) for linting
+
+Additionally, we recommend using the [ginkgo CLI](https://onsi.github.io/ginkgo/#ginkgo-cli-overview) for setting up and running tests.
+
+## Running a local build
 
 ## Make Commands
 

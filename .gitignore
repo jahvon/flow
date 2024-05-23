@@ -22,6 +22,7 @@ coverage.txt
 .idea
 
 # build files
+.bin
 flow
 flow*.tar.gz
 dist

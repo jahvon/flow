@@ -1,0 +1,68 @@
+visibility: private
+tags: [development]
+executables:
+  - verb: run
+    name: pre-commit
+    aliases: [precommit, pc]
+    description: Run the repo's pre-commit script
+    logMode: logfmt
+    serial:
+      failFast: true
+      refs:
+        - run generate
+        - run lint
+        - run tests
+
+  - verb: run
+    name: build
+    exec:
+      dir: //
+      args:
+        - envKey: BIN_PATH
+          default: .bin
+          pos: 1
+          required: false
+      params:
+        - envKey: BIN_NAME
+          text: flow
+      cmd: |
+        go build -o ${BIN_PATH}/${BIN_NAME}
+        echo "flow built at ${BIN_PATH}/${BIN_NAME}"
+
+  - verb: run
+    name: generate
+    aliases: [docsgen, codegen, gen]
+    exec:
+      dir: //
+      cmd: |
+        go generate ./...
+        go run ./tools/docsgen/main.go
+
+  - verb: run
+    name: lint
+    exec:
+      dir: //
+      cmd: |
+        go fmt ./...
+        go mod tidy
+        golangci-lint run ./...
+
+  - verb: run
+    name: tests
+    exec:
+      dir: //
+      cmd: go test ./... -race
+
+  - verb: install
+    name: deps
+    aliases: [local-deps]
+    exec:
+      dir: //
+      cmd: |
+        go mod tidy
+        echo "installing cobra-cli..."
+        go install github.com/spf13/cobra-cli@v1.3.0
+        echo "installing golangci-lint..."
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+        echo "installing ginkgo..."
+        go install github.com/onsi/ginkgo/v2/ginkgo@v2.17.2

@@ -44,8 +44,6 @@ Alternatively, you can install the binary via Go using the following command:
 go install github.com/jahvon/flow@latest
 ```
 
-See the [Development](DEVELOPMENT.md) guide for more information on how to build from source.
-
 ### Basic Usage
 
 #### Setting up a Workspace
@@ -98,7 +96,7 @@ and follow the workspace setup instructions above to run these examples on your 
 
 ## Contributing
 
-We welcome contributions from the community! Please see our [Contributing Guide](link_to_contributing_guide) for more details on how to get involved.
+We welcome contributions from the community! Please see our [Contributing Guide](.github/CONTRIBUTING.md) for more details on how to get involved.
 
 
 
