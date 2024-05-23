@@ -118,7 +118,7 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	}
 
 	tmpWsDir := filepath.Join(tmpDir, TestWorkspaceName)
-	if err := os.Mkdir(filepath.Join(tmpDir, TestWorkspaceName), 0600); err != nil {
+	if err := os.Mkdir(filepath.Join(tmpDir, TestWorkspaceName), 0750); err != nil {
 		t.Fatalf("unable to create workspace directory: %v", err)
 	}
 	if err := copy.Copy(srcWsDir, tmpWsDir); err != nil {
@@ -129,7 +129,7 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err != nil {
 		t.Fatalf("unable to marshal test data: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(tmpWsDir, "testdata.flow"), execDef, 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpWsDir, "testdata.flow"), execDef, 0750); err != nil {
 		t.Fatalf("unable to write test data: %v", err)
 	}
 	tmpConfigDir := filepath.Join(tmpDir, userConfigSubdir)
@@ -196,12 +196,12 @@ func examplesDir() string {
 
 func setTestEnv(t ginkgo.FullGinkgoTInterface, configDir, cacheDir string) {
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(configDir, 0600); err != nil {
+		if err := os.MkdirAll(configDir, 0750); err != nil {
 			t.Fatalf("unable to create config directory: %v", err)
 		}
 	}
 	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(cacheDir, 0600); err != nil {
+		if err := os.MkdirAll(cacheDir, 0750); err != nil {
 			t.Fatalf("unable to create cache directory: %v", err)
 		}
 	}
