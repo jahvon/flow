@@ -129,7 +129,7 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err != nil {
 		t.Fatalf("unable to marshal test data: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(tmpWsDir, "testdata.flow"), execDef, 0750); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpWsDir, "testdata.flow"), execDef, 0600); err != nil {
 		t.Fatalf("unable to write test data: %v", err)
 	}
 	tmpConfigDir := filepath.Join(tmpDir, userConfigSubdir)
