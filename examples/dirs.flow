@@ -42,7 +42,7 @@ executables:
   - verb: run
     name: env-dir
     exec:
-      dir: $FLOW_CONFIG_PATH/
+      dir: /$FLOW_CONFIG_PATH/
       cmd: |
         echo "Current directory: $(pwd)"
 

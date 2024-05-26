@@ -42,6 +42,7 @@ func registerGetConfigCmd(ctx *context.Context, getCmd *cobra.Command) {
 		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { getConfigFunc(ctx, cmd, args) },
 	}
+	RegisterFlag(ctx, configCmd, *flags.OutputFormatFlag)
 	getCmd.AddCommand(configCmd)
 }
 
@@ -115,6 +116,7 @@ func registerGetExecCmd(ctx *context.Context, getCmd *cobra.Command) {
 		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { getExecFunc(ctx, cmd, args) },
 	}
+	RegisterFlag(ctx, execCmd, *flags.OutputFormatFlag)
 	getCmd.AddCommand(execCmd)
 }
 
@@ -160,6 +162,7 @@ func registerGetSecretCmd(ctx *context.Context, getCmd *cobra.Command) {
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { getSecretFunc(ctx, cmd, args) },
 	}
+	RegisterFlag(ctx, secretCmd, *flags.OutputSecretAsPlainTextFlag)
 	getCmd.AddCommand(secretCmd)
 }
 

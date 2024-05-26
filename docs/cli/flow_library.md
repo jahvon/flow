@@ -9,6 +9,7 @@ flow library [flags]
 ### Options
 
 ```
+  -f, --filter string      Filter executable by reference substring.
   -h, --help               help for library
   -n, --namespace string   Filter executables by namespace.
   -t, --tag stringArray    Filter by tags.

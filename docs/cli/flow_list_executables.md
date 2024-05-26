@@ -9,6 +9,7 @@ flow list executables [flags]
 ### Options
 
 ```
+  -f, --filter string      Filter executable by reference substring.
   -h, --help               help for executables
   -n, --namespace string   Filter executables by namespace.
   -o, --output string      Output format. One of: yaml, json, doc, or list.

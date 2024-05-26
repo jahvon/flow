@@ -26,6 +26,7 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	RegisterFlag(ctx, libraryCmd, *flags.FilterNamespaceFlag)
 	RegisterFlag(ctx, libraryCmd, *flags.FilterVerbFlag)
 	RegisterFlag(ctx, libraryCmd, *flags.FilterTagFlag)
+	RegisterFlag(ctx, libraryCmd, *flags.FilterExecSubstringFlag)
 	rootCmd.AddCommand(libraryCmd)
 }
 
@@ -47,6 +48,7 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 
 	verbFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterVerbFlag, false)
 	tagsFilter := flags.ValueFor[[]string](ctx, cmd, *flags.FilterTagFlag, false)
+	subStr := flags.ValueFor[string](ctx, cmd, *flags.FilterExecSubstringFlag, false)
 
 	allExecs, err := ctx.ExecutableCache.GetExecutableList(logger)
 	if err != nil {
@@ -64,6 +66,7 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 			Namespace: nsFilter,
 			Verb:      config.Verb(verbFilter),
 			Tags:      tagsFilter,
+			Substring: subStr,
 		},
 		io.Theme(),
 	)

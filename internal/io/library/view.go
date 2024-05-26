@@ -3,6 +3,7 @@ package library
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -148,13 +149,15 @@ func (l *Library) paneTwoContent() string {
 	}
 
 	_, _, maxWidth := calculateViewportWidths(l.termWidth)
+	paneTwoMaxWidth := math.Floor(float64(maxWidth) * 0.95)
 	mdStyles, err := l.theme.MarkdownStyleJSON()
 	if err != nil {
 		return l.theme.RenderError(fmt.Sprintf("unable to render markdown: %s", err.Error()))
 	}
 	renderer, err := glamour.NewTermRenderer(
 		glamour.WithStylesFromJSONBytes([]byte(mdStyles)),
-		glamour.WithWordWrap(maxWidth-2),
+		glamour.WithPreservedNewLines(),
+		glamour.WithWordWrap(int(paneTwoMaxWidth)),
 	)
 	if err != nil {
 		return l.theme.RenderError(fmt.Sprintf("unable to render markdown: %s", err.Error()))

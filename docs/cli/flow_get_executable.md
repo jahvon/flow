@@ -16,7 +16,8 @@ flow get executable VERB ID [flags]
 ### Options
 
 ```
-  -h, --help   help for executable
+  -h, --help            help for executable
+  -o, --output string   Output format. One of: yaml, json, doc, or list.
 ```
 
 ### Options inherited from parent commands
