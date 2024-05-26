@@ -365,7 +365,7 @@ func structToMarkdown(t reflect.Type) string {
 		if !field.Linkable {
 			continue
 		}
-		if field.Type == "Object" {
+		if field.Type == "Object" && field.goType.Kind() == reflect.Struct {
 			tmpl, err = template.New("struct").Parse(structTemplate)
 			if err != nil {
 				panic(err)
