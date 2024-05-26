@@ -9,7 +9,7 @@ import (
 var ExecWithExit = &config.Executable{
 	Verb:       "run",
 	Name:       "exit",
-	Visibility: config.VisibilityPrivate,
+	Visibility: config.VisibilityPrivate.NewPointer(),
 	Description: "This executable will exit with the provided exit code." +
 		"\n\n- The exit code can be set using the `exitCode` parameter.",
 	Type: &config.ExecutableTypeSpec{
@@ -32,7 +32,7 @@ var ExecWithExit = &config.Executable{
 var ExecWithTimeout = &config.Executable{
 	Verb:       "run",
 	Name:       "timeout",
-	Visibility: config.VisibilityPrivate,
+	Visibility: config.VisibilityPrivate.NewPointer(),
 	Description: "This executable will sleep for the provided duration." +
 		"\n\n- The sleep duration can be set using the `duration` parameter.",
 	Timeout: 250 * time.Millisecond,
@@ -51,4 +51,8 @@ var ExecWithTimeout = &config.Executable{
 			Command: "sleep $duration",
 		},
 	},
+}
+
+func vPtr(v config.Visibility) *config.Visibility {
+	return &v
 }
