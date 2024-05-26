@@ -52,7 +52,3 @@ var ExecWithTimeout = &config.Executable{
 		},
 	},
 }
-
-func vPtr(v config.Visibility) *config.Visibility {
-	return &v
-}
