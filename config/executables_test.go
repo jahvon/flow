@@ -122,14 +122,14 @@ var _ = Describe("Executable", func() {
 			Expect(exec.IsVisibleFromWorkspace("another-ws")).To(Equal(expected))
 		}
 	},
-		Entry("public from ws", vPtr(config.VisibilityPublic), true, true),
-		Entry("public from another ws", vPtr(config.VisibilityPublic), false, true),
-		Entry("private from ws", vPtr(config.VisibilityPrivate), true, true),
-		Entry("private from another ws", vPtr(config.VisibilityPrivate), false, false),
-		Entry("internal from ws", vPtr(config.VisibilityInternal), true, false),
-		Entry("internal from another ws", vPtr(config.VisibilityInternal), false, false),
-		Entry("hidden from ws", vPtr(config.VisibilityHidden), true, false),
-		Entry("hidden from another ws", vPtr(config.VisibilityHidden), false, false),
+		Entry("public from ws", config.VisibilityPublic.NewPointer(), true, true),
+		Entry("public from another ws", config.VisibilityPublic.NewPointer(), false, true),
+		Entry("private from ws", config.VisibilityPrivate.NewPointer(), true, true),
+		Entry("private from another ws", config.VisibilityPrivate.NewPointer(), false, false),
+		Entry("internal from ws", config.VisibilityInternal.NewPointer(), true, false),
+		Entry("internal from another ws", config.VisibilityInternal.NewPointer(), false, false),
+		Entry("hidden from ws", config.VisibilityHidden.NewPointer(), true, false),
+		Entry("hidden from another ws", config.VisibilityHidden.NewPointer(), false, false),
 	)
 
 	DescribeTable("IsExecutableFromWorkspace", func(visibility *config.Visibility, wsMatch, expected bool) {
@@ -140,14 +140,14 @@ var _ = Describe("Executable", func() {
 			Expect(exec.IsExecutableFromWorkspace("another-ws")).To(Equal(expected))
 		}
 	},
-		Entry("public from ws", vPtr(config.VisibilityPublic), true, true),
-		Entry("public from another ws", vPtr(config.VisibilityPublic), false, true),
-		Entry("private from ws", vPtr(config.VisibilityPrivate), true, true),
-		Entry("private from another ws", vPtr(config.VisibilityPrivate), false, false),
-		Entry("internal from ws", vPtr(config.VisibilityInternal), true, true),
-		Entry("internal from another ws", vPtr(config.VisibilityInternal), false, false),
-		Entry("hidden from ws", vPtr(config.VisibilityHidden), true, false),
-		Entry("hidden from another ws", vPtr(config.VisibilityHidden), false, false),
+		Entry("public from ws", config.VisibilityPublic.NewPointer(), true, true),
+		Entry("public from another ws", config.VisibilityPublic.NewPointer(), false, true),
+		Entry("private from ws", config.VisibilityPrivate.NewPointer(), true, true),
+		Entry("private from another ws", config.VisibilityPrivate.NewPointer(), false, false),
+		Entry("internal from ws", config.VisibilityInternal.NewPointer(), true, true),
+		Entry("internal from another ws", config.VisibilityInternal.NewPointer(), false, false),
+		Entry("hidden from ws", config.VisibilityHidden.NewPointer(), true, false),
+		Entry("hidden from another ws", config.VisibilityHidden.NewPointer(), false, false),
 	)
 })
 
@@ -299,5 +299,3 @@ var _ = Describe("ExecutableList", func() {
 		})
 	})
 })
-
-func vPtr(v config.Visibility) *config.Visibility { return &v }
