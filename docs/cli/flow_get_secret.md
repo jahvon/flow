@@ -9,7 +9,8 @@ flow get secret REFERENCE [flags]
 ### Options
 
 ```
-  -h, --help   help for secret
+  -h, --help        help for secret
+  -p, --plainText   Output the secret value as plain text instead of an obfuscated string
 ```
 
 ### Options inherited from parent commands

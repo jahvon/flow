@@ -29,6 +29,14 @@ var SyncCacheFlag = &Metadata{
 	Required: false,
 }
 
+var FilterExecSubstringFlag = &Metadata{
+	Name:      "filter",
+	Shorthand: "f",
+	Usage:     "Filter executable by reference substring.",
+	Default:   "",
+	Required:  false,
+}
+
 var FilterWorkspaceFlag = &Metadata{
 	Name:      "workspace",
 	Shorthand: "w",
@@ -81,6 +89,14 @@ var SetAfterCreateFlag = &Metadata{
 	Name:      "set",
 	Shorthand: "s",
 	Usage:     "Set the newly created workspace as the current workspace",
+	Default:   false,
+	Required:  false,
+}
+
+var FixedWsModeFlag = &Metadata{
+	Name:      "fixed",
+	Shorthand: "f",
+	Usage:     "Set the workspace mode to fixed",
 	Default:   false,
 	Required:  false,
 }

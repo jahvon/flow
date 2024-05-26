@@ -52,7 +52,7 @@ var _ = Describe("Run", func() {
 				logger.EXPECT().LogMode().DoAndReturn(func() tuikitIO.LogMode {
 					return tuikitIO.Text
 				}).AnyTimes()
-				logger.EXPECT().Println("foo").Times(1)
+				logger.EXPECT().Print("foo").Times(1)
 				err := run.RunCmd("echo \"foo\"", "", nil, tuikitIO.Text, logger, os.Stdin, nil)
 				Expect(err).NotTo(HaveOccurred())
 			})
@@ -126,7 +126,7 @@ var _ = Describe("Run", func() {
 			logger.EXPECT().LogMode().DoAndReturn(func() tuikitIO.LogMode {
 				return tuikitIO.Text
 			}).AnyTimes()
-			logger.EXPECT().Println("foo").Times(1)
+			logger.EXPECT().Print("foo").Times(1)
 			filename := filepath.Base(testfile.Name())
 			filedir := filepath.Dir(testfile.Name())
 			err := run.RunFile(filename, filedir, nil, tuikitIO.Logfmt, logger, os.Stdin, nil)

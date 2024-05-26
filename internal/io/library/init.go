@@ -71,7 +71,8 @@ func (l *Library) setVisibleExecs() {
 		FilterByWorkspace(curWs).
 		FilterByNamespace(curNs).
 		FilterByVerb(filter.Verb).
-		FilterByTags(filter.Tags)
+		FilterByTags(filter.Tags).
+		FilterBySubstring(filter.Substring)
 
 	slices.SortFunc(filteredExec, func(i, j *config.Executable) int {
 		return strings.Compare(i.Ref().String(), j.Ref().String())

@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/config/file"
@@ -43,10 +44,11 @@ func registerSetWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setWorkspaceFunc(ctx, cmd, args) },
 	}
+	RegisterFlag(ctx, workspaceCmd, *flags.FixedWsModeFlag)
 	setCmd.AddCommand(workspaceCmd)
 }
 
-func setWorkspaceFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func setWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	workspace := args[0]
 	userConfig := ctx.UserConfig
@@ -54,6 +56,10 @@ func setWorkspaceFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		logger.Fatalf("workspace %s not found", workspace)
 	}
 	userConfig.CurrentWorkspace = workspace
+	fixedMode := flags.ValueFor[bool](ctx, cmd, *flags.FixedWsModeFlag, false)
+	if fixedMode {
+		userConfig.WorkspaceMode = config.WorkspaceModeFixed
+	}
 
 	if err := file.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
