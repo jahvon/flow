@@ -60,8 +60,8 @@ github.com/jahvon/glamour v0.7.1-patch1 h1:v3btiQx2OB0ETStjkXciUjwZBO9fXfSv5flZl
 github.com/jahvon/glamour v0.7.1-patch1/go.mod h1:jUMh5MeihljJPQbJ/wf4ldw2+yBP59+ctV36jASy7ps=
 github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef h1:4PS/MNVT6Rsv15x5Rtwaw971e6kFvNUAf9nvUsZ5hcc=
 github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef/go.mod h1:dUmuT5CN6osIeLSRtTPJOf0Yz+qAbcyU6omnCzI+ZfQ=
-github.com/jahvon/tuikit v0.0.11 h1:Tbwd8SdaHqgYoS+OqUHa3ESfYrK1tR+BmSo1YlYZKDc=
-github.com/jahvon/tuikit v0.0.11/go.mod h1:6T4MFGAy4aSlDLV5Ka1FUd+TOt/fCXBrsibRpM1I3mI=
+github.com/jahvon/tuikit v0.0.12 h1:JpoZ9zESPfZ98h2gWerE3P1/LqhOFUy7Ea/loBDtiVU=
+github.com/jahvon/tuikit v0.0.12/go.mod h1:6T4MFGAy4aSlDLV5Ka1FUd+TOt/fCXBrsibRpM1I3mI=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
