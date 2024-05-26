@@ -113,18 +113,14 @@ const (
 	VisibilityHidden Visibility = "hidden"
 )
 
-// From highest the visible [0] to the lowest visible [n-1].
-var visibilityByLevel = []Visibility{
-	VisibilityPublic,
-	VisibilityPrivate,
-	VisibilityInternal,
-	VisibilityHidden,
-}
-
 type Visibility string
 
 func (v Visibility) String() string {
 	return string(v)
+}
+
+func (v Visibility) NewPointer() *Visibility {
+	return &v
 }
 
 func (v Visibility) IsPublic() bool {
