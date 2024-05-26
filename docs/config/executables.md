@@ -214,7 +214,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 -------
 ## Visibility
 
-**Type**: Visibility
+**Type**: Object
 
 The visibility of the executables to Flow.<br>If not set, the visibility will default to `public`.<br><br>`public` executables can be executed and listed from anywhere.<br>`private` executables can be executed and listed only within their own workspace.<br>`internal` executables can be executed within their own workspace but are not listed.<br>`hidden` executables cannot be executed or listed.
 
