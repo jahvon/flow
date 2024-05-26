@@ -15,7 +15,7 @@ import (
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/mocks"
 	"github.com/jahvon/flow/internal/runner/serial"
-	examples_test "github.com/jahvon/flow/tests/examples"
+	examplestest "github.com/jahvon/flow/tests/examples"
 	testRunner "github.com/jahvon/flow/tests/runner"
 )
 
@@ -83,12 +83,12 @@ var _ = Describe("SerialRunner", func() {
 				)
 			}
 
-			rootExec = examples_test.SerialExecRoot
-			serialExec1 = examples_test.SerialExec1
+			rootExec = examplestest.SerialExecRoot
+			serialExec1 = examplestest.SerialExec1
 			setExecCtx(serialExec1)
-			serialExec2 = examples_test.SerialExec2
+			serialExec2 = examplestest.SerialExec2
 			setExecCtx(serialExec2)
-			serialExec3 = examples_test.SerialExec3
+			serialExec3 = examplestest.SerialExec3
 			setExecCtx(serialExec3)
 
 			isSerialExec1 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialExec1.Ref()) })
@@ -134,7 +134,7 @@ var _ = Describe("SerialRunner", func() {
 			mockRunner.EXPECT().IsCompatible(isSerialExec2).Return(true).Times(1)
 			mockRunner.EXPECT().Exec(ctx, isSerialExec2, promptedEnv).Return(errors.New("error")).Times(1)
 
-			Expect(serialRnr.Exec(ctx, examples_test.SerialWithExitRoot, promptedEnv)).ToNot(Succeed())
+			Expect(serialRnr.Exec(ctx, examplestest.SerialWithExitRoot, promptedEnv)).ToNot(Succeed())
 		})
 
 		It("should not fail fast when disabled", func() {
@@ -150,7 +150,7 @@ var _ = Describe("SerialRunner", func() {
 			mockRunner.EXPECT().Exec(ctx, isSerialExec3, promptedEnv).Return(nil).Times(1)
 			mockLogger.EXPECT().Error(gomock.Any(), gomock.Any()).Times(1)
 
-			Expect(serialRnr.Exec(ctx, examples_test.SerialExecRoot, promptedEnv)).ToNot(Succeed())
+			Expect(serialRnr.Exec(ctx, examplestest.SerialExecRoot, promptedEnv)).ToNot(Succeed())
 		})
 	})
 })

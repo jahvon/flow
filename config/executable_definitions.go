@@ -41,9 +41,11 @@ func (d *ExecutableDefinition) SetContext(workspaceName, workspacePath, definiti
 	d.definitionPath = definitionPath
 	for _, exec := range d.Executables {
 		exec.SetContext(workspaceName, workspacePath, d.Namespace, definitionPath)
+		if exec.Visibility == nil {
+			exec.Visibility = &d.Visibility
+		}
 		exec.SetDefaults()
 		exec.MergeTags(d.Tags)
-		exec.MergeVisibility(d.Visibility)
 	}
 }
 

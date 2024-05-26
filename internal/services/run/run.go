@@ -47,7 +47,7 @@ func RunCmd(
 		interp.Dir(dir),
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
-			io.StdInReader{StdIn: stdIn},
+			stdIn,
 			stdOutWriter(logMode, logger, flattenedFields...),
 			stdErrWriter(logMode, logger, flattenedFields...),
 		),
@@ -107,7 +107,7 @@ func RunFile(
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(envList...)),
 		interp.StdIO(
-			io.StdInReader{StdIn: stdIn},
+			stdIn,
 			stdOutWriter(logMode, logger, flattenedFields...),
 			stdErrWriter(logMode, logger, flattenedFields...),
 		),
@@ -127,9 +127,9 @@ func RunFile(
 }
 
 func stdOutWriter(mode io.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
-	return io.StdOutWriter{LogFields: logFields, Logger: logger, LogMode: mode}
+	return io.StdOutWriter{LogFields: logFields, Logger: logger, LogMode: &mode}
 }
 
 func stdErrWriter(mode io.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
-	return io.StdErrWriter{LogFields: logFields, Logger: logger, LogMode: mode}
+	return io.StdErrWriter{LogFields: logFields, Logger: logger, LogMode: &mode}
 }

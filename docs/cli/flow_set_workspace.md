@@ -9,7 +9,8 @@ flow set workspace NAME [flags]
 ### Options
 
 ```
-  -h, --help   help for workspace
+  -f, --fixed   Set the workspace mode to fixed
+  -h, --help    help for workspace
 ```
 
 ### Options inherited from parent commands

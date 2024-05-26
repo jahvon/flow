@@ -18,7 +18,7 @@ import (
 	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
-	examples_test "github.com/jahvon/flow/tests/examples"
+	examplestest "github.com/jahvon/flow/tests/examples"
 )
 
 const (
@@ -124,7 +124,7 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err := copy.Copy(srcWsDir, tmpWsDir); err != nil {
 		t.Fatalf("unable to copy workspace directory: %v", err)
 	}
-	testData := examples_test.TestExecutableDefinition
+	testData := examplestest.TestExecutableDefinition
 	execDef, err := yaml.Marshal(testData)
 	if err != nil {
 		t.Fatalf("unable to marshal test data: %v", err)

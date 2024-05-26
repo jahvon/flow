@@ -2,14 +2,14 @@ package main
 
 import (
 	stdCtx "context"
-	"os"
 
 	"github.com/jahvon/flow/cmd"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/io"
 )
 
 func main() {
-	ctx := context.NewContext(stdCtx.Background(), os.Stdin, os.Stdout)
+	ctx := context.NewContext(stdCtx.Background(), io.Stdin, io.Stdout)
 	defer ctx.Finalize()
 
 	if ctx == nil {

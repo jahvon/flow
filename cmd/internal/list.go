@@ -94,6 +94,7 @@ func registerListExecutableCmd(ctx *context.Context, listCmd *cobra.Command) {
 	RegisterFlag(ctx, executableCmd, *flags.FilterNamespaceFlag)
 	RegisterFlag(ctx, executableCmd, *flags.FilterVerbFlag)
 	RegisterFlag(ctx, executableCmd, *flags.FilterTagFlag)
+	RegisterFlag(ctx, executableCmd, *flags.FilterExecSubstringFlag)
 	listCmd.AddCommand(executableCmd)
 }
 
@@ -112,6 +113,7 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	verbFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterVerbFlag, false)
 	tagsFilter := flags.ValueFor[[]string](ctx, cmd, *flags.FilterTagFlag, false)
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
+	substr := flags.ValueFor[string](ctx, cmd, *flags.FilterExecSubstringFlag, false)
 
 	allExecs, err := ctx.ExecutableCache.GetExecutableList(logger)
 	if err != nil {
@@ -122,7 +124,8 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		FilterByWorkspace(wsFilter).
 		FilterByNamespace(nsFilter).
 		FilterByVerb(config.Verb(verbFilter)).
-		FilterByTags(tagsFilter)
+		FilterByTags(tagsFilter).
+		FilterBySubstring(substr)
 
 	if interactive.UIEnabled(ctx, cmd) {
 		view := executableio.NewExecutableListView(

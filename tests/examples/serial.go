@@ -13,7 +13,7 @@ var (
 var SerialExecRoot = &config.Executable{
 	Verb:       "start",
 	Name:       "serial",
-	Visibility: config.VisibilityPrivate,
+	Visibility: config.VisibilityPrivate.NewPointer(),
 	Description: serialBaseDesc +
 		"\n\n- The environment defined on the root executable is inherited by all the child executables." +
 		"\n- Setting `f:tmp` as the directory on child executables will create a shared temporary directory for execution.",
@@ -41,7 +41,7 @@ var SerialWithExitRoot = &config.Executable{
 	Verb:       "start",
 	Name:       "serial-with-exit",
 	Aliases:    []string{"serial-exit"},
-	Visibility: config.VisibilityPrivate,
+	Visibility: config.VisibilityPrivate.NewPointer(),
 	Description: serialBaseDesc +
 		"\n\n The `failFast` option can be set to `true` to stop the flow if a child executable fails.",
 	Timeout: 10 * time.Second,
@@ -61,7 +61,7 @@ var SerialWithExitRoot = &config.Executable{
 var SerialExec1 = &config.Executable{
 	Verb:        "run",
 	Name:        "serial-exec1",
-	Visibility:  config.VisibilityInternal,
+	Visibility:  config.VisibilityInternal.NewPointer(),
 	Description: "First serial executable.",
 	Type: &config.ExecutableTypeSpec{
 		Exec: &config.ExecExecutableType{
@@ -74,7 +74,7 @@ var SerialExec1 = &config.Executable{
 var SerialExec2 = &config.Executable{
 	Verb:        "run",
 	Name:        "serial-exec2",
-	Visibility:  config.VisibilityInternal,
+	Visibility:  config.VisibilityInternal.NewPointer(),
 	Description: "Second serial executable.",
 	Type: &config.ExecutableTypeSpec{
 		Exec: &config.ExecExecutableType{
@@ -87,7 +87,7 @@ var SerialExec2 = &config.Executable{
 var SerialExec3 = &config.Executable{
 	Verb:        "run",
 	Name:        "serial-exec3",
-	Visibility:  config.VisibilityInternal,
+	Visibility:  config.VisibilityInternal.NewPointer(),
 	Description: "Third serial executable.",
 	Type: &config.ExecutableTypeSpec{
 		Exec: &config.ExecExecutableType{

@@ -40,6 +40,7 @@ type Filter struct {
 	Workspace, Namespace string
 	Verb                 config.Verb
 	Tags                 config.Tags
+	Substring            string
 }
 
 func NewLibrary(
