@@ -161,8 +161,8 @@ type Executable struct {
 	Aliases     []string      `yaml:"aliases,omitempty"`
 	Tags        Tags          `yaml:"tags,omitempty"`
 	Description string        `yaml:"description,omitempty"`
-	Visibility  Visibility    `yaml:"visibility,omitempty"`
 	Timeout     time.Duration `yaml:"timeout,omitempty"`
+	Visibility  *Visibility   `yaml:"visibility,omitempty"`
 	// +docsgen:typeExec
 	// The type of executable. Only one type can be set.
 	Type *ExecutableTypeSpec `yaml:",inline,omitempty"`
@@ -212,39 +212,7 @@ func (e *Executable) JSON() (string, error) {
 }
 
 func (e *Executable) Markdown() string {
-	var mkdwn string
-	mkdwn += fmt.Sprintf("# [Executable] %s %s\n", e.Verb, e.ID())
-	mkdwn += fmt.Sprintf("## Defined in\n%s\n", e.definitionPath)
-	if len(e.Aliases) > 0 {
-		mkdwn += "## Aliases\n"
-		lo.ForEach(e.Aliases, func(alias string, _ int) {
-			mkdwn += fmt.Sprintf("- %s\n", alias)
-		})
-	}
-	if e.Description != "" {
-		mkdwn += fmt.Sprintf("## Description\n%s\n", e.Description)
-	}
-	if len(e.Tags) > 0 {
-		mkdwn += "## Tags\n"
-		lo.ForEach(e.Tags, func(tag string, _ int) {
-			mkdwn += fmt.Sprintf("- %s\n", tag)
-		})
-	}
-	if e.Type != nil {
-		typeSpec, err := yaml.Marshal(e.Type)
-		if err != nil {
-			mkdwn += "## Type spec\nerror\n"
-		} else {
-			mkdwn += fmt.Sprintf("## Type spec\n```yaml\n%s```\n", string(typeSpec))
-		}
-	}
-	if e.Visibility != "" {
-		mkdwn += fmt.Sprintf("## Visibility\n%s\n", e.Visibility)
-	}
-	if e.Timeout != 0 {
-		mkdwn += fmt.Sprintf("## Timeout\n%s\n", e.Timeout.String())
-	}
-	return mkdwn
+	return execMarkdown(e)
 }
 
 func (e *Executable) Ref() Ref {
@@ -304,8 +272,9 @@ func (e *Executable) SetDefaults() {
 	if e.Verb == "" {
 		e.Verb = "exec"
 	}
-	if e.Visibility == "" {
-		e.Visibility = VisibilityPrivate
+	if e.Visibility == nil || *e.Visibility == "" {
+		v := VisibilityPrivate
+		e.Visibility = &v
 	}
 	if e.Timeout == 0 {
 		e.Timeout = DefaultTimeout
@@ -351,34 +320,22 @@ func (e *Executable) Validate() error {
 }
 
 func (e *Executable) NameEquals(name string) bool {
-	return e.Name == name || lo.Contains(e.Aliases, name)
+	return e.Name == name || slices.Contains(e.Aliases, name)
 }
 
 func (e *Executable) MergeTags(tags Tags) {
-	e.Tags = lo.Uniq(append(e.Tags, tags...))
-}
-
-// MergeVisibility merges the visibility of the executable with the given visibility.
-// Private < Internal < Public < Hidden
-// The visibility will be set to the highest level of the two.
-func (e *Executable) MergeVisibility(visibility Visibility) {
-	curLevel := slices.Index(visibilityByLevel, e.Visibility)
-	vLevel := slices.Index(visibilityByLevel, visibility)
-	if curLevel == 0 {
-		return
-	} else if vLevel == 0 {
-		e.Visibility = visibility
-	}
-	if vLevel > curLevel {
-		e.Visibility = visibility
-	}
+	e.Tags = slices.Compact(append(e.Tags, tags...))
 }
 
 // IsVisibleFromWorkspace returns true if the executable should be shown in terminal output for the given workspace.
 func (e *Executable) IsVisibleFromWorkspace(workspaceFilter string) bool {
-	switch e.Visibility {
+	matchesWsFiler := e.workspace == workspaceFilter || workspaceFilter == "" || workspaceFilter == "*"
+	if e.Visibility == nil {
+		return matchesWsFiler
+	}
+	switch *e.Visibility {
 	case VisibilityPrivate:
-		return e.workspace == workspaceFilter || workspaceFilter == "" || workspaceFilter == "*"
+		return matchesWsFiler
 	case VisibilityPublic:
 		return true
 	case VisibilityInternal, VisibilityHidden:
@@ -389,10 +346,14 @@ func (e *Executable) IsVisibleFromWorkspace(workspaceFilter string) bool {
 }
 
 // IsExecutableFromWorkspace returns true if the executable can be executed from the given workspace.
-func (e *Executable) IsExecutableFromWorkspace(workspace string) bool {
-	switch e.Visibility {
+func (e *Executable) IsExecutableFromWorkspace(workspaceFilter string) bool {
+	matchesWsFiler := e.workspace == workspaceFilter || workspaceFilter == "" || workspaceFilter == "*"
+	if e.Visibility == nil {
+		return matchesWsFiler
+	}
+	switch *e.Visibility {
 	case VisibilityPrivate, VisibilityInternal:
-		return e.workspace == workspace
+		return matchesWsFiler
 	case VisibilityPublic:
 		return true
 	case VisibilityHidden:
@@ -436,9 +397,8 @@ func (l ExecutableList) Items() []*types.CollectionItem {
 	items := make([]*types.CollectionItem, 0)
 	for _, exec := range l {
 		item := &types.CollectionItem{
-			Header:    exec.ID(),
-			SubHeader: exec.Verb.String(),
-			Desc:      exec.Description,
+			Header: exec.Ref().String(),
+			Desc:   exec.Description,
 		}
 		if len(exec.Tags) > 0 {
 			item.Desc = fmt.Sprintf("[%s]\n", exec.Tags.PreviewString()) + exec.Description
@@ -494,6 +454,20 @@ func (l ExecutableList) FilterByVerb(verb Verb) ExecutableList {
 	execs := lo.Filter(l, func(exec *Executable, _ int) bool {
 		return exec.Verb.Equals(verb)
 	})
+	return execs
+}
+
+func (l ExecutableList) FilterBySubstring(str string) ExecutableList {
+	if str == "" {
+		return l
+	}
+
+	execs := lo.Filter(l, func(exec *Executable, _ int) bool {
+		ref := exec.Ref().String()
+		// TODO: Include aliases in search
+		return strings.Contains(ref, str) || strings.Contains(exec.Description, str)
+	})
+
 	return execs
 }
 

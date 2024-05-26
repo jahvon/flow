@@ -13,7 +13,7 @@ var (
 var ParallelExecRoot = &config.Executable{
 	Verb:       "start",
 	Name:       "parallel",
-	Visibility: config.VisibilityPrivate,
+	Visibility: config.VisibilityPrivate.NewPointer(),
 	Description: parallelBaseDesc +
 		"\n\n- The environment defined on the root executable is inherited by all the child executables." +
 		"\n- Setting `f:tmp` as the directory on child executables will create a shared temporary directory for execution.",
@@ -33,7 +33,7 @@ var ParallelExecRootWithExit = &config.Executable{
 	Verb:       "start",
 	Name:       "parallel-exit",
 	Aliases:    []string{"parallel-with-exit"},
-	Visibility: config.VisibilityPrivate,
+	Visibility: config.VisibilityPrivate.NewPointer(),
 	Description: parallelBaseDesc +
 		"\n\nThe `failFast` option can be set to `true` to stop the flow if a child executable fails.",
 	Timeout: 10 * time.Second,
@@ -54,7 +54,7 @@ var ParallelExecRootWithMaxThreads = &config.Executable{
 	Verb:       "start",
 	Name:       "parallel-max",
 	Aliases:    []string{"parallel-with-max-threads"},
-	Visibility: config.VisibilityPrivate,
+	Visibility: config.VisibilityPrivate.NewPointer(),
 	Description: parallelBaseDesc +
 		"\n\nThe `maxThreads` option can be set to limit the number of concurrent executions.",
 	Timeout: 15 * time.Second,
@@ -73,7 +73,7 @@ var ParallelExecRootWithMaxThreads = &config.Executable{
 var ParallelExec1 = &config.Executable{
 	Verb:        "run",
 	Name:        "parallel-exec1",
-	Visibility:  config.VisibilityInternal,
+	Visibility:  config.VisibilityInternal.NewPointer(),
 	Description: "First parallel executable.",
 	Type: &config.ExecutableTypeSpec{
 		Exec: &config.ExecExecutableType{
@@ -86,7 +86,7 @@ var ParallelExec1 = &config.Executable{
 var ParallelExec2 = &config.Executable{
 	Verb:        "run",
 	Name:        "parallel-exec2",
-	Visibility:  config.VisibilityInternal,
+	Visibility:  config.VisibilityInternal.NewPointer(),
 	Description: "Second parallel executable.",
 	Type: &config.ExecutableTypeSpec{
 		Exec: &config.ExecExecutableType{
@@ -99,7 +99,7 @@ var ParallelExec2 = &config.Executable{
 var ParallelExec3 = &config.Executable{
 	Verb:        "run",
 	Name:        "parallel-exec3",
-	Visibility:  config.VisibilityInternal,
+	Visibility:  config.VisibilityInternal.NewPointer(),
 	Description: "Third parallel executable.",
 	Type: &config.ExecutableTypeSpec{
 		Exec: &config.ExecExecutableType{

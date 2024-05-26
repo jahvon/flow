@@ -92,7 +92,7 @@ func (c *ExecutableCache) Update(logger io.Logger) error { //nolint:gocognit
 				continue
 			}
 			for _, e := range def.Executables {
-				if e == nil || e.Visibility == config.VisibilityHidden {
+				if e == nil || (e.Visibility != nil && *e.Visibility == config.VisibilityHidden) {
 					continue
 				}
 				cacheData.ExecutableMap[e.Ref()] = def.DefinitionPath()

@@ -57,7 +57,8 @@ func executablesFromFile(logger io.Logger, shFile string) (*config.Executable, e
 		case fileparser.NameConfigurationKey:
 			executable.Name = value
 		case fileparser.VisibilityConfigurationKey:
-			executable.Visibility = config.Visibility(value)
+			v := config.Visibility(value)
+			executable.Visibility = &v
 		case fileparser.DescriptionConfigurationKey:
 			executable.Description = value
 		case fileparser.AliasConfigurationKey:
