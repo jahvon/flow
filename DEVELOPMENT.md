@@ -5,6 +5,50 @@ Before getting started, please read the [Code of Conduct](.github/CODE_OF_CONDUC
 flow is written in [Go](https://golang.org/). See the [go.mod](go.mod) file for the current Go version used in 
 building the project.
 
+## Getting Started
+
+Before developing on this project, you will need to make sure you have the latest `flow` version installed.
+Refer to the [Installation](README.md#installation) section for more information.
+
+After cloning the repository, you can start using the below commands after registering the repo workspace:
+
+```sh
+flow init workspace flow <repo-path>
+```
+
+### Development Executables
+
+The `flow` project contains a few development executables that can be run locally. After registering the repo
+workspace, you can run the following commands:
+
+```sh
+# Install local dependencies
+flow install deps
+
+# Build the project
+flow run build <output-path>
+
+# Run tests
+flow run tests
+
+# Validate code changes
+flow run validate
+
+# Install the flow binary in your $GOPATH
+flow install gopath
+```
+
+### Working with tuikit
+
+The `flow` project uses the [tuikit](github.com/jahvon/tuikit) framework for building the terminal UI.
+Contributions to the components and helpers in `tuikit` are welcome.
+
+_You should test all tuikit changes with a local flow build before submitting a PR._
+    
+```sh
+  go mod edit -replace github.com/jahvon/tuikit=../tuikit
+```
+
 ## Development Tools
 
 The following tools are required for development:
@@ -14,24 +58,3 @@ The following tools are required for development:
 
 Additionally, we recommend using the [ginkgo CLI](https://onsi.github.io/ginkgo/#ginkgo-cli-overview) for setting up and running tests.
 
-## Running a local build
-
-## Make Commands
-
-The following `make` commands are available for development:
-
-|                                | Make Command      |
-|--------------------------------|-------------------|
-| **Install Local Dependencies** | `make local/deps` |
-| **Build**                      | `make go/build`   |
-| **Test**                       | `make go/test`    |
-| **Pre-commit**                 | `make pre-commit` |
-
-## Installing via Source
-
-```bash
-$ git clone github.com/jahvon/flow
-$ cd flow
-$ go generate ./...
-$ go install
-```

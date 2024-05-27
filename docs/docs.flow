@@ -1,4 +1,5 @@
 visibility: public
+namespace: docs
 tags: [documentation]
 executables:
   - verb: show

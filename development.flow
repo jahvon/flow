@@ -2,10 +2,11 @@ visibility: private
 tags: [development]
 executables:
   - verb: run
-    name: pre-commit
-    aliases: [precommit, pc]
-    description: Run the repo's pre-commit script
-    logMode: logfmt
+    name: validate
+    aliases: [precommit]
+    description: |
+      Run the repository validation checks. This includes linting, tests, and code generation.
+      Validate should be run before committing changes.
     serial:
       failFast: true
       refs:
@@ -15,6 +16,9 @@ executables:
 
   - verb: run
     name: build
+    description: |
+        Build the flow binary. The binary is built at the path specified in the first positional argument.
+        If not set, the binary is built at .bin/flow.
     exec:
       dir: //
       args:
@@ -31,6 +35,7 @@ executables:
 
   - verb: run
     name: generate
+    description: Generate code and documentation
     aliases: [docsgen, codegen, gen]
     exec:
       dir: //
@@ -40,21 +45,32 @@ executables:
 
   - verb: run
     name: lint
+    description: Run linters and formatters
     exec:
       dir: //
       cmd: |
         go fmt ./...
         go mod tidy
-        golangci-lint run ./...
+        golangci-lint run ./... --fix
 
   - verb: run
     name: tests
+    description: Run all project tests
+    exec:
+      dir: //
+      cmd: go test ./... -race
+
+  - verb: install
+    name: gopath
+    aliases: [local]
+    description: Install the project to the GOPATH from local source
     exec:
       dir: //
       cmd: go test ./... -race
 
   - verb: install
     name: deps
+    description: Install project dependencies
     aliases: [local-deps]
     exec:
       dir: //
