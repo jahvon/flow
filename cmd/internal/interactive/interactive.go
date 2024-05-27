@@ -27,8 +27,7 @@ func UIEnabled(ctx *context.Context, cmd *cobra.Command) bool {
 
 func InitInteractiveCommand(ctx *context.Context, cmd *cobra.Command) {
 	if UIEnabled(ctx, cmd) {
-		_, _ = fmt.Fprintln(ctx.StdOut(), io.Theme().
-			RenderHeader(appName, headerCtxKey, headerCtxVal(ctx), 0))
+		ctx.Logger.Println(io.Theme().RenderHeader(appName, headerCtxKey, headerCtxVal(ctx), 0))
 	}
 }
 

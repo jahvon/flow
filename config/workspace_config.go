@@ -157,6 +157,7 @@ func (l WorkspaceConfigList) Items() []*types.CollectionItem {
 			Header:    name,
 			SubHeader: location,
 			Desc:      ws.Description,
+			ID:        name,
 		}
 		items = append(items, &item)
 	}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gen2brain/beeep"
@@ -47,26 +48,30 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			return execIDs, cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
-			runner.RegisterRunner(exec.NewRunner())
-			runner.RegisterRunner(launch.NewRunner())
-			runner.RegisterRunner(request.NewRunner())
-			runner.RegisterRunner(render.NewRunner())
-			runner.RegisterRunner(serial.NewRunner())
-			runner.RegisterRunner(parallel.NewRunner())
-			interactive.InitInteractiveCommand(ctx, cmd)
+			execPreRun(ctx, cmd, args)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			execFunc(ctx, cmd, args)
+			verbStr := cmd.CalledAs()
+			verb := config.Verb(verbStr)
+			execFunc(ctx, cmd, verb, args)
 		},
 	}
 	rootCmd.AddCommand(subCmd)
 }
 
+func execPreRun(ctx *context.Context, cmd *cobra.Command, _ []string) {
+	runner.RegisterRunner(exec.NewRunner())
+	runner.RegisterRunner(launch.NewRunner())
+	runner.RegisterRunner(request.NewRunner())
+	runner.RegisterRunner(render.NewRunner())
+	runner.RegisterRunner(serial.NewRunner())
+	runner.RegisterRunner(parallel.NewRunner())
+	interactive.InitInteractiveCommand(ctx, cmd)
+}
+
 //nolint:gocognit
-func execFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func execFunc(ctx *context.Context, cmd *cobra.Command, verb config.Verb, args []string) {
 	logger := ctx.Logger
-	verbStr := cmd.CalledAs()
-	verb := config.Verb(verbStr)
 	if err := verb.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
@@ -131,6 +136,37 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 			_ = beeep.Notify("Flow", "Flow completed", "")
 		}
 	}
+}
+
+func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
+	s := strings.Split(argsStr, " ")
+	if len(s) != 2 {
+		return fmt.Errorf("invalid reference string %s", argsStr)
+	}
+	verbStr := s[0]
+	verb := config.Verb(verbStr)
+	id := s[1]
+
+	cmds := cmd.Root().Commands()
+	var execCmd *cobra.Command
+	for _, c := range cmds {
+		if c.Name() == "exec" {
+			execCmd = c
+			break
+		}
+	}
+
+	if execCmd == nil {
+		return errors.New("exec command not found")
+	}
+	execCmd.SetArgs([]string{verbStr, id})
+	execCmd.SetOut(ctx.StdOut())
+	execCmd.SetErr(ctx.StdOut())
+	execCmd.SetIn(ctx.StdIn())
+	execPreRun(ctx, execCmd, []string{id})
+	execFunc(ctx, execCmd, verb, []string{id})
+	ctx.CancelFunc()
+	return nil
 }
 
 func setAuthEnv(ctx *context.Context, executable *config.Executable) {

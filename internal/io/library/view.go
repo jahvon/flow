@@ -28,7 +28,8 @@ const (
 	helpPrefix          = "[ ↑/↓: navigate pane ] [ ←/→: change pane ]"
 	paneOneHelp         = "[ o: open ] [ e: edit ] [ s:set ] ● [ space: show namespaces ]"
 	paneOneExpandedHelp = "[ o: open ] [ e: edit ] [ s:set ] ● [ space: hide namespaces ]"
-	paneTwoAndThreeHelp = "[ e: edit ] [ c: copy ref ]  ● [ f: change format ]"
+	paneTwoHelp         = "[ r: run ] [ e: edit ] [ c: copy ref ]  ● [ f: change format ]"
+	paneThreeHelp       = "[ r: run ] [ e: edit ] [ c: copy ref ]  ● [ f: change format ]"
 )
 
 var (
@@ -214,8 +215,13 @@ func (l *Library) footerContent() string {
 		}
 	case 1, 2:
 		if help {
+			helpStr := paneTwoHelp
+			if l.currentPane == 3 {
+				helpStr = paneThreeHelp
+			}
+
 			return l.theme.RenderFooter(
-				fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, paneTwoAndThreeHelp), l.termWidth,
+				fmt.Sprintf("%s ● %s ● %s", footerPrefix, helpPrefix, helpStr), l.termWidth,
 			)
 		} else if l.currentExecutable < uint(len(l.visibleExecutables)) {
 			exec := l.visibleExecutables[l.currentExecutable]
