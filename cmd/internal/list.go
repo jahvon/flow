@@ -128,10 +128,12 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		FilterBySubstring(substr)
 
 	if interactive.UIEnabled(ctx, cmd) {
+		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
 		view := executableio.NewExecutableListView(
 			ctx,
 			filteredExec,
 			components.Format(outputFormat),
+			runFunc,
 		)
 		ctx.InteractiveContainer.SetView(view)
 	} else {
