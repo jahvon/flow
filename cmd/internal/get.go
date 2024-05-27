@@ -128,6 +128,14 @@ func getExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		logger.FatalErr(err)
 	}
 	id := args[1]
+	ws, ns, name := config.ParseExecutableID(id)
+	if ws == "" {
+		ws = ctx.CurrentWorkspace.AssignedName()
+	}
+	if ns == "" && ctx.UserConfig.CurrentNamespace != "" {
+		ns = ctx.UserConfig.CurrentNamespace
+	}
+	id = config.NewExecutableID(ws, ns, name)
 	ref := config.NewRef(id, verb)
 
 	exec, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
@@ -146,7 +154,8 @@ func getExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if interactive.UIEnabled(ctx, cmd) {
-		view := executableio.NewExecutableView(ctx, *exec, components.Format(outputFormat))
+		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
+		view := executableio.NewExecutableView(ctx, *exec, components.Format(outputFormat), runFunc)
 		ctx.InteractiveContainer.SetView(view)
 	} else {
 		executableio.PrintExecutable(logger, outputFormat, exec)

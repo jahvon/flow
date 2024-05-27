@@ -34,6 +34,8 @@ type Library struct {
 	currentPane, currentWorkspace, currentNamespace, currentExecutable uint
 	paneZeroViewport, paneOneViewport, paneTwoViewport                 viewport.Model
 	loadingScreen                                                      tea.Model
+
+	cmdRunFunc func(string) error
 }
 
 type Filter struct {
@@ -49,6 +51,7 @@ func NewLibrary(
 	execs config.ExecutableList,
 	filter Filter,
 	theme styles.Theme,
+	runFunc func(string) error,
 ) *Library {
 	p1 := viewport.New(0, 0)
 	p2 := viewport.New(0, 0)
@@ -65,7 +68,20 @@ func NewLibrary(
 		paneOneViewport:  p2,
 		paneTwoViewport:  p3,
 		theme:            theme,
+		cmdRunFunc:       runFunc,
 	}
+}
+
+func NewLibraryView(
+	ctx *context.Context,
+	workspaces config.WorkspaceConfigList,
+	execs config.ExecutableList,
+	filter Filter,
+	theme styles.Theme,
+	runFunc func(string) error,
+) components.TeaModel {
+	l := NewLibrary(ctx, workspaces, execs, filter, theme, runFunc)
+	return components.NewFrameView(l)
 }
 
 func ctxVal(ws, ns string) string {

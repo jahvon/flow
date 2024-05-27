@@ -399,6 +399,7 @@ func (l ExecutableList) Items() []*types.CollectionItem {
 		item := &types.CollectionItem{
 			Header: exec.Ref().String(),
 			Desc:   exec.Description,
+			ID:     exec.Ref().String(),
 		}
 		if len(exec.Tags) > 0 {
 			item.Desc = fmt.Sprintf("[%s]\n", exec.Tags.PreviewString()) + exec.Description

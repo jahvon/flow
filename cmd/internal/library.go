@@ -3,7 +3,6 @@ package internal
 import (
 	"errors"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
@@ -20,6 +19,8 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Short:   "View and manage your library of workspaces and executables.",
 		Aliases: []string{"lib"},
 		Args:    cobra.NoArgs,
+		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { libraryFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, libraryCmd, *flags.FilterWorkspaceFlag)
@@ -59,7 +60,8 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.FatalErr(err)
 	}
 
-	libraryModel := library.NewLibrary(
+	runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
+	libraryModel := library.NewLibraryView(
 		ctx, allWs, allExecs,
 		library.Filter{
 			Workspace: wsFilter,
@@ -69,13 +71,7 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 			Substring: subStr,
 		},
 		io.Theme(),
+		runFunc,
 	)
-	program := tea.NewProgram(
-		libraryModel,
-		tea.WithAltScreen(),
-		tea.WithContext(ctx.Ctx),
-	)
-	if _, err := program.Run(); err != nil {
-		logger.FatalErr(err)
-	}
+	ctx.InteractiveContainer.SetView(libraryModel)
 }

@@ -3,11 +3,9 @@ package library
 
 import (
 	"path/filepath"
-	"time"
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/styles"
 	"golang.design/x/clipboard"
 
@@ -30,17 +28,9 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		l.paneOneViewport.Height = l.termHeight - heightPadding
 		l.paneTwoViewport.Height = l.termHeight - heightPadding
 		l.loadingScreen = nil
-	case components.TickMsg:
-		cmds = append(cmds, tea.Tick(time.Second, func(t time.Time) tea.Msg {
-			return components.TickMsg(t)
-		}))
-	case tea.Cmd:
-		cmds = append(cmds, msg)
 	case tea.KeyMsg:
 		key := msg.String()
 		switch key {
-		case "ctrl+c", "q":
-			return l, tea.Quit
 		case tea.KeyLeft.String():
 			if l.currentPane == 0 {
 				break
@@ -256,6 +246,18 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 
 			clipboard.Write(clipboard.FmtText, []byte(curExec.Ref().String()))
 			l.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
+		case "r":
+			if curExec == nil {
+				l.SetNotice("no executable selected", styles.NoticeLevelError)
+				break
+			}
+
+			go func() {
+				l.ctx.InteractiveContainer.Shutdown()
+				if err := l.cmdRunFunc(curExec.Ref().String()); err != nil {
+					l.ctx.Logger.Fatalx("unable to execute command", "error", err)
+				}
+			}()
 		}
 	}
 
