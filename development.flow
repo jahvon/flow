@@ -1,0 +1,84 @@
+visibility: private
+tags: [development]
+executables:
+  - verb: run
+    name: validate
+    aliases: [precommit]
+    description: |
+      Run the repository validation checks. This includes linting, tests, and code generation.
+      Validate should be run before committing changes.
+    serial:
+      failFast: true
+      refs:
+        - run generate
+        - run lint
+        - run tests
+
+  - verb: run
+    name: build
+    description: |
+        Build the flow binary. The binary is built at the path specified in the first positional argument.
+        If not set, the binary is built at .bin/flow.
+    exec:
+      dir: //
+      args:
+        - envKey: BIN_PATH
+          default: .bin
+          pos: 1
+          required: false
+      params:
+        - envKey: BIN_NAME
+          text: flow
+      cmd: |
+        go build -o ${BIN_PATH}/${BIN_NAME}
+        echo "flow built at ${BIN_PATH}/${BIN_NAME}"
+
+  - verb: run
+    name: generate
+    description: Generate code and documentation
+    aliases: [docsgen, codegen, gen]
+    exec:
+      dir: //
+      cmd: |
+        go generate ./...
+        go run ./tools/docsgen/main.go
+
+  - verb: run
+    name: lint
+    description: Run linters and formatters
+    exec:
+      dir: //
+      cmd: |
+        go fmt ./...
+        go mod tidy
+        golangci-lint run ./... --fix
+
+  - verb: run
+    name: tests
+    description: Run all project tests
+    exec:
+      dir: //
+      cmd: go test ./... -race
+
+  - verb: install
+    name: gopath
+    aliases: [local]
+    description: Install the project to the GOPATH from local source
+    exec:
+      dir: //
+      cmd: go test ./... -race
+
+  - verb: install
+    name: deps
+    description: Install project dependencies
+    aliases: [local-deps]
+    exec:
+      dir: //
+      cmd: |
+        go mod tidy
+        echo "installing cobra-cli..."
+        go install github.com/spf13/cobra-cli@v1.3.0
+        echo "installing golangci-lint..."
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+        echo "installing ginkgo..."
+        go install github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
