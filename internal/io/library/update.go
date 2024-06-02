@@ -17,17 +17,6 @@ import (
 func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds := make([]tea.Cmd, 0)
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		l.termWidth = msg.Width
-		l.termHeight = msg.Height
-		p0, p1, p2 := calculateViewportWidths(l.termWidth - widthPadding)
-		l.paneZeroViewport.Width = p0
-		l.paneOneViewport.Width = p1
-		l.paneTwoViewport.Width = p2
-		l.paneZeroViewport.Height = l.termHeight - heightPadding
-		l.paneOneViewport.Height = l.termHeight - heightPadding
-		l.paneTwoViewport.Height = l.termHeight - heightPadding
-		l.loadingScreen = nil
 	case tea.KeyMsg:
 		key := msg.String()
 		switch key {
@@ -52,12 +41,6 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if l.loadingScreen != nil {
-		updatedModel, cmd := l.loadingScreen.Update(msg)
-		l.loadingScreen = updatedModel
-		return l, cmd
-	}
-
 	wsPane, wsCmd := l.updateWsPane(msg)
 	l.paneZeroViewport = wsPane
 	execPane, execCmd := l.updateExecPanes(msg)
@@ -76,7 +59,7 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
-	if l.loadingScreen != nil || l.currentPane != 0 {
+	if l.currentPane != 0 {
 		return l.paneZeroViewport, nil
 	}
 
@@ -189,7 +172,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 }
 
 func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
-	if l.loadingScreen != nil || (l.currentPane != 1 && l.currentPane != 2) {
+	if l.currentPane != 1 && l.currentPane != 2 {
 		return l.paneOneViewport, nil
 	}
 

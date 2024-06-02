@@ -143,7 +143,7 @@ func requestExecMarkdown(r *RequestExecutableType) string {
 		}
 	}
 	if r.TransformResponse != "" {
-		mkdwn += fmt.Sprintf("**Transformation Expression:** ```\n%s\n```\n", r.TransformResponse)
+		mkdwn += fmt.Sprintf("**Transformation Expression:\n** ```\n%s\n```\n", r.TransformResponse)
 	}
 
 	mkdwn += execEnvTable(&r.ExecutableEnvironment)

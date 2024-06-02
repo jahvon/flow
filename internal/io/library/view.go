@@ -39,10 +39,6 @@ var (
 )
 
 func (l *Library) View() string {
-	if l.loadingScreen != nil {
-		return l.loadingScreen.View()
-	}
-
 	l.paneZeroViewport.Style = paneStyle(0, l.theme)
 	l.paneZeroViewport.SetContent(l.paneZeroContent())
 

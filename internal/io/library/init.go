@@ -14,9 +14,6 @@ import (
 
 func (l *Library) Init() tea.Cmd {
 	cmds := make([]tea.Cmd, 0)
-	if l.loadingScreen != nil {
-		cmds = append(cmds, l.loadingScreen.Init())
-	}
 	cmds = append(
 		cmds,
 		tea.SetWindowTitle("flow library"),
@@ -30,6 +27,16 @@ func (l *Library) Init() tea.Cmd {
 		l.paneOneViewport.Init(),
 		l.paneTwoViewport.Init(),
 	)
+
+	l.termWidth = l.ctx.InteractiveContainer.Width()
+	l.termHeight = l.ctx.InteractiveContainer.FullHeight()
+	p0, p1, p2 := calculateViewportWidths(l.termWidth - widthPadding)
+	l.paneZeroViewport.Width = p0
+	l.paneOneViewport.Width = p1
+	l.paneTwoViewport.Width = p2
+	l.paneZeroViewport.Height = l.termHeight - heightPadding
+	l.paneOneViewport.Height = l.termHeight - heightPadding
+	l.paneTwoViewport.Height = l.termHeight - heightPadding
 
 	go func() {
 		l.setVisibleWorkspaces()
