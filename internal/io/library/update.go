@@ -17,6 +17,8 @@ import (
 func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds := make([]tea.Cmd, 0)
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		l.setSize()
 	case tea.KeyMsg:
 		key := msg.String()
 		switch key {

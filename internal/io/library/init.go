@@ -28,16 +28,7 @@ func (l *Library) Init() tea.Cmd {
 		l.paneTwoViewport.Init(),
 	)
 
-	l.termWidth = l.ctx.InteractiveContainer.Width()
-	l.termHeight = l.ctx.InteractiveContainer.FullHeight()
-	p0, p1, p2 := calculateViewportWidths(l.termWidth - widthPadding)
-	l.paneZeroViewport.Width = p0
-	l.paneOneViewport.Width = p1
-	l.paneTwoViewport.Width = p2
-	l.paneZeroViewport.Height = l.termHeight - heightPadding
-	l.paneOneViewport.Height = l.termHeight - heightPadding
-	l.paneTwoViewport.Height = l.termHeight - heightPadding
-
+	l.setSize()
 	go func() {
 		l.setVisibleWorkspaces()
 		l.setVisibleNamespaces()

@@ -67,6 +67,18 @@ func (l *Library) SetNotice(notice string, level styles.NoticeLevel) {
 	l.noticeText = l.theme.RenderNotice(notice, level)
 }
 
+func (l *Library) setSize() {
+	l.termWidth = l.ctx.InteractiveContainer.Width()
+	l.termHeight = l.ctx.InteractiveContainer.FullHeight()
+	p0, p1, p2 := calculateViewportWidths(l.termWidth - widthPadding)
+	l.paneZeroViewport.Width = p0
+	l.paneOneViewport.Width = p1
+	l.paneTwoViewport.Width = p2
+	l.paneZeroViewport.Height = l.termHeight - heightPadding
+	l.paneOneViewport.Height = l.termHeight - heightPadding
+	l.paneTwoViewport.Height = l.termHeight - heightPadding
+}
+
 func (l *Library) paneZeroContent() string {
 	var sb strings.Builder
 	workspaces := l.visibleWorkspaces
