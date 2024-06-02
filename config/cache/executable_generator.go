@@ -14,7 +14,11 @@ import (
 
 const generatedTag = "generated"
 
-func generatedExecutables(logger io.Logger, definitionPath string, files []string) (config.ExecutableList, error) {
+func generatedExecutables(
+	logger io.Logger,
+	wsName, wsPath, definitionNs, definitionPath string,
+	files []string,
+) (config.ExecutableList, error) {
 	executables := make(config.ExecutableList, 0)
 	for _, file := range files {
 		shFile := filepath.Join(filepath.Dir(definitionPath), file)
@@ -22,6 +26,7 @@ func generatedExecutables(logger io.Logger, definitionPath string, files []strin
 		if err != nil {
 			return nil, err
 		}
+		executable.SetContext(wsName, wsPath, definitionNs, definitionPath)
 		executables = append(executables, executable)
 	}
 
