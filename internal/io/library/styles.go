@@ -43,9 +43,9 @@ func renderPaneTitle(s string, count int, active bool, theme styles.Theme) strin
 	return style.Render(title) + "\n\n"
 }
 
-func paneStyle(pos int, theme styles.Theme) lipgloss.Style {
+func paneStyle(pos int, theme styles.Theme, splitView bool) lipgloss.Style {
 	style := lipgloss.NewStyle().Padding(0, 1)
-	if pos == 2 {
+	if pos == 2 && splitView {
 		style = style.BorderStyle(lipgloss.OuterHalfBlockBorder()).
 			BorderForeground(theme.BorderColor).BorderLeft(true)
 	}
@@ -53,11 +53,18 @@ func paneStyle(pos int, theme styles.Theme) lipgloss.Style {
 	return style
 }
 
-func calculateViewportWidths(termWidth int) (int, int, int) {
-	paneOne := math.Floor(float64(termWidth) * 0.20)
-	paneTwo := math.Floor(float64(termWidth) * 0.20)
-	paneThree := termWidth - int(paneOne) - int(paneTwo)
-	return int(paneOne), int(paneTwo), paneThree
+func calculateViewportWidths(termWidth int, splitView bool) (int, int, int) {
+	if splitView {
+		paneOne := math.Floor(float64(termWidth) * 0.20)
+		paneTwo := math.Floor(float64(termWidth) * 0.30)
+		paneThree := termWidth - int(paneOne) - int(paneTwo)
+		return int(paneOne), int(paneTwo), paneThree
+	} else {
+		paneOne := math.Floor(float64(termWidth) * 0.33)
+		paneTwo := math.Floor(float64(termWidth) * 0.67)
+		paneThree := termWidth
+		return int(paneOne), int(paneTwo), paneThree
+	}
 }
 
 func truncateText(s string, w int) string {

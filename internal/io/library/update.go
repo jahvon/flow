@@ -33,13 +33,22 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				l.currentExecutable = 0
 				l.paneOneViewport.GotoTop()
 			}
-		case tea.KeyRight.String():
+		case tea.KeyRight.String(), tea.KeyEnter.String():
 			if l.currentPane == 2 {
 				break
 			}
 			l.currentPane++
+		case tea.KeyTab.String():
+			l.splitView = !l.splitView
+			l.setSize()
 		case "h":
-			l.showHelp = !l.showHelp
+			switch {
+			case l.showHelp && l.currentHelpPage == 0:
+				l.currentHelpPage = 1
+			default:
+				l.showHelp = !l.showHelp
+				l.currentHelpPage = 0
+			}
 		}
 	}
 
@@ -243,6 +252,12 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 					l.ctx.Logger.Fatalx("unable to execute command", "error", err)
 				}
 			}()
+		case "f":
+			if l.currentPane == 1 {
+				break
+			}
+			l.currentFormat = (l.currentFormat + 1) % 3
+			pane.GotoTop()
 		}
 	}
 

@@ -16,10 +16,10 @@ const (
 )
 
 type Library struct {
-	ctx                      *context.Context
-	termWidth, termHeight    int
-	noticeText               string
-	showHelp, showNamespaces bool
+	ctx                                 *context.Context
+	termWidth, termHeight               int
+	noticeText                          string
+	showHelp, showNamespaces, splitView bool
 
 	visibleWorkspaces  []string
 	visibleNamespaces  []string
@@ -31,6 +31,7 @@ type Library struct {
 	selectedWsConfig   *config.WorkspaceConfig
 
 	currentPane, currentWorkspace, currentNamespace, currentExecutable uint
+	currentFormat, currentHelpPage                                     uint
 	paneZeroViewport, paneOneViewport, paneTwoViewport                 viewport.Model
 
 	cmdRunFunc func(string) error
@@ -88,3 +89,5 @@ func ctxVal(ws, ns string) string {
 	}
 	return fmt.Sprintf("%s/%s", ws, ns)
 }
+
+var formatOrder = []string{"markdown", "yaml", "json"}
