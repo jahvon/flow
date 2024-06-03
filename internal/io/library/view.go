@@ -224,7 +224,7 @@ func (l *Library) paneTwoContent() string {
 
 func (l *Library) footerContent() string {
 	help := l.showHelp
-	if l.currentHelpPage != 0 {
+	if help && l.currentHelpPage != 0 {
 		return l.theme.RenderFooter(fmt.Sprintf("2/2 %s ● %s", "[ h: exit help ]", containerHelp), l.termWidth)
 	}
 
@@ -262,9 +262,12 @@ func (l *Library) footerContent() string {
 				break
 			}
 			var info string
-			if len(wsCfg.Tags) > 0 {
+			switch {
+			case l.noticeText != "":
+				info = l.noticeText
+			case len(wsCfg.Tags) > 0:
 				info = fmt.Sprintf("%s(%s) -> %s", wsCfg.DisplayName, wsCfg.Tags.PreviewString(), path)
-			} else {
+			default:
 				info = fmt.Sprintf("%s -> %s", wsCfg.DisplayName, path)
 			}
 			return l.theme.RenderFooter(fmt.Sprintf("%s ● %s", footerPrefix, info), l.termWidth)
@@ -280,13 +283,20 @@ func (l *Library) footerContent() string {
 				fmt.Sprintf("%s ● %s", footerPrefix, helpStr), l.termWidth,
 			)
 		} else if l.currentExecutable < uint(len(l.visibleExecutables)) {
-			exec := l.visibleExecutables[l.currentExecutable]
-			path, err := relativePathFromWd(exec.DefinitionPath())
-			if err != nil {
-				l.ctx.Logger.Error(err, "unable to get relative path from wd")
-				break
+			var info string
+			switch {
+			case l.noticeText != "":
+				info = l.noticeText
+			default:
+				exec := l.visibleExecutables[l.currentExecutable]
+				path, err := relativePathFromWd(exec.DefinitionPath())
+				if err != nil {
+					l.ctx.Logger.Error(err, "unable to get relative path from wd")
+					break
+				}
+				info = path
 			}
-			return l.theme.RenderFooter(fmt.Sprintf("%s ● %s", footerPrefix, path), l.termWidth)
+			return l.theme.RenderFooter(fmt.Sprintf("%s ● %s", footerPrefix, info), l.termWidth)
 		}
 	}
 	return l.theme.RenderFooter(footerPrefix, l.termWidth)

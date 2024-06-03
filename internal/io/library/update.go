@@ -50,6 +50,7 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				l.currentHelpPage = 0
 			}
 		}
+		l.noticeText = ""
 	}
 
 	wsPane, wsCmd := l.updateWsPane(msg)
@@ -81,7 +82,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 	}
 
 	curWs := l.visibleWorkspaces[l.currentWorkspace]
-	curWsCfg := l.selectedWsConfig
+	curWsCfg := l.allWorkspaces.FindByName(curWs)
 	wsCanMoveUp := numWs > 1 && l.currentWorkspace >= 1 && l.currentWorkspace < uint(numWs)
 	wsCanMoveDown := numWs > 1 && l.currentWorkspace < uint(numWs-1)
 

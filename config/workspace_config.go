@@ -131,6 +131,15 @@ func (l WorkspaceConfigList) JSON() (string, error) {
 	return string(jsonBytes), nil
 }
 
+func (l WorkspaceConfigList) FindByName(name string) *WorkspaceConfig {
+	for _, ws := range l {
+		if ws.AssignedName() == name {
+			return &ws
+		}
+	}
+	return nil
+}
+
 func (l WorkspaceConfigList) Items() []*types.CollectionItem {
 	items := make([]*types.CollectionItem, 0)
 	for _, ws := range l {

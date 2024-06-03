@@ -28,7 +28,6 @@ type Library struct {
 	allExecutables     config.ExecutableList
 	filter             Filter
 	theme              styles.Theme
-	selectedWsConfig   *config.WorkspaceConfig
 
 	currentPane, currentWorkspace, currentNamespace, currentExecutable uint
 	currentFormat, currentHelpPage                                     uint
@@ -89,5 +88,3 @@ func ctxVal(ws, ns string) string {
 	}
 	return fmt.Sprintf("%s/%s", ws, ns)
 }
-
-var formatOrder = []string{"markdown", "yaml", "json"}
