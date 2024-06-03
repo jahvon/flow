@@ -14,9 +14,6 @@ import (
 
 func (l *Library) Init() tea.Cmd {
 	cmds := make([]tea.Cmd, 0)
-	if l.loadingScreen != nil {
-		cmds = append(cmds, l.loadingScreen.Init())
-	}
 	cmds = append(
 		cmds,
 		tea.SetWindowTitle("flow library"),
@@ -31,6 +28,7 @@ func (l *Library) Init() tea.Cmd {
 		l.paneTwoViewport.Init(),
 	)
 
+	l.setSize()
 	go func() {
 		l.setVisibleWorkspaces()
 		l.setVisibleNamespaces()

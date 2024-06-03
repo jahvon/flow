@@ -18,16 +18,7 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds := make([]tea.Cmd, 0)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		l.termWidth = msg.Width
-		l.termHeight = msg.Height
-		p0, p1, p2 := calculateViewportWidths(l.termWidth - widthPadding)
-		l.paneZeroViewport.Width = p0
-		l.paneOneViewport.Width = p1
-		l.paneTwoViewport.Width = p2
-		l.paneZeroViewport.Height = l.termHeight - heightPadding
-		l.paneOneViewport.Height = l.termHeight - heightPadding
-		l.paneTwoViewport.Height = l.termHeight - heightPadding
-		l.loadingScreen = nil
+		l.setSize()
 	case tea.KeyMsg:
 		key := msg.String()
 		switch key {
@@ -42,20 +33,24 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				l.currentExecutable = 0
 				l.paneOneViewport.GotoTop()
 			}
-		case tea.KeyRight.String():
+		case tea.KeyRight.String(), tea.KeyEnter.String():
 			if l.currentPane == 2 {
 				break
 			}
 			l.currentPane++
+		case tea.KeyTab.String():
+			l.splitView = !l.splitView
+			l.setSize()
 		case "h":
-			l.showHelp = !l.showHelp
+			switch {
+			case l.showHelp && l.currentHelpPage == 0:
+				l.currentHelpPage = 1
+			default:
+				l.showHelp = !l.showHelp
+				l.currentHelpPage = 0
+			}
 		}
-	}
-
-	if l.loadingScreen != nil {
-		updatedModel, cmd := l.loadingScreen.Update(msg)
-		l.loadingScreen = updatedModel
-		return l, cmd
+		l.noticeText = ""
 	}
 
 	wsPane, wsCmd := l.updateWsPane(msg)
@@ -76,7 +71,7 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
-	if l.loadingScreen != nil || l.currentPane != 0 {
+	if l.currentPane != 0 {
 		return l.paneZeroViewport, nil
 	}
 
@@ -87,7 +82,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 	}
 
 	curWs := l.visibleWorkspaces[l.currentWorkspace]
-	curWsCfg := l.selectedWsConfig
+	curWsCfg := l.allWorkspaces.FindByName(curWs)
 	wsCanMoveUp := numWs > 1 && l.currentWorkspace >= 1 && l.currentWorkspace < uint(numWs)
 	wsCanMoveDown := numWs > 1 && l.currentWorkspace < uint(numWs-1)
 
@@ -189,7 +184,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 }
 
 func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
-	if l.loadingScreen != nil || (l.currentPane != 1 && l.currentPane != 2) {
+	if l.currentPane != 1 && l.currentPane != 2 {
 		return l.paneOneViewport, nil
 	}
 
@@ -258,6 +253,12 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 					l.ctx.Logger.Fatalx("unable to execute command", "error", err)
 				}
 			}()
+		case "f":
+			if l.currentPane == 1 {
+				break
+			}
+			l.currentFormat = (l.currentFormat + 1) % 3
+			pane.GotoTop()
 		}
 	}
 

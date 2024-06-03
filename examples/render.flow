@@ -1,5 +1,5 @@
 visibility: private
-namespace: example
+namespace: examples
 executables:
   - verb: show
     name: markdown

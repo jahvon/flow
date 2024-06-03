@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/styles"
 
@@ -17,10 +16,10 @@ const (
 )
 
 type Library struct {
-	ctx                      *context.Context
-	termWidth, termHeight    int
-	noticeText               string
-	showHelp, showNamespaces bool
+	ctx                                 *context.Context
+	termWidth, termHeight               int
+	noticeText                          string
+	showHelp, showNamespaces, splitView bool
 
 	visibleWorkspaces  []string
 	visibleNamespaces  []string
@@ -29,11 +28,10 @@ type Library struct {
 	allExecutables     config.ExecutableList
 	filter             Filter
 	theme              styles.Theme
-	selectedWsConfig   *config.WorkspaceConfig
 
 	currentPane, currentWorkspace, currentNamespace, currentExecutable uint
+	currentFormat, currentHelpPage                                     uint
 	paneZeroViewport, paneOneViewport, paneTwoViewport                 viewport.Model
-	loadingScreen                                                      tea.Model
 
 	cmdRunFunc func(string) error
 }
@@ -56,14 +54,11 @@ func NewLibrary(
 	p1 := viewport.New(0, 0)
 	p2 := viewport.New(0, 0)
 	p3 := viewport.New(0, 0)
-	loadingModel := components.NewLoadingView("Loading...", theme)
-
 	return &Library{
 		ctx:              ctx,
 		allWorkspaces:    workspaces,
 		allExecutables:   execs,
 		filter:           filter,
-		loadingScreen:    loadingModel,
 		paneZeroViewport: p1,
 		paneOneViewport:  p2,
 		paneTwoViewport:  p3,
