@@ -80,4 +80,4 @@ require (
 	golang.org/x/tools v0.21.0 // indirect
 )
 
-replace github.com/charmbracelet/glamour => github.com/jahvon/glamour v0.7.1-patch1
+replace github.com/charmbracelet/glamour => github.com/jahvon/glamour v0.7.0
