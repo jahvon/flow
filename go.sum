@@ -14,8 +14,6 @@ github.com/charmbracelet/bubbles v0.18.0 h1:PYv1A036luoBGroX6VWjQIE9Syf2Wby2oOl/
 github.com/charmbracelet/bubbles v0.18.0/go.mod h1:08qhZhtIwzgrtBjAcJnij1t1H0ZRjwHyGsy6AL11PSw=
 github.com/charmbracelet/bubbletea v0.26.4 h1:2gDkkzLZaTjMl/dQBpNVtnvcCxsh/FCkimep7FC9c40=
 github.com/charmbracelet/bubbletea v0.26.4/go.mod h1:P+r+RRA5qtI1DOHNFn0otoNwB4rn+zNAzSj/EXz6xU0=
-github.com/charmbracelet/glamour v0.7.0 h1:2BtKGZ4iVJCDfMF229EzbeR1QRKLWztO9dMtjmqZSng=
-github.com/charmbracelet/glamour v0.7.0/go.mod h1:jUMh5MeihljJPQbJ/wf4ldw2+yBP59+ctV36jASy7ps=
 github.com/charmbracelet/lipgloss v0.11.0 h1:UoAcbQ6Qml8hDwSWs0Y1cB5TEQuZkDPH/ZqwWWYTG4g=
 github.com/charmbracelet/lipgloss v0.11.0/go.mod h1:1UdRTH9gYgpcdNN5oBtjbu/IzNKtzVtb7sqN1t9LNn8=
 github.com/charmbracelet/log v0.4.0 h1:G9bQAcx8rWA2T3pWvx7YtPTPwgqpk7D68BX21IRW8ZM=
@@ -66,6 +64,8 @@ github.com/itchyny/gojq v0.12.15 h1:WC1Nxbx4Ifw5U2oQWACYz32JK8G9qxNtHzrvW4KEcqI=
 github.com/itchyny/gojq v0.12.15/go.mod h1:uWAHCbCIla1jiNxmeT5/B5mOjSdfkCq6p8vxWg+BM10=
 github.com/itchyny/timefmt-go v0.1.5 h1:G0INE2la8S6ru/ZI5JecgyzbbJNs5lG1RcBqa7Jm6GE=
 github.com/itchyny/timefmt-go v0.1.5/go.mod h1:nEP7L+2YmAbT2kZ2HfSs1d8Xtw9LY8D2stDBckWakZ8=
+github.com/jahvon/glamour v0.7.1-patch1 h1:v3btiQx2OB0ETStjkXciUjwZBO9fXfSv5flZllVysnI=
+github.com/jahvon/glamour v0.7.1-patch1/go.mod h1:jUMh5MeihljJPQbJ/wf4ldw2+yBP59+ctV36jASy7ps=
 github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef h1:4PS/MNVT6Rsv15x5Rtwaw971e6kFvNUAf9nvUsZ5hcc=
 github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef/go.mod h1:dUmuT5CN6osIeLSRtTPJOf0Yz+qAbcyU6omnCzI+ZfQ=
 github.com/jahvon/tuikit v0.0.15 h1:vpMB0Gn12FdK4EEx+gjZ63WSUQ8oFwEih/VNlB74izA=

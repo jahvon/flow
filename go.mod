@@ -2,8 +2,6 @@ module github.com/jahvon/flow
 
 go 1.22
 
-toolchain go1.22.1
-
 require (
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.26.4
@@ -79,3 +77,5 @@ require (
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/tools v0.21.0 // indirect
 )
+
+replace github.com/charmbracelet/glamour => github.com/jahvon/glamour v0.7.1-patch1
