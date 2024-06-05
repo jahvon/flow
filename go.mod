@@ -1,6 +1,6 @@
 module github.com/jahvon/flow
 
-go 1.22
+go 1.22.4
 
 require (
 	github.com/charmbracelet/bubbles v0.18.0
