@@ -28,6 +28,9 @@ func (l *Library) Init() tea.Cmd {
 		l.paneTwoViewport.Init(),
 	)
 
+	if l.ctx.InteractiveContainer.Width() >= 150 {
+		l.splitView = true
+	}
 	l.setSize()
 	go func() {
 		l.setVisibleWorkspaces()
