@@ -79,6 +79,20 @@ func (e *ExecExecutableType) GetLogFields() map[string]interface{} {
 	return e.logFields
 }
 
+type ExecutableRetries struct {
+	Retries int `yaml:"retries,omitempty"`
+
+	attempts int
+}
+
+func (e *ExecutableRetries) RecordAttempt() {
+	e.attempts++
+}
+
+func (e *ExecutableRetries) AttemptedMaxTimes() bool {
+	return e.attempts >= e.Retries
+}
+
 type LaunchExecutableType struct {
 	ExecutableEnvironment `yaml:",inline"`
 
@@ -117,21 +131,41 @@ type RenderExecutableType struct {
 	TemplateDataFile string `yaml:"templateDataFile,omitempty"`
 }
 
+type SerialRefConfig struct {
+	ExecutableRetries `yaml:",inline"`
+
+	Cmd           string   `yaml:"cmd,omitempty"`
+	Ref           Ref      `yaml:"ref,omitempty"`
+	Arguments     []string `yaml:"args,omitempty"`
+	ProceedPrompt bool     `yaml:"proceedPrompt,omitempty"`
+}
+
 type SerialExecutableType struct {
 	ExecutableEnvironment `yaml:",inline"`
 
 	// +docsgen:refs
 	// List of executables references
-	ExecutableRefs []Ref `yaml:"refs,omitempty"`
-	FailFast       bool  `yaml:"failFast,omitempty"`
+	ExecutableRefs []Ref             `yaml:"refs,omitempty"`
+	Executables    []SerialRefConfig `yaml:"execs,omitempty"`
+	FailFast       bool              `yaml:"failFast,omitempty"`
+}
+
+type ParallelRefConfig struct {
+	ExecutableRetries `yaml:",inline"`
+
+	Cmd       string   `yaml:"cmd,omitempty"`
+	Ref       Ref      `yaml:"ref,omitempty"`
+	Arguments []string `yaml:"args,omitempty"`
+	Retries   int      `yaml:"retries,omitempty"`
 }
 
 type ParallelExecutableType struct {
 	ExecutableEnvironment `yaml:",inline"`
 
-	ExecutableRefs []Ref `yaml:"refs,omitempty"`
-	MaxThreads     int   `yaml:"maxThreads,omitempty"`
-	FailFast       bool  `yaml:"failFast,omitempty"`
+	ExecutableRefs []Ref               `yaml:"refs,omitempty"`
+	Executables    []ParallelRefConfig `yaml:"execs,omitempty"`
+	MaxThreads     int                 `yaml:"maxThreads,omitempty"`
+	FailFast       bool                `yaml:"failFast,omitempty"`
 }
 
 type ExecutableTypeSpec struct {
