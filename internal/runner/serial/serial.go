@@ -6,8 +6,10 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"golang.org/x/exp/maps"
 
 	"github.com/jahvon/flow/config"
+	argUtils "github.com/jahvon/flow/config/args"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/utils"
@@ -56,6 +58,7 @@ func handleExecRef(ctx *context.Context, serialSpec *config.SerialExecutableType
 	var errs []error
 	for i, executableRef := range order {
 		ctx.Logger.Debugf("executing %s (%d/%d)", executableRef, i+1, len(order))
+		executableRef = context.ExpandRef(ctx, executableRef)
 		exec, err := executableFromRef(ctx, executableRef)
 		if err != nil {
 			return err
@@ -70,15 +73,19 @@ func handleExecRef(ctx *context.Context, serialSpec *config.SerialExecutableType
 
 		if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
 			if serialSpec.FailFast {
-				return errors.Wrapf(err, "execution error for %s", executableRef)
+				return errors.Wrapf(err, "execution error ref='%s'", executableRef)
 			}
 			errs = append(errs, err)
 			ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", executableRef))
 		}
 	}
+	if len(errs) > 0 {
+		return fmt.Errorf("%d execution errors - %v", len(errs), errs)
+	}
 	return nil
 }
 
+//nolint:gocognit
 func handleExec(
 	ctx *context.Context,
 	parent *config.Executable,
@@ -91,33 +98,23 @@ func handleExec(
 		switch {
 		case len(refConfig.Ref) > 0:
 			var err error
-			exec, err = executableFromRef(ctx, refConfig.Ref)
+			executableRef := context.ExpandRef(ctx, refConfig.Ref)
+			exec, err = executableFromRef(ctx, executableRef)
 			if err != nil {
 				return err
 			}
-			if exec.Type.Exec != nil {
-				fields := map[string]interface{}{
-					"executable": exec.ID(),
-				}
-				exec.Type.Exec.SetLogFields(fields)
-			}
 		case refConfig.Cmd != "":
-			vis := config.VisibilityInternal
-			exec = &config.Executable{
-				Verb:       "exec",
-				Name:       fmt.Sprintf("%s-cmd-%d", parent.Name, i),
-				Visibility: &vis,
-				Type: &config.ExecutableTypeSpec{
-					Exec: &config.ExecExecutableType{
-						Command: refConfig.Cmd,
-					},
-				},
-			}
-			fields := map[string]interface{}{"executable": exec.ID()}
-			exec.Type.Exec.SetLogFields(fields)
-			exec.SetContext(parent.Workspace(), parent.WorkspacePath(), parent.Namespace(), parent.DefinitionPath())
+			exec = executableFromCmd(parent, refConfig.Cmd, i)
 		}
 		ctx.Logger.Debugf("executing %s (%d/%d)", exec.Ref(), i+1, len(serialSpec.Executables))
+
+		if len(refConfig.Arguments) > 0 {
+			a, err := argUtils.ProcessArgs(exec, refConfig.Arguments)
+			if err != nil {
+				ctx.Logger.Error(err, "unable to process arguments")
+			}
+			maps.Copy(promptedEnv, a)
+		}
 
 		for {
 			if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
@@ -161,9 +158,35 @@ func executableFromRef(ctx *context.Context, ref config.Ref) (*config.Executable
 	if err != nil {
 		return nil, err
 	} else if exec == nil {
-		return nil, fmt.Errorf("unable to find executable with reference %s", ref)
+		return nil, fmt.Errorf("executable missing ref='%s'", ref)
 	}
+
+	if exec.Type.Exec != nil {
+		fields := map[string]interface{}{
+			"executable": exec.ID(),
+		}
+		exec.Type.Exec.SetLogFields(fields)
+	}
+
 	return exec, nil
+}
+
+func executableFromCmd(parent *config.Executable, cmd string, id int) *config.Executable {
+	vis := config.VisibilityInternal
+	exec := &config.Executable{
+		Verb:       "exec",
+		Name:       fmt.Sprintf("%s-cmd-%d", parent.Name, id),
+		Visibility: &vis,
+		Type: &config.ExecutableTypeSpec{
+			Exec: &config.ExecExecutableType{
+				Command: cmd,
+			},
+		},
+	}
+	fields := map[string]interface{}{"executable": exec.ID()}
+	exec.Type.Exec.SetLogFields(fields)
+	exec.SetContext(parent.Workspace(), parent.WorkspacePath(), parent.Namespace(), parent.DefinitionPath())
+	return exec
 }
 
 func inputConfirmed(in *os.File) bool {

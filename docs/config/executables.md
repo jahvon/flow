@@ -142,6 +142,7 @@ Runs a list of executables in parallel.
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
 | args | Array ([Argument](#Argument)) |  |
 | refs | Array ([Ref](#Ref)) | List of executables references |
+| execs | Array ([ParallelRefConfig](#ParallelRefConfig)) |  |
 | maxThreads | Integer |  |
 | failFast | Boolean |  |
 
@@ -201,6 +202,7 @@ Runs a list of executables in serial.
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
 | args | Array ([Argument](#Argument)) |  |
 | refs | Array ([Ref](#Ref)) | List of executables references |
+| execs | Array ([SerialRefConfig](#SerialRefConfig)) |  |
 | failFast | Boolean |  |
 
 
@@ -410,6 +412,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
 | args | Array ([Argument](#Argument)) |  |
 | refs | Array ([Ref](#Ref)) | List of executables references |
+| execs | Array ([SerialRefConfig](#SerialRefConfig)) |  |
 | failFast | Boolean |  |
 
 
@@ -430,6 +433,7 @@ Keywords that describe the action an executable performs.<br>While executables a
 | params | Array ([Parameter](#Parameter)) | List of parameters to pass to the executable. |
 | args | Array ([Argument](#Argument)) |  |
 | refs | Array ([Ref](#Ref)) | List of executables references |
+| execs | Array ([ParallelRefConfig](#ParallelRefConfig)) |  |
 | maxThreads | Integer |  |
 | failFast | Boolean |  |
 

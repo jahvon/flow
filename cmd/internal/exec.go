@@ -11,9 +11,9 @@ import (
 	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
-	argUtils "github.com/jahvon/flow/cmd/internal/args"
 	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/config"
+	argUtils "github.com/jahvon/flow/config/args"
 	"github.com/jahvon/flow/config/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
@@ -103,7 +103,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb config.Verb, args [
 	}
 
 	execArgs := args[1:]
-	envMap, err := processExecArgs(executable, execArgs)
+	envMap, err := argUtils.ProcessArgs(executable, execArgs)
 	if err != nil {
 		logger.FatalErr(err)
 	}
@@ -316,21 +316,6 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []*com
 		}
 	}
 	return pending
-}
-
-func processExecArgs(executable *config.Executable, execArgs []string) (map[string]string, error) {
-	flagArgs, posArgs := argUtils.ParseArgs(execArgs)
-	execEnv := executable.Env()
-	if execEnv == nil || execEnv.Args == nil {
-		return nil, nil //nolint:nilnil
-	}
-	if err := execEnv.Args.SetValues(flagArgs, posArgs); err != nil {
-		return nil, err
-	}
-	if err := execEnv.Args.ValidateValues(); err != nil {
-		return nil, err
-	}
-	return execEnv.Args.ToEnvMap(), nil
 }
 
 var (
