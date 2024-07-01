@@ -118,6 +118,35 @@ func (v *Vault) DeleteSecret(reference string) error {
 	return v.saveData(d)
 }
 
+func (v *Vault) RenameSecret(oldRef string, newRef string) error {
+	v.logger.Debugf("renaming secret with reference %s in vault", oldRef)
+
+	d, err := v.loadData()
+	if err != nil {
+		return err
+	}
+
+	secret, exists := d.Secrets[oldRef]
+	if !exists {
+		return errors.Errorf("secret with reference %s does not exist in vault", oldRef)
+	}
+
+	_, exists = d.Secrets[newRef]
+	if exists {
+		return errors.Errorf("secret with reference %s already exists in vault", newRef)
+	}
+
+	if err := ValidateReference(newRef); err != nil {
+		return err
+	}
+
+	d.Secrets[newRef] = secret
+
+	delete(d.Secrets, oldRef)
+
+	return v.saveData(d)
+}
+
 func (v *Vault) retrieveEncryptionKey() (string, error) {
 	if v.cachedEncryptionKey != "" {
 		return v.cachedEncryptionKey, nil

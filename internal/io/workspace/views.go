@@ -37,7 +37,7 @@ func NewWorkspaceView(
 			Callback: func() error {
 				fullPath := filepath.Join(ws.Location(), file.WorkspaceConfigFileName)
 				if err := common.OpenInEditor(fullPath, ctx.StdIn(), ctx.StdOut()); err != nil {
-					container.HandleError(fmt.Errorf("unable to open workspace: %w", err))
+					container.HandleError(fmt.Errorf("unable to edit workspace: %w", err))
 				}
 				return nil
 			},
@@ -55,7 +55,7 @@ func NewWorkspaceView(
 					container.HandleError(err)
 				}
 				container.SetContext(fmt.Sprintf("%s/*", ws.AssignedName()))
-				container.SetNotice("workspace updatedd", styles.NoticeLevelInfo)
+				container.SetNotice("workspace updated", styles.NoticeLevelInfo)
 				return nil
 			},
 		},
