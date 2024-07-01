@@ -11,6 +11,7 @@ import (
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	executableio "github.com/jahvon/flow/internal/io/executable"
+	secretio "github.com/jahvon/flow/internal/io/secret"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -147,7 +148,8 @@ func registerListSecretCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"scrt"},
 		Short:   "Print a list of secrets in the flow vault.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listSecretFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, vaultSecretListCmd, *flags.OutputSecretAsPlainTextFlag)
@@ -164,11 +166,16 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.FatalErr(err)
 	}
 
-	for ref, secret := range secrets {
-		if asPlainText {
-			logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.PlainTextString()))
-		} else {
-			logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.String()))
+	interactiveUI := interactive.UIEnabled(ctx, cmd)
+	if interactiveUI {
+		secretio.LoadSecretListView(ctx, asPlainText)
+	} else {
+		for ref, secret := range secrets {
+			if asPlainText {
+				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.PlainTextString()))
+			} else {
+				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.String()))
+			}
 		}
 	}
 }
