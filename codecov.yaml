@@ -1,0 +1,4 @@
+github_checks:
+  annotations: false
+coverage:
+  range: "50...100"
