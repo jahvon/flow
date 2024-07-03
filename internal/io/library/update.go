@@ -4,10 +4,10 @@ package library
 import (
 	"path/filepath"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jahvon/tuikit/styles"
-	"golang.design/x/clipboard"
 
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io/common"
@@ -233,14 +233,12 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				break
 			}
 
-			if err := clipboard.Init(); err != nil {
-				l.ctx.Logger.Error(err, "unable to initialize clipboard")
-				l.SetNotice("unable to initialize clipboard", styles.NoticeLevelError)
-				break
+			if err := clipboard.WriteAll(curExec.Ref().String()); err != nil {
+				l.ctx.Logger.Error(err, "unable to copy reference to clipboard")
+				l.SetNotice("unable to copy reference to clipboard", styles.NoticeLevelError)
+			} else {
+				l.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
 			}
-
-			clipboard.Write(clipboard.FmtText, []byte(curExec.Ref().String()))
-			l.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
 		case "r":
 			if curExec == nil {
 				l.SetNotice("no executable selected", styles.NoticeLevelError)
