@@ -10,6 +10,7 @@ import (
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/fileparser"
+	"github.com/jahvon/flow/internal/utils"
 )
 
 const generatedTag = "generated"
@@ -21,8 +22,8 @@ func generatedExecutables(
 ) (config.ExecutableList, error) {
 	executables := make(config.ExecutableList, 0)
 	for _, file := range files {
-		shFile := filepath.Join(filepath.Dir(definitionPath), file)
-		executable, err := executablesFromFile(logger, shFile)
+		expandedFile := utils.ExpandDirectory(logger, file, wsPath, definitionPath, nil)
+		executable, err := executablesFromFile(logger, file, expandedFile)
 		if err != nil {
 			return nil, err
 		}
@@ -33,19 +34,18 @@ func generatedExecutables(
 	return executables, nil
 }
 
-func executablesFromFile(logger io.Logger, shFile string) (*config.Executable, error) {
-	configMap, err := fileparser.ExecConfigMapFromFile(logger, shFile)
+func executablesFromFile(logger io.Logger, fileBase, filePath string) (*config.Executable, error) {
+	configMap, err := fileparser.ExecConfigMapFromFile(logger, filePath)
 	if err != nil {
 		return nil, err
 	}
 
-	filename := filepath.Base(shFile)
 	executable := &config.Executable{
 		Verb: config.Verb("exec"),
-		Name: filepath.Base(filename),
+		Name: filepath.Base(fileBase),
 		Type: &config.ExecutableTypeSpec{
 			Exec: &config.ExecExecutableType{
-				File: filename,
+				File: fileBase,
 			},
 		},
 	}

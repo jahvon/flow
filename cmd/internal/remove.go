@@ -10,9 +10,9 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -76,7 +76,7 @@ func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	}
 
 	delete(userConfig.Workspaces, name)
-	if err := file.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 

@@ -48,7 +48,7 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	tagsFilter := flags.ValueFor[[]string](ctx, cmd, *flags.FilterTagFlag, false)
 
 	logger.Debugf("Loading workspace configs from cache")
-	workspaceCache, err := ctx.WorkspacesCache.Get(logger)
+	workspaceCache, err := ctx.WorkspacesCache.GetLatestData(logger)
 	if err != nil {
 		logger.Fatalx("failure loading workspace configs from cache", "err", err)
 	}

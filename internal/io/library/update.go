@@ -9,7 +9,7 @@ import (
 	"github.com/jahvon/tuikit/styles"
 	"golang.design/x/clipboard"
 
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io/common"
 	"github.com/jahvon/flow/internal/services/open"
 )
@@ -132,7 +132,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			}
 
 			if err := common.OpenInEditor(
-				filepath.Join(curWsCfg.Location(), file.WorkspaceConfigFileName),
+				filepath.Join(curWsCfg.Location(), filesystem.WorkspaceConfigFileName),
 				l.ctx.StdIn(), l.ctx.StdOut(),
 			); err != nil {
 				l.ctx.Logger.Error(err, "unable to open workspace in editor")
@@ -144,7 +144,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				break
 			}
 
-			curCfg, err := file.LoadUserConfig()
+			curCfg, err := filesystem.LoadUserConfig()
 			if err != nil {
 				l.ctx.Logger.Error(err, "unable to load user config")
 				l.SetNotice("unable to load user config", styles.NoticeLevelError)
@@ -168,7 +168,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				curCfg.CurrentWorkspace = curWsCfg.AssignedName()
 			}
 
-			if err := file.WriteUserConfig(curCfg); err != nil {
+			if err := filesystem.WriteUserConfig(curCfg); err != nil {
 				l.ctx.Logger.Error(err, "unable to write user config")
 				l.SetNotice("unable to write user config", styles.NoticeLevelError)
 				break

@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	workspaceCache  *WorkspaceCache
-	executableCache *ExecutableCache
+	workspaceCache  WorkspaceCache
+	executableCache ExecutableCache
 )
 
 func UpdateAll(logger io.Logger) error {

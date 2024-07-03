@@ -109,7 +109,7 @@ func (l *Library) setVisibleWorkspaces() {
 }
 
 func (l *Library) setVisibleNamespaces() {
-	if l.allExecutables == nil {
+	if l.allExecutables == nil || len(l.visibleWorkspaces) == 0 {
 		return
 	}
 

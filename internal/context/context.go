@@ -13,8 +13,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
+	"github.com/jahvon/flow/internal/filesystem"
 )
 
 type Context struct {
@@ -23,8 +23,8 @@ type Context struct {
 	Logger               io.Logger
 	UserConfig           *config.UserConfig
 	CurrentWorkspace     *config.WorkspaceConfig
-	WorkspacesCache      *cache.WorkspaceCache
-	ExecutableCache      *cache.ExecutableCache
+	WorkspacesCache      cache.WorkspaceCache
+	ExecutableCache      cache.ExecutableCache
 	InteractiveContainer *components.ContainerView
 
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
@@ -35,7 +35,7 @@ type Context struct {
 }
 
 func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
-	userConfig, err := file.LoadUserConfig()
+	userConfig, err := filesystem.LoadUserConfig()
 	if err != nil {
 		panic(errors.Wrap(err, "user config load error"))
 	}
@@ -64,9 +64,9 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		CancelFunc:       cancel,
 		UserConfig:       userConfig,
 		CurrentWorkspace: wsConfig,
-		WorkspacesCache:  cache.NewWorkspaceCache(),
-		ExecutableCache:  cache.NewExecutableCache(),
-		Logger:           io.NewLogger(stdOut, theme, logMode, file.LogsDir()),
+		WorkspacesCache:  workspaceCache,
+		ExecutableCache:  executableCache,
+		Logger:           io.NewLogger(stdOut, theme, logMode, filesystem.LogsDir()),
 		stdOut:           stdOut,
 		stdIn:            stdIn,
 	}
@@ -165,5 +165,5 @@ func currentWorkspace(userConfig *config.UserConfig) (*config.WorkspaceConfig, e
 		return nil, fmt.Errorf("current workspace not found")
 	}
 
-	return file.LoadWorkspaceConfig(ws, wsPath)
+	return filesystem.LoadWorkspaceConfig(ws, wsPath)
 }

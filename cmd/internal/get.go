@@ -9,9 +9,9 @@ import (
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	configio "github.com/jahvon/flow/internal/io/config"
 	executableio "github.com/jahvon/flow/internal/io/executable"
@@ -86,7 +86,7 @@ func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		wsPath = ctx.CurrentWorkspace.Location()
 	}
 
-	wsCfg, err := file.LoadWorkspaceConfig(workspaceName, wsPath)
+	wsCfg, err := filesystem.LoadWorkspaceConfig(workspaceName, wsPath)
 	if err != nil {
 		logger.FatalErr(errors.Wrap(err, "failure loading workspace config"))
 	} else if wsCfg == nil {

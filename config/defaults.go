@@ -7,6 +7,5 @@ const DefaultTimeout = 30 * time.Minute
 func DefaultWorkspaceConfig(name string) *WorkspaceConfig {
 	return &WorkspaceConfig{
 		DisplayName: name,
-		Git:         &GitConfig{Enabled: false},
 	}
 }

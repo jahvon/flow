@@ -14,11 +14,13 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/builder"
+	"github.com/jahvon/flow/internal/cache"
+	cacheMocks "github.com/jahvon/flow/internal/cache/mocks"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
-	examplestest "github.com/jahvon/flow/tests/examples"
+	"github.com/jahvon/flow/internal/runner/mocks"
 )
 
 const (
@@ -51,28 +53,50 @@ func NewTestContext(
 	return ctxx
 }
 
-// NewTestContextWithMockLogger creates a new context for testing runners. It initializes the context with
-// a mock logger.
-// It also creates a temporary testing directory for the test workspace, user configs, and caches.
-// Test environment variables are set the config and cache directories override paths.
-func NewTestContextWithMockLogger(
-	ctx stdCtx.Context,
-	t ginkgo.FullGinkgoTInterface,
-	ctrl *gomock.Controller,
-) (*context.Context, *tuikitIOMocks.MockLogger) {
-	stdOut, err := os.CreateTemp("", "flow-test-out")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
-	stdIn, err := os.CreateTemp("", "flow-test-in")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
+type ContextWithMocks struct {
+	Ctx             *context.Context
+	Logger          *tuikitIOMocks.MockLogger
+	ExecutableCache *cacheMocks.MockExecutableCache
+	WorkspaceCache  *cacheMocks.MockWorkspaceCache
+	RunnerMock      *mocks.MockRunner
+}
 
-	logger := tuikitIOMocks.NewMockLogger(ctrl)
+// NewContextWithMocks creates a new context for testing runners. It initializes the context with
+// a mock logger and mock caches. The mock logger is set to expect debug calls.
+func NewContextWithMocks(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *ContextWithMocks {
+	null := os.NewFile(0, os.DevNull)
+	testWsCfg, err := testWsConfig("workspace-directory")
+	if err != nil {
+		t.Fatalf("unable to create workspace config: %v", err)
+	}
+	testUserCfg, err := testUserConfig("workspace-directory")
+	if err != nil {
+		t.Fatalf("unable to create user config: %v", err)
+	}
+	cancel := func() {
+		<-ctx.Done()
+	}
+	logger := tuikitIOMocks.NewMockLogger(gomock.NewController(t))
 	expectInternalMockLoggerCalls(logger)
-	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
-	return ctxx, logger
+	wsCache := cacheMocks.NewMockWorkspaceCache(gomock.NewController(t))
+	execCache := cacheMocks.NewMockExecutableCache(gomock.NewController(t))
+	ctxx := &context.Context{
+		Ctx:              ctx,
+		CancelFunc:       cancel,
+		Logger:           logger,
+		UserConfig:       testUserCfg,
+		CurrentWorkspace: testWsCfg,
+		WorkspacesCache:  wsCache,
+		ExecutableCache:  execCache,
+	}
+	ctxx.SetIO(null, null)
+	return &ContextWithMocks{
+		Ctx:             ctxx,
+		Logger:          logger,
+		ExecutableCache: execCache,
+		WorkspaceCache:  wsCache,
+		RunnerMock:      mocks.NewMockRunner(gomock.NewController(t)),
+	}
 }
 
 func newTestContext(
@@ -108,6 +132,17 @@ func newTestContext(
 		ExecutableCache:  execCache,
 	}
 	ctxx.SetIO(stdIn, stdOut)
+
+	definitionPath := filepath.Join(wsDir, "testdata.flow")
+	testData := builder.ExampleExecutableDefinition(ctxx, definitionPath)
+	execDef, err := yaml.Marshal(testData)
+	if err != nil {
+		t.Fatalf("unable to marshal test data: %v", err)
+	}
+	if err := os.WriteFile(definitionPath, execDef, 0600); err != nil {
+		t.Fatalf("unable to write test data: %v", err)
+	}
+
 	return ctxx
 }
 
@@ -124,14 +159,6 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err := copy.Copy(srcWsDir, tmpWsDir); err != nil {
 		t.Fatalf("unable to copy workspace directory: %v", err)
 	}
-	testData := examplestest.TestExecutableDefinition
-	execDef, err := yaml.Marshal(testData)
-	if err != nil {
-		t.Fatalf("unable to marshal test data: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(tmpWsDir, "testdata.flow"), execDef, 0600); err != nil {
-		t.Fatalf("unable to write test data: %v", err)
-	}
 	tmpConfigDir := filepath.Join(tmpDir, userConfigSubdir)
 	tmpCacheDir := filepath.Join(tmpDir, cacheSubdir)
 
@@ -139,10 +166,10 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 }
 
 func testUserConfig(wsDir string) (*config.UserConfig, error) {
-	if err := file.InitUserConfig(); err != nil {
+	if err := filesystem.InitUserConfig(); err != nil {
 		return nil, err
 	}
-	userCfg, err := file.LoadUserConfig()
+	userCfg, err := filesystem.LoadUserConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +179,7 @@ func testUserConfig(wsDir string) (*config.UserConfig, error) {
 		TestWorkspaceName: wsDir,
 	}
 	userCfg.Interactive = &config.InteractiveConfig{Enabled: false}
-	if err = file.WriteUserConfig(userCfg); err != nil {
+	if err = filesystem.WriteUserConfig(userCfg); err != nil {
 		return nil, err
 	}
 
@@ -160,22 +187,24 @@ func testUserConfig(wsDir string) (*config.UserConfig, error) {
 }
 
 func testWsConfig(wsDir string) (*config.WorkspaceConfig, error) {
-	if err := file.InitWorkspaceConfig(TestWorkspaceName, wsDir); err != nil {
+	if err := filesystem.InitWorkspaceConfig(TestWorkspaceName, wsDir); err != nil {
 		return nil, err
 	}
-	wsCfg, err := file.LoadWorkspaceConfig(TestWorkspaceName, wsDir)
+	wsCfg, err := filesystem.LoadWorkspaceConfig(TestWorkspaceName, wsDir)
 	if err != nil {
 		return nil, err
 	}
 	wsCfg.DisplayName = TestWorkspaceDisplayName
-	if err = file.WriteWorkspaceConfig(wsDir, wsCfg); err != nil {
+	if err = filesystem.WriteWorkspaceConfig(wsDir, wsCfg); err != nil {
 		return nil, err
 	}
 	return wsCfg, nil
 }
 
 // testCaches must be called after the user and workspace configs have been created.
-func testCaches(t ginkgo.FullGinkgoTInterface, logger tuikitIO.Logger) (*cache.WorkspaceCache, *cache.ExecutableCache) {
+func testCaches(
+	t ginkgo.FullGinkgoTInterface, logger tuikitIO.Logger,
+) (cache.WorkspaceCache, cache.ExecutableCache) {
 	wsCache := cache.NewWorkspaceCache()
 	execCache := cache.NewExecutableCache()
 
@@ -206,8 +235,8 @@ func setTestEnv(t ginkgo.FullGinkgoTInterface, configDir, cacheDir string) {
 		}
 	}
 
-	t.Setenv(file.FlowConfigDirEnvVar, configDir)
-	t.Setenv(file.FlowCacheDirEnvVar, cacheDir)
+	t.Setenv(filesystem.FlowConfigDirEnvVar, configDir)
+	t.Setenv(filesystem.FlowCacheDirEnvVar, cacheDir)
 }
 
 func expectInternalMockLoggerCalls(logger *tuikitIOMocks.MockLogger) {

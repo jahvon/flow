@@ -9,8 +9,8 @@ import (
 	"github.com/jahvon/tuikit/io"
 
 	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -136,8 +136,8 @@ func DefaultEnv(ctx *context.Context, executable *config.Executable) map[string]
 	envMap["FLOW_DEFINITION_PATH"] = executable.DefinitionPath()
 	envMap["FLOW_DEFINITION_DIR"] = filepath.Dir(executable.DefinitionPath())
 	envMap["FLOW_WORKSPACE_PATH"] = executable.WorkspacePath()
-	envMap["FLOW_CONFIG_PATH"] = file.ConfigDirPath()
-	envMap["FLOW_CACHE_PATH"] = file.CachedDataDirPath()
+	envMap["FLOW_CONFIG_PATH"] = filesystem.ConfigDirPath()
+	envMap["FLOW_CACHE_PATH"] = filesystem.CachedDataDirPath()
 	envMap["DISABLE_FLOW_INTERACTIVE"] = "true"
 	return envMap
 }

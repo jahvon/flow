@@ -90,7 +90,7 @@ func (e *ExecutableRetries) RecordAttempt() {
 }
 
 func (e *ExecutableRetries) AttemptedMaxTimes() bool {
-	return e.attempts >= e.Retries
+	return e.attempts >= e.Retries+1
 }
 
 type LaunchExecutableType struct {

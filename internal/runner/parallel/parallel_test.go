@@ -33,7 +33,7 @@ var _ = Describe("ParallelRunner", func() {
 
 	BeforeEach(func() {
 		ctrl := gomock.NewController(GinkgoT())
-		ctx, mockLogger = testRunner.NewTestContextWithMockLogger(stdCtx.Background(), GinkgoT(), ctrl)
+		ctx, mockLogger = testRunner.NewTestContextWithMocks(stdCtx.Background(), GinkgoT(), ctrl)
 		parallelRnr = parallel.NewRunner()
 	})
 
