@@ -65,11 +65,16 @@ type ContextWithMocks struct {
 // a mock logger and mock caches. The mock logger is set to expect debug calls.
 func NewContextWithMocks(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *ContextWithMocks {
 	null := os.NewFile(0, os.DevNull)
-	testWsCfg, err := testWsConfig("workspace-directory")
+	tmpDir, err := os.MkdirTemp("", "flow-test")
+	if err != nil {
+		t.Fatalf("unable to create temp dir: %v", err)
+	}
+	setTestEnv(t, tmpDir, tmpDir)
+	testWsCfg, err := testWsConfig(tmpDir)
 	if err != nil {
 		t.Fatalf("unable to create workspace config: %v", err)
 	}
-	testUserCfg, err := testUserConfig("workspace-directory")
+	testUserCfg, err := testUserConfig(tmpDir)
 	if err != nil {
 		t.Fatalf("unable to create user config: %v", err)
 	}
