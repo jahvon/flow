@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/jahvon/glamour"
 	"github.com/jahvon/tuikit/styles"
 
 	"github.com/jahvon/flow/config"
