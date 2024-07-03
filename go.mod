@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/charmbracelet/bubbles v0.18.0
-	github.com/charmbracelet/bubbletea v0.26.4
+	github.com/charmbracelet/bubbletea v0.26.6
 	github.com/charmbracelet/glamour v0.7.0
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea
@@ -74,7 +74,7 @@ require (
 	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/mobile v0.0.0-20240112133503-c713f31d574b // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/term v0.20.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
