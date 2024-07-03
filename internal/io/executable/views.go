@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/styles"
-	"golang.design/x/clipboard"
 
 	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
@@ -32,12 +32,11 @@ func NewExecutableView(
 		{
 			Key: "c", Label: "copy ref",
 			Callback: func() error {
-				err := clipboard.Init()
-				if err != nil {
-					return err
+				if err := clipboard.WriteAll(exec.Ref().String()); err != nil {
+					container.HandleError(fmt.Errorf("unable to copy reference to clipboard: %w", err))
+				} else {
+					container.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
 				}
-				clipboard.Write(clipboard.FmtText, []byte(exec.Ref().String()))
-				container.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
 				return nil
 			},
 		},
