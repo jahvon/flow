@@ -7,7 +7,6 @@ import (
 	"github.com/jahvon/tuikit/styles"
 	"github.com/samber/lo"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
@@ -15,7 +14,7 @@ import (
 
 func NewSecretView(
 	ctx *context.Context,
-	secret config.SecretConfig,
+	secret vault.Secret,
 	asPlainText bool,
 ) components.TeaModel {
 	container := ctx.InteractiveContainer
@@ -30,7 +29,7 @@ func NewSecretView(
 					ctx.Logger.FatalErr(err)
 				}
 				newName := inputs.FindByKey("value").Value()
-				if err := v.RenameSecret(secret.Name, newName); err != nil {
+				if err := v.RenameSecret(secret.Reference, newName); err != nil {
 					container.HandleError(fmt.Errorf("unable to rename secret: %w", err))
 					return nil
 				}
@@ -48,8 +47,8 @@ func NewSecretView(
 					ctx.Logger.FatalErr(err)
 				}
 				newValue := inputs.FindByKey("value").Value()
-				secretValue := vault.Secret(newValue)
-				if err := v.SetSecret(secret.Name, secretValue); err != nil {
+				secretValue := vault.SecretValue(newValue)
+				if err := v.SetSecret(secret.Reference, secretValue); err != nil {
 					container.HandleError(fmt.Errorf("unable to edit secret: %w", err))
 					return nil
 				}
@@ -61,7 +60,7 @@ func NewSecretView(
 		{
 			Key: "x", Label: "delete",
 			Callback: func() error {
-				if err := v.DeleteSecret(secret.Name); err != nil {
+				if err := v.DeleteSecret(secret.Reference); err != nil {
 					container.HandleError(fmt.Errorf("unable to delete secret: %w", err))
 					return nil
 				}
@@ -77,12 +76,12 @@ func NewSecretView(
 		Height: container.Height(),
 		Width:  container.Width(),
 	}
-	return components.NewEntityView(state, &secret, "", secretKeyCallbacks...)
+	return components.NewEntityView(state, &secret, components.FormatDocument, secretKeyCallbacks...)
 }
 
 func NewSecretListView(
 	ctx *context.Context,
-	secrets config.SecretConfigList,
+	secrets vault.SecretList,
 	asPlainText bool,
 ) components.TeaModel {
 	container := ctx.InteractiveContainer
@@ -91,8 +90,8 @@ func NewSecretListView(
 	}
 
 	selectFunc := func(filterVal string) error {
-		secret, found := lo.Find(secrets, func(s config.SecretConfig) bool {
-			return s.AssignedName() == filterVal || s.Name == filterVal
+		secret, found := lo.Find(secrets, func(s vault.Secret) bool {
+			return s.Reference == filterVal
 		})
 		if !found {
 			return fmt.Errorf("secret not found")
@@ -107,7 +106,7 @@ func NewSecretListView(
 		Height: container.Height(),
 		Width:  container.Width(),
 	}
-	return components.NewCollectionView(state, secrets, "", selectFunc)
+	return components.NewCollectionView(state, secrets, components.FormatList, selectFunc)
 }
 
 func LoadSecretListView(
@@ -120,17 +119,17 @@ func LoadSecretListView(
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	var secretConfigList config.SecretConfigList
+	var secretList vault.SecretList
 	for name, secret := range secrets {
 		if asPlainText {
-			secretConfigList = append(secretConfigList, config.SecretConfig{Name: name, Secret: secret.PlainTextString()})
+			secretList = append(secretList, vault.Secret{Reference: name, Secret: secret.PlainTextString()})
 		} else {
-			secretConfigList = append(secretConfigList, config.SecretConfig{Name: name, Secret: secret.String()})
+			secretList = append(secretList, vault.Secret{Reference: name, Secret: secret.ObfuscatedString()})
 		}
 	}
 	view := NewSecretListView(
 		ctx,
-		secretConfigList,
+		secretList,
 		asPlainText,
 	)
 	container.SetView(view)

@@ -31,8 +31,8 @@ type Vault struct {
 
 // Represents the data stored in the vault data file.
 type data struct {
-	LastUpdated string            `yaml:"lastUpdated"`
-	Secrets     map[string]Secret `yaml:"secrets"`
+	LastUpdated string                 `yaml:"lastUpdated"`
+	Secrets     map[string]SecretValue `yaml:"secrets"`
 }
 
 func RegisterEncryptionKey(key string) error {
@@ -60,7 +60,7 @@ func NewVault(logger io.Logger) *Vault {
 	return &Vault{logger: logger}
 }
 
-func (v *Vault) GetSecret(reference string) (Secret, error) {
+func (v *Vault) GetSecret(reference string) (SecretValue, error) {
 	v.logger.Debugf("getting secret with reference %s from vault", reference)
 	d, err := v.loadData()
 	if err != nil {
@@ -76,7 +76,7 @@ func (v *Vault) GetSecret(reference string) (Secret, error) {
 	return secret, nil
 }
 
-func (v *Vault) GetAllSecrets() (map[string]Secret, error) {
+func (v *Vault) GetAllSecrets() (map[string]SecretValue, error) {
 	v.logger.Debugf("getting all secrets from vault")
 	d, err := v.loadData()
 	if err != nil {
@@ -87,7 +87,7 @@ func (v *Vault) GetAllSecrets() (map[string]Secret, error) {
 	return d.Secrets, nil
 }
 
-func (v *Vault) SetSecret(reference string, secret Secret) error {
+func (v *Vault) SetSecret(reference string, secret SecretValue) error {
 	v.logger.Debugf("setting secret with reference %s in vault", reference)
 	if err := ValidateReference(reference); err != nil {
 		return err
@@ -99,7 +99,7 @@ func (v *Vault) SetSecret(reference string, secret Secret) error {
 	}
 
 	if d.Secrets == nil {
-		d.Secrets = make(map[string]Secret)
+		d.Secrets = make(map[string]SecretValue)
 	}
 	d.Secrets[reference] = secret
 
