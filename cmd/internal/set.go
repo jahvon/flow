@@ -234,7 +234,7 @@ func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		value = inputs.FindByKey("value").Value()
 	}
 
-	secret := vault.Secret(value)
+	secret := vault.SecretValue(value)
 	v := vault.NewVault(logger)
 	err := v.SetSecret(reference, secret)
 	if err != nil {
