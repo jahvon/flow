@@ -12,9 +12,10 @@ package mocks
 import (
 	reflect "reflect"
 
-	config "github.com/jahvon/flow/config"
-	context "github.com/jahvon/flow/internal/context"
 	gomock "go.uber.org/mock/gomock"
+
+	config "github.com/jahvon/flow/types/executable"
+	context "github.com/jahvon/flow/internal/context"
 )
 
 // MockRunner is a mock of Runner interface.
@@ -71,7 +72,7 @@ func (mr *MockRunnerMockRecorder) IsCompatible(arg0 any) *gomock.Call {
 // Name mocks base method.
 func (m *MockRunner) Name() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
+	ret := m.ctrl.Call(m, "Title")
 	ret0, _ := ret[0].(string)
 	return ret0
 }
@@ -79,5 +80,5 @@ func (m *MockRunner) Name() string {
 // Name indicates an expected call of Name.
 func (mr *MockRunnerMockRecorder) Name() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockRunner)(nil).Name))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Title", reflect.TypeOf((*MockRunner)(nil).Name))
 }

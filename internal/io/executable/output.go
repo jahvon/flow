@@ -6,10 +6,10 @@ import (
 
 	tuikitIO "github.com/jahvon/tuikit/io"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/executable"
 )
 
-func PrintExecutableList(logger tuikitIO.Logger, format string, executables config.ExecutableList) {
+func PrintExecutableList(logger tuikitIO.Logger, format string, executables executable.ExecutableList) {
 	logger.Infof("listing %d executables", len(executables))
 	switch strings.ToLower(format) {
 	case "", "yaml", "yml":
@@ -29,11 +29,11 @@ func PrintExecutableList(logger tuikitIO.Logger, format string, executables conf
 	}
 }
 
-func PrintExecutable(logger tuikitIO.Logger, format string, exec *config.Executable) {
+func PrintExecutable(logger tuikitIO.Logger, format string, exec *executable.Executable) {
 	if exec == nil {
 		logger.Fatalf("Executable is nil")
 	}
-	logger.Infox(fmt.Sprintf("Executable %s", exec.ID()), "Location", exec.DefinitionPath())
+	logger.Infox(fmt.Sprintf("Executable %s", exec.ID()), "Location", exec.ConfigPath())
 	switch strings.ToLower(format) {
 	case "", "yaml", "yml":
 		str, err := exec.YAML()

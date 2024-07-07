@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/types/executable"
 )
 
 //go:generate mockgen -destination=mocks/mock_runner.go -package=mocks github.com/jahvon/flow/internal/runner Runner
 type Runner interface {
 	Name() string
-	Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error
-	IsCompatible(executable *config.Executable) bool
+	Exec(ctx *context.Context, executable *executable.Executable, promptedEnv map[string]string) error
+	IsCompatible(executable *executable.Executable) bool
 }
 
 var registeredRunners []Runner
@@ -25,7 +25,7 @@ func RegisterRunner(runner Runner) {
 	registeredRunners = append(registeredRunners, runner)
 }
 
-func Exec(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
+func Exec(ctx *context.Context, executable *executable.Executable, promptedEnv map[string]string) error {
 	var assignedRunner Runner
 	for _, runner := range registeredRunners {
 		if runner.IsCompatible(executable) {

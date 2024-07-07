@@ -10,13 +10,13 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/mocks"
 	"github.com/jahvon/flow/internal/runner/serial"
-	examplestest "github.com/jahvon/flow/tests/examples"
 	testRunner "github.com/jahvon/flow/tests/runner"
+	"github.com/jahvon/flow/tools/builder"
+	"github.com/jahvon/flow/types/executable"
 )
 
 func TestSerialRunner(t *testing.T) {
@@ -37,7 +37,7 @@ var _ = Describe("SerialRunner", func() {
 		serialRnr = serial.NewRunner()
 	})
 
-	Context("Name", func() {
+	Context("Title", func() {
 		It("should return the correct runner name", func() {
 			Expect(serialRnr.Name()).To(Equal("serial"))
 		})
@@ -49,15 +49,13 @@ var _ = Describe("SerialRunner", func() {
 		})
 
 		It("should return false when executable type is nil", func() {
-			executable := &config.Executable{}
+			executable := &executable.Executable{}
 			Expect(serialRnr.IsCompatible(executable)).To(BeFalse())
 		})
 
 		It("should return true when executable type is serial", func() {
-			executable := &config.Executable{
-				Type: &config.ExecutableTypeSpec{
-					Serial: &config.SerialExecutableType{},
-				},
+			executable := &executable.Executable{
+				Serial: &executable.SerialExecutableType{},
 			}
 			Expect(serialRnr.IsCompatible(executable)).To(BeTrue())
 		})
@@ -65,38 +63,29 @@ var _ = Describe("SerialRunner", func() {
 
 	Context("Exec", func() {
 		var (
-			rootExec, serialExec1, serialExec2, serialExec3 *config.Executable
-			isSerialExec1, isSerialExec2, isSerialExec3     gomock.Matcher
-			mockRunner                                      *mocks.MockRunner
+			rootExec                                    *executable.Executable
+			isSerialExec1, isSerialExec2, isSerialExec3 gomock.Matcher
+			mockRunner                                  *mocks.MockRunner
 		)
 
 		BeforeEach(func() {
 			ctrl := gomock.NewController(GinkgoT())
 			mockRunner = mocks.NewMockRunner(ctrl)
 
-			setExecCtx := func(exec *config.Executable) {
-				exec.SetContext(
-					ctx.CurrentWorkspace.AssignedName(),
-					ctx.CurrentWorkspace.Location(),
-					"examples",
-					"",
-				)
-			}
-
-			rootExec = examplestest.SerialExecRoot
-			serialExec1 = examplestest.SerialExec1
-			setExecCtx(serialExec1)
-			serialExec2 = examplestest.SerialExec2
-			setExecCtx(serialExec2)
-			serialExec3 = examplestest.SerialExec3
-			setExecCtx(serialExec3)
-
-			isSerialExec1 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialExec1.Ref()) })
-			isSerialExec2 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialExec2.Ref()) })
-			isSerialExec3 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialExec3.Ref()) })
+			ns := "examples"
+			rootExec = builder.SerialExecByRef(
+				builder.WithNamespaceName(ns),
+				builder.WithWorkspaceName(ctx.CurrentWorkspace.AssignedName()),
+				builder.WithWorkspacePath(ctx.CurrentWorkspace.Location()),
+			)
+			serialSpec := rootExec.Serial
+			isSerialExec1 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialSpec.Refs[0]) })
+			isSerialExec2 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialSpec.Refs[1]) })
+			isSerialExec3 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialSpec.Refs[2]) })
 
 			runner.RegisterRunner(serialRnr)
 			runner.RegisterRunner(mockRunner)
+			mockRunner.EXPECT().IsCompatible(rootExec).Return(false).AnyTimes()
 
 			Expect(mockLogger).To(Not(BeNil()))
 		})
@@ -107,11 +96,6 @@ var _ = Describe("SerialRunner", func() {
 
 		It("should execute in order", func() {
 			promptedEnv := make(map[string]string)
-
-			// mockRunner.EXPECT().IsCompatible(rootExec).Return(true).Times(1)
-			// mockRunner.EXPECT().Exec(ctx, rootExec, make(map[string]string)).Return(nil).Times(1)
-
-			// isRootExec := gomock.Cond(func(e any) bool { return isExecutableWithRef(e, "run examples:serial") })
 
 			mockRunner.EXPECT().IsCompatible(isSerialExec1).Return(true).Times(1)
 			mockRunner.EXPECT().Exec(ctx, isSerialExec1, promptedEnv).Return(nil).Times(1)
@@ -134,7 +118,8 @@ var _ = Describe("SerialRunner", func() {
 			mockRunner.EXPECT().IsCompatible(isSerialExec2).Return(true).Times(1)
 			mockRunner.EXPECT().Exec(ctx, isSerialExec2, promptedEnv).Return(errors.New("error")).Times(1)
 
-			Expect(serialRnr.Exec(ctx, examplestest.SerialWithExitRoot, promptedEnv)).ToNot(Succeed())
+			rootExec.Serial.FailFast = true
+			Expect(serialRnr.Exec(ctx, rootExec, promptedEnv)).ToNot(Succeed())
 		})
 
 		It("should not fail fast when disabled", func() {
@@ -150,13 +135,13 @@ var _ = Describe("SerialRunner", func() {
 			mockRunner.EXPECT().Exec(ctx, isSerialExec3, promptedEnv).Return(nil).Times(1)
 			mockLogger.EXPECT().Error(gomock.Any(), gomock.Any()).Times(1)
 
-			Expect(serialRnr.Exec(ctx, examplestest.SerialExecRoot, promptedEnv)).ToNot(Succeed())
+			Expect(serialRnr.Exec(ctx, rootExec, promptedEnv)).ToNot(Succeed())
 		})
 	})
 })
 
-func isExecutableWithRef(e any, ref config.Ref) bool {
-	exec, ok := e.(*config.Executable)
+func isExecutableWithRef(e any, ref executable.Ref) bool {
+	exec, ok := e.(*executable.Executable)
 	if !ok {
 		return false
 	}

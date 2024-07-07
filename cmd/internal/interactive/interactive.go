@@ -22,7 +22,7 @@ const (
 func UIEnabled(ctx *context.Context, cmd *cobra.Command) bool {
 	disabled := flags.ValueFor[bool](ctx, cmd.Root(), *flags.NonInteractiveFlag, true)
 	envDisabled, _ := strconv.ParseBool(os.Getenv("DISABLE_FLOW_INTERACTIVE"))
-	return !disabled && !envDisabled && ctx.UserConfig.Interactive != nil && ctx.UserConfig.Interactive.Enabled
+	return !disabled && !envDisabled && ctx.UserConfig.ShowTUI()
 }
 
 func InitInteractiveCommand(ctx *context.Context, cmd *cobra.Command) {

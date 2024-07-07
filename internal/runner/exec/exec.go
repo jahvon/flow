@@ -4,10 +4,10 @@ import (
 	"github.com/jahvon/tuikit/io"
 	"github.com/pkg/errors"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/services/run"
+	"github.com/jahvon/flow/types/executable"
 )
 
 type execRunner struct{}
@@ -20,29 +20,29 @@ func (r *execRunner) Name() string {
 	return "exec"
 }
 
-func (r *execRunner) IsCompatible(executable *config.Executable) bool {
-	if executable == nil || executable.Type == nil || executable.Type.Exec == nil {
+func (r *execRunner) IsCompatible(executable *executable.Executable) bool {
+	if executable == nil || executable.Exec == nil {
 		return false
 	}
 	return true
 }
 
-func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, inputEnv map[string]string) error {
-	execSpec := executable.Type.Exec
-	defaultEnv := runner.DefaultEnv(ctx, executable)
-	envMap, err := runner.BuildEnvMap(ctx.Logger, &execSpec.ExecutableEnvironment, inputEnv, defaultEnv)
+func (r *execRunner) Exec(ctx *context.Context, e *executable.Executable, inputEnv map[string]string) error {
+	execSpec := e.Exec
+	defaultEnv := runner.DefaultEnv(ctx, e)
+	envMap, err := runner.BuildEnvMap(ctx.Logger, e.Env(), inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envList, err := runner.BuildEnvList(ctx.Logger, &execSpec.ExecutableEnvironment, inputEnv, defaultEnv)
+	envList, err := runner.BuildEnvList(ctx.Logger, e.Env(), inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
-	targetDir, isTmp, err := execSpec.ExpandDirectory(
+	targetDir, isTmp, err := execSpec.Dir.ExpandDirectory(
 		ctx.Logger,
-		executable.WorkspacePath(),
-		executable.DefinitionPath(),
+		e.WorkspacePath(),
+		e.ConfigPath(),
 		ctx.ProcessTmpDir,
 		envMap,
 	)
@@ -59,15 +59,15 @@ func (r *execRunner) Exec(ctx *context.Context, executable *config.Executable, i
 	}
 
 	switch {
-	case execSpec.Command == "" && execSpec.File == "":
+	case execSpec.Cmd == "" && execSpec.File == "":
 		return errors.New("either cmd or file must be specified")
-	case execSpec.Command != "" && execSpec.File != "":
+	case execSpec.Cmd != "" && execSpec.File != "":
 		return errors.New("cannot set both cmd and file")
-	case execSpec.Command != "":
-		return run.RunCmd(execSpec.Command, targetDir, envList, logMode, ctx.Logger, ctx.StdIn(), logFields)
+	case execSpec.Cmd != "":
+		return run.RunCmd(execSpec.Cmd, targetDir, envList, logMode, ctx.Logger, ctx.StdIn(), logFields)
 	case execSpec.File != "":
 		return run.RunFile(execSpec.File, targetDir, envList, logMode, ctx.Logger, ctx.StdIn(), logFields)
 	default:
-		return errors.New("unable to determine how executable should be run")
+		return errors.New("unable to determine how e should be run")
 	}
 }

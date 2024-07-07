@@ -22,7 +22,7 @@ func (e WorkspaceNotFoundError) Error() string {
 }
 
 type ExecutableContextError struct {
-	Workspace, Namespace, WorkspacePath, DefinitionFile string
+	Workspace, Namespace, WorkspacePath, FlowFile string
 }
 
 func (e ExecutableContextError) Error() string {
@@ -31,6 +31,6 @@ func (e ExecutableContextError) Error() string {
 		e.Workspace,
 		e.Namespace,
 		e.WorkspacePath,
-		e.DefinitionFile,
+		e.FlowFile,
 	)
 }

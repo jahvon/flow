@@ -9,7 +9,7 @@ import (
 	"github.com/jahvon/flow/cmd/internal"
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/version"
-	"github.com/jahvon/flow/config/cache"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 )
 

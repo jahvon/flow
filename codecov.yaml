@@ -2,3 +2,5 @@ github_checks:
   annotations: false
 coverage:
   range: "50...100"
+ignore:
+  - "**/*.gen.go" # ignore generated code

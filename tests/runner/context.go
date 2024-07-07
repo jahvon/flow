@@ -13,12 +13,13 @@ import (
 	"go.uber.org/mock/gomock"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
-	examplestest "github.com/jahvon/flow/tests/examples"
+	"github.com/jahvon/flow/tools/builder"
+	"github.com/jahvon/flow/types/config"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 const (
@@ -124,7 +125,7 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err := copy.Copy(srcWsDir, tmpWsDir); err != nil {
 		t.Fatalf("unable to copy workspace directory: %v", err)
 	}
-	testData := examplestest.TestExecutableDefinition
+	testData := builder.ExamplesExecFlowFile()
 	execDef, err := yaml.Marshal(testData)
 	if err != nil {
 		t.Fatalf("unable to marshal test data: %v", err)
@@ -138,11 +139,11 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	return tmpConfigDir, tmpCacheDir, tmpWsDir
 }
 
-func testUserConfig(wsDir string) (*config.UserConfig, error) {
-	if err := file.InitUserConfig(); err != nil {
+func testUserConfig(wsDir string) (*config.Config, error) {
+	if err := filesystem.InitUserConfig(); err != nil {
 		return nil, err
 	}
-	userCfg, err := file.LoadUserConfig()
+	userCfg, err := filesystem.LoadUserConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -151,31 +152,31 @@ func testUserConfig(wsDir string) (*config.UserConfig, error) {
 	userCfg.Workspaces = map[string]string{
 		TestWorkspaceName: wsDir,
 	}
-	userCfg.Interactive = &config.InteractiveConfig{Enabled: false}
-	if err = file.WriteUserConfig(userCfg); err != nil {
+	userCfg.Interactive = &config.Interactive{Enabled: false}
+	if err = filesystem.WriteUserConfig(userCfg); err != nil {
 		return nil, err
 	}
 
 	return userCfg, nil
 }
 
-func testWsConfig(wsDir string) (*config.WorkspaceConfig, error) {
-	if err := file.InitWorkspaceConfig(TestWorkspaceName, wsDir); err != nil {
+func testWsConfig(wsDir string) (*workspace.Workspace, error) {
+	if err := filesystem.InitWorkspaceConfig(TestWorkspaceName, wsDir); err != nil {
 		return nil, err
 	}
-	wsCfg, err := file.LoadWorkspaceConfig(TestWorkspaceName, wsDir)
+	wsCfg, err := filesystem.LoadWorkspaceConfig(TestWorkspaceName, wsDir)
 	if err != nil {
 		return nil, err
 	}
 	wsCfg.DisplayName = TestWorkspaceDisplayName
-	if err = file.WriteWorkspaceConfig(wsDir, wsCfg); err != nil {
+	if err = filesystem.WriteWorkspaceConfig(wsDir, wsCfg); err != nil {
 		return nil, err
 	}
 	return wsCfg, nil
 }
 
 // testCaches must be called after the user and workspace configs have been created.
-func testCaches(t ginkgo.FullGinkgoTInterface, logger tuikitIO.Logger) (*cache.WorkspaceCache, *cache.ExecutableCache) {
+func testCaches(t ginkgo.FullGinkgoTInterface, logger tuikitIO.Logger) (cache.WorkspaceCache, cache.ExecutableCache) {
 	wsCache := cache.NewWorkspaceCache()
 	execCache := cache.NewExecutableCache()
 
@@ -206,8 +207,8 @@ func setTestEnv(t ginkgo.FullGinkgoTInterface, configDir, cacheDir string) {
 		}
 	}
 
-	t.Setenv(file.FlowConfigDirEnvVar, configDir)
-	t.Setenv(file.FlowCacheDirEnvVar, cacheDir)
+	t.Setenv(filesystem.FlowConfigDirEnvVar, configDir)
+	t.Setenv(filesystem.FlowCacheDirEnvVar, cacheDir)
 }
 
 func expectInternalMockLoggerCalls(logger *tuikitIOMocks.MockLogger) {

@@ -8,15 +8,15 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	configio "github.com/jahvon/flow/internal/io/config"
 	executableio "github.com/jahvon/flow/internal/io/executable"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/executable"
 )
 
 func RegisterGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -86,7 +86,7 @@ func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		wsPath = ctx.CurrentWorkspace.Location()
 	}
 
-	wsCfg, err := file.LoadWorkspaceConfig(workspaceName, wsPath)
+	wsCfg, err := filesystem.LoadWorkspaceConfig(workspaceName, wsPath)
 	if err != nil {
 		logger.FatalErr(errors.Wrap(err, "failure loading workspace config"))
 	} else if wsCfg == nil {
@@ -123,20 +123,20 @@ func registerGetExecCmd(ctx *context.Context, getCmd *cobra.Command) {
 func getExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	verbStr := args[0]
-	verb := config.Verb(verbStr)
+	verb := executable.Verb(verbStr)
 	if err := verb.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
 	id := args[1]
-	ws, ns, name := config.ParseExecutableID(id)
+	ws, ns, name := executable.ParseExecutableID(id)
 	if ws == "" {
 		ws = ctx.CurrentWorkspace.AssignedName()
 	}
 	if ns == "" && ctx.UserConfig.CurrentNamespace != "" {
 		ns = ctx.UserConfig.CurrentNamespace
 	}
-	id = config.NewExecutableID(ws, ns, name)
-	ref := config.NewRef(id, verb)
+	id = executable.NewExecutableID(ws, ns, name)
+	ref := executable.NewRef(id, verb)
 
 	exec, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
 	if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {

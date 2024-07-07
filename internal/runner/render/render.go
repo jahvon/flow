@@ -13,10 +13,10 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/types/executable"
 )
 
 const appName = "flow renderer"
@@ -31,35 +31,30 @@ func (r *renderRunner) Name() string {
 	return "render"
 }
 
-func (r *renderRunner) IsCompatible(executable *config.Executable) bool {
-	if executable == nil || executable.Type == nil || executable.Type.Render == nil {
+func (r *renderRunner) IsCompatible(executable *executable.Executable) bool {
+	if executable == nil || executable.Render == nil {
 		return false
 	}
 	return true
 }
 
-func (r *renderRunner) Exec(ctx *context.Context, executable *config.Executable, inputEnv map[string]string) error {
-	if ctx.UserConfig.Interactive != nil && !ctx.UserConfig.Interactive.Enabled {
+func (r *renderRunner) Exec(ctx *context.Context, e *executable.Executable, inputEnv map[string]string) error {
+	if !ctx.UserConfig.ShowTUI() {
 		return fmt.Errorf("unable to render when interactive mode is disabled")
 	}
 
-	renderSpec := executable.Type.Render
-	if err := runner.SetEnv(ctx.Logger, &renderSpec.ExecutableEnvironment, inputEnv); err != nil {
+	renderSpec := e.Render
+	if err := runner.SetEnv(ctx.Logger, e.Env(), inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envMap, err := runner.BuildEnvMap(
-		ctx.Logger,
-		&renderSpec.ExecutableEnvironment,
-		inputEnv,
-		runner.DefaultEnv(ctx, executable),
-	)
+	envMap, err := runner.BuildEnvMap(ctx.Logger, e.Env(), inputEnv, runner.DefaultEnv(ctx, e))
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	targetDir, isTmp, err := renderSpec.ExpandDirectory(
+	targetDir, isTmp, err := renderSpec.Dir.ExpandDirectory(
 		ctx.Logger,
-		executable.WorkspacePath(),
-		executable.DefinitionPath(),
+		e.WorkspacePath(),
+		e.ConfigPath(),
 		ctx.ProcessTmpDir,
 		envMap,
 	)

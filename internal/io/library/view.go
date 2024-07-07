@@ -12,7 +12,8 @@ import (
 	"github.com/jahvon/glamour"
 	"github.com/jahvon/tuikit/styles"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/common"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 const (
@@ -245,7 +246,7 @@ func (l *Library) footerContent() string {
 			if ws == allWorkspacesLabel {
 				break
 			}
-			var wsCfg *config.WorkspaceConfig
+			var wsCfg *workspace.Workspace
 			for i, w := range l.allWorkspaces {
 				if w.AssignedName() == ws {
 					wsCfg = &l.allWorkspaces[i]
@@ -266,7 +267,7 @@ func (l *Library) footerContent() string {
 			case l.noticeText != "":
 				info = l.noticeText
 			case len(wsCfg.Tags) > 0:
-				info = fmt.Sprintf("%s(%s) -> %s", wsCfg.DisplayName, wsCfg.Tags.PreviewString(), path)
+				info = fmt.Sprintf("%s(%s) -> %s", wsCfg.DisplayName, common.Tags(wsCfg.Tags).PreviewString(), path)
 			default:
 				info = fmt.Sprintf("%s -> %s", wsCfg.DisplayName, path)
 			}
@@ -289,7 +290,7 @@ func (l *Library) footerContent() string {
 				info = l.noticeText
 			default:
 				exec := l.visibleExecutables[l.currentExecutable]
-				path, err := relativePathFromWd(exec.DefinitionPath())
+				path, err := relativePathFromWd(exec.ConfigPath())
 				if err != nil {
 					l.ctx.Logger.Error(err, "unable to get relative path from wd")
 					break

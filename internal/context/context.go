@@ -12,19 +12,21 @@ import (
 	"github.com/jahvon/tuikit/styles"
 	"github.com/pkg/errors"
 
-	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
+	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/config"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 type Context struct {
 	Ctx                  context.Context
 	CancelFunc           context.CancelFunc
 	Logger               io.Logger
-	UserConfig           *config.UserConfig
-	CurrentWorkspace     *config.WorkspaceConfig
-	WorkspacesCache      *cache.WorkspaceCache
-	ExecutableCache      *cache.ExecutableCache
+	UserConfig           *config.Config
+	CurrentWorkspace     *workspace.Workspace
+	WorkspacesCache      cache.WorkspaceCache
+	ExecutableCache      cache.ExecutableCache
 	InteractiveContainer *components.ContainerView
 
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
@@ -35,16 +37,17 @@ type Context struct {
 }
 
 func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
-	userConfig, err := file.LoadUserConfig()
+	cfg, err := filesystem.LoadUserConfig()
 	if err != nil {
 		panic(errors.Wrap(err, "user config load error"))
 	}
 
-	wsConfig, err := currentWorkspace(userConfig)
+	cfg.SetDefaults()
+	wsConfig, err := currentWorkspace(cfg)
 	if err != nil {
 		panic(errors.Wrap(err, "workspace config load error"))
 	} else if wsConfig == nil {
-		panic(fmt.Errorf("workspace config not found in current workspace (%s)", userConfig.CurrentWorkspace))
+		panic(fmt.Errorf("workspace config not found in current workspace (%s)", cfg.CurrentWorkspace))
 	}
 
 	workspaceCache := cache.NewWorkspaceCache()
@@ -58,15 +61,15 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 
 	ctxx, cancel := context.WithCancel(ctx)
 	theme := styles.EverforestTheme()
-	logMode := userConfig.DefaultLogMode
+	logMode := cfg.DefaultLogMode
 	return &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
-		UserConfig:       userConfig,
+		UserConfig:       cfg,
 		CurrentWorkspace: wsConfig,
-		WorkspacesCache:  cache.NewWorkspaceCache(),
-		ExecutableCache:  cache.NewExecutableCache(),
-		Logger:           io.NewLogger(stdOut, theme, logMode, file.LogsDir()),
+		WorkspacesCache:  workspaceCache,
+		ExecutableCache:  executableCache,
+		Logger:           io.NewLogger(stdOut, theme, logMode, filesystem.LogsDir()),
 		stdOut:           stdOut,
 		stdIn:            stdIn,
 	}
@@ -116,33 +119,30 @@ func (ctx *Context) Finalize() {
 	}
 }
 
-func ExpandRef(ctx *Context, ref config.Ref) config.Ref {
+func ExpandRef(ctx *Context, ref executable.Ref) executable.Ref {
 	id := ref.GetID()
-	ws, ns, name := config.ParseExecutableID(id)
+	ws, ns, name := executable.ParseExecutableID(id)
 	if ws == "" {
 		ws = ctx.CurrentWorkspace.AssignedName()
 	}
 	if ns == "" {
 		ns = ctx.UserConfig.CurrentNamespace
 	}
-	return config.NewRef(config.NewExecutableID(ws, ns, name), ref.GetVerb())
+	return executable.NewRef(executable.NewExecutableID(ws, ns, name), ref.GetVerb())
 }
 
-func currentWorkspace(userConfig *config.UserConfig) (*config.WorkspaceConfig, error) {
+func currentWorkspace(cfg *config.Config) (*workspace.Workspace, error) {
 	var ws, wsPath string
-	mode := userConfig.WorkspaceMode
-	if mode == "" {
-		mode = config.WorkspaceModeDynamic
-	}
+	mode := cfg.WorkspaceMode
 
 	switch mode {
-	case config.WorkspaceModeDynamic:
+	case config.ConfigWorkspaceModeDynamic:
 		wd, err := os.Getwd()
 		if err != nil {
 			return nil, err
 		}
 
-		for wsName, path := range userConfig.Workspaces {
+		for wsName, path := range cfg.Workspaces {
 			rel, err := filepath.Rel(filepath.Clean(path), filepath.Clean(wd))
 			if err != nil {
 				return nil, err
@@ -154,16 +154,16 @@ func currentWorkspace(userConfig *config.UserConfig) (*config.WorkspaceConfig, e
 			}
 		}
 		fallthrough
-	case config.WorkspaceModeFixed:
+	case config.ConfigWorkspaceModeFixed:
 		if ws != "" && wsPath != "" {
 			break
 		}
-		ws = userConfig.CurrentWorkspace
-		wsPath = userConfig.Workspaces[ws]
+		ws = cfg.CurrentWorkspace
+		wsPath = cfg.Workspaces[ws]
 	}
 	if ws == "" || wsPath == "" {
 		return nil, fmt.Errorf("current workspace not found")
 	}
 
-	return file.LoadWorkspaceConfig(ws, wsPath)
+	return filesystem.LoadWorkspaceConfig(ws, wsPath)
 }

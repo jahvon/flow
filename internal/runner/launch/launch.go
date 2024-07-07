@@ -3,11 +3,11 @@ package launch
 import (
 	"github.com/pkg/errors"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/services/open"
 	"github.com/jahvon/flow/internal/utils"
+	"github.com/jahvon/flow/types/executable"
 )
 
 type launchRunner struct{}
@@ -20,32 +20,32 @@ func (r *launchRunner) Name() string {
 	return "launch"
 }
 
-func (r *launchRunner) IsCompatible(executable *config.Executable) bool {
-	if executable == nil || executable.Type == nil || executable.Type.Launch == nil {
+func (r *launchRunner) IsCompatible(executable *executable.Executable) bool {
+	if executable == nil || executable.Launch == nil {
 		return false
 	}
 	return true
 }
 
-func (r *launchRunner) Exec(ctx *context.Context, executable *config.Executable, inputEnv map[string]string) error {
-	launchSpec := executable.Type.Launch
+func (r *launchRunner) Exec(ctx *context.Context, e *executable.Executable, inputEnv map[string]string) error {
+	launchSpec := e.Launch
 	envMap, err := runner.BuildEnvMap(
 		ctx.Logger,
-		&launchSpec.ExecutableEnvironment,
+		e.Env(),
 		inputEnv,
-		runner.DefaultEnv(ctx, executable),
+		runner.DefaultEnv(ctx, e),
 	)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	if err := runner.SetEnv(ctx.Logger, &launchSpec.ExecutableEnvironment, envMap); err != nil {
+	if err := runner.SetEnv(ctx.Logger, e.Env(), envMap); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	targetURI := utils.ExpandDirectory(
 		ctx.Logger,
 		launchSpec.URI,
-		executable.WorkspacePath(),
-		executable.DefinitionPath(),
+		e.WorkspacePath(),
+		e.ConfigPath(),
 		envMap,
 	)
 

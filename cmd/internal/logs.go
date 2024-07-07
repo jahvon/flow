@@ -10,8 +10,8 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 )
 
@@ -37,7 +37,7 @@ func RegisterLogsCmd(ctx *context.Context, rootCmd *cobra.Command) {
 
 func logFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	lastEntry := flags.ValueFor[bool](ctx, cmd, *flags.LastLogEntryFlag, false)
-	if err := file.EnsureLogsDir(); err != nil {
+	if err := filesystem.EnsureLogsDir(); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
 	if interactive.UIEnabled(ctx, cmd) {
@@ -46,11 +46,11 @@ func logFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 			Height: ctx.InteractiveContainer.Height(),
 			Width:  ctx.InteractiveContainer.Width(),
 		}
-		view := components.NewLogArchiveView(state, file.LogsDir(), lastEntry)
+		view := components.NewLogArchiveView(state, filesystem.LogsDir(), lastEntry)
 		ctx.InteractiveContainer.SetView(view)
 		return
 	}
-	entries, err := tuikitIO.ListArchiveEntries(file.LogsDir())
+	entries, err := tuikitIO.ListArchiveEntries(filesystem.LogsDir())
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	} else if len(entries) == 0 {

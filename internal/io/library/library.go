@@ -7,8 +7,10 @@ import (
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/styles"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/types/common"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 const (
@@ -23,9 +25,9 @@ type Library struct {
 
 	visibleWorkspaces  []string
 	visibleNamespaces  []string
-	visibleExecutables config.ExecutableList
-	allWorkspaces      config.WorkspaceConfigList
-	allExecutables     config.ExecutableList
+	visibleExecutables executable.ExecutableList
+	allWorkspaces      workspace.WorkspaceList
+	allExecutables     executable.ExecutableList
 	filter             Filter
 	theme              styles.Theme
 
@@ -38,15 +40,15 @@ type Library struct {
 
 type Filter struct {
 	Workspace, Namespace string
-	Verb                 config.Verb
-	Tags                 config.Tags
+	Verb                 executable.Verb
+	Tags                 common.Tags
 	Substring            string
 }
 
 func NewLibrary(
 	ctx *context.Context,
-	workspaces config.WorkspaceConfigList,
-	execs config.ExecutableList,
+	workspaces workspace.WorkspaceList,
+	execs executable.ExecutableList,
 	filter Filter,
 	theme styles.Theme,
 	runFunc func(string) error,
@@ -69,8 +71,8 @@ func NewLibrary(
 
 func NewLibraryView(
 	ctx *context.Context,
-	workspaces config.WorkspaceConfigList,
-	execs config.ExecutableList,
+	workspaces workspace.WorkspaceList,
+	execs executable.ExecutableList,
 	filter Filter,
 	theme styles.Theme,
 	runFunc func(string) error,
