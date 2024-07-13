@@ -5,7 +5,6 @@ import (
 
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/styles"
-	"github.com/samber/lo"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
@@ -90,9 +89,15 @@ func NewSecretListView(
 	}
 
 	selectFunc := func(filterVal string) error {
-		secret, found := lo.Find(secrets, func(s vault.Secret) bool {
-			return s.Reference == filterVal
-		})
+		var secret vault.Secret
+		var found bool
+		for _, s := range secrets {
+			if s.Reference == filterVal {
+				secret = s
+				found = true
+				break
+			}
+		}
 		if !found {
 			return fmt.Errorf("secret not found")
 		}

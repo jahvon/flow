@@ -109,8 +109,10 @@ func registerGetExecCmd(ctx *context.Context, getCmd *cobra.Command) {
 		Short:   "Print an executable flow by reference.",
 		Long: "Print an executable by the executable's verb and ID.\nThe target executable's ID should be in the  " +
 			"form of 'ws/ns:name' and the verb should match the target executable's verb or one of its aliases.\n\n" +
-			"See" + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
-			"See" + io.ConfigDocsURL("executable", "Ref") + "for more information on executable IDs.",
+			"See" + io.TypesDocsURL("flowfile", "ExecutableVerb") +
+			"for more information on executable verbs." +
+			"See" + io.TypesDocsURL("flowfile", "ExecutableRef") +
+			"for more information on executable IDs.",
 		Args:    cobra.ExactArgs(2),
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },

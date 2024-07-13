@@ -27,7 +27,7 @@ flow exec ws/ns:build
 flow exec ws/ns:build flag1=value1 flag2=value2 value3 value4
 
 
-See https://github.com/jahvon/flow/blob/main/docs/config/executables.md#Verbfor more information on executable verbs.See https://github.com/jahvon/flow/blob/main/docs/config/executables.md#Reffor more information on executable IDs.
+See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableVerbfor more information on executable verbs.See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableReffor more information on executable IDs.
 
 ```
 flow exec EXECUTABLE_ID [args...] [flags]

@@ -484,6 +484,7 @@
     },
     "executables": {
       "$ref": "#/definitions/Executable",
+      "type": "array",
       "default": []
     },
     "fromFile": {
