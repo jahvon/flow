@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/executable"
 )
 
 type refMatcher struct {
@@ -13,7 +13,7 @@ type refMatcher struct {
 }
 
 func (m *refMatcher) Matches(x any) bool {
-	e, ok := x.(*config.Executable)
+	e, ok := x.(*executable.Executable)
 	if !ok {
 		return false
 	}
@@ -24,7 +24,7 @@ func (m *refMatcher) String() string {
 	return fmt.Sprintf("has ref %s", m.ref)
 }
 
-func ExecWithRef(ref config.Ref) gomock.Matcher {
+func ExecWithRef(ref executable.Ref) gomock.Matcher {
 	return &refMatcher{ref.String()}
 }
 
@@ -33,14 +33,14 @@ type cmdMatcher struct {
 }
 
 func (m *cmdMatcher) Matches(x any) bool {
-	e, ok := x.(*config.Executable)
+	e, ok := x.(*executable.Executable)
 	if !ok {
 		return false
 	}
-	if e.Type == nil || e.Type.Exec == nil {
+	if e.Exec == nil {
 		return false
 	}
-	return e.Type.Exec.Command == m.cmd
+	return e.Exec.Cmd == m.cmd
 }
 
 func (m *cmdMatcher) String() string {
