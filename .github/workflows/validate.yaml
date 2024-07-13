@@ -29,7 +29,6 @@ jobs:
 
       - name: Init project and generate code
         run: |
-          go clean -modcache
           go mod tidy
           go fmt ./...
           go generate ./...
@@ -40,6 +39,7 @@ jobs:
           if [[ `git status . --porcelain -- ':!cmd/internal/version'` ]]; then
             echo "Uncommitted changes found"
             git status
+            git diff --color --compact-summary
             exit 1
           else
             echo "No uncommitted changes"
