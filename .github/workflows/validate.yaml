@@ -32,7 +32,7 @@ jobs:
           go mod tidy
           go fmt ./...
           go generate ./...
-          go run ./tools/docsgen/main.go
+          go run ./tools/docsgen/.
 
       - name: Verify clean state
         run: |
