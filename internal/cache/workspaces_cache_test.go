@@ -8,9 +8,9 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 var _ = Describe("WorkspaceCacheImpl", func() {
@@ -26,7 +26,7 @@ var _ = Describe("WorkspaceCacheImpl", func() {
 		logger = mocks.NewMockLogger(ctrl)
 		wsCache = &cache.WorkspaceCacheImpl{
 			Data: &cache.WorkspaceCacheData{
-				Workspaces:         make(map[string]*config.WorkspaceConfig),
+				Workspaces:         make(map[string]*workspace.Workspace),
 				WorkspaceLocations: make(map[string]string),
 			},
 		}
@@ -39,7 +39,7 @@ var _ = Describe("WorkspaceCacheImpl", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(os.Setenv(filesystem.FlowConfigDirEnvVar, configDir)).To(Succeed())
 
-		testWs := &config.WorkspaceConfig{}
+		testWs := &workspace.Workspace{}
 		testWs.SetContext("test", cacheDir)
 		wsCache.Data.Workspaces["test"] = testWs
 		wsCache.Data.WorkspaceLocations["test"] = cacheDir

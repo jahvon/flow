@@ -8,15 +8,15 @@ import (
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/styles"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/common"
+	"github.com/jahvon/flow/types/executable"
 )
 
 func NewExecutableView(
 	ctx *context.Context,
-	exec config.Executable,
+	exec executable.Executable,
 	format components.Format,
 	runFunc func(string) error,
 ) components.TeaModel {
@@ -43,7 +43,7 @@ func NewExecutableView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				if err := common.OpenInEditor(exec.DefinitionPath(), ctx.StdIn(), ctx.StdOut()); err != nil {
+				if err := common.OpenInEditor(exec.FlowFilePath(), ctx.StdIn(), ctx.StdOut()); err != nil {
 					container.HandleError(fmt.Errorf("unable to open executable: %w", err))
 				}
 				return nil
@@ -65,7 +65,7 @@ func NewExecutableView(
 
 func NewExecutableListView(
 	ctx *context.Context,
-	executables config.ExecutableList,
+	executables executable.ExecutableList,
 	format components.Format,
 	runFunc func(string) error,
 ) components.TeaModel {
@@ -80,7 +80,7 @@ func NewExecutableListView(
 			return fmt.Errorf("invalid filter value")
 		}
 		verb, id := s[0], s[1]
-		exec, err := executables.FindByVerbAndID(config.Verb(verb), id)
+		exec, err := executables.FindByVerbAndID(executable.Verb(verb), id)
 		if err != nil {
 			return fmt.Errorf("executable not found")
 		}

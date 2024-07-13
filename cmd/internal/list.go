@@ -8,11 +8,14 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	executableio "github.com/jahvon/flow/internal/io/executable"
+	secretio "github.com/jahvon/flow/internal/io/secret"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/common"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 func RegisterListCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -53,14 +56,14 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.Fatalx("failure loading workspace configs from cache", "err", err)
 	}
 
-	filteredWorkspaces := make([]config.WorkspaceConfig, 0)
+	filteredWorkspaces := make([]*workspace.Workspace, 0)
 	for name, ws := range workspaceCache.Workspaces {
 		location := workspaceCache.WorkspaceLocations[name]
 		ws.SetContext(name, location)
-		if !ws.Tags.HasAnyTag(tagsFilter) {
+		if !common.Tags(ws.Tags).HasAnyTag(tagsFilter) {
 			continue
 		}
-		filteredWorkspaces = append(filteredWorkspaces, *ws)
+		filteredWorkspaces = append(filteredWorkspaces, ws)
 	}
 
 	if len(filteredWorkspaces) == 0 {
@@ -102,12 +105,12 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
-		wsFilter = ctx.UserConfig.CurrentWorkspace
+		wsFilter = ctx.Config.CurrentWorkspace
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
 	if nsFilter == "." {
-		nsFilter = ctx.UserConfig.CurrentNamespace
+		nsFilter = ctx.Config.CurrentNamespace
 	}
 
 	verbFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterVerbFlag, false)
@@ -123,7 +126,7 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	filteredExec = filteredExec.
 		FilterByWorkspace(wsFilter).
 		FilterByNamespace(nsFilter).
-		FilterByVerb(config.Verb(verbFilter)).
+		FilterByVerb(executable.Verb(verbFilter)).
 		FilterByTags(tagsFilter).
 		FilterBySubstring(substr)
 
@@ -147,7 +150,8 @@ func registerListSecretCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"scrt"},
 		Short:   "Print a list of secrets in the flow vault.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listSecretFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, vaultSecretListCmd, *flags.OutputSecretAsPlainTextFlag)
@@ -164,11 +168,16 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.FatalErr(err)
 	}
 
-	for ref, secret := range secrets {
-		if asPlainText {
-			logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.PlainTextString()))
-		} else {
-			logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.String()))
+	interactiveUI := interactive.UIEnabled(ctx, cmd)
+	if interactiveUI {
+		secretio.LoadSecretListView(ctx, asPlainText)
+	} else {
+		for ref, secret := range secrets {
+			if asPlainText {
+				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.PlainTextString()))
+			} else {
+				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, secret.String()))
+			}
 		}
 	}
 }

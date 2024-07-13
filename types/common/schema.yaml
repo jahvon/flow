@@ -1,0 +1,32 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/common/schema.yaml"
+
+title: Common
+description: Common definitions used across the Flow CLI types.
+definitions:
+  Visibility:
+    type: string
+    description: |
+      The visibility of the executables to Flow.
+      If not set, the visibility will default to `public`.
+      
+      `public` executables can be executed and listed from anywhere.
+      `private` executables can be executed and listed only within their own workspace.
+      `internal` executables can be executed within their own workspace but are not listed.
+      `hidden` executables cannot be executed or listed.
+    enum: [public, private, internal, hidden]
+    default: public
+
+  Tags:
+    type: array
+    items:
+      type: string
+    description: |
+      A list of tags.
+      Tags can be used with list commands to filter returned data.
+
+  Aliases:
+    type: array
+    items:
+      type: string
+    description: Alternate names that can be used to reference the executable in the CLI.

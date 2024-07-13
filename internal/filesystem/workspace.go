@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 const WorkspaceConfigFileName = "flow.yaml"
@@ -17,7 +17,7 @@ func DefaultWorkspaceDir() string {
 }
 
 func InitWorkspaceConfig(name, path string) error {
-	wsCfg := config.DefaultWorkspaceConfig(name)
+	wsCfg := workspace.DefaultWorkspaceConfig(name)
 
 	if err := EnsureWorkspaceDir(path); err != nil {
 		return errors.Wrap(err, "unable to ensure workspace directory")
@@ -67,7 +67,7 @@ func EnsureWorkspaceConfig(workspaceName, workspacePath string) error {
 	return nil
 }
 
-func WriteWorkspaceConfig(workspacePath string, config *config.WorkspaceConfig) error {
+func WriteWorkspaceConfig(workspacePath string, config *workspace.Workspace) error {
 	wsFile := filepath.Join(workspacePath, WorkspaceConfigFileName)
 	file, err := os.OpenFile(filepath.Clean(wsFile), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
@@ -87,14 +87,14 @@ func WriteWorkspaceConfig(workspacePath string, config *config.WorkspaceConfig) 
 	return nil
 }
 
-func LoadWorkspaceConfig(workspaceName, workspacePath string) (*config.WorkspaceConfig, error) {
+func LoadWorkspaceConfig(workspaceName, workspacePath string) (*workspace.Workspace, error) {
 	if err := EnsureWorkspaceDir(workspacePath); err != nil {
 		return nil, errors.Wrap(err, "unable to ensure workspace directory")
 	} else if err := EnsureWorkspaceConfig(workspaceName, workspacePath); err != nil {
 		return nil, errors.Wrap(err, "unable to ensure workspace config file")
 	}
 
-	wsCfg := &config.WorkspaceConfig{}
+	wsCfg := &workspace.Workspace{}
 	wsFile := filepath.Join(workspacePath, WorkspaceConfigFileName)
 	file, err := os.Open(filepath.Clean(wsFile))
 	if err != nil {

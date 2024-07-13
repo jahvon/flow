@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 var _ = Describe("Workspace", func() {
@@ -44,7 +44,7 @@ var _ = Describe("Workspace", func() {
 
 	Describe("WriteWorkspaceConfig and LoadWorkspaceConfig", func() {
 		It("writes and reads config correctly", func() {
-			workspaceConfig := config.DefaultWorkspaceConfig("test")
+			workspaceConfig := workspace.DefaultWorkspaceConfig("test")
 			workspaceConfig.SetContext("test", tmpDir)
 
 			Expect(filesystem.WriteWorkspaceConfig(tmpDir, workspaceConfig)).To(Succeed())

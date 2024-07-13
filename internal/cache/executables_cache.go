@@ -7,8 +7,9 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/common"
+	"github.com/jahvon/flow/types/executable"
 )
 
 const execCacheKey = "executables"
@@ -16,8 +17,8 @@ const execCacheKey = "executables"
 //go:generate mockgen -destination=mocks/mock_executable_cache.go -package=mocks github.com/jahvon/flow/internal/cache ExecutableCache
 type ExecutableCache interface {
 	Update(logger io.Logger) error
-	GetExecutableByRef(logger io.Logger, ref config.Ref) (*config.Executable, error)
-	GetExecutableList(logger io.Logger) (config.ExecutableList, error)
+	GetExecutableByRef(logger io.Logger, ref executable.Ref) (*executable.Executable, error)
+	GetExecutableList(logger io.Logger) (executable.ExecutableList, error)
 }
 type WorkspaceInfo struct {
 	WorkspaceName string `json:"workspaceName" yaml:"workspaceName"`
@@ -25,14 +26,14 @@ type WorkspaceInfo struct {
 }
 
 type ExecutableCacheData struct {
-	// Map of executable ref to definition path
-	ExecutableMap map[config.Ref]string `json:"executableMap" yaml:"executableMap"`
+	// Map of executable ref to config path
+	ExecutableMap map[executable.Ref]string `json:"executableMap" yaml:"executableMap"`
 	// Map of executable alias ref to primary executable ref
-	AliasMap map[config.Ref]config.Ref `json:"aliasMap" yaml:"aliasMap"`
-	// Map of definition paths to their workspace / workspace path
-	DefinitionMap map[string]WorkspaceInfo `json:"definitionMap" yaml:"definitionMap"`
+	AliasMap map[executable.Ref]executable.Ref `json:"aliasMap" yaml:"aliasMap"`
+	// Map of config paths to their workspace / workspace path
+	ConfigMap map[string]WorkspaceInfo `json:"configMap" yaml:"configMap"`
 
-	loadedExecutables map[string]*config.Executable
+	loadedExecutables map[string]*executable.Executable
 }
 
 type ExecutableCacheImpl struct {
@@ -40,33 +41,19 @@ type ExecutableCacheImpl struct {
 	WorkspaceCache WorkspaceCache       `json:"-"       yaml:"-"`
 }
 
-func NewExecutableCache() ExecutableCache {
-	if executableCache == nil {
-		executableCache = &ExecutableCacheImpl{
-			Data: &ExecutableCacheData{
-				ExecutableMap: make(map[config.Ref]string),
-				AliasMap:      make(map[config.Ref]config.Ref),
-				DefinitionMap: make(map[string]WorkspaceInfo),
-			},
-			WorkspaceCache: NewWorkspaceCache(),
-		}
+func NewExecutableCache(wsCache WorkspaceCache) ExecutableCache {
+	return &ExecutableCacheImpl{
+		Data: &ExecutableCacheData{
+			ExecutableMap: make(map[executable.Ref]string),
+			AliasMap:      make(map[executable.Ref]executable.Ref),
+			ConfigMap:     make(map[string]WorkspaceInfo),
+		},
+		WorkspaceCache: wsCache,
 	}
-	return executableCache
 }
 
 func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
-	if c.Data == nil || c.WorkspaceCache == nil {
-		logger.Debugf("Initializing executable cache data")
-		ec, ok := NewExecutableCache().(*ExecutableCacheImpl)
-		if !ok {
-			return errors.New("unable to initialize executable cache")
-		}
-		c.Data = ec.Data
-		c.WorkspaceCache = ec.WorkspaceCache
-	} else {
-		logger.Debugf("Updating executable cache data")
-	}
-
+	logger.Debugf("Updating executable cache data")
 	wsCacheData, err := c.WorkspaceCache.GetLatestData(logger)
 	if err != nil {
 		return fmt.Errorf("failed to get workspace cache data\n%w", err)
@@ -75,43 +62,45 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 	cacheData := c.Data
 	for name, wsCfg := range wsCacheData.Workspaces {
 		wsCfg.SetContext(name, wsCacheData.WorkspaceLocations[name])
-		definitions, err := filesystem.LoadWorkspaceExecutableDefinitions(logger, wsCfg)
+		flowFiles, err := filesystem.LoadWorkspaceFlowFiles(logger, wsCfg)
 		if err != nil {
-			logger.Errorx("failed to load workspace executable definitions", "workspace", wsCfg.AssignedName(), "err", err)
+			logger.Errorx("failed to load workspace executable configs", "workspace", wsCfg.AssignedName(), "err", err)
 			continue
 		}
-		for _, def := range definitions {
-			if len(def.FromFiles) > 0 {
+		for _, flowFile := range flowFiles {
+			if len(flowFile.FromFile) > 0 {
 				generated, err := generatedExecutables(
 					logger,
 					name,
 					wsCfg.Location(),
-					def.Namespace,
-					def.DefinitionPath(),
-					def.FromFiles,
+					flowFile.Namespace,
+					flowFile.ConfigPath(),
+					flowFile.FromFile,
 				)
 				if err != nil {
 					logger.Errorx(
 						"failed to generate executables from files",
-						"definitionPath", def.DefinitionPath(),
+						"flowFilePath", flowFile.ConfigPath(),
 						"err", err,
 					)
 				}
-				def.Executables = append(def.Executables, generated...)
+				flowFile.Executables = append(flowFile.Executables, generated...)
 			}
 
-			if def == nil || def.Visibility == config.VisibilityHidden || len(def.Executables) == 0 {
+			if flowFile.Visibility == nil ||
+				common.Visibility(*flowFile.Visibility).IsHidden() ||
+				len(flowFile.Executables) == 0 {
 				continue
 			}
-			for _, e := range def.Executables {
-				if e == nil || (e.Visibility != nil && *e.Visibility == config.VisibilityHidden) {
+			for _, e := range flowFile.Executables {
+				if e == nil || (e.Visibility != nil && common.Visibility(*e.Visibility).IsHidden()) {
 					continue
 				}
-				cacheData.ExecutableMap[e.Ref()] = def.DefinitionPath()
+				cacheData.ExecutableMap[e.Ref()] = flowFile.ConfigPath()
 				for _, ref := range enumerateExecutableAliasRefs(e) {
 					cacheData.AliasMap[ref] = e.Ref()
 				}
-				cacheData.DefinitionMap[def.DefinitionPath()] = WorkspaceInfo{
+				cacheData.ConfigMap[flowFile.ConfigPath()] = WorkspaceInfo{
 					WorkspaceName: wsCfg.AssignedName(),
 					WorkspacePath: wsCfg.Location(),
 				}
@@ -133,7 +122,7 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 	return nil
 }
 
-func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref config.Ref) (*config.Executable, error) {
+func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executable.Ref) (*executable.Executable, error) {
 	err := c.initExecutableCacheData(logger)
 	if err != nil {
 		return nil, err
@@ -142,15 +131,15 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref config.Re
 	}
 
 	if c.Data.loadedExecutables == nil {
-		c.Data.loadedExecutables = make(map[string]*config.Executable)
-	} else if executable, found := c.Data.loadedExecutables[ref.String()]; found {
-		return executable, nil
+		c.Data.loadedExecutables = make(map[string]*executable.Executable)
+	} else if exec, found := c.Data.loadedExecutables[ref.String()]; found {
+		return exec, nil
 	}
 
-	definitionPath, found := c.Data.ExecutableMap[ref]
+	cfgPath, found := c.Data.ExecutableMap[ref]
 	if !found {
 		if primaryRef, aliasFound := c.Data.AliasMap[ref]; aliasFound {
-			definitionPath, found = c.Data.ExecutableMap[primaryRef]
+			cfgPath, found = c.Data.ExecutableMap[primaryRef]
 			if !found {
 				return nil, NewExecutableNotFoundError(ref.String())
 			}
@@ -158,49 +147,50 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref config.Re
 			return nil, NewExecutableNotFoundError(ref.String())
 		}
 	}
-	definition, err := filesystem.LoadExecutableDefinition(definitionPath)
+	cfg, err := filesystem.LoadFlowFile(cfgPath)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to load executable definition")
+		return nil, errors.Wrap(err, "unable to load executable config")
 	}
 
-	wsInfo, found := c.Data.DefinitionMap[definitionPath]
+	wsInfo, found := c.Data.ConfigMap[cfgPath]
 	if !found {
-		return nil, errors.Wrap(err, "unable to find workspace info for definition")
+		return nil, errors.Wrap(err, "unable to find workspace info for config")
 	}
 
-	definition.SetDefaults()
-	definition.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, definitionPath)
+	cfg.SetDefaults()
+	cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
 	generated, err := generatedExecutables(
 		logger,
 		wsInfo.WorkspaceName,
 		wsInfo.WorkspacePath,
-		definition.Namespace,
-		definition.DefinitionPath(),
-		definition.FromFiles,
+		cfg.Namespace,
+		cfg.ConfigPath(),
+		cfg.FromFile,
 	)
 	if err != nil {
 		logger.Warnx(
 			"failed to generate executables from files",
-			"definitionPath", definitionPath,
+			"cfgPath", cfgPath,
 			"err", err,
 		)
 	}
-	definition.Executables = append(definition.Executables, generated...)
+	cfg.Executables = append(cfg.Executables, generated...)
 
-	executable, err := definition.Executables.FindByVerbAndID(ref.GetVerb(), ref.GetID())
+	execs := cfg.Executables
+	exec, err := execs.FindByVerbAndID(ref.GetVerb(), ref.GetID())
 	if err != nil {
 		return nil, err
-	} else if executable == nil {
+	} else if exec == nil {
 		return nil, NewExecutableNotFoundError(ref.String())
 	}
 
-	c.Data.loadedExecutables[ref.String()] = executable
+	c.Data.loadedExecutables[ref.String()] = exec
 
-	return executable, nil
+	return exec, nil
 }
 
-func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (config.ExecutableList, error) {
+func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (executable.ExecutableList, error) {
 	err := c.initExecutableCacheData(logger)
 	if err != nil {
 		return nil, err
@@ -208,39 +198,39 @@ func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (config.Execut
 		return nil, errors.New("no cached executables found")
 	}
 
-	list := make(config.ExecutableList, 0)
-	for definitionPath := range c.Data.DefinitionMap {
-		definition, err := filesystem.LoadExecutableDefinition(definitionPath)
+	list := make(executable.ExecutableList, 0)
+	for cfgPath := range c.Data.ConfigMap {
+		cfg, err := filesystem.LoadFlowFile(cfgPath)
 		if err != nil {
-			logger.Errorx("unable to load executable definition", "definitionPath", definitionPath, "err", err)
+			logger.Errorx("unable to load executable config", "cfgPath", cfgPath, "err", err)
 			continue
 		}
-		wsInfo, found := c.Data.DefinitionMap[definitionPath]
+		wsInfo, found := c.Data.ConfigMap[cfgPath]
 		if !found {
-			logger.Errorx("unable to find workspace info for definition", "definitionPath", definitionPath)
+			logger.Errorx("unable to find workspace info for config", "cfgPath", cfgPath)
 			continue
 		}
-		definition.SetDefaults()
-		definition.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, definitionPath)
+		cfg.SetDefaults()
+		cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
 		generated, err := generatedExecutables(
 			logger,
 			wsInfo.WorkspaceName,
 			wsInfo.WorkspacePath,
-			definition.Namespace,
-			definition.DefinitionPath(),
-			definition.FromFiles,
+			cfg.Namespace,
+			cfg.ConfigPath(),
+			cfg.FromFile,
 		)
 		if err != nil {
 			logger.Warnx(
 				"failed to generate executables from files",
-				"definitionPath", definitionPath,
+				"cfgPath", cfgPath,
 				"err", err,
 			)
 		}
-		definition.Executables = append(definition.Executables, generated...)
+		cfg.Executables = append(cfg.Executables, generated...)
 
-		list = append(list, definition.Executables...)
+		list = append(list, cfg.Executables...)
 	}
 	return list, nil
 }
@@ -262,13 +252,13 @@ func (c *ExecutableCacheImpl) initExecutableCacheData(logger io.Logger) error {
 	return nil
 }
 
-func enumerateExecutableAliasRefs(executable *config.Executable) []config.Ref {
-	refs := make([]config.Ref, 0)
+func enumerateExecutableAliasRefs(exec *executable.Executable) executable.RefList {
+	refs := make(executable.RefList, 0)
 
-	for _, verb := range config.RelatedVerbs(executable.Verb) {
-		refs = append(refs, config.NewRef(executable.ID(), verb))
-		for _, id := range executable.AliasesIDs() {
-			refs = append(refs, config.NewRef(id, verb))
+	for _, verb := range executable.RelatedVerbs(exec.Verb) {
+		refs = append(refs, executable.NewRef(exec.ID(), verb))
+		for _, id := range exec.AliasesIDs() {
+			refs = append(refs, executable.NewRef(id, verb))
 		}
 	}
 

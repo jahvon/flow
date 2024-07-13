@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
 visibility: private
 tags: [development]
 executables:
@@ -41,7 +42,7 @@ executables:
       dir: //
       cmd: |
         go generate ./...
-        go run ./tools/docsgen/main.go
+        go run ./tools/docsgen/.
 
   - verb: run
     name: lint

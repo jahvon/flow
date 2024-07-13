@@ -1,0 +1,93 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/config/schema.yaml"
+
+title: Config
+description: |
+  User Configuration for the Flow CLI.
+  Includes configurations for workspaces, templates, I/O, and other settings for the CLI.
+  
+  It is read from the user's flow config directory:
+  - **MacOS**: `$HOME/Library/Application Support/flow`
+  - **Linux**: `$HOME/.config/flow`
+  - **Windows**: `%APPDATA%\flow`
+  
+  Alternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment variable.
+
+definitions:
+  Interactive:
+    type: object
+    description: Configurations for the interactive UI.
+    properties:
+      enabled:
+        type: boolean
+      notifyOnCompletion:
+        type: boolean
+        description: Whether to send a desktop notification when a command completes.
+      soundOnCompletion:
+        type: boolean
+        description: Whether to play a sound when a command completes.
+    required: [ enabled ]
+
+type: object
+properties:
+  workspaces:
+    type: object
+    additionalProperties:
+      type: string
+    description: |
+      Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.
+#  remoteWorkspaces:
+#    type: object
+#    additionalProperties:
+#      type: string
+#    description: |
+#      **UNIMPLEMENTED**
+#      A map of remote workspace names to their git repository URLs.
+#      The repository URL should be a valid git URL that can be cloned.
+#    default: {}
+  currentWorkspace:
+    type: string
+    description: The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.
+    default: ""
+  workspaceMode:
+    type: string
+    enum: [fixed, dynamic]
+    default: dynamic
+    description: |
+      The mode of the workspace. This can be either `fixed` or `dynamic`.
+      In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.
+      In `dynamic` mode, the current workspace used at runtime is determined by the current directory.
+      If the current directory is within a workspace, that workspace is used.
+  currentNamespace:
+    type: string
+    description: |
+      The name of the current namespace.
+      
+      Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.
+      If the namespace is not set, only executables defined without a namespace will be discovered.
+    default: ""
+  interactive:
+    $ref: '#/definitions/Interactive'
+  templates:
+    type: object
+    additionalProperties:
+      type: string
+    description: A map of flowfile template names to their paths.
+    default: {}
+  defaultLogMode:
+    type: string
+    goJSONSchema:
+      type: io.LogMode
+      imports: ["github.com/jahvon/tuikit/io"]
+    description: |
+      The default log mode to use when running executables.
+      This can either be `hidden`, `json`, `logfmt` or `text`
+      
+      `hidden` will not display any logs.
+      `json` will display logs in JSON format.
+      `logfmt` will display logs with a log level, timestamp, and message.
+      `text` will just display the log message.
+    default: logfmt
+required:
+  - workspaces
+  - currentWorkspace

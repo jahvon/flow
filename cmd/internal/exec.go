@@ -12,8 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config"
-	argUtils "github.com/jahvon/flow/config/args"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
@@ -24,17 +22,22 @@ import (
 	"github.com/jahvon/flow/internal/runner/render"
 	"github.com/jahvon/flow/internal/runner/request"
 	"github.com/jahvon/flow/internal/runner/serial"
+	argUtils "github.com/jahvon/flow/internal/utils/args"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/executable"
 )
 
 func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:     "exec EXECUTABLE_ID [args...]",
-		Aliases: config.SortedValidVerbs(),
+		Aliases: executable.SortedValidVerbs(),
 		Short:   "Execute a flow by ID.",
-		Long: execDocumentation + "\n\n" + execExamples + "\n\n" +
-			"See " + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
-			"See " + io.ConfigDocsURL("executables", "Ref") + "for more information on executable IDs.",
+		Long: execDocumentation + fmt.Sprintf(
+			"\n\n%s\n\nSee %s for more information on executable verbs."+
+				"See %s for more information on executable IDs.",
+			execExamples, io.TypesDocsURL("flowfile", "ExecutableVerb"),
+			io.TypesDocsURL("flowfile", "ExecutableRef"),
+		),
 		Args: cobra.MinimumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
@@ -52,7 +55,7 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			verbStr := cmd.CalledAs()
-			verb := config.Verb(verbStr)
+			verb := executable.Verb(verbStr)
 			execFunc(ctx, cmd, verb, args)
 		},
 	}
@@ -70,40 +73,40 @@ func execPreRun(ctx *context.Context, cmd *cobra.Command, _ []string) {
 }
 
 //nolint:gocognit
-func execFunc(ctx *context.Context, cmd *cobra.Command, verb config.Verb, args []string) {
+func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, args []string) {
 	logger := ctx.Logger
 	if err := verb.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
 
 	idArg := args[0]
-	ref := context.ExpandRef(ctx, config.NewRef(idArg, verb))
-	executable, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
+	ref := context.ExpandRef(ctx, executable.NewRef(idArg, verb))
+	e, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
 	if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
 		logger.Debugf("Executable %s not found in cache, syncing cache", ref)
 		if err := ctx.ExecutableCache.Update(logger); err != nil {
 			logger.FatalErr(err)
 		}
-		executable, err = ctx.ExecutableCache.GetExecutableByRef(logger, ref)
+		e, err = ctx.ExecutableCache.GetExecutableByRef(logger, ref)
 	}
 	if err != nil {
 		logger.FatalErr(err)
 	}
 
-	if err := executable.Validate(); err != nil {
+	if err := e.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
 
-	if !executable.IsExecutableFromWorkspace(ctx.CurrentWorkspace.AssignedName()) {
+	if !e.IsExecutableFromWorkspace(ctx.CurrentWorkspace.AssignedName()) {
 		logger.FatalErr(fmt.Errorf(
-			"executable '%s' cannot be executed from workspace %s",
+			"e '%s' cannot be executed from workspace %s",
 			ref,
-			ctx.UserConfig.CurrentWorkspace,
+			ctx.Config.CurrentWorkspace,
 		))
 	}
 
 	execArgs := args[1:]
-	envMap, err := argUtils.ProcessArgs(executable, execArgs)
+	envMap, err := argUtils.ProcessArgs(e, execArgs)
 	if err != nil {
 		logger.FatalErr(err)
 	}
@@ -111,8 +114,8 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb config.Verb, args [
 		envMap = make(map[string]string)
 	}
 
-	setAuthEnv(ctx, executable)
-	textInputs := pendingTextInputs(ctx, executable)
+	setAuthEnv(ctx, e)
+	textInputs := pendingTextInputs(ctx, e)
 	if len(textInputs) > 0 {
 		inputs, err := components.ProcessInputs(io.Theme(), textInputs...)
 		if err != nil {
@@ -123,16 +126,16 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb config.Verb, args [
 		}
 	}
 	startTime := time.Now()
-	if err := runner.Exec(ctx, executable, envMap); err != nil {
+	if err := runner.Exec(ctx, e, envMap); err != nil {
 		logger.FatalErr(err)
 	}
 	dur := time.Since(startTime)
 	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
 	if interactive.UIEnabled(ctx, cmd) {
-		if dur > 1*time.Minute && ctx.UserConfig.Interactive.SoundOnCompletion {
+		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
 			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 		}
-		if dur > 1*time.Minute && ctx.UserConfig.Interactive.NotifyOnCompletion {
+		if dur > 1*time.Minute && ctx.Config.SendTextNotification() {
 			_ = beeep.Notify("Flow", "Flow completed", "")
 		}
 	}
@@ -144,7 +147,7 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 		return fmt.Errorf("invalid reference string %s", argsStr)
 	}
 	verbStr := s[0]
-	verb := config.Verb(verbStr)
+	verb := executable.Verb(verbStr)
 	id := s[1]
 
 	cmds := cmd.Root().Commands()
@@ -169,7 +172,7 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 	return nil
 }
 
-func setAuthEnv(ctx *context.Context, executable *config.Executable) {
+func setAuthEnv(ctx *context.Context, executable *executable.Executable) {
 	if authRequired(ctx, executable) {
 		resp, err := components.ProcessInputs(
 			io.Theme(),
@@ -192,42 +195,42 @@ func setAuthEnv(ctx *context.Context, executable *config.Executable) {
 }
 
 //nolint:gocognit
-func authRequired(ctx *context.Context, rootExec *config.Executable) bool {
-	if rootExec.Type == nil || os.Getenv(vault.EncryptionKeyEnvVar) != "" {
+func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
+	if os.Getenv(vault.EncryptionKeyEnvVar) != "" {
 		return false
 	}
 	switch {
-	case rootExec.Type.Exec != nil:
-		for _, param := range rootExec.Type.Exec.Parameters {
+	case rootExec.Exec != nil:
+		for _, param := range rootExec.Exec.Params {
 			if param.SecretRef != "" {
 				return true
 			}
 		}
-	case rootExec.Type.Launch != nil:
-		for _, param := range rootExec.Type.Launch.Parameters {
+	case rootExec.Launch != nil:
+		for _, param := range rootExec.Launch.Params {
 			if param.SecretRef != "" {
 				return true
 			}
 		}
-	case rootExec.Type.Request != nil:
-		for _, param := range rootExec.Type.Request.Parameters {
+	case rootExec.Request != nil:
+		for _, param := range rootExec.Request.Params {
 			if param.SecretRef != "" {
 				return true
 			}
 		}
-	case rootExec.Type.Render != nil:
-		for _, param := range rootExec.Type.Render.Parameters {
+	case rootExec.Render != nil:
+		for _, param := range rootExec.Render.Params {
 			if param.SecretRef != "" {
 				return true
 			}
 		}
-	case rootExec.Type.Serial != nil:
-		for _, param := range rootExec.Type.Serial.Parameters {
+	case rootExec.Serial != nil:
+		for _, param := range rootExec.Serial.Params {
 			if param.SecretRef != "" {
 				return true
 			}
 		}
-		for _, child := range rootExec.Type.Serial.ExecutableRefs {
+		for _, child := range rootExec.Serial.Refs {
 			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue
@@ -236,13 +239,13 @@ func authRequired(ctx *context.Context, rootExec *config.Executable) bool {
 				return true
 			}
 		}
-	case rootExec.Type.Parallel != nil:
-		for _, param := range rootExec.Type.Parallel.Parameters {
+	case rootExec.Parallel != nil:
+		for _, param := range rootExec.Parallel.Params {
 			if param.SecretRef != "" {
 				return true
 			}
 		}
-		for _, child := range rootExec.Type.Parallel.ExecutableRefs {
+		for _, child := range rootExec.Parallel.Refs {
 			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue
@@ -256,43 +259,40 @@ func authRequired(ctx *context.Context, rootExec *config.Executable) bool {
 }
 
 //nolint:gocognit
-func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []*components.TextInput {
+func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []*components.TextInput {
 	pending := make([]*components.TextInput, 0)
-	if rootExec.Type == nil {
-		return nil
-	}
 	switch {
-	case rootExec.Type.Exec != nil:
-		for _, param := range rootExec.Type.Exec.Parameters {
+	case rootExec.Exec != nil:
+		for _, param := range rootExec.Exec.Params {
 			if param.Prompt != "" {
 				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
-	case rootExec.Type.Launch != nil:
-		for _, param := range rootExec.Type.Launch.Parameters {
+	case rootExec.Launch != nil:
+		for _, param := range rootExec.Launch.Params {
 			if param.Prompt != "" {
 				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
-	case rootExec.Type.Request != nil:
-		for _, param := range rootExec.Type.Request.Parameters {
+	case rootExec.Request != nil:
+		for _, param := range rootExec.Request.Params {
 			if param.Prompt != "" {
 				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
-	case rootExec.Type.Render != nil:
-		for _, param := range rootExec.Type.Render.Parameters {
+	case rootExec.Render != nil:
+		for _, param := range rootExec.Render.Params {
 			if param.Prompt != "" {
 				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
-	case rootExec.Type.Serial != nil:
-		for _, param := range rootExec.Type.Serial.Parameters {
+	case rootExec.Serial != nil:
+		for _, param := range rootExec.Serial.Params {
 			if param.Prompt != "" {
 				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
-		for _, child := range rootExec.Type.Serial.ExecutableRefs {
+		for _, child := range rootExec.Serial.Refs {
 			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue
@@ -300,13 +300,13 @@ func pendingTextInputs(ctx *context.Context, rootExec *config.Executable) []*com
 			childPending := pendingTextInputs(ctx, childExec)
 			pending = append(pending, childPending...)
 		}
-	case rootExec.Type.Parallel != nil:
-		for _, param := range rootExec.Type.Parallel.Parameters {
+	case rootExec.Parallel != nil:
+		for _, param := range rootExec.Parallel.Params {
 			if param.Prompt != "" {
 				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
 			}
 		}
-		for _, child := range rootExec.Type.Parallel.ExecutableRefs {
+		for _, child := range rootExec.Parallel.Refs {
 			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
 			if err != nil {
 				continue

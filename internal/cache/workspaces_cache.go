@@ -5,8 +5,8 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 const wsCacheKey = "workspace"
@@ -16,11 +16,11 @@ type WorkspaceCache interface {
 	Update(logger io.Logger) error
 	GetData() *WorkspaceCacheData
 	GetLatestData(logger io.Logger) (*WorkspaceCacheData, error)
-	GetWorkspaceConfigList(logger io.Logger) (config.WorkspaceConfigList, error)
+	GetWorkspaceConfigList(logger io.Logger) (workspace.WorkspaceList, error)
 }
 type WorkspaceCacheData struct {
 	// Map of workspace name to workspace config
-	Workspaces map[string]*config.WorkspaceConfig `yaml:"workspaces"`
+	Workspaces map[string]*workspace.Workspace `yaml:"workspaces"`
 	// Map of workspace name to workspace path
 	WorkspaceLocations map[string]string `yaml:"workspaceLocations"`
 }
@@ -30,36 +30,25 @@ type WorkspaceCacheImpl struct {
 }
 
 func NewWorkspaceCache() WorkspaceCache {
-	if workspaceCache == nil {
-		workspaceCache = &WorkspaceCacheImpl{
-			Data: &WorkspaceCacheData{
-				Workspaces:         make(map[string]*config.WorkspaceConfig),
-				WorkspaceLocations: make(map[string]string),
-			},
-		}
+	workspaceCache := &WorkspaceCacheImpl{
+		Data: &WorkspaceCacheData{
+			Workspaces:         make(map[string]*workspace.Workspace),
+			WorkspaceLocations: make(map[string]string),
+		},
 	}
 	return workspaceCache
 }
 
 func (c *WorkspaceCacheImpl) Update(logger io.Logger) error {
-	if c.Data == nil {
-		logger.Debugf("Initializing workspace cache data")
-		wc, ok := NewWorkspaceCache().(*WorkspaceCacheImpl)
-		if !ok {
-			return errors.New("unable to initialize workspace cache")
-		}
-		c.Data = wc.Data
-	} else {
-		logger.Debugf("Updating workspace cache data")
-	}
+	logger.Debugf("Updating workspace cache data")
 
-	userCfg, err := filesystem.LoadUserConfig()
+	cfg, err := filesystem.LoadConfig()
 	if err != nil {
 		return err
 	}
 
 	cacheData := c.Data
-	for name, path := range userCfg.Workspaces {
+	for name, path := range cfg.Workspaces {
 		wsCfg, err := filesystem.LoadWorkspaceConfig(name, path)
 		if err != nil {
 			return errors.Wrap(err, "failed loading workspace config")
@@ -105,16 +94,22 @@ func (c *WorkspaceCacheImpl) GetLatestData(logger io.Logger) (*WorkspaceCacheDat
 	return c.Data, nil
 }
 
-func (c *WorkspaceCacheImpl) GetWorkspaceConfigList(logger io.Logger) (config.WorkspaceConfigList, error) {
-	cache, err := c.GetLatestData(logger)
-	if err != nil {
-		return nil, err
+func (c *WorkspaceCacheImpl) GetWorkspaceConfigList(logger io.Logger) (workspace.WorkspaceList, error) {
+	var cache *WorkspaceCacheData
+	if len(c.Data.Workspaces) == 0 {
+		var err error
+		cache, err = c.GetLatestData(logger)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		cache = c.GetData()
 	}
 
-	wsCfgs := make(config.WorkspaceConfigList, 0, len(c.Data.Workspaces))
+	wsCfgs := make(workspace.WorkspaceList, 0, len(c.Data.Workspaces))
 	for wsName, wsCfg := range cache.Workspaces {
 		wsCfg.SetContext(wsName, cache.WorkspaceLocations[wsName])
-		wsCfgs = append(wsCfgs, *wsCfg)
+		wsCfgs = append(wsCfgs, wsCfg)
 	}
 	return wsCfgs, nil
 }

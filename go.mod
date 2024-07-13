@@ -2,7 +2,7 @@ module github.com/jahvon/flow
 
 go 1.22
 
-toolchain go1.22.1
+toolchain go1.22.5
 
 require (
 	github.com/atotto/clipboard v0.1.4
@@ -19,7 +19,6 @@ require (
 	github.com/onsi/gomega v1.33.1
 	github.com/otiai10/copy v1.14.0
 	github.com/pkg/errors v0.9.1
-	github.com/samber/lo v1.44.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	go.uber.org/mock v0.4.0

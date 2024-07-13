@@ -1,0 +1,54 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/workspace/schema.yaml"
+
+title: Workspace
+description: |
+  Configuration for a workspace in the Flow CLI.
+  This configuration is used to define the settings for a workspace.
+  Every workspace has a workspace config file named `flow.yaml` in the root of the workspace directory.
+
+definitions:
+  ExecutableFilter:
+    type: object
+    properties:
+      included:
+        type: array
+        items:
+          type: string
+        description: A list of directories to include in the executable search.
+        default: []
+      excluded:
+        type: array
+        items:
+          type: string
+        description: A list of directories to exclude from the executable search.
+        default: []
+
+type: object
+properties:
+  tags:
+    $ref: '../common/schema.yaml#/definitions/Tags'
+    goJSONSchema:
+      type: "common.Tags"
+      imports: [ "github.com/jahvon/flow/types/common" ]
+    default: []
+  executables:
+    $ref: '#/definitions/ExecutableFilter'
+  displayName:
+    type: string
+    description: The display name of the workspace. This is used in the interactive UI.
+    default: ""
+  description:
+    type: string
+    description: A description of the workspace. This description is rendered as markdown in the interactive UI.
+    default: ""
+  assignedName:
+    type: string
+    goJSONSchema:
+      identifier: assignedName
+    default: ""
+  location:
+    type: string
+    goJSONSchema:
+      identifier: location
+    default: ""

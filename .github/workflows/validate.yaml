@@ -21,7 +21,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.1"
+          go-version: "^1.22.5"
 
       - name: Install Go Tools
         run: |
@@ -32,13 +32,13 @@ jobs:
           go mod tidy
           go fmt ./...
           go generate ./...
-          go run ./tools/docsgen/main.go
+          go run ./tools/docsgen/.
 
       - name: Verify clean state
         run: |
           if [[ `git status . --porcelain -- ':!cmd/internal/version'` ]]; then
             echo "Uncommitted changes found"
-            git status
+            git diff --color --compact-summary
             exit 1
           else
             echo "No uncommitted changes"

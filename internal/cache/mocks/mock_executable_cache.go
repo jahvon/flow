@@ -12,7 +12,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	config "github.com/jahvon/flow/config"
+	executable "github.com/jahvon/flow/types/executable"
 	io "github.com/jahvon/tuikit/io"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -41,10 +41,10 @@ func (m *MockExecutableCache) EXPECT() *MockExecutableCacheMockRecorder {
 }
 
 // GetExecutableByRef mocks base method.
-func (m *MockExecutableCache) GetExecutableByRef(arg0 io.Logger, arg1 config.Ref) (*config.Executable, error) {
+func (m *MockExecutableCache) GetExecutableByRef(arg0 io.Logger, arg1 executable.Ref) (*executable.Executable, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExecutableByRef", arg0, arg1)
-	ret0, _ := ret[0].(*config.Executable)
+	ret0, _ := ret[0].(*executable.Executable)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -56,10 +56,10 @@ func (mr *MockExecutableCacheMockRecorder) GetExecutableByRef(arg0, arg1 any) *g
 }
 
 // GetExecutableList mocks base method.
-func (m *MockExecutableCache) GetExecutableList(arg0 io.Logger) (config.ExecutableList, error) {
+func (m *MockExecutableCache) GetExecutableList(arg0 io.Logger) (executable.ExecutableList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExecutableList", arg0)
-	ret0, _ := ret[0].(config.ExecutableList)
+	ret0, _ := ret[0].(executable.ExecutableList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

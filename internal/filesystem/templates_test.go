@@ -7,8 +7,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 var _ = Describe("Templates", func() {
@@ -26,73 +27,73 @@ var _ = Describe("Templates", func() {
 		Expect(os.RemoveAll(tmpDir)).To(Succeed())
 	})
 
-	Describe("RenderAndWriteExecutablesTemplate", func() {
+	Describe("WriteFlowFileFromTemplate", func() {
 		It("renders and writes the template correctly", func() {
-			definitionTemplate := &config.ExecutableDefinitionTemplate{
-				ExecutableDefinition: &config.ExecutableDefinition{
+			definitionTemplate := &executable.FlowFileTemplate{
+				FlowFile: &executable.FlowFile{
 					Namespace: "test",
-					Executables: config.ExecutableList{
+					Executables: executable.ExecutableList{
 						{Verb: "run", Name: "test-executable", Description: "{{ .key }}"},
 					},
 				},
-				Data: config.TemplateData{{Key: "key", Default: "value"}},
+				Data: executable.TemplateData{{Key: "key", Default: "value"}},
 			}
-			definitionTemplate.SetContext(filepath.Join(tmpDir, "test.tmpl"+filesystem.ExecutableDefinitionExt))
+			definitionTemplate.SetContext(filepath.Join(tmpDir, "test.tmpl"+filesystem.FlowFileExt))
 
-			workspaceConfig := config.DefaultWorkspaceConfig("test")
+			workspaceConfig := workspace.DefaultWorkspaceConfig("test")
 			workspaceConfig.SetContext("test", tmpDir)
 
-			err := filesystem.RenderAndWriteExecutablesTemplate(definitionTemplate, workspaceConfig, "test", "")
+			err := filesystem.WriteFlowFileFromTemplate(definitionTemplate, workspaceConfig, "test", "")
 			Expect(err).ToNot(HaveOccurred())
-			_, err = os.Stat(filepath.Join(tmpDir, "test"+filesystem.ExecutableDefinitionExt))
+			_, err = os.Stat(filepath.Join(tmpDir, "test"+filesystem.FlowFileExt))
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("renders and writes the template with artifacts correctly", func() {
-			definitionTemplate := &config.ExecutableDefinitionTemplate{
-				ExecutableDefinition: &config.ExecutableDefinition{
+			definitionTemplate := &executable.FlowFileTemplate{
+				FlowFile: &executable.FlowFile{
 					Namespace: "test",
-					Executables: config.ExecutableList{
+					Executables: executable.ExecutableList{
 						{Verb: "run", Name: "test-executable", Description: "{{ .key }}"},
 					},
 				},
-				Data:      config.TemplateData{{Key: "key", Default: "value"}},
+				Data:      executable.TemplateData{{Key: "key", Default: "value"}},
 				Artifacts: []string{"subpath/test-artifact"},
 			}
-			definitionTemplate.SetContext(filepath.Join(tmpDir, "test.tmpl"+filesystem.ExecutableDefinitionExt))
+			definitionTemplate.SetContext(filepath.Join(tmpDir, "test.tmpl"+filesystem.FlowFileExt))
 
 			err := os.MkdirAll(filepath.Join(tmpDir, "subpath"), 0750)
 			Expect(err).NotTo(HaveOccurred())
 			_, err = os.Create(filepath.Join(tmpDir, "subpath", "test-artifact"))
 			Expect(err).NotTo(HaveOccurred())
 
-			workspaceConfig := config.DefaultWorkspaceConfig("test")
+			workspaceConfig := workspace.DefaultWorkspaceConfig("test")
 			workspaceConfig.SetContext("test", tmpDir)
 
-			Expect(filesystem.RenderAndWriteExecutablesTemplate(definitionTemplate, workspaceConfig, "test", "")).To(Succeed())
-			_, err = os.Stat(definitionTemplate.Location())
+			Expect(filesystem.WriteFlowFileFromTemplate(definitionTemplate, workspaceConfig, "test", "")).To(Succeed())
+			_, err = os.Stat(filepath.Join(tmpDir, "test"+filesystem.FlowFileExt))
 			Expect(err).NotTo(HaveOccurred())
-			_, err = os.Stat(filepath.Join(tmpDir, "subpath", "test-artifact"))
+			_, err = os.Stat(filepath.Join(tmpDir, "test-artifact"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
-	Describe("LoadExecutableDefinitionTemplate", func() {
+	Describe("LoadFlowFileTemplate", func() {
 		It("loads the template correctly", func() {
-			definitionTemplate := &config.ExecutableDefinitionTemplate{
-				ExecutableDefinition: &config.ExecutableDefinition{
+			definitionTemplate := &executable.FlowFileTemplate{
+				FlowFile: &executable.FlowFile{
 					Namespace: "test",
-					Executables: config.ExecutableList{
+					Executables: executable.ExecutableList{
 						{Verb: "exec", Name: "test-executable", Description: "{{ .key }}"},
 					},
 				},
-				Data: config.TemplateData{{Key: "key", Default: "value"}},
+				Data: executable.TemplateData{{Key: "key", Default: "value"}},
 			}
-			definitionTemplate.SetContext(filepath.Join(tmpDir, "test.tmpl"+filesystem.ExecutableDefinitionExt))
+			definitionTemplate.SetContext(filepath.Join(tmpDir, "test.tmpl"+filesystem.FlowFileExt))
 
-			Expect(filesystem.WriteExecutableDefinitionTemplate(definitionTemplate.Location(), definitionTemplate)).To(Succeed())
+			Expect(filesystem.WriteFlowFileTemplate(definitionTemplate.Location(), definitionTemplate)).To(Succeed())
 
-			readTemplate, err := filesystem.LoadExecutableDefinitionTemplate(definitionTemplate.Location())
+			readTemplate, err := filesystem.LoadFlowFileTemplate(definitionTemplate.Location())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(readTemplate).To(Equal(definitionTemplate))
 		})

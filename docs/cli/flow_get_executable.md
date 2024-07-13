@@ -7,7 +7,8 @@ Print an executable flow by reference.
 Print an executable by the executable's verb and ID.
 The target executable's ID should be in the  form of 'ws/ns:name' and the verb should match the target executable's verb or one of its aliases.
 
-Seehttps://github.com/jahvon/flow/blob/main/docs/config/executables.md#Verbfor more information on executable verbs.Seehttps://github.com/jahvon/flow/blob/main/docs/config/executable.md#Reffor more information on executable IDs.
+See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableVerb for more information on executable verbs.
+See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableRef for more information on executable IDs.
 
 ```
 flow get executable VERB ID [flags]

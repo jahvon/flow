@@ -144,7 +144,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				break
 			}
 
-			curCfg, err := filesystem.LoadUserConfig()
+			curCfg, err := filesystem.LoadConfig()
 			if err != nil {
 				l.ctx.Logger.Error(err, "unable to load user config")
 				l.SetNotice("unable to load user config", styles.NoticeLevelError)
@@ -174,8 +174,8 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				break
 			}
 
-			l.ctx.UserConfig.CurrentWorkspace = curCfg.CurrentWorkspace
-			l.ctx.UserConfig.CurrentNamespace = curCfg.CurrentNamespace
+			l.ctx.Config.CurrentWorkspace = curCfg.CurrentWorkspace
+			l.ctx.Config.CurrentNamespace = curCfg.CurrentNamespace
 			l.SetNotice("context updated", styles.NoticeLevelInfo)
 		}
 	}
@@ -223,7 +223,7 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				break
 			}
 
-			if err := common.OpenInEditor(curExec.DefinitionPath(), l.ctx.StdIn(), l.ctx.StdOut()); err != nil {
+			if err := common.OpenInEditor(curExec.FlowFilePath(), l.ctx.StdIn(), l.ctx.StdOut()); err != nil {
 				l.ctx.Logger.Error(err, "unable to open executable in editor")
 				l.SetNotice("unable to open executable in editor", styles.NoticeLevelError)
 			}

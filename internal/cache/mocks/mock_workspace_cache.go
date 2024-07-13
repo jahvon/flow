@@ -12,8 +12,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	config "github.com/jahvon/flow/config"
 	cache "github.com/jahvon/flow/internal/cache"
+	workspace "github.com/jahvon/flow/types/workspace"
 	io "github.com/jahvon/tuikit/io"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -71,10 +71,10 @@ func (mr *MockWorkspaceCacheMockRecorder) GetLatestData(arg0 any) *gomock.Call {
 }
 
 // GetWorkspaceConfigList mocks base method.
-func (m *MockWorkspaceCache) GetWorkspaceConfigList(arg0 io.Logger) (config.WorkspaceConfigList, error) {
+func (m *MockWorkspaceCache) GetWorkspaceConfigList(arg0 io.Logger) (workspace.WorkspaceList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWorkspaceConfigList", arg0)
-	ret0, _ := ret[0].(config.WorkspaceConfigList)
+	ret0, _ := ret[0].(workspace.WorkspaceList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

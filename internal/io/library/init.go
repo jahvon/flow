@@ -9,7 +9,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jahvon/tuikit/components"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 func (l *Library) Init() tea.Cmd {
@@ -75,7 +76,7 @@ func (l *Library) setVisibleExecs() {
 		FilterByTags(filter.Tags).
 		FilterBySubstring(filter.Substring)
 
-	slices.SortFunc(filteredExec, func(i, j *config.Executable) int {
+	slices.SortFunc(filteredExec, func(i, j *executable.Executable) int {
 		return strings.Compare(i.Ref().String(), j.Ref().String())
 	})
 	l.visibleExecutables = filteredExec
@@ -91,7 +92,7 @@ func (l *Library) setVisibleWorkspaces() {
 	if filter.Workspace != "" {
 		for _, ws := range l.allWorkspaces {
 			if ws.AssignedName() == filter.Workspace {
-				filteredWs = config.WorkspaceConfigList{ws}
+				filteredWs = workspace.WorkspaceList{ws}
 				break
 			}
 		}

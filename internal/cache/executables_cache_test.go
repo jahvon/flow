@@ -10,10 +10,12 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/cache"
 	cacheMocks "github.com/jahvon/flow/internal/cache/mocks"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/common"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 var _ = Describe("ExecutableCacheImpl", func() {
@@ -42,24 +44,25 @@ var _ = Describe("ExecutableCacheImpl", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		logger = mocks.NewMockLogger(gomock.NewController(GinkgoT()))
-		execDefinition := &config.ExecutableDefinition{
+		v := executable.FlowFileVisibility(common.VisibilityPrivate)
+		execCfg := &executable.FlowFile{
 			Namespace:  "testdata",
-			Visibility: config.VisibilityPrivate,
-			Executables: config.ExecutableList{
+			Visibility: &v,
+			Executables: executable.ExecutableList{
 				{Verb: "run", Name: "exec"},
 			},
 		}
-		execDefinition.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+filesystem.ExecutableDefinitionExt))
-		err = filesystem.WriteExecutableDefinition(execDefinition.DefinitionPath(), execDefinition)
+		execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+filesystem.FlowFileExt))
+		err = filesystem.WriteFlowFile(execCfg.ConfigPath(), execCfg)
 		Expect(err).NotTo(HaveOccurred())
 		execCacheData := &cache.ExecutableCacheData{
-			ExecutableMap: make(map[config.Ref]string),
-			AliasMap:      make(map[config.Ref]config.Ref),
-			DefinitionMap: make(map[string]cache.WorkspaceInfo),
+			ExecutableMap: make(map[executable.Ref]string),
+			AliasMap:      make(map[executable.Ref]executable.Ref),
+			ConfigMap:     make(map[string]cache.WorkspaceInfo),
 		}
 		wsCache = cacheMocks.NewMockWorkspaceCache(gomock.NewController(GinkgoT()))
 		wsCache.EXPECT().GetLatestData(gomock.Any()).Return(&cache.WorkspaceCacheData{
-			Workspaces:         map[string]*config.WorkspaceConfig{wsName: wsConfig},
+			Workspaces:         map[string]*workspace.Workspace{wsName: wsConfig},
 			WorkspaceLocations: map[string]string{wsName: wsPath},
 		}, nil).AnyTimes()
 		execCache = &cache.ExecutableCacheImpl{
@@ -81,7 +84,7 @@ var _ = Describe("ExecutableCacheImpl", func() {
 			err := execCache.Update(logger)
 			Expect(err).ToNot(HaveOccurred())
 
-			var readData config.ExecutableList
+			var readData executable.ExecutableList
 			readData, err = execCache.GetExecutableList(logger)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(readData).ToNot(BeNil())
@@ -97,13 +100,14 @@ var _ = Describe("ExecutableCacheImpl", func() {
 					filepath.Join(wsPath, "from-file.sh"),
 				)
 				Expect(err).NotTo(HaveOccurred())
-				execDefinition := &config.ExecutableDefinition{
+				v := executable.FlowFileVisibility(common.VisibilityPrivate)
+				execCfg := &executable.FlowFile{
 					Namespace:  "testdata",
-					Visibility: config.VisibilityPrivate,
-					FromFiles:  []string{"from-file.sh"},
+					Visibility: &v,
+					FromFile:   []string{"from-file.sh"},
 				}
-				execDefinition.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+filesystem.ExecutableDefinitionExt))
-				err = filesystem.WriteExecutableDefinition(execDefinition.DefinitionPath(), execDefinition)
+				execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+filesystem.FlowFileExt))
+				err = filesystem.WriteFlowFile(execCfg.ConfigPath(), execCfg)
 				Expect(err).NotTo(HaveOccurred())
 
 				logger.EXPECT().Debugf(gomock.Any()).Times(1)
@@ -112,7 +116,7 @@ var _ = Describe("ExecutableCacheImpl", func() {
 				err = execCache.Update(logger)
 				Expect(err).ToNot(HaveOccurred())
 
-				var readData config.ExecutableList
+				var readData executable.ExecutableList
 				readData, err = execCache.GetExecutableList(logger)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(readData).ToNot(BeNil())
@@ -130,8 +134,8 @@ var _ = Describe("ExecutableCacheImpl", func() {
 			err := execCache.Update(logger)
 			Expect(err).ToNot(HaveOccurred())
 
-			var readData *config.Executable
-			ref := config.Ref("run test/testdata:exec")
+			var readData *executable.Executable
+			ref := executable.Ref("run test/testdata:exec")
 			readData, err = execCache.GetExecutableByRef(logger, ref)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(readData).ToNot(BeNil())

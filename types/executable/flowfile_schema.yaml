@@ -1,0 +1,71 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/executable/flowfile_schema.yaml"
+
+title: FlowFile
+description: |
+  Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered 
+  by the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).
+  A workspace can have multiple flow files located anywhere in the workspace directory
+
+definitions:
+  FromFile:
+    type: array
+    description: A list of `.sh` files to convert into generated executables in the file's executable group.
+    items:
+      type: string
+    default: []
+
+type: object
+properties:
+  visibility:
+    $ref: '../common/schema.yaml#/definitions/Visibility'
+    goJSONSchema:
+      type: "common.Visibility"
+      imports: ["github.com/jahvon/flow/types/common"]
+  fromFile:
+    $ref: '#/definitions/FromFile'
+    default: []
+  namespace:
+    type: string
+    description: |
+      The namespace to be given to all executables in the flow file.
+      If not set, the executables in the file will be grouped into the root (*) namespace. 
+      Namespaces can be reused across multiple flow files.
+      
+      Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.
+    default: ""
+  executables:
+    type: array
+    items:
+      $ref: '../executable/executable_schema.yaml#/'
+    goJSONSchema:
+      type: ExecutableList
+    default: []
+  tags:
+    type: array
+    description: Tags to be applied to all executables defined within the flow file.
+    items:
+      type: string
+    default: []
+  description:
+    type: string
+    description: |
+      A description of the executables defined within the flow file. This description will be set as the executables'
+      description if not defined at the executable level.
+    default: ""
+  #### Executable config context fields
+  workspaceName:
+    type: string
+    goJSONSchema:
+      identifier: workspace
+    default: ""
+  workspacePath:
+    type: string
+    goJSONSchema:
+        identifier: workspacePath
+    default: ""
+  configPath:
+    type: string
+    goJSONSchema:
+        identifier: configPath
+    default: ""

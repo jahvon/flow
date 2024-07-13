@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/config"
 )
 
 const FlowConfigDirEnvVar = "FLOW_CONFIG_DIR"
@@ -53,11 +53,11 @@ func InitUserConfig() error {
 		return errors.Wrap(err, "unable to check for default workspace config")
 	}
 
-	defaultCfg := &config.UserConfig{
+	defaultCfg := &config.Config{
 		Workspaces:       map[string]string{defaultWsName: DefaultWorkspaceDir()},
 		CurrentWorkspace: defaultWsName,
-		WorkspaceMode:    config.WorkspaceModeDynamic,
-		Interactive: &config.InteractiveConfig{
+		WorkspaceMode:    config.ConfigWorkspaceModeDynamic,
+		Interactive: &config.Interactive{
 			Enabled: true,
 		},
 		DefaultLogMode: "logfmt",
@@ -74,7 +74,7 @@ func InitUserConfig() error {
 	return nil
 }
 
-func WriteUserConfig(config *config.UserConfig) error {
+func WriteUserConfig(config *config.Config) error {
 	file, err := os.OpenFile(filepath.Clean(UserConfigFilePath()), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return errors.Wrap(err, "unable to open config file")
@@ -93,7 +93,7 @@ func WriteUserConfig(config *config.UserConfig) error {
 	return nil
 }
 
-func LoadUserConfig() (*config.UserConfig, error) {
+func LoadConfig() (*config.Config, error) {
 	if err := EnsureConfigDir(); err != nil {
 		return nil, errors.Wrap(err, "unable to ensure existence of config directory")
 	}
@@ -112,7 +112,7 @@ func LoadUserConfig() (*config.UserConfig, error) {
 	}
 	defer file.Close()
 
-	userCfg := &config.UserConfig{}
+	userCfg := &config.Config{}
 	err = yaml.NewDecoder(file).Decode(userCfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to decode config file")

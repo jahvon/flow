@@ -1,18 +1,19 @@
 package parallel
 
 import (
+	stdCtx "context"
 	"fmt"
 	"maps"
 
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/jahvon/flow/config"
-	argUtils "github.com/jahvon/flow/config/args"
-	"github.com/jahvon/flow/config/executables"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/utils"
+	argUtils "github.com/jahvon/flow/internal/utils/args"
+	"github.com/jahvon/flow/internal/utils/executables"
+	"github.com/jahvon/flow/types/executable"
 )
 
 type parallelRunner struct{}
@@ -25,47 +26,43 @@ func (r *parallelRunner) Name() string {
 	return "parallel"
 }
 
-func (r *parallelRunner) IsCompatible(executable *config.Executable) bool {
-	if executable == nil || executable.Type == nil || executable.Type.Parallel == nil {
+func (r *parallelRunner) IsCompatible(executable *executable.Executable) bool {
+	if executable == nil || executable.Parallel == nil {
 		return false
 	}
 	return true
 }
 
-func (r *parallelRunner) Exec(
-	ctx *context.Context,
-	executable *config.Executable,
-	promptedEnv map[string]string,
-) error {
-	parallelSpec := executable.Type.Parallel
-	if err := runner.SetEnv(ctx.Logger, &parallelSpec.ExecutableEnvironment, promptedEnv); err != nil {
+func (r *parallelRunner) Exec(ctx *context.Context, e *executable.Executable, promptedEnv map[string]string) error {
+	parallelSpec := e.Parallel
+	if err := runner.SetEnv(ctx.Logger, e.Env(), promptedEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
-	if err := utils.ValidateOneOf(
-		"executable list",
-		parallelSpec.ExecutableRefs, parallelSpec.Executables,
-	); err != nil {
+	if err := utils.ValidateOneOf("executable list", parallelSpec.Refs, parallelSpec.Execs); err != nil {
 		return err
 	}
 
-	if len(parallelSpec.ExecutableRefs) > 0 {
+	if len(parallelSpec.Refs) > 0 {
 		return handleExecRef(ctx, parallelSpec, promptedEnv)
-	} else if len(parallelSpec.Executables) > 0 {
-		return handleExec(ctx, executable, parallelSpec, promptedEnv)
+	} else if len(parallelSpec.Execs) > 0 {
+		return handleExec(ctx, e, parallelSpec, promptedEnv)
 	}
 
 	return fmt.Errorf("no parallel executables to run")
 }
 
 func handleExecRef(
-	ctx *context.Context, parallelSpec *config.ParallelExecutableType, promptedEnv map[string]string,
+	ctx *context.Context, parallelSpec *executable.ParallelExecutableType, promptedEnv map[string]string,
 ) error {
-	refs := parallelSpec.ExecutableRefs
-	group, _ := errgroup.WithContext(ctx.Ctx)
+	refs := parallelSpec.Refs
+	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
+	defer cancel()
+	group, _ := errgroup.WithContext(groupCtx)
+
 	limit := parallelSpec.MaxThreads
 	if limit == 0 {
-		limit = len(refs)
+		limit = 5
 	}
 	group.SetLimit(limit)
 	var errs []error
@@ -76,17 +73,27 @@ func handleExecRef(
 			return err
 		}
 
+		if exec.Exec != nil {
+			fields := map[string]interface{}{
+				"e": exec.ID(),
+			}
+			exec.Exec.SetLogFields(fields)
+		}
+
 		group.Go(func() error {
 			if parallelSpec.FailFast {
-				return runner.Exec(ctx, exec, promptedEnv)
+				if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
+					cancel()
+					return err
+				}
 			} else {
 				err := runner.Exec(ctx, exec, promptedEnv)
 				if err != nil {
 					errs = append(errs, err)
 					ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", ref))
 				}
-				return nil
 			}
+			return nil
 		})
 	}
 	if err := group.Wait(); err != nil {
@@ -101,18 +108,18 @@ func handleExecRef(
 
 //nolint:gocognit
 func handleExec(
-	ctx *context.Context, parent *config.Executable,
-	parallelSpec *config.ParallelExecutableType, promptedEnv map[string]string,
+	ctx *context.Context, parent *executable.Executable,
+	parallelSpec *executable.ParallelExecutableType, promptedEnv map[string]string,
 ) error {
 	group, _ := errgroup.WithContext(ctx.Ctx)
 	limit := parallelSpec.MaxThreads
 	if limit == 0 {
-		limit = len(parallelSpec.Executables)
+		limit = len(parallelSpec.Execs)
 	}
 	group.SetLimit(limit)
 	var errs []error
-	for i, refConfig := range parallelSpec.Executables {
-		var exec *config.Executable
+	for i, refConfig := range parallelSpec.Execs {
+		var exec *executable.Executable
 		switch {
 		case len(refConfig.Ref) > 0:
 			var err error
@@ -124,12 +131,19 @@ func handleExec(
 			exec = executables.ExecutableForCmd(parent, refConfig.Cmd, i)
 		}
 
-		if len(refConfig.Arguments) > 0 {
-			a, err := argUtils.ProcessArgs(exec, refConfig.Arguments)
+		if len(refConfig.Args) > 0 {
+			a, err := argUtils.ProcessArgs(exec, refConfig.Args)
 			if err != nil {
 				ctx.Logger.Error(err, "unable to process arguments")
 			}
 			maps.Copy(promptedEnv, a)
+		}
+
+		if exec.Exec != nil {
+			fields := map[string]interface{}{
+				"e": exec.ID(),
+			}
+			exec.Exec.SetLogFields(fields)
 		}
 
 		group.Go(func() error {

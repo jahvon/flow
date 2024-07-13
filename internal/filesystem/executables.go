@@ -12,10 +12,11 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
-const ExecutableDefinitionExt = ".flow"
+const FlowFileExt = ".flow"
 
 func EnsureExecutableDir(workspacePath, subPath string) error {
 	if _, err := os.Stat(filepath.Join(workspacePath, subPath)); os.IsNotExist(err) {
@@ -28,82 +29,82 @@ func EnsureExecutableDir(workspacePath, subPath string) error {
 }
 
 func InitExecutables(
-	template *config.ExecutableDefinitionTemplate,
-	ws *config.WorkspaceConfig,
+	template *executable.FlowFileTemplate,
+	ws *workspace.Workspace,
 	name, subPath string,
 ) error {
 	if err := EnsureExecutableDir(ws.Location(), subPath); err != nil {
 		return errors.Wrap(err, "unable to ensure executable directory")
 	}
-	if err := RenderAndWriteExecutablesTemplate(template, ws, name, subPath); err != nil {
-		return errors.Wrap(err, "unable to write executable definition template")
+	if err := WriteFlowFileFromTemplate(template, ws, name, subPath); err != nil {
+		return errors.Wrap(err, "unable to write executable config template")
 	}
 	return nil
 }
 
-func WriteExecutableDefinition(definitionFile string, definition *config.ExecutableDefinition) error {
-	file, err := os.OpenFile(filepath.Clean(definitionFile), os.O_WRONLY|os.O_CREATE, 0600)
+func WriteFlowFile(cfgFile string, cfg *executable.FlowFile) error {
+	file, err := os.OpenFile(filepath.Clean(cfgFile), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
-		return errors.Wrap(err, "unable to open definition file")
+		return errors.Wrap(err, "unable to open cfg file")
 	}
 	defer file.Close()
 
 	if err := file.Truncate(0); err != nil {
-		return errors.Wrap(err, "unable to truncate definition file")
+		return errors.Wrap(err, "unable to truncate config file")
 	}
 
-	err = yaml.NewEncoder(file).Encode(definition)
+	err = yaml.NewEncoder(file).Encode(cfg)
 	if err != nil {
-		return errors.Wrap(err, "unable to encode definition file")
+		return errors.Wrap(err, "unable to encode config file")
 	}
 
 	return nil
 }
 
-func LoadExecutableDefinition(definitionFile string) (*config.ExecutableDefinition, error) {
-	file, err := os.Open(filepath.Clean(definitionFile))
+func LoadFlowFile(cfgFile string) (*executable.FlowFile, error) {
+	file, err := os.Open(filepath.Clean(cfgFile))
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to open definition file")
+		return nil, errors.Wrap(err, "unable to open config file")
 	}
 	defer file.Close()
 
-	definition := &config.ExecutableDefinition{}
-	err = yaml.NewDecoder(file).Decode(definition)
+	cfg := &executable.FlowFile{}
+	err = yaml.NewDecoder(file).Decode(cfg)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to decode definition file")
+		return nil, errors.Wrap(err, "unable to decode config file")
 	}
-	return definition, nil
+	return cfg, nil
 }
 
-func LoadWorkspaceExecutableDefinitions(
+func LoadWorkspaceFlowFiles(
 	logger io.Logger,
-	workspaceCfg *config.WorkspaceConfig,
-) (config.ExecutableDefinitionList, error) {
-	definitionFiles, err := findDefinitionFiles(logger, workspaceCfg)
+	workspaceCfg *workspace.Workspace,
+) (executable.FlowFileList, error) {
+	cfgFiles, err := findFlowFiles(logger, workspaceCfg)
 	if err != nil {
 		return nil, err
 	}
 
-	var definitions config.ExecutableDefinitionList
-	for _, definitionFile := range definitionFiles {
-		definition, err := LoadExecutableDefinition(definitionFile)
+	var cfgs executable.FlowFileList
+	for _, cfgFile := range cfgFiles {
+		cfg, err := LoadFlowFile(cfgFile)
 		if err != nil {
-			logger.Errorx("unable to load executable definition file", "definitionFile", definitionFile, "err", err)
+			logger.Errorx("unable to load executable config file", "configFile", cfgFile, "err", err)
 			continue
 		}
-		definition.SetContext(workspaceCfg.AssignedName(), workspaceCfg.Location(), definitionFile)
-		definitions = append(definitions, definition)
+		cfg.SetContext(workspaceCfg.AssignedName(), workspaceCfg.Location(), cfgFile)
+		cfgs = append(cfgs, cfg)
 	}
 	logger.Debugx(
-		fmt.Sprintf("loaded %d definitions", len(definitions)),
+		fmt.Sprintf("loaded %d config files", len(cfgs)),
 		"workspace",
 		workspaceCfg.AssignedName(),
 	)
 
-	return definitions, nil
+	return cfgs, nil
 }
 
-func findDefinitionFiles(logger io.Logger, workspaceCfg *config.WorkspaceConfig) ([]string, error) {
+func findFlowFiles(logger io.Logger, workspaceCfg *workspace.Workspace) ([]string, error) {
 	var includePaths, excludedPaths []string
 	if workspaceCfg.Executables != nil {
 		includePaths = workspaceCfg.Executables.Included
@@ -116,11 +117,11 @@ func findDefinitionFiles(logger io.Logger, workspaceCfg *config.WorkspaceConfig)
 		includePaths = []string{workspaceCfg.Location()}
 	}
 
-	var definitionPaths []string
+	var cfgPaths []string
 	walkDirFunc := func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
-				logger.Debugx("definition path does not exist", "path", path)
+				logger.Debugx("cfg path does not exist", "path", path)
 				return nil
 			}
 			return err
@@ -130,8 +131,8 @@ func findDefinitionFiles(logger io.Logger, workspaceCfg *config.WorkspaceConfig)
 				return filepath.SkipDir
 			}
 
-			if filepath.Ext(entry.Name()) == ExecutableDefinitionExt {
-				definitionPaths = append(definitionPaths, path)
+			if filepath.Ext(entry.Name()) == FlowFileExt {
+				cfgPaths = append(cfgPaths, path)
 			}
 		}
 		return nil
@@ -140,7 +141,7 @@ func findDefinitionFiles(logger io.Logger, workspaceCfg *config.WorkspaceConfig)
 	if err := filepath.WalkDir(workspaceCfg.Location(), walkDirFunc); err != nil {
 		return nil, err
 	}
-	return definitionPaths, nil
+	return cfgPaths, nil
 }
 
 // IsPathIn returns true if the path is in any of the include paths.

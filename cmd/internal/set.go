@@ -12,11 +12,11 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/config"
 )
 
 func RegisterSetCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -51,14 +51,14 @@ func registerSetWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 func setWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	workspace := args[0]
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if _, found := userConfig.Workspaces[workspace]; !found {
 		logger.Fatalf("workspace %s not found", workspace)
 	}
 	userConfig.CurrentWorkspace = workspace
 	fixedMode := flags.ValueFor[bool](ctx, cmd, *flags.FixedWsModeFlag, false)
 	if fixedMode {
-		userConfig.WorkspaceMode = config.WorkspaceModeFixed
+		userConfig.WorkspaceMode = config.ConfigWorkspaceModeFixed
 	}
 
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
@@ -82,7 +82,7 @@ func registerSetNamespaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 func setNamespaceFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	namespace := args[0]
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	userConfig.CurrentNamespace = namespace
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
@@ -104,11 +104,11 @@ func registerSetWorkspaceModeCmd(ctx *context.Context, setCmd *cobra.Command) {
 
 func setWorkspaceModeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
-	mode := config.WorkspaceMode(strings.ToLower(args[0]))
+	mode := config.ConfigWorkspaceMode(strings.ToLower(args[0]))
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if userConfig.Interactive == nil {
-		userConfig.Interactive = &config.InteractiveConfig{}
+		userConfig.Interactive = &config.Interactive{}
 	}
 	userConfig.WorkspaceMode = mode
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
@@ -133,7 +133,7 @@ func setLogModeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	mode := tuiKitIO.LogMode(strings.ToLower(args[0]))
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	userConfig.DefaultLogMode = mode
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
@@ -160,9 +160,9 @@ func setInteractiveFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		logger.FatalErr(errors.Wrap(err, "invalid boolean value"))
 	}
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if userConfig.Interactive == nil {
-		userConfig.Interactive = &config.InteractiveConfig{}
+		userConfig.Interactive = &config.Interactive{}
 	}
 	userConfig.Interactive.Enabled = enabled
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
@@ -189,23 +189,23 @@ func registerSetTemplateCmd(ctx *context.Context, setCmd *cobra.Command) {
 func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
-	definitionPath := args[1]
-	loadedTemplates, err := filesystem.LoadExecutableDefinitionTemplate(definitionPath)
+	flowFilePath := args[1]
+	loadedTemplates, err := filesystem.LoadFlowFileTemplate(flowFilePath)
 	if err != nil {
 		logger.FatalErr(err)
 	}
 	if err := loadedTemplates.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if userConfig.Templates == nil {
 		userConfig.Templates = map[string]string{}
 	}
-	userConfig.Templates[name] = definitionPath
+	userConfig.Templates[name] = flowFilePath
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
-	logger.PlainTextSuccess(fmt.Sprintf("Template %s set to %s", name, definitionPath))
+	logger.PlainTextSuccess(fmt.Sprintf("Template %s set to %s", name, flowFilePath))
 }
 
 func registerSetSecretCmd(ctx *context.Context, setCmd *cobra.Command) {
@@ -234,7 +234,7 @@ func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		value = inputs.FindByKey("value").Value()
 	}
 
-	secret := vault.Secret(value)
+	secret := vault.SecretValue(value)
 	v := vault.NewVault(logger)
 	err := v.SetSecret(reference, secret)
 	if err != nil {

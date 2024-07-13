@@ -59,13 +59,21 @@ flow init workspace <name> <path>
 ```
 
 This command will register the Workspace and create the root config file for you.
-For more information on Workspaces and it's config, see [Workspaces](docs/config/workspace_config.md).
+For more information on Workspaces and it's config, see [Workspaces](docs/types/workspace.md).
 
 #### Defining Executables
 
-Executables are the core of flow. Each executable is driven by its definition within an executable definition file 
-(`*.flow` file). There are several types of executables that can be defined.
-For more information on Executables and it's config, see [Executables](docs/config/executables.md).
+Executables are the core of flow. Each executable is driven by its definition within a flow file (`*.flow`).
+There are several types of executables that can be defined. For more information on Executables and the flow file, see [FlowFile.md](docs/types/flowfile.md).
+
+There is also a JSON Schema that can be used in IDEs with the Language Server Protocol (LSP) to perform intelligent 
+suggestions. You can add the following comment to the top of your flow files to enable this:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
+```
+
+See the [schemas](schemas/) directory all available schemas.
 
 #### Running and managing workflows
 

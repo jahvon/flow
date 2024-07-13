@@ -31,8 +31,8 @@ type Vault struct {
 
 // Represents the data stored in the vault data file.
 type data struct {
-	LastUpdated string            `yaml:"lastUpdated"`
-	Secrets     map[string]Secret `yaml:"secrets"`
+	LastUpdated string                 `yaml:"lastUpdated"`
+	Secrets     map[string]SecretValue `yaml:"secrets"`
 }
 
 func RegisterEncryptionKey(key string) error {
@@ -60,7 +60,7 @@ func NewVault(logger io.Logger) *Vault {
 	return &Vault{logger: logger}
 }
 
-func (v *Vault) GetSecret(reference string) (Secret, error) {
+func (v *Vault) GetSecret(reference string) (SecretValue, error) {
 	v.logger.Debugf("getting secret with reference %s from vault", reference)
 	d, err := v.loadData()
 	if err != nil {
@@ -76,7 +76,7 @@ func (v *Vault) GetSecret(reference string) (Secret, error) {
 	return secret, nil
 }
 
-func (v *Vault) GetAllSecrets() (map[string]Secret, error) {
+func (v *Vault) GetAllSecrets() (map[string]SecretValue, error) {
 	v.logger.Debugf("getting all secrets from vault")
 	d, err := v.loadData()
 	if err != nil {
@@ -87,7 +87,7 @@ func (v *Vault) GetAllSecrets() (map[string]Secret, error) {
 	return d.Secrets, nil
 }
 
-func (v *Vault) SetSecret(reference string, secret Secret) error {
+func (v *Vault) SetSecret(reference string, secret SecretValue) error {
 	v.logger.Debugf("setting secret with reference %s in vault", reference)
 	if err := ValidateReference(reference); err != nil {
 		return err
@@ -99,7 +99,7 @@ func (v *Vault) SetSecret(reference string, secret Secret) error {
 	}
 
 	if d.Secrets == nil {
-		d.Secrets = make(map[string]Secret)
+		d.Secrets = make(map[string]SecretValue)
 	}
 	d.Secrets[reference] = secret
 
@@ -114,6 +114,35 @@ func (v *Vault) DeleteSecret(reference string) error {
 	}
 
 	delete(d.Secrets, reference)
+
+	return v.saveData(d)
+}
+
+func (v *Vault) RenameSecret(oldRef string, newRef string) error {
+	v.logger.Debugf("renaming secret with reference %s in vault", oldRef)
+
+	d, err := v.loadData()
+	if err != nil {
+		return err
+	}
+
+	secret, exists := d.Secrets[oldRef]
+	if !exists {
+		return errors.Errorf("secret with reference %s does not exist in vault", oldRef)
+	}
+
+	_, exists = d.Secrets[newRef]
+	if exists {
+		return errors.Errorf("secret with reference %s already exists in vault", newRef)
+	}
+
+	if err := ValidateReference(newRef); err != nil {
+		return err
+	}
+
+	d.Secrets[newRef] = secret
+
+	delete(d.Secrets, oldRef)
 
 	return v.saveData(d)
 }

@@ -15,7 +15,7 @@ import (
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/crypto"
-	filesystem "github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -83,7 +83,7 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 	name := args[0]
 	path := args[1]
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if _, found := userConfig.Workspaces[name]; found {
 		logger.Fatalf("workspace %s already exists at %s", name, userConfig.Workspaces[name])
 	}
@@ -167,37 +167,38 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	fileVal := flags.ValueFor[string](ctx, cmd, *flags.FileFlag, false)
 
 	logger.Infof("Adding '%s' executables to '%s' workspace", definitionName, workspaceName)
-	var definitionPath string
+	var flowFilePath string
 	switch {
 	case template == "" && fileVal == "":
 		logger.Fatalf("one of -f or -t must be provided")
 	case template != "" && fileVal != "":
 		logger.Fatalf("only one of -f or -t can be provided")
 	case template != "":
-		if ctx.UserConfig.Templates == nil {
+		if ctx.Config.Templates == nil {
 			logger.Fatalf("template %s not found", template)
 		}
-		if path, found := ctx.UserConfig.Templates[template]; !found {
+		if path, found := ctx.Config.Templates[template]; !found {
 			logger.Fatalf("template %s not found", template)
-		} else if found {
-			definitionPath = path
+		} else {
+			flowFilePath = path
 		}
 	case fileVal != "":
 		if _, err := os.Stat(fileVal); os.IsNotExist(err) {
 			logger.Fatalf("fileVal %s not found", fileVal)
 		}
-		definitionPath = fileVal
+		flowFilePath = fileVal
 	}
-	execTemplate, err := filesystem.LoadExecutableDefinitionTemplate(definitionPath)
+
+	execTemplate, err := filesystem.LoadFlowFileTemplate(flowFilePath)
 	if err != nil {
 		logger.FatalErr(err)
 	}
 	if err := execTemplate.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
-	execTemplate.SetContext(definitionPath)
+	execTemplate.SetContext(flowFilePath)
 
-	wsPath, wsFound := ctx.UserConfig.Workspaces[workspaceName]
+	wsPath, wsFound := ctx.Config.Workspaces[workspaceName]
 	if !wsFound {
 		logger.Fatalf("workspace %s not found", workspaceName)
 	}
@@ -235,7 +236,7 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger.PlainTextSuccess(
 		fmt.Sprintf(
 			"Executables from %s added to %s\nPath: %s",
-			definitionName, workspaceName, definitionPath,
+			definitionName, workspaceName, flowFilePath,
 		))
 }
 

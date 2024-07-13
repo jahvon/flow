@@ -1,25 +1,26 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
 visibility: public
 namespace: docs
 tags: [documentation]
 executables:
   - verb: show
-    name: execs
-    aliases: [executables, exec]
-    description: Render the Flow Executable reference documentation
+    name: flowfile
+    aliases: [executables, exec, executable]
+    description: Render the FlowFile reference documentation
     render:
-      dir: config
-      templateFile: executables.md
+      dir: types
+      templateFile: flowfile.md
   - verb: show
     name: ws
     aliases: [workspace]
     description: Render the Flow Workspace reference documentation
     render:
-      dir: config
-      templateFile: workspace_config.md
+      dir: types
+      templateFile: workspace.md
   - verb: show
     name: cfg
-    aliases: [user-config, user-cfg]
+    aliases: [config, user-config, user-cfg]
     description: Render the Flow User Config reference documentation
     render:
-      dir: config
-      templateFile: user_config.md
+      dir: types
+      templateFile: config.md

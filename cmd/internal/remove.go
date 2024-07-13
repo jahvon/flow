@@ -37,7 +37,7 @@ func registerRemoveWsCmd(ctx *context.Context, removeCmd *cobra.Command) {
 			"workspace will be unlinked from the flow global configurations.\nNote: You cannot remove the current workspace.",
 		Args: cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return maps.Keys(ctx.UserConfig.Workspaces), cobra.ShellCompDirectiveNoFileComp
+			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 			interactive.InitInteractiveCommand(ctx, cmd)
@@ -67,7 +67,7 @@ func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		return
 	}
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if name == userConfig.CurrentWorkspace {
 		logger.Fatalf("cannot remove the current workspace")
 	}

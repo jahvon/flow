@@ -11,10 +11,11 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
-func WriteExecutableDefinitionTemplate(templatePath string, template *config.ExecutableDefinitionTemplate) error {
+func WriteFlowFileTemplate(templatePath string, template *executable.FlowFileTemplate) error {
 	file, err := os.Create(filepath.Clean(templatePath))
 	if err != nil {
 		return errors.Wrap(err, "unable to create template file")
@@ -27,9 +28,9 @@ func WriteExecutableDefinitionTemplate(templatePath string, template *config.Exe
 	return nil
 }
 
-func RenderAndWriteExecutablesTemplate(
-	definitionTemplate *config.ExecutableDefinitionTemplate,
-	ws *config.WorkspaceConfig,
+func WriteFlowFileFromTemplate(
+	cfgTemplate *executable.FlowFileTemplate,
+	ws *workspace.Workspace,
 	name, subPath string,
 ) error {
 	if err := EnsureExecutableDir(ws.Location(), subPath); err != nil {
@@ -37,69 +38,66 @@ func RenderAndWriteExecutablesTemplate(
 	}
 
 	executablesPath := filepath.Join(ws.Location(), subPath)
-	definitionYaml, err := yaml.Marshal(definitionTemplate.ExecutableDefinition)
+	cfgYaml, err := yaml.Marshal(cfgTemplate.FlowFile)
 	if err != nil {
-		return errors.Wrap(err, "unable to marshal executable definition")
+		return errors.Wrap(err, "unable to marshal executable config")
 	}
-	templateData := definitionTemplate.Data.MapInterface()
+	templateData := cfgTemplate.Data.MapInterface()
 	templateData["Workspace"] = ws.AssignedName()
 	templateData["WorkspaceLocation"] = ws.Location()
 	templateData["ExecutablePath"] = executablesPath
-	t, err := template.New("definition").Parse(string(definitionYaml))
+	t, err := template.New("config").Parse(string(cfgYaml))
 	if err != nil {
-		return errors.Wrap(err, "unable to parse definition template")
+		return errors.Wrap(err, "unable to parse config template")
 	}
 
 	var buf bytes.Buffer
 	if err := t.Execute(&buf, templateData); err != nil {
-		return errors.Wrap(err, "unable to execute definition template")
+		return errors.Wrap(err, "unable to execute config template")
 	}
 
 	filename := strings.ToLower(name)
 	filename = strings.ReplaceAll(filename, " ", "_")
-	if !strings.HasSuffix(filename, ExecutableDefinitionExt) {
-		filename += ExecutableDefinitionExt
+	if !strings.HasSuffix(filename, FlowFileExt) {
+		filename += FlowFileExt
 	}
 	file, err := os.Create(filepath.Clean(filepath.Join(executablesPath, filename)))
 	if err != nil {
-		return errors.Wrap(err, "unable to create rendered definition file")
+		return errors.Wrap(err, "unable to create rendered config file")
 	}
 	defer file.Close()
 
 	if _, err := file.Write(buf.Bytes()); err != nil {
-		return errors.Wrap(err, "unable to write rendered definition file")
+		return errors.Wrap(err, "unable to write rendered config file")
 	}
 
-	if err := copyExecutableDefinitionTemplateAssets(definitionTemplate, executablesPath); err != nil {
+	if err := copyFlowFileTemplateAssets(cfgTemplate, executablesPath); err != nil {
 		return errors.Wrap(err, "unable to copy template assets")
 	}
 
 	return nil
 }
 
-func LoadExecutableDefinitionTemplate(templateFile string) (*config.ExecutableDefinitionTemplate, error) {
+func LoadFlowFileTemplate(templateFile string) (*executable.FlowFileTemplate, error) {
 	file, err := os.Open(filepath.Clean(templateFile))
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to open template file")
 	}
 	defer file.Close()
 
-	definitionTemplate := &config.ExecutableDefinitionTemplate{}
-	err = yaml.NewDecoder(file).Decode(definitionTemplate)
+	cfgTemplate := &executable.FlowFileTemplate{}
+	err = yaml.NewDecoder(file).Decode(cfgTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to decode template file")
 	}
-	definitionTemplate.SetContext(templateFile)
+	cfgTemplate.SetContext(templateFile)
 
-	return definitionTemplate, nil
+	return cfgTemplate, nil
 }
 
-func copyExecutableDefinitionTemplateAssets(
-	definitionTemplate *config.ExecutableDefinitionTemplate,
-	destinationPath string,
-) error {
-	sourcePath := filepath.Dir(definitionTemplate.Location())
-	sourceFiles, err := expandArtifactFiles(sourcePath, definitionTemplate.Artifacts)
+func copyFlowFileTemplateAssets(cfgTemplate *executable.FlowFileTemplate, cfgPath string) error {
+	sourcePath := filepath.Dir(cfgTemplate.Location())
+	sourceFiles, err := expandArtifactFiles(sourcePath, cfgTemplate.Artifacts)
 	if err != nil {
 		return errors.Wrap(err, "unable to expand artifact files")
 	}
@@ -109,8 +107,11 @@ func copyExecutableDefinitionTemplateAssets(
 		if err != nil {
 			return errors.Wrap(err, "unable to get relative path")
 		}
-		destPath := filepath.Join(destinationPath, relPath)
+		destPath := filepath.Join(cfgPath, filepath.Base(relPath))
 		if err := os.MkdirAll(filepath.Dir(destPath), 0750); err != nil {
+			if !os.IsExist(err) {
+				return errors.Wrap(err, "unable to create destination directory")
+			}
 			return errors.Wrap(err, "unable to create destination directory")
 		}
 		if err := CopyFile(file, destPath); err != nil {

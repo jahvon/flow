@@ -12,8 +12,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	config "github.com/jahvon/flow/config"
 	context "github.com/jahvon/flow/internal/context"
+	executable "github.com/jahvon/flow/types/executable"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,7 +41,7 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 }
 
 // Exec mocks base method.
-func (m *MockRunner) Exec(arg0 *context.Context, arg1 *config.Executable, arg2 map[string]string) error {
+func (m *MockRunner) Exec(arg0 *context.Context, arg1 *executable.Executable, arg2 map[string]string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Exec", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
@@ -55,7 +55,7 @@ func (mr *MockRunnerMockRecorder) Exec(arg0, arg1, arg2 any) *gomock.Call {
 }
 
 // IsCompatible mocks base method.
-func (m *MockRunner) IsCompatible(arg0 *config.Executable) bool {
+func (m *MockRunner) IsCompatible(arg0 *executable.Executable) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsCompatible", arg0)
 	ret0, _ := ret[0].(bool)

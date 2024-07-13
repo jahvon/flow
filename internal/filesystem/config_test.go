@@ -7,11 +7,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/types/config"
 )
 
-var _ = Describe("Config", func() {
+var _ = Describe("FlowFile", func() {
 	var (
 		tmpDir string
 	)
@@ -48,13 +48,13 @@ var _ = Describe("Config", func() {
 		})
 	})
 
-	Describe("WriteUserConfig and LoadUserConfig", func() {
+	Describe("WriteUserConfig and LoadConfig", func() {
 		It("writes and reads config correctly", func() {
-			userConfig := &config.UserConfig{
+			userConfig := &config.Config{
 				Workspaces:       map[string]string{"default": tmpDir},
 				CurrentWorkspace: "default",
-				WorkspaceMode:    config.WorkspaceModeDynamic,
-				Interactive: &config.InteractiveConfig{
+				WorkspaceMode:    config.ConfigWorkspaceModeDynamic,
+				Interactive: &config.Interactive{
 					Enabled: true,
 				},
 				DefaultLogMode: "logfmt",
@@ -62,7 +62,7 @@ var _ = Describe("Config", func() {
 
 			Expect(filesystem.WriteUserConfig(userConfig)).To(Succeed())
 
-			readConfig, err := filesystem.LoadUserConfig()
+			readConfig, err := filesystem.LoadConfig()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(readConfig).To(Equal(userConfig))
 		})
