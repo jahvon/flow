@@ -29,6 +29,7 @@ jobs:
 
       - name: Init project and generate code
         run: |
+          go clean -modcache
           go mod tidy
           go fmt ./...
           go generate ./...
