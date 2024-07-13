@@ -1,14 +1,15 @@
 package parallel
 
 import (
+	stdCtx "context"
 	"fmt"
 
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/types/executable"
 )
 
 type parallelRunner struct{}
@@ -21,28 +22,26 @@ func (r *parallelRunner) Name() string {
 	return "parallel"
 }
 
-func (r *parallelRunner) IsCompatible(executable *config.Executable) bool {
-	if executable == nil || executable.Type == nil || executable.Type.Parallel == nil {
+func (r *parallelRunner) IsCompatible(executable *executable.Executable) bool {
+	if executable == nil || executable.Parallel == nil {
 		return false
 	}
 	return true
 }
 
-func (r *parallelRunner) Exec(
-	ctx *context.Context,
-	executable *config.Executable,
-	promptedEnv map[string]string,
-) error {
-	parallelSpec := executable.Type.Parallel
-	if err := runner.SetEnv(ctx.Logger, &parallelSpec.ExecutableEnvironment, promptedEnv); err != nil {
+func (r *parallelRunner) Exec(ctx *context.Context, e *executable.Executable, promptedEnv map[string]string) error {
+	parallelSpec := e.Parallel
+	if err := runner.SetEnv(ctx.Logger, e.Env(), promptedEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
-	refs := parallelSpec.ExecutableRefs
-	group, _ := errgroup.WithContext(ctx.Ctx)
+	refs := parallelSpec.Refs
+	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
+	defer cancel()
+	group, _ := errgroup.WithContext(groupCtx)
 	limit := parallelSpec.MaxThreads
 	if limit == 0 {
-		limit = len(refs)
+		limit = 5
 	}
 	group.SetLimit(limit)
 	var errs []error
@@ -53,24 +52,27 @@ func (r *parallelRunner) Exec(
 			return err
 		}
 
-		if exec.Type.Exec != nil {
+		if exec.Exec != nil {
 			fields := map[string]interface{}{
-				"executable": exec.ID(),
+				"e": exec.ID(),
 			}
-			exec.Type.Exec.SetLogFields(fields)
+			exec.Exec.SetLogFields(fields)
 		}
 
 		group.Go(func() error {
 			if parallelSpec.FailFast {
-				return runner.Exec(ctx, exec, promptedEnv)
+				if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
+					cancel()
+					return err
+				}
 			} else {
 				err := runner.Exec(ctx, exec, promptedEnv)
 				if err != nil {
 					errs = append(errs, err)
 					ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", ref))
 				}
-				return nil
 			}
+			return nil
 		})
 	}
 	if err := group.Wait(); err != nil {

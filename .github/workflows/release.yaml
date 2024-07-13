@@ -44,7 +44,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.1"
+          go-version: "1.22.5"
 
       - name: Generate Version Files
         run: |
@@ -57,7 +57,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "1.22.1"
+          goversion: "1.22.5"
           extra_files: LICENSE README.md
           # This linux dependency is required for the clipboard package
           pre_command: "apt-get update && apt-get -y install xclip"
@@ -69,5 +69,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "1.22.1"
+          goversion: "1.22.5"
           extra_files: LICENSE README.md

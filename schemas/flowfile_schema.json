@@ -1,0 +1,510 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json",
+  "description": "Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered \nby the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).\nA workspace can have multiple flow files located anywhere in the workspace directory\n",
+  "type": "object",
+  "definitions": {
+    "CommonAliases": {
+      "description": "Alternate names that can be used to reference the executable in the CLI.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "CommonTags": {
+      "description": "A list of tags.\nTags can be used with list commands to filter returned data.\n",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "CommonVisibility": {
+      "description": "The visibility of the executables to Flow.\nIf not set, the visibility will default to `public`.\n\n`public` executables can be executed and listed from anywhere.\n`private` executables can be executed and listed only within their own workspace.\n`internal` executables can be executed within their own workspace but are not listed.\n`hidden` executables cannot be executed or listed.\n",
+      "type": "string",
+      "default": "public",
+      "enum": [
+        "public",
+        "private",
+        "internal",
+        "hidden"
+      ]
+    },
+    "Executable": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "description": "The executable schema defines the structure of an executable in the Flow CLI.\nExecutables are the building blocks of workflows and are used to define the actions that can be performed in a workspace.\n",
+      "type": "object",
+      "required": [
+        "name",
+        "verb"
+      ],
+      "properties": {
+        "aliases": {
+          "$ref": "#/definitions/CommonAliases",
+          "default": []
+        },
+        "description": {
+          "description": "A description of the executable.\nThis description is rendered as markdown in the interactive UI.\n",
+          "type": "string",
+          "default": ""
+        },
+        "exec": {
+          "$ref": "#/definitions/ExecutableExecExecutableType"
+        },
+        "launch": {
+          "$ref": "#/definitions/ExecutableLaunchExecutableType"
+        },
+        "name": {
+          "description": "The name of the executable. \n\nName is used to reference the executable in the CLI using the format `workspace:namespace/name`.\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
+          "type": "string",
+          "default": ""
+        },
+        "parallel": {
+          "$ref": "#/definitions/ExecutableParallelExecutableType"
+        },
+        "render": {
+          "$ref": "#/definitions/ExecutableRenderExecutableType"
+        },
+        "request": {
+          "$ref": "#/definitions/ExecutableRequestExecutableType"
+        },
+        "serial": {
+          "$ref": "#/definitions/ExecutableSerialExecutableType"
+        },
+        "tags": {
+          "$ref": "#/definitions/CommonTags",
+          "default": []
+        },
+        "timeout": {
+          "description": "The maximum amount of time the executable is allowed to run before being terminated.\nThe timeout is specified in Go duration format (e.g. 30s, 5m, 1h).\n",
+          "type": "string",
+          "default": "30m0s"
+        },
+        "verb": {
+          "$ref": "#/definitions/ExecutableVerb",
+          "default": "exec"
+        },
+        "visibility": {
+          "$ref": "#/definitions/CommonVisibility"
+        }
+      }
+    },
+    "ExecutableArgument": {
+      "type": "object",
+      "required": [
+        "envKey"
+      ],
+      "properties": {
+        "default": {
+          "description": "The default value to use if the argument is not provided.\nIf the argument is required and no default is provided, the executable will fail.\n",
+          "type": "string",
+          "default": ""
+        },
+        "envKey": {
+          "description": "The name of the environment variable that will be assigned the value.",
+          "type": "string",
+          "default": ""
+        },
+        "flag": {
+          "description": "The flag to use when setting the argument from the command line.\nEither `flag` or `pos` must be set, but not both.\n",
+          "type": "string",
+          "default": ""
+        },
+        "pos": {
+          "description": "The position of the argument in the command line ArgumentList. Values start at 1.\nEither `flag` or `pos` must be set, but not both.\n",
+          "type": "integer",
+          "default": 0
+        },
+        "required": {
+          "description": "If the argument is required, the executable will fail if the argument is not provided.\nIf the argument is not required, the default value will be used if the argument is not provided.\n",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "description": "The type of the argument. This is used to determine how to parse the value of the argument.",
+          "type": "string",
+          "default": "string",
+          "enum": [
+            "string",
+            "int",
+            "float",
+            "bool"
+          ]
+        }
+      }
+    },
+    "ExecutableArgumentList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExecutableArgument"
+      }
+    },
+    "ExecutableDirectory": {
+      "description": "The directory to execute the command in.\nIf unset, the directory of the flow file will be used.\nIf set to `f:tmp`, a temporary directory will be created for the process.\nIf prefixed with `./`, the path will be relative to the current working directory.\nIf prefixed with `//`, the path will be relative to the workspace root.\nEnvironment variables in the path will be expended at runtime.\n",
+      "type": "string",
+      "default": ""
+    },
+    "ExecutableExecExecutableType": {
+      "description": "Standard executable type. Runs a command/file in a subprocess.",
+      "type": "object",
+      "properties": {
+        "args": {
+          "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "cmd": {
+          "description": "The command to execute.\nOnly one of `cmd` or `file` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "dir": {
+          "$ref": "#/definitions/ExecutableDirectory",
+          "default": ""
+        },
+        "file": {
+          "description": "The file to execute.\nOnly one of `cmd` or `file` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "logMode": {
+          "description": "The log mode to use when running the executable.\nThis can either be `hidden`, `json`, `logfmt` or `text`\n",
+          "type": "string",
+          "default": "logfmt"
+        },
+        "params": {
+          "$ref": "#/definitions/ExecutableParameterList"
+        }
+      }
+    },
+    "ExecutableLaunchExecutableType": {
+      "description": "Launches an application or opens a URI.",
+      "type": "object",
+      "required": [
+        "uri"
+      ],
+      "properties": {
+        "app": {
+          "description": "The application to launch the URI with.",
+          "type": "string",
+          "default": ""
+        },
+        "args": {
+          "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "params": {
+          "$ref": "#/definitions/ExecutableParameterList"
+        },
+        "uri": {
+          "description": "The URI to launch. This can be a file path or a web URL.",
+          "type": "string",
+          "default": ""
+        },
+        "wait": {
+          "description": "If set to true, the executable will wait for the launched application to exit before continuing.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "ExecutableParallelExecutableType": {
+      "type": "object",
+      "required": [
+        "refs"
+      ],
+      "properties": {
+        "args": {
+          "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "failFast": {
+          "description": "If set to true, the parallel executable will fail if any of the sub-executables fail.",
+          "type": "boolean",
+          "default": false
+        },
+        "maxThreads": {
+          "description": "The maximum number of threads to use when executing the parallel executables.",
+          "type": "integer",
+          "default": 5
+        },
+        "params": {
+          "$ref": "#/definitions/ExecutableParameterList"
+        },
+        "refs": {
+          "$ref": "#/definitions/ExecutableRefList"
+        }
+      }
+    },
+    "ExecutableParameter": {
+      "description": "A parameter is a value that can be passed to an executable and all of its sub-executables.\nOnly one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.\n",
+      "type": "object",
+      "required": [
+        "envKey"
+      ],
+      "properties": {
+        "envKey": {
+          "description": "The name of the environment variable that will be assigned the value.",
+          "type": "string",
+          "default": ""
+        },
+        "prompt": {
+          "description": "A prompt to be displayed to the user when collecting an input value.",
+          "type": "string",
+          "default": ""
+        },
+        "secretRef": {
+          "description": "A reference to a secret to be passed to the executable.",
+          "type": "string",
+          "default": ""
+        },
+        "text": {
+          "description": "A static value to be passed to the executable.",
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "ExecutableParameterList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExecutableParameter"
+      }
+    },
+    "ExecutableRef": {
+      "description": "A reference to an executable.\nThe format is `\u003cverb\u003e \u003cworkspace\u003e/\u003cnamespace\u003e:\u003cexecutable name\u003e`.\nFor example, `exec ws/ns:my-workflow`.\n\nThe workspace and namespace are optional.\nIf the workspace is not specified, the current workspace will be used.\nIf the namespace is not specified, the current namespace will be used.\n",
+      "type": "string"
+    },
+    "ExecutableRefList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExecutableRef"
+      }
+    },
+    "ExecutableRenderExecutableType": {
+      "description": "Renders a markdown template file with data.",
+      "type": "object",
+      "required": [
+        "templateFile"
+      ],
+      "properties": {
+        "args": {
+          "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "dir": {
+          "$ref": "#/definitions/ExecutableDirectory",
+          "default": ""
+        },
+        "params": {
+          "$ref": "#/definitions/ExecutableParameterList"
+        },
+        "templateDataFile": {
+          "description": "The path to the JSON or YAML file containing the template data.",
+          "type": "string",
+          "default": ""
+        },
+        "templateFile": {
+          "description": "The path to the markdown template file to render.",
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "ExecutableRequestExecutableType": {
+      "description": "Makes an HTTP request.",
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "args": {
+          "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "body": {
+          "description": "The body of the request.",
+          "type": "string",
+          "default": ""
+        },
+        "headers": {
+          "description": "A map of headers to include in the request.",
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "logResponse": {
+          "description": "If set to true, the response will be logged as program output.",
+          "type": "boolean",
+          "default": false
+        },
+        "method": {
+          "description": "The HTTP method to use when making the request.",
+          "type": "string",
+          "default": "GET",
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "params": {
+          "$ref": "#/definitions/ExecutableParameterList"
+        },
+        "responseFile": {
+          "$ref": "#/definitions/ExecutableRequestResponseFile"
+        },
+        "timeout": {
+          "description": "The timeout for the request in Go duration format (e.g. 30s, 5m, 1h).",
+          "type": "string",
+          "default": "30m0s"
+        },
+        "transformResponse": {
+          "description": "JQ query to transform the response before saving it to a file or outputting it.",
+          "type": "string",
+          "default": ""
+        },
+        "url": {
+          "description": "The URL to make the request to.",
+          "type": "string",
+          "default": ""
+        },
+        "validStatusCodes": {
+          "description": "A list of valid status codes. If the response status code is not in this list, the executable will fail.\nIf not set, the response status code will not be checked.\n",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "ExecutableRequestResponseFile": {
+      "description": "Configuration for saving the response of a request to a file.",
+      "type": "object",
+      "required": [
+        "filename"
+      ],
+      "properties": {
+        "dir": {
+          "$ref": "#/definitions/ExecutableDirectory",
+          "default": ""
+        },
+        "filename": {
+          "description": "The name of the file to save the response to.",
+          "type": "string",
+          "default": ""
+        },
+        "saveAs": {
+          "description": "The format to save the response as.",
+          "type": "string",
+          "default": "raw",
+          "enum": [
+            "raw",
+            "json",
+            "indented-json",
+            "yaml",
+            "yml"
+          ]
+        }
+      }
+    },
+    "ExecutableSerialExecutableType": {
+      "description": "Executes a list of executables in serial.",
+      "type": "object",
+      "required": [
+        "refs"
+      ],
+      "properties": {
+        "args": {
+          "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "failFast": {
+          "description": "If set to true, the serial executable will fail if any of the sub-executables fail.",
+          "type": "boolean",
+          "default": false
+        },
+        "params": {
+          "$ref": "#/definitions/ExecutableParameterList"
+        },
+        "refs": {
+          "$ref": "#/definitions/ExecutableRefList"
+        }
+      }
+    },
+    "ExecutableVerb": {
+      "description": "Keywords that describe the action an executable performs.\nWhile executables are configured with a single verb, the verb can be aliased to related verbs.\nFor example, the `exec` verb can replaced with \"run\" or \"start\" when referencing an executable.\nThis allows users to use the verb that best describes the action they are performing.\n\n**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`\n**Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`\n**Update verbs**: `update`, `upgrade`, `refresh`, `reload`\n**Management verbs**: `manage`, `configure`, `monitor`, `edit`\n**Launch verbs**: `open`, `launch`, `show`, `view`, `render`\n**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`\n\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
+      "type": "string",
+      "default": "exec",
+      "enum": [
+        "exec",
+        "run",
+        "start",
+        "install",
+        "setup",
+        "release",
+        "deploy",
+        "apply",
+        "delete",
+        "remove",
+        "uninstall",
+        "destroy",
+        "undeploy",
+        "update",
+        "upgrade",
+        "refresh",
+        "reload",
+        "manage",
+        "configure",
+        "monitor",
+        "edit",
+        "open",
+        "launch",
+        "show",
+        "view",
+        "render",
+        "generate",
+        "add",
+        "new",
+        "build",
+        "transform"
+      ]
+    },
+    "FromFile": {
+      "description": "A list of `.sh` files to convert into generated executables in the file's executable group.",
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "properties": {
+    "description": {
+      "description": "A description of the executables defined within the flow file. This description will be set as the executables'\ndescription if not defined at the executable level.\n",
+      "type": "string",
+      "default": ""
+    },
+    "executables": {
+      "$ref": "#/definitions/Executable",
+      "default": []
+    },
+    "fromFile": {
+      "$ref": "#/definitions/FromFile",
+      "default": []
+    },
+    "namespace": {
+      "description": "The namespace to be given to all executables in the flow file.\nIf not set, the executables in the file will be grouped into the root (*) namespace. \nNamespaces can be reused across multiple flow files.\n\nNamespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.\n",
+      "type": "string",
+      "default": ""
+    },
+    "tags": {
+      "description": "Tags to be applied to all executables defined within the flow file.",
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "visibility": {
+      "$ref": "#/definitions/CommonVisibility"
+    }
+  }
+}

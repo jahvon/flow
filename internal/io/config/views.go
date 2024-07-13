@@ -3,13 +3,13 @@ package config
 import (
 	"github.com/jahvon/tuikit/components"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/types/config"
 )
 
 func NewUserConfigView(
 	container *components.ContainerView,
-	cfg config.UserConfig,
+	cfg config.Config,
 	format components.Format,
 ) components.TeaModel {
 	state := &components.TerminalState{

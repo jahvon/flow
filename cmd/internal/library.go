@@ -7,10 +7,10 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/library"
+	"github.com/jahvon/flow/types/executable"
 )
 
 func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -39,12 +39,12 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
-		wsFilter = ctx.UserConfig.CurrentWorkspace
+		wsFilter = ctx.Config.CurrentWorkspace
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
 	if nsFilter == "." {
-		nsFilter = ctx.UserConfig.CurrentNamespace
+		nsFilter = ctx.Config.CurrentNamespace
 	}
 
 	verbFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterVerbFlag, false)
@@ -66,7 +66,7 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		library.Filter{
 			Workspace: wsFilter,
 			Namespace: nsFilter,
-			Verb:      config.Verb(verbFilter),
+			Verb:      executable.Verb(verbFilter),
 			Tags:      tagsFilter,
 			Substring: subStr,
 		},

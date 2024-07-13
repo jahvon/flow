@@ -13,8 +13,8 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/crypto"
+	"github.com/jahvon/flow/internal/filesystem"
 )
 
 const (
@@ -36,7 +36,7 @@ type data struct {
 }
 
 func RegisterEncryptionKey(key string) error {
-	if err := file.EnsureCachedDataDir(); err != nil {
+	if err := filesystem.EnsureCachedDataDir(); err != nil {
 		return err
 	}
 
@@ -262,5 +262,5 @@ func dataFilePath(encryptionKey string) string {
 		panic("unable to hash encryption key")
 	}
 	storageKey := crypto.EncodeValue(hasher.Sum(nil))
-	return filepath.Join(file.CachedDataDirPath(), cacheDirName, storageKey, "data")
+	return filepath.Join(filesystem.CachedDataDirPath(), cacheDirName, storageKey, "data")
 }

@@ -8,10 +8,10 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/mocks"
+	"github.com/jahvon/flow/types/executable"
 )
 
 func TestRunner(t *testing.T) {
@@ -39,7 +39,7 @@ var _ = Describe("Runner", func() {
 	Describe("Exec", func() {
 		It("should execute the runner correctly", func() {
 			ctx := &context.Context{}
-			executable := &config.Executable{
+			executable := &executable.Executable{
 				Name: "test-executable",
 			}
 			promptedEnv := make(map[string]string)
@@ -51,33 +51,33 @@ var _ = Describe("Runner", func() {
 
 		It("should return error when no compatible runner is found", func() {
 			ctx := &context.Context{}
-			executable := &config.Executable{
-				Name: "test-executable",
+			exec := &executable.Executable{
+				Name: "test-exec",
 			}
 			promptedEnv := make(map[string]string)
 
-			mockRunner.EXPECT().IsCompatible(executable).Return(false)
+			mockRunner.EXPECT().IsCompatible(exec).Return(false)
 
-			err := runner.Exec(ctx, executable, promptedEnv)
+			err := runner.Exec(ctx, exec, promptedEnv)
 			Expect(err.Error()).To(ContainSubstring("compatible runner not found"))
 		})
 
 		It("should return error when execution times out", func() {
 			ctx := &context.Context{}
-			executable := &config.Executable{
-				Name:    "test-executable",
+			exec := &executable.Executable{
+				Name:    "test-exec",
 				Timeout: 250 * time.Millisecond,
 			}
 			promptedEnv := make(map[string]string)
 
-			mockRunner.EXPECT().IsCompatible(executable).Return(true)
-			mockRunner.EXPECT().Exec(ctx, executable, promptedEnv).DoAndReturn(
-				func(ctx *context.Context, executable *config.Executable, promptedEnv map[string]string) error {
+			mockRunner.EXPECT().IsCompatible(exec).Return(true)
+			mockRunner.EXPECT().Exec(ctx, exec, promptedEnv).DoAndReturn(
+				func(ctx *context.Context, executable *executable.Executable, promptedEnv map[string]string) error {
 					time.Sleep(2 * time.Second)
 					return nil
 				})
 
-			err := runner.Exec(ctx, executable, promptedEnv)
+			err := runner.Exec(ctx, exec, promptedEnv)
 			Expect(err.Error()).To(ContainSubstring("timeout"))
 		})
 	})

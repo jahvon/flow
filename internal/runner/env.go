@@ -8,15 +8,15 @@ import (
 
 	"github.com/jahvon/tuikit/io"
 
-	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/executable"
 )
 
-func SetEnv(logger io.Logger, exec *config.ExecutableEnvironment, promptedEnv map[string]string) error {
+func SetEnv(logger io.Logger, exec *executable.ExecutableEnvironment, promptedEnv map[string]string) error {
 	var errs []error
-	for _, param := range exec.Parameters {
+	for _, param := range exec.Params {
 		val, err := ResolveParameterValue(logger, param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
@@ -33,7 +33,11 @@ func SetEnv(logger io.Logger, exec *config.ExecutableEnvironment, promptedEnv ma
 	return nil
 }
 
-func ResolveParameterValue(logger io.Logger, param config.Parameter, promptedEnv map[string]string) (string, error) {
+func ResolveParameterValue(
+	logger io.Logger,
+	param executable.Parameter,
+	promptedEnv map[string]string,
+) (string, error) {
 	switch {
 	case param.Text == "" && param.SecretRef == "" && param.Prompt == "":
 		return "", nil
@@ -62,7 +66,7 @@ func ResolveParameterValue(logger io.Logger, param config.Parameter, promptedEnv
 
 func BuildEnvList(
 	logger io.Logger,
-	exec *config.ExecutableEnvironment,
+	exec *executable.ExecutableEnvironment,
 	inputEnv map[string]string,
 	defaultEnv map[string]string,
 ) ([]string, error) {
@@ -74,7 +78,7 @@ func BuildEnvList(
 			envList = append(envList, fmt.Sprintf("%s=%s", k, v))
 		}
 	}
-	for _, param := range exec.Parameters {
+	for _, param := range exec.Params {
 		val, err := ResolveParameterValue(logger, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
@@ -94,7 +98,7 @@ func BuildEnvList(
 
 func BuildEnvMap(
 	logger io.Logger,
-	exec *config.ExecutableEnvironment,
+	exec *executable.ExecutableEnvironment,
 	inputEnv map[string]string,
 	defaultEnv map[string]string,
 ) (map[string]string, error) {
@@ -106,7 +110,7 @@ func BuildEnvMap(
 			envMap[k] = v
 		}
 	}
-	for _, param := range exec.Parameters {
+	for _, param := range exec.Params {
 		val, err := ResolveParameterValue(logger, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
@@ -124,20 +128,20 @@ func BuildEnvMap(
 	return envMap, nil
 }
 
-func DefaultEnv(ctx *context.Context, executable *config.Executable) map[string]string {
+func DefaultEnv(ctx *context.Context, executable *executable.Executable) map[string]string {
 	envMap := make(map[string]string)
 	envMap["FLOW_RUNNER"] = "true"
 	envMap["FLOW_CURRENT_WORKSPACE"] = ctx.CurrentWorkspace.AssignedName()
-	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.UserConfig.CurrentNamespace
+	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.Config.CurrentNamespace
 	if ctx.ProcessTmpDir != "" {
 		envMap["FLOW_TMP_DIRECTORY"] = ctx.ProcessTmpDir
 	}
 	envMap["FLOW_EXECUTABLE_NAME"] = executable.Name
-	envMap["FLOW_DEFINITION_PATH"] = executable.DefinitionPath()
-	envMap["FLOW_DEFINITION_DIR"] = filepath.Dir(executable.DefinitionPath())
+	envMap["FLOW_DEFINITION_PATH"] = executable.FlowFilePath()
+	envMap["FLOW_DEFINITION_DIR"] = filepath.Dir(executable.FlowFilePath())
 	envMap["FLOW_WORKSPACE_PATH"] = executable.WorkspacePath()
-	envMap["FLOW_CONFIG_PATH"] = file.ConfigDirPath()
-	envMap["FLOW_CACHE_PATH"] = file.CachedDataDirPath()
+	envMap["FLOW_CONFIG_PATH"] = filesystem.ConfigDirPath()
+	envMap["FLOW_CACHE_PATH"] = filesystem.CachedDataDirPath()
 	envMap["DISABLE_FLOW_INTERACTIVE"] = "true"
 	return envMap
 }

@@ -12,10 +12,10 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/crypto"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -59,7 +59,7 @@ func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 		return
 	}
 
-	if err := file.InitUserConfig(); err != nil {
+	if err := filesystem.InitUserConfig(); err != nil {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess("Initialized flow global configurations")
@@ -83,14 +83,14 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 	name := args[0]
 	path := args[1]
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if _, found := userConfig.Workspaces[name]; found {
 		logger.Fatalf("workspace %s already exists at %s", name, userConfig.Workspaces[name])
 	}
 
 	switch {
 	case path == "":
-		path = filepath.Join(file.CachedDataDirPath(), name)
+		path = filepath.Join(filesystem.CachedDataDirPath(), name)
 	case path == "." || strings.HasPrefix(path, "./"):
 		wd, err := os.Getwd()
 		if err != nil {
@@ -113,7 +113,7 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 		}
 	}
 
-	if err := file.InitWorkspaceConfig(name, path); err != nil {
+	if err := filesystem.InitWorkspaceConfig(name, path); err != nil {
 		logger.FatalErr(err)
 	}
 	userConfig.Workspaces[name] = path
@@ -124,7 +124,7 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 		logger.Infof("Workspace '%s' set as current workspace", name)
 	}
 
-	if err := file.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 
@@ -172,10 +172,10 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	case template != "" && fileVal != "":
 		logger.Fatalf("only one of -f or -t can be provided")
 	case template != "":
-		if ctx.UserConfig.Templates == nil {
+		if ctx.Config.Templates == nil {
 			logger.Fatalf("template %s not found", template)
 		}
-		if path, found := ctx.UserConfig.Templates[template]; !found {
+		if path, found := ctx.Config.Templates[template]; !found {
 			logger.Fatalf("template %s not found", template)
 		} else if found {
 			definitionPath = path
@@ -186,7 +186,7 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		}
 		definitionPath = fileVal
 	}
-	execTemplate, err := file.LoadExecutableDefinitionTemplate(definitionPath)
+	execTemplate, err := filesystem.LoadFlowFileTemplate(definitionPath)
 	if err != nil {
 		logger.FatalErr(err)
 	}
@@ -195,11 +195,11 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	}
 	execTemplate.SetContext(definitionPath)
 
-	wsPath, wsFound := ctx.UserConfig.Workspaces[workspaceName]
+	wsPath, wsFound := ctx.Config.Workspaces[workspaceName]
 	if !wsFound {
 		logger.Fatalf("workspace %s not found", workspaceName)
 	}
-	ws, err := file.LoadWorkspaceConfig(workspaceName, wsPath)
+	ws, err := filesystem.LoadWorkspaceConfig(workspaceName, wsPath)
 	if err != nil {
 		logger.FatalErr(err)
 	}
@@ -226,7 +226,7 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		}
 	}
 
-	if err := file.InitExecutables(execTemplate, ws, definitionName, subPath); err != nil {
+	if err := filesystem.InitExecutables(execTemplate, ws, definitionName, subPath); err != nil {
 		logger.FatalErr(err)
 	}
 

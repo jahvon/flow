@@ -8,9 +8,11 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/types/config"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 var _ = Describe("Env", func() {
@@ -30,8 +32,8 @@ var _ = Describe("Env", func() {
 
 	Describe("SetEnv", func() {
 		It("should set environment variables correctly", func() {
-			exec := &config.ExecutableEnvironment{
-				Parameters: []config.Parameter{
+			exec := &executable.ExecutableEnvironment{
+				Params: []executable.Parameter{
 					{
 						EnvKey: "TEST_KEY",
 						Text:   "test",
@@ -49,7 +51,7 @@ var _ = Describe("Env", func() {
 
 	Describe("ResolveParameterValue", func() {
 		It("should return empty string when all parameter fields are empty", func() {
-			param := config.Parameter{}
+			param := executable.Parameter{}
 			promptedEnv := make(map[string]string)
 			val, err := runner.ResolveParameterValue(logger, param, promptedEnv)
 			Expect(err).ToNot(HaveOccurred())
@@ -57,7 +59,7 @@ var _ = Describe("Env", func() {
 		})
 
 		It("should return text when text field is not empty", func() {
-			param := config.Parameter{
+			param := executable.Parameter{
 				Text: "test",
 			}
 			promptedEnv := make(map[string]string)
@@ -67,7 +69,7 @@ var _ = Describe("Env", func() {
 		})
 
 		It("should return error when prompt field is not empty but env key is not in promptedEnv", func() {
-			param := config.Parameter{
+			param := executable.Parameter{
 				Prompt: "test",
 				EnvKey: "TEST_KEY",
 			}
@@ -77,7 +79,7 @@ var _ = Describe("Env", func() {
 		})
 
 		It("should return value from promptedEnv when prompt field is not empty and env key is in promptedEnv", func() {
-			param := config.Parameter{
+			param := executable.Parameter{
 				Prompt: "test",
 				EnvKey: "TEST_KEY",
 			}
@@ -94,8 +96,8 @@ var _ = Describe("Env", func() {
 
 	Describe("BuildEnvList", func() {
 		It("should build the environment list correctly", func() {
-			exec := &config.ExecutableEnvironment{
-				Parameters: []config.Parameter{
+			exec := &executable.ExecutableEnvironment{
+				Params: []executable.Parameter{
 					{
 						EnvKey: "TEST_KEY",
 						Text:   "test",
@@ -116,8 +118,8 @@ var _ = Describe("Env", func() {
 
 	Describe("BuildEnvMap", func() {
 		It("should build environment map correctly", func() {
-			exec := &config.ExecutableEnvironment{
-				Parameters: []config.Parameter{
+			exec := &executable.ExecutableEnvironment{
+				Params: []executable.Parameter{
 					{
 						EnvKey: "TEST_KEY",
 						Text:   "test",
@@ -144,15 +146,15 @@ var _ = Describe("Env", func() {
 			execName := "test-executable"
 			execDefinitionLocation := "test-definition-location"
 
-			ws := config.WorkspaceConfig{}
+			ws := workspace.Workspace{}
 			ws.SetContext(wsName, wsLocation)
 			ctx := &context.Context{
 				CurrentWorkspace: &ws,
-				UserConfig: &config.UserConfig{
+				Config: &config.Config{
 					CurrentNamespace: nsName,
 				},
 			}
-			exec := config.Executable{Name: execName}
+			exec := executable.Executable{Name: execName}
 			exec.SetContext(wsName, wsLocation, nsName, execDefinitionLocation)
 			envMap := runner.DefaultEnv(ctx, &exec)
 			Expect(envMap["FLOW_RUNNER"]).To(Equal("true"))

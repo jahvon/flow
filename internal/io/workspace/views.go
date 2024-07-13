@@ -6,19 +6,18 @@ import (
 
 	"github.com/jahvon/tuikit/components"
 	"github.com/jahvon/tuikit/styles"
-	"github.com/samber/lo"
 
-	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/file"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/common"
 	"github.com/jahvon/flow/internal/services/open"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 func NewWorkspaceView(
 	ctx *context.Context,
-	ws config.WorkspaceConfig,
+	ws *workspace.Workspace,
 	format components.Format,
 ) components.TeaModel {
 	container := ctx.InteractiveContainer
@@ -35,7 +34,7 @@ func NewWorkspaceView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				fullPath := filepath.Join(ws.Location(), file.WorkspaceConfigFileName)
+				fullPath := filepath.Join(ws.Location(), filesystem.WorkspaceConfigFileName)
 				if err := common.OpenInEditor(fullPath, ctx.StdIn(), ctx.StdOut()); err != nil {
 					container.HandleError(fmt.Errorf("unable to edit workspace: %w", err))
 				}
@@ -45,13 +44,13 @@ func NewWorkspaceView(
 		{
 			Key: "s", Label: "set",
 			Callback: func() error {
-				curCfg, err := file.LoadUserConfig()
+				curCfg, err := filesystem.LoadConfig()
 				if err != nil {
 					container.HandleError(err)
 					return nil
 				}
 				curCfg.CurrentWorkspace = ws.AssignedName()
-				if err := file.WriteUserConfig(curCfg); err != nil {
+				if err := filesystem.WriteUserConfig(curCfg); err != nil {
 					container.HandleError(err)
 				}
 				container.SetContext(fmt.Sprintf("%s/*", ws.AssignedName()))
@@ -66,12 +65,12 @@ func NewWorkspaceView(
 		Height: container.Height(),
 		Width:  container.Width(),
 	}
-	return components.NewEntityView(state, &ws, format, workspaceKeyCallbacks...)
+	return components.NewEntityView(state, ws, format, workspaceKeyCallbacks...)
 }
 
 func NewWorkspaceListView(
 	ctx *context.Context,
-	workspaces config.WorkspaceConfigList,
+	workspaces workspace.WorkspaceList,
 	format components.Format,
 ) components.TeaModel {
 	container := ctx.InteractiveContainer
@@ -80,10 +79,14 @@ func NewWorkspaceListView(
 	}
 
 	selectFunc := func(filterVal string) error {
-		ws, found := lo.Find(workspaces, func(s config.WorkspaceConfig) bool {
-			return s.AssignedName() == filterVal || s.DisplayName == filterVal
-		})
-		if !found {
+		var ws *workspace.Workspace
+		for _, s := range workspaces {
+			if s.AssignedName() == filterVal || s.DisplayName == filterVal {
+				ws = s
+				break
+			}
+		}
+		if ws == nil {
 			return fmt.Errorf("workspace not found")
 		}
 

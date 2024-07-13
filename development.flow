@@ -41,7 +41,7 @@ executables:
       dir: //
       cmd: |
         go generate ./...
-        go run ./tools/docsgen/main.go
+        go run ./tools/docsgen/.
 
   - verb: run
     name: lint

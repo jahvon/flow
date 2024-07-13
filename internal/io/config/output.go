@@ -6,12 +6,12 @@ import (
 
 	tuikitIO "github.com/jahvon/tuikit/io"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/config"
 )
 
-func PrintUserConfig(logger tuikitIO.Logger, format string, userConfig *config.UserConfig) {
+func PrintUserConfig(logger tuikitIO.Logger, format string, userConfig *config.Config) {
 	if userConfig == nil {
-		logger.Fatalf("Config is nil")
+		logger.Fatalf("FlowFile is nil")
 	}
 
 	switch strings.ToLower(format) {

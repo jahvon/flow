@@ -90,3 +90,10 @@ func ValidateOneOf(fieldName string, vals ...interface{}) error {
 	}
 	return nil
 }
+
+func IsZeroValue(v interface{}) bool {
+	if v == nil {
+		return true
+	}
+	return reflect.DeepEqual(v, reflect.Zero(reflect.TypeOf(v)).Interface())
+}

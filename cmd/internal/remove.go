@@ -10,9 +10,9 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -37,7 +37,7 @@ func registerRemoveWsCmd(ctx *context.Context, removeCmd *cobra.Command) {
 			"workspace will be unlinked from the flow global configurations.\nNote: You cannot remove the current workspace.",
 		Args: cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return maps.Keys(ctx.UserConfig.Workspaces), cobra.ShellCompDirectiveNoFileComp
+			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 			interactive.InitInteractiveCommand(ctx, cmd)
@@ -67,7 +67,7 @@ func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		return
 	}
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if name == userConfig.CurrentWorkspace {
 		logger.Fatalf("cannot remove the current workspace")
 	}
@@ -76,7 +76,7 @@ func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	}
 
 	delete(userConfig.Workspaces, name)
-	if err := file.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 

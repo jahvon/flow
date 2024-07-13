@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config/cache"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 )
 

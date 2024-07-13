@@ -8,15 +8,15 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config"
-	"github.com/jahvon/flow/config/cache"
-	"github.com/jahvon/flow/config/file"
+	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	configio "github.com/jahvon/flow/internal/io/config"
 	executableio "github.com/jahvon/flow/internal/io/executable"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/executable"
 )
 
 func RegisterGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -48,7 +48,7 @@ func registerGetConfigCmd(ctx *context.Context, getCmd *cobra.Command) {
 
 func getConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if interactive.UIEnabled(ctx, cmd) {
 		view := configio.NewUserConfigView(ctx.InteractiveContainer, *userConfig, components.Format(outputFormat))
@@ -65,7 +65,7 @@ func registerGetWsCmd(ctx *context.Context, getCmd *cobra.Command) {
 		Short:   "Print a workspace's configuration. If the name is omitted, the current workspace is used.",
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return maps.Keys(ctx.UserConfig.Workspaces), cobra.ShellCompDirectiveNoFileComp
+			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
@@ -80,13 +80,13 @@ func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	var workspaceName, wsPath string
 	if len(args) == 1 {
 		workspaceName = args[0]
-		wsPath = ctx.UserConfig.Workspaces[workspaceName]
+		wsPath = ctx.Config.Workspaces[workspaceName]
 	} else {
 		workspaceName = ctx.CurrentWorkspace.AssignedName()
 		wsPath = ctx.CurrentWorkspace.Location()
 	}
 
-	wsCfg, err := file.LoadWorkspaceConfig(workspaceName, wsPath)
+	wsCfg, err := filesystem.LoadWorkspaceConfig(workspaceName, wsPath)
 	if err != nil {
 		logger.FatalErr(errors.Wrap(err, "failure loading workspace config"))
 	} else if wsCfg == nil {
@@ -95,7 +95,7 @@ func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if interactive.UIEnabled(ctx, cmd) {
-		view := workspaceio.NewWorkspaceView(ctx, *wsCfg, components.Format(outputFormat))
+		view := workspaceio.NewWorkspaceView(ctx, wsCfg, components.Format(outputFormat))
 		ctx.InteractiveContainer.SetView(view)
 	} else {
 		workspaceio.PrintWorkspaceConfig(logger, outputFormat, wsCfg)
@@ -123,20 +123,20 @@ func registerGetExecCmd(ctx *context.Context, getCmd *cobra.Command) {
 func getExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	verbStr := args[0]
-	verb := config.Verb(verbStr)
+	verb := executable.Verb(verbStr)
 	if err := verb.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
 	id := args[1]
-	ws, ns, name := config.ParseExecutableID(id)
+	ws, ns, name := executable.ParseExecutableID(id)
 	if ws == "" {
 		ws = ctx.CurrentWorkspace.AssignedName()
 	}
-	if ns == "" && ctx.UserConfig.CurrentNamespace != "" {
-		ns = ctx.UserConfig.CurrentNamespace
+	if ns == "" && ctx.Config.CurrentNamespace != "" {
+		ns = ctx.Config.CurrentNamespace
 	}
-	id = config.NewExecutableID(ws, ns, name)
-	ref := config.NewRef(id, verb)
+	id = executable.NewExecutableID(ws, ns, name)
+	ref := executable.NewRef(id, verb)
 
 	exec, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
 	if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {

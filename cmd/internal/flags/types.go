@@ -4,7 +4,7 @@ package flags
 import (
 	"fmt"
 
-	"github.com/jahvon/flow/config"
+	"github.com/jahvon/flow/types/executable"
 )
 
 type Metadata struct {
@@ -56,7 +56,7 @@ var FilterNamespaceFlag = &Metadata{
 var FilterVerbFlag = &Metadata{
 	Name:      "verb",
 	Shorthand: "v",
-	Usage:     fmt.Sprintf("Filter executables by verb. One of: %s", config.SortedValidVerbs()),
+	Usage:     fmt.Sprintf("Filter executables by verb. One of: %s", executable.SortedValidVerbs()),
 	Default:   "",
 	Required:  false,
 }

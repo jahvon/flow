@@ -8,12 +8,14 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/cmd/internal/interactive"
-	"github.com/jahvon/flow/config"
 	"github.com/jahvon/flow/internal/context"
 	executableio "github.com/jahvon/flow/internal/io/executable"
 	secretio "github.com/jahvon/flow/internal/io/secret"
 	workspaceio "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/common"
+	"github.com/jahvon/flow/types/executable"
+	"github.com/jahvon/flow/types/workspace"
 )
 
 func RegisterListCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -49,19 +51,19 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	tagsFilter := flags.ValueFor[[]string](ctx, cmd, *flags.FilterTagFlag, false)
 
 	logger.Debugf("Loading workspace configs from cache")
-	workspaceCache, err := ctx.WorkspacesCache.Get(logger)
+	workspaceCache, err := ctx.WorkspacesCache.GetLatestData(logger)
 	if err != nil {
 		logger.Fatalx("failure loading workspace configs from cache", "err", err)
 	}
 
-	filteredWorkspaces := make([]config.WorkspaceConfig, 0)
+	filteredWorkspaces := make([]*workspace.Workspace, 0)
 	for name, ws := range workspaceCache.Workspaces {
 		location := workspaceCache.WorkspaceLocations[name]
 		ws.SetContext(name, location)
-		if !ws.Tags.HasAnyTag(tagsFilter) {
+		if !common.Tags(ws.Tags).HasAnyTag(tagsFilter) {
 			continue
 		}
-		filteredWorkspaces = append(filteredWorkspaces, *ws)
+		filteredWorkspaces = append(filteredWorkspaces, ws)
 	}
 
 	if len(filteredWorkspaces) == 0 {
@@ -103,12 +105,12 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
-		wsFilter = ctx.UserConfig.CurrentWorkspace
+		wsFilter = ctx.Config.CurrentWorkspace
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
 	if nsFilter == "." {
-		nsFilter = ctx.UserConfig.CurrentNamespace
+		nsFilter = ctx.Config.CurrentNamespace
 	}
 
 	verbFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterVerbFlag, false)
@@ -124,7 +126,7 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	filteredExec = filteredExec.
 		FilterByWorkspace(wsFilter).
 		FilterByNamespace(nsFilter).
-		FilterByVerb(config.Verb(verbFilter)).
+		FilterByVerb(executable.Verb(verbFilter)).
 		FilterByTags(tagsFilter).
 		FilterBySubstring(substr)
 
