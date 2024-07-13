@@ -48,7 +48,7 @@ var _ = Describe("ExecutableCacheImpl", func() {
 		execCfg := &executable.FlowFile{
 			Namespace:  "testdata",
 			Visibility: &v,
-			Executables: executable.FlowFileExecutables{
+			Executables: executable.ExecutableList{
 				{Verb: "run", Name: "exec"},
 			},
 		}

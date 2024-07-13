@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/jahvon/tuikit/components"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -109,8 +111,12 @@ func registerGetExecCmd(ctx *context.Context, getCmd *cobra.Command) {
 		Short:   "Print an executable flow by reference.",
 		Long: "Print an executable by the executable's verb and ID.\nThe target executable's ID should be in the  " +
 			"form of 'ws/ns:name' and the verb should match the target executable's verb or one of its aliases.\n\n" +
-			"See" + io.ConfigDocsURL("executables", "Verb") + "for more information on executable verbs." +
-			"See" + io.ConfigDocsURL("executable", "Ref") + "for more information on executable IDs.",
+			fmt.Sprintf(
+				"See %s for more information on executable verbs.\n"+
+					"See %s for more information on executable IDs.",
+				io.TypesDocsURL("flowfile", "ExecutableVerb"),
+				io.TypesDocsURL("flowfile", "ExecutableRef"),
+			),
 		Args:    cobra.ExactArgs(2),
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },

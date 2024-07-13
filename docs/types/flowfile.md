@@ -15,10 +15,10 @@ A workspace can have multiple flow files located anywhere in the workspace direc
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `description` | A description of the executables defined within the flow file. This description will be set as the executables' description if not defined at the executable level.  | `string` |  | [] |
-| `executables` |  | [Executable](#Executable) | [] | [] |
+| `executables` |  | `array` ([Executable](#Executable)) | [] | [] |
 | `fromFile` |  | [FromFile](#FromFile) | [] | [] |
 | `namespace` | The namespace to be given to all executables in the flow file. If not set, the executables in the file will be grouped into the root (*) namespace.  Namespaces can be reused across multiple flow files.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.  | `string` |  | [] |
-| `tags` | Tags to be applied to all executables defined within the flow file. | array (``string``) | [] | [] |
+| `tags` | Tags to be applied to all executables defined within the flow file. | `array` (`string`) | [] | [] |
 | `visibility` |  | [CommonVisibility](#CommonVisibility) | <no value> | [] |
 
 
@@ -28,7 +28,7 @@ A workspace can have multiple flow files located anywhere in the workspace direc
 
 Alternate names that can be used to reference the executable in the CLI.
 
-**Type:** array (``string``)
+**Type:** `array` (`string`)
 
 
 
@@ -39,7 +39,7 @@ A list of tags.
 Tags can be used with list commands to filter returned data.
 
 
-**Type:** array (``string``)
+**Type:** `array` (`string`)
 
 
 
@@ -116,7 +116,7 @@ Executables are the building blocks of workflows and are used to define the acti
 
 
 
-**Type:** array (`[ExecutableArgument](#ExecutableArgument)`)
+**Type:** `array` ([ExecutableArgument](#ExecutableArgument))
 
 
 
@@ -214,7 +214,7 @@ Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than o
 
 
 
-**Type:** array (`[ExecutableParameter](#ExecutableParameter)`)
+**Type:** `array` ([ExecutableParameter](#ExecutableParameter))
 
 
 
@@ -239,7 +239,7 @@ If the namespace is not specified, the current namespace will be used.
 
 
 
-**Type:** array (`[ExecutableRef](#ExecutableRef)`)
+**Type:** `array` ([ExecutableRef](#ExecutableRef))
 
 
 
@@ -276,7 +276,7 @@ Makes an HTTP request.
 | ----- | ----------- | ---- | ------- | -------- |
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
 | `body` | The body of the request. | `string` |  | [] |
-| `headers` | A map of headers to include in the request. | map (`string -> string`) | map[] | [] |
+| `headers` | A map of headers to include in the request. | `map` (`string` -> `string`) | map[] | [] |
 | `logResponse` | If set to true, the response will be logged as program output. | `boolean` | false | [] |
 | `method` | The HTTP method to use when making the request. | `string` | GET | [] |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
@@ -284,7 +284,7 @@ Makes an HTTP request.
 | `timeout` | The timeout for the request in Go duration format (e.g. 30s, 5m, 1h). | `string` | 30m0s | [] |
 | `transformResponse` | JQ query to transform the response before saving it to a file or outputting it. | `string` |  | [] |
 | `url` | The URL to make the request to. | `string` |  | [] |
-| `validStatusCodes` | A list of valid status codes. If the response status code is not in this list, the executable will fail. If not set, the response status code will not be checked.  | array (``integer``) | [] | [] |
+| `validStatusCodes` | A list of valid status codes. If the response status code is not in this list, the executable will fail. If not set, the response status code will not be checked.  | `array` (`integer`) | [] | [] |
 
 ### ExecutableRequestResponseFile
 
@@ -377,7 +377,7 @@ This allows users to use the verb that best describes the action they are perfor
 
 A list of `.sh` files to convert into generated executables in the file's executable group.
 
-**Type:** array (``string``)
+**Type:** `array` (`string`)
 
 
 

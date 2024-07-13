@@ -28,7 +28,7 @@ A list of tags.
 Tags can be used with list commands to filter returned data.
 
 
-**Type:** array (``string``)
+**Type:** `array` (`string`)
 
 
 
@@ -45,7 +45,7 @@ Tags can be used with list commands to filter returned data.
 
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
-| `excluded` | A list of directories to exclude from the executable search. | array (``string``) | [] | [] |
-| `included` | A list of directories to include in the executable search. | array (``string``) | [] | [] |
+| `excluded` | A list of directories to exclude from the executable search. | `array` (`string`) | [] | [] |
+| `included` | A list of directories to include in the executable search. | `array` (`string`) | [] | [] |
 
 

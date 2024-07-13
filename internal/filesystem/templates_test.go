@@ -32,7 +32,7 @@ var _ = Describe("Templates", func() {
 			definitionTemplate := &executable.FlowFileTemplate{
 				FlowFile: &executable.FlowFile{
 					Namespace: "test",
-					Executables: executable.FlowFileExecutables{
+					Executables: executable.ExecutableList{
 						{Verb: "run", Name: "test-executable", Description: "{{ .key }}"},
 					},
 				},
@@ -53,7 +53,7 @@ var _ = Describe("Templates", func() {
 			definitionTemplate := &executable.FlowFileTemplate{
 				FlowFile: &executable.FlowFile{
 					Namespace: "test",
-					Executables: executable.FlowFileExecutables{
+					Executables: executable.ExecutableList{
 						{Verb: "run", Name: "test-executable", Description: "{{ .key }}"},
 					},
 				},
@@ -83,7 +83,7 @@ var _ = Describe("Templates", func() {
 			definitionTemplate := &executable.FlowFileTemplate{
 				FlowFile: &executable.FlowFile{
 					Namespace: "test",
-					Executables: executable.FlowFileExecutables{
+					Executables: executable.ExecutableList{
 						{Verb: "exec", Name: "test-executable", Description: "{{ .key }}"},
 					},
 				},

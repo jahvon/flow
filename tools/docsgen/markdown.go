@@ -130,10 +130,10 @@ func typeStr(s *schema.JSONSchema) string {
 	standard := []string{"string", "integer", "number", "boolean", "object"}
 	switch {
 	case name == "array":
-		return fmt.Sprintf("array (`%s`)", typeStr(s.Items))
+		return fmt.Sprintf("`array` (%s)", typeStr(s.Items))
 	case name == "object" && s.AdditionalProperties != nil:
 		// TODO: look into if this is correct
-		return fmt.Sprintf("map (`string -> %s`)", s.AdditionalProperties.Type)
+		return fmt.Sprintf("`map` (`string` -> %s)", typeStr(s.AdditionalProperties))
 	case slices.Contains(standard, name) ||
 		strings.HasPrefix(name, "map[") ||
 		strings.HasPrefix(name, "[]"):

@@ -35,7 +35,9 @@ properties:
       Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.
     default: ""
   executables:
-    $ref: '../executable/executable_schema.yaml#/'
+    type: array
+    items:
+      $ref: '../executable/executable_schema.yaml#/'
     goJSONSchema:
       type: ExecutableList
     default: []

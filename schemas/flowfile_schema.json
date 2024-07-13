@@ -483,8 +483,11 @@
       "default": ""
     },
     "executables": {
-      "$ref": "#/definitions/Executable",
-      "default": []
+      "type": "array",
+      "default": [],
+      "items": {
+        "$ref": "#/definitions/Executable"
+      }
     },
     "fromFile": {
       "$ref": "#/definitions/FromFile",

@@ -41,7 +41,7 @@ var _ = Describe("Executables", func() {
 		It("writes and reads executable definition correctly", func() {
 			executableDefinition := &executable.FlowFile{
 				Namespace: "test",
-				Executables: executable.FlowFileExecutables{
+				Executables: executable.ExecutableList{
 					{
 						Verb: "exec",
 						Name: "test-executable",
@@ -62,7 +62,7 @@ var _ = Describe("Executables", func() {
 		It("loads all executable definitions if no paths are set", func() {
 			executableDefinition := &executable.FlowFile{
 				Namespace: "test",
-				Executables: executable.FlowFileExecutables{
+				Executables: executable.ExecutableList{
 					{
 						Verb: "exec",
 						Name: "test-executable",
@@ -88,7 +88,7 @@ var _ = Describe("Executables", func() {
 		It("loads executable definitions from the included path", func() {
 			executableDefinition := &executable.FlowFile{
 				Namespace: "test",
-				Executables: executable.FlowFileExecutables{
+				Executables: executable.ExecutableList{
 					{
 						Verb: "exec",
 						Name: "test-executable",
@@ -120,7 +120,7 @@ var _ = Describe("Executables", func() {
 		It("does not load executable definitions from excluded paths", func() {
 			executableDefinition := &executable.FlowFile{
 				Namespace: "test",
-				Executables: executable.FlowFileExecutables{
+				Executables: executable.ExecutableList{
 					{
 						Verb: "exec",
 						Name: "test-executable",

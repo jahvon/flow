@@ -21,7 +21,7 @@ type FlowFile struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
 	// Executables corresponds to the JSON schema field "executables".
-	Executables FlowFileExecutables `json:"executables,omitempty" yaml:"executables,omitempty" mapstructure:"executables,omitempty"`
+	Executables ExecutableList `json:"executables,omitempty" yaml:"executables,omitempty" mapstructure:"executables,omitempty"`
 
 	// FromFile corresponds to the JSON schema field "fromFile".
 	FromFile FromFile `json:"fromFile,omitempty" yaml:"fromFile,omitempty" mapstructure:"fromFile,omitempty"`
@@ -48,8 +48,6 @@ type FlowFile struct {
 	// workspacePath corresponds to the JSON schema field "workspacePath".
 	workspacePath string `json:"workspacePath,omitempty" yaml:"workspacePath,omitempty" mapstructure:"workspacePath,omitempty"`
 }
-
-type FlowFileExecutables ExecutableList
 
 type FlowFileVisibility common.Visibility
 
