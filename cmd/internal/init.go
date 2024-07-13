@@ -83,7 +83,7 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 	name := args[0]
 	path := args[1]
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if _, found := userConfig.Workspaces[name]; found {
 		logger.Fatalf("workspace %s already exists at %s", name, userConfig.Workspaces[name])
 	}
@@ -172,10 +172,10 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	case template != "" && fileVal != "":
 		logger.Fatalf("only one of -f or -t can be provided")
 	case template != "":
-		if ctx.UserConfig.Templates == nil {
+		if ctx.Config.Templates == nil {
 			logger.Fatalf("template %s not found", template)
 		}
-		if path, found := ctx.UserConfig.Templates[template]; !found {
+		if path, found := ctx.Config.Templates[template]; !found {
 			logger.Fatalf("template %s not found", template)
 		} else if found {
 			definitionPath = path
@@ -195,7 +195,7 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	}
 	execTemplate.SetContext(definitionPath)
 
-	wsPath, wsFound := ctx.UserConfig.Workspaces[workspaceName]
+	wsPath, wsFound := ctx.Config.Workspaces[workspaceName]
 	if !wsFound {
 		logger.Fatalf("workspace %s not found", workspaceName)
 	}

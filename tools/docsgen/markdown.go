@@ -61,7 +61,7 @@ func generateMarkdownDocs() {
 				panic(err)
 			}
 			markdown := buf.String()
-			filePath := filepath.Join(dir, page.Filename)
+			filePath := filepath.Clean(filepath.Join(dir, page.Filename))
 			file, err := os.Create(filePath)
 			if err != nil {
 				panic(err)
@@ -107,7 +107,8 @@ func newTopLevelPage(f schema.FileName, s *schema.JSONSchema, sm map[schema.File
 }
 
 func templateFileData(filename string) string {
-	f, err := os.ReadFile(filepath.Join(rootDir(), "tools/docsgen", filename))
+	p := filepath.Clean(filepath.Join(rootDir(), "tools/docsgen", filename))
+	f, err := os.ReadFile(p)
 	if err != nil {
 		panic(err)
 	}

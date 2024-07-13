@@ -42,7 +42,7 @@ func (r *execRunner) Exec(ctx *context.Context, e *executable.Executable, inputE
 	targetDir, isTmp, err := execSpec.Dir.ExpandDirectory(
 		ctx.Logger,
 		e.WorkspacePath(),
-		e.ConfigPath(),
+		e.FlowFilePath(),
 		ctx.ProcessTmpDir,
 		envMap,
 	)

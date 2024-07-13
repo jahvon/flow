@@ -75,7 +75,7 @@ func (r *requestRunner) Exec(ctx *context.Context, e *executable.Executable, inp
 		targetDir, isTmp, err := requestSpec.ResponseFile.Dir.ExpandDirectory(
 			ctx.Logger,
 			e.WorkspacePath(),
-			e.ConfigPath(),
+			e.FlowFilePath(),
 			ctx.ProcessTmpDir,
 			envMap,
 		)

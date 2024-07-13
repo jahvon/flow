@@ -5,10 +5,16 @@ package config
 import "github.com/jahvon/tuikit/io"
 
 // User Configuration for the Flow CLI.
-// This configuration is used to define workspaces, templates, and other settings
-// for the CLI.
-// It is stored in the user's flow cache directory (e.g. `$HOME/Library/Application
-// Support/flow` on MacOS).
+// Includes configurations for workspaces, templates, I/O, and other settings for
+// the CLI.
+//
+// It is read from the user's flow config directory:
+// - **MacOS**: `$HOME/Library/Application Support/flow`
+// - **Linux**: `$HOME/.config/flow`
+// - **Windows**: `%APPDATA%\flow`
+//
+// Alternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment
+// variable.
 type Config struct {
 	// The name of the current namespace.
 	//

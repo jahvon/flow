@@ -48,7 +48,7 @@ func registerGetConfigCmd(ctx *context.Context, getCmd *cobra.Command) {
 
 func getConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if interactive.UIEnabled(ctx, cmd) {
 		view := configio.NewUserConfigView(ctx.InteractiveContainer, *userConfig, components.Format(outputFormat))
@@ -65,7 +65,7 @@ func registerGetWsCmd(ctx *context.Context, getCmd *cobra.Command) {
 		Short:   "Print a workspace's configuration. If the name is omitted, the current workspace is used.",
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return maps.Keys(ctx.UserConfig.Workspaces), cobra.ShellCompDirectiveNoFileComp
+			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
@@ -80,7 +80,7 @@ func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	var workspaceName, wsPath string
 	if len(args) == 1 {
 		workspaceName = args[0]
-		wsPath = ctx.UserConfig.Workspaces[workspaceName]
+		wsPath = ctx.Config.Workspaces[workspaceName]
 	} else {
 		workspaceName = ctx.CurrentWorkspace.AssignedName()
 		wsPath = ctx.CurrentWorkspace.Location()
@@ -95,7 +95,7 @@ func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if interactive.UIEnabled(ctx, cmd) {
-		view := workspaceio.NewWorkspaceView(ctx, *wsCfg, components.Format(outputFormat))
+		view := workspaceio.NewWorkspaceView(ctx, wsCfg, components.Format(outputFormat))
 		ctx.InteractiveContainer.SetView(view)
 	} else {
 		workspaceio.PrintWorkspaceConfig(logger, outputFormat, wsCfg)
@@ -132,8 +132,8 @@ func getExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	if ws == "" {
 		ws = ctx.CurrentWorkspace.AssignedName()
 	}
-	if ns == "" && ctx.UserConfig.CurrentNamespace != "" {
-		ns = ctx.UserConfig.CurrentNamespace
+	if ns == "" && ctx.Config.CurrentNamespace != "" {
+		ns = ctx.Config.CurrentNamespace
 	}
 	id = executable.NewExecutableID(ws, ns, name)
 	ref := executable.NewRef(id, verb)

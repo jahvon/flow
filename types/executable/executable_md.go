@@ -39,7 +39,7 @@ func execMarkdown(e *Executable) string {
 	}
 
 	mkdwn += execTypeMarkdown(e)
-	mkdwn += fmt.Sprintf("\n\n_Executable can be found in_ [%s](%s)\n", e.configPath, e.configPath)
+	mkdwn += fmt.Sprintf("\n\n_Executable can be found in_ [%s](%s)\n", e.flowFilePath, e.flowFilePath)
 	return mkdwn
 }
 

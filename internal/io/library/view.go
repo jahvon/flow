@@ -47,7 +47,7 @@ func (l *Library) View() string {
 
 	l.paneTwoViewport.Style = paneStyle(2, l.theme, l.splitView)
 	l.paneTwoViewport.SetContent(l.paneTwoContent())
-	v := ctxVal(l.ctx.CurrentWorkspace.AssignedName(), l.ctx.UserConfig.CurrentNamespace)
+	v := ctxVal(l.ctx.CurrentWorkspace.AssignedName(), l.ctx.Config.CurrentNamespace)
 	header := l.theme.RenderHeader(appName, "ctx", v, l.termWidth)
 	var panes string
 	if l.splitView {
@@ -249,7 +249,7 @@ func (l *Library) footerContent() string {
 			var wsCfg *workspace.Workspace
 			for i, w := range l.allWorkspaces {
 				if w.AssignedName() == ws {
-					wsCfg = &l.allWorkspaces[i]
+					wsCfg = l.allWorkspaces[i]
 				}
 			}
 			if wsCfg == nil {
@@ -290,7 +290,7 @@ func (l *Library) footerContent() string {
 				info = l.noticeText
 			default:
 				exec := l.visibleExecutables[l.currentExecutable]
-				path, err := relativePathFromWd(exec.ConfigPath())
+				path, err := relativePathFromWd(exec.FlowFilePath())
 				if err != nil {
 					l.ctx.Logger.Error(err, "unable to get relative path from wd")
 					break

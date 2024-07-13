@@ -68,11 +68,11 @@ type enrichedExecutable struct {
 	Spec *Executable `json:"spec" yaml:"spec"`
 }
 
-func (e *Executable) SetContext(workspaceName, workspacePath, namespace, configPath string) {
+func (e *Executable) SetContext(workspaceName, workspacePath, namespace, flowFilePath string) {
 	e.workspace = workspaceName
 	e.workspacePath = workspacePath
 	e.namespace = namespace
-	e.configPath = configPath
+	e.flowFilePath = flowFilePath
 }
 
 func (e *Executable) YAML() (string, error) {
@@ -175,8 +175,8 @@ func (e *Executable) WorkspacePath() string {
 	return e.workspacePath
 }
 
-func (e *Executable) ConfigPath() string {
-	return e.configPath
+func (e *Executable) FlowFilePath() string {
+	return e.flowFilePath
 }
 
 func (e *Executable) SetDefaults() {
@@ -220,8 +220,8 @@ func (e *Executable) Validate() error {
 	if e.workspace == "" {
 		return fmt.Errorf("workspace was not set")
 	}
-	if e.configPath == "" {
-		return fmt.Errorf("config path was not set")
+	if e.flowFilePath == "" {
+		return fmt.Errorf("flowFile path was not set")
 	}
 
 	return nil

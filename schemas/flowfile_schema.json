@@ -467,7 +467,7 @@
         "transform"
       ]
     },
-    "FromFiles": {
+    "FromFile": {
       "description": "A list of `.sh` files to convert into generated executables in the file's executable group.",
       "type": "array",
       "default": [],
@@ -486,8 +486,8 @@
       "$ref": "#/definitions/Executable",
       "default": []
     },
-    "fromFiles": {
-      "$ref": "#/definitions/FromFiles",
+    "fromFile": {
+      "$ref": "#/definitions/FromFile",
       "default": []
     },
     "namespace": {

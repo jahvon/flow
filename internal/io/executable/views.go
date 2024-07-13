@@ -43,7 +43,7 @@ func NewExecutableView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				if err := common.OpenInEditor(exec.ConfigPath(), ctx.StdIn(), ctx.StdOut()); err != nil {
+				if err := common.OpenInEditor(exec.FlowFilePath(), ctx.StdIn(), ctx.StdOut()); err != nil {
 					container.HandleError(fmt.Errorf("unable to open executable: %w", err))
 				}
 				return nil

@@ -17,17 +17,17 @@ const generatedTag = "generated"
 
 func generatedExecutables(
 	logger io.Logger,
-	wsName, wsPath, cfgNs, cfgPath string,
+	wsName, wsPath, flowFileNs, flowFilePath string,
 	files []string,
 ) (executable.ExecutableList, error) {
 	executables := make(executable.ExecutableList, 0)
 	for _, file := range files {
-		expandedFile := utils.ExpandDirectory(logger, file, wsPath, cfgPath, nil)
+		expandedFile := utils.ExpandDirectory(logger, file, wsPath, flowFilePath, nil)
 		exec, err := executablesFromFile(logger, file, expandedFile)
 		if err != nil {
 			return nil, err
 		}
-		exec.SetContext(wsName, wsPath, cfgNs, cfgPath)
+		exec.SetContext(wsName, wsPath, flowFileNs, flowFilePath)
 		executables = append(executables, exec)
 	}
 

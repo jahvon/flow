@@ -103,7 +103,7 @@ func newTestContext(
 		Ctx:              ctx,
 		CancelFunc:       cancel,
 		Logger:           logger,
-		UserConfig:       testUserCfg,
+		Config:           testUserCfg,
 		CurrentWorkspace: testWsCfg,
 		WorkspacesCache:  wsCache,
 		ExecutableCache:  execCache,
@@ -143,7 +143,7 @@ func testUserConfig(wsDir string) (*config.Config, error) {
 	if err := filesystem.InitUserConfig(); err != nil {
 		return nil, err
 	}
-	userCfg, err := filesystem.LoadUserConfig()
+	userCfg, err := filesystem.LoadConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func testWsConfig(wsDir string) (*workspace.Workspace, error) {
 // testCaches must be called after the user and workspace configs have been created.
 func testCaches(t ginkgo.FullGinkgoTInterface, logger tuikitIO.Logger) (cache.WorkspaceCache, cache.ExecutableCache) {
 	wsCache := cache.NewWorkspaceCache()
-	execCache := cache.NewExecutableCache()
+	execCache := cache.NewExecutableCache(wsCache)
 
 	if err := wsCache.Update(logger); err != nil {
 		t.Fatalf("unable to update cache: %v", err)

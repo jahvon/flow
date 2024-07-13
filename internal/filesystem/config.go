@@ -93,7 +93,7 @@ func WriteUserConfig(config *config.Config) error {
 	return nil
 }
 
-func LoadUserConfig() (*config.Config, error) {
+func LoadConfig() (*config.Config, error) {
 	if err := EnsureConfigDir(); err != nil {
 		return nil, errors.Wrap(err, "unable to ensure existence of config directory")
 	}

@@ -13,7 +13,7 @@ import (
 
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p workspace -o workspace.gen.go schema.yaml
 
-type WorkspaceList []Workspace
+type WorkspaceList []*Workspace
 
 type enrichedWorkspaceConfigList struct {
 	Workspaces WorkspaceList `json:"workspaces" yaml:"workspaces"`
@@ -102,7 +102,7 @@ func (l WorkspaceList) JSON() (string, error) {
 func (l WorkspaceList) FindByName(name string) *Workspace {
 	for _, ws := range l {
 		if ws.AssignedName() == name {
-			return &ws
+			return ws
 		}
 	}
 	return nil

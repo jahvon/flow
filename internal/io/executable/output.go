@@ -33,7 +33,7 @@ func PrintExecutable(logger tuikitIO.Logger, format string, exec *executable.Exe
 	if exec == nil {
 		logger.Fatalf("Executable is nil")
 	}
-	logger.Infox(fmt.Sprintf("Executable %s", exec.ID()), "Location", exec.ConfigPath())
+	logger.Infox(fmt.Sprintf("Executable %s", exec.ID()), "Location", exec.FlowFilePath())
 	switch strings.ToLower(format) {
 	case "", "yaml", "yml":
 		str, err := exec.YAML()

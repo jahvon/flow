@@ -8,7 +8,7 @@ description: |
   A workspace can have multiple flow files located anywhere in the workspace directory
 
 definitions:
-  FromFiles:
+  FromFile:
     type: array
     description: A list of `.sh` files to convert into generated executables in the file's executable group.
     items:
@@ -22,8 +22,8 @@ properties:
     goJSONSchema:
       type: "common.Visibility"
       imports: ["github.com/jahvon/flow/types/common"]
-  fromFiles:
-    $ref: '#/definitions/FromFiles'
+  fromFile:
+    $ref: '#/definitions/FromFile'
     default: []
   namespace:
     type: string

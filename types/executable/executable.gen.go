@@ -97,9 +97,6 @@ type Executable struct {
 	// Aliases corresponds to the JSON schema field "aliases".
 	Aliases ExecutableAliases `json:"aliases,omitempty" yaml:"aliases,omitempty" mapstructure:"aliases,omitempty"`
 
-	// configPath corresponds to the JSON schema field "configPath".
-	configPath string `json:"configPath,omitempty" yaml:"configPath,omitempty" mapstructure:"configPath,omitempty"`
-
 	// A description of the executable.
 	// This description is rendered as markdown in the interactive UI.
 	//
@@ -107,6 +104,9 @@ type Executable struct {
 
 	// Exec corresponds to the JSON schema field "exec".
 	Exec *ExecExecutableType `json:"exec,omitempty" yaml:"exec,omitempty" mapstructure:"exec,omitempty"`
+
+	// flowFilePath corresponds to the JSON schema field "flowFilePath".
+	flowFilePath string `json:"flowFilePath,omitempty" yaml:"flowFilePath,omitempty" mapstructure:"flowFilePath,omitempty"`
 
 	// Launch corresponds to the JSON schema field "launch".
 	Launch *LaunchExecutableType `json:"launch,omitempty" yaml:"launch,omitempty" mapstructure:"launch,omitempty"`

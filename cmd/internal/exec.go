@@ -98,7 +98,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.FatalErr(fmt.Errorf(
 			"e '%s' cannot be executed from workspace %s",
 			ref,
-			ctx.UserConfig.CurrentWorkspace,
+			ctx.Config.CurrentWorkspace,
 		))
 	}
 
@@ -129,10 +129,10 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	dur := time.Since(startTime)
 	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
 	if interactive.UIEnabled(ctx, cmd) {
-		if dur > 1*time.Minute && ctx.UserConfig.SendSoundNotification() {
+		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
 			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 		}
-		if dur > 1*time.Minute && ctx.UserConfig.SendTextNotification() {
+		if dur > 1*time.Minute && ctx.Config.SendTextNotification() {
 			_ = beeep.Notify("Flow", "Flow completed", "")
 		}
 	}

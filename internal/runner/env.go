@@ -132,13 +132,13 @@ func DefaultEnv(ctx *context.Context, executable *executable.Executable) map[str
 	envMap := make(map[string]string)
 	envMap["FLOW_RUNNER"] = "true"
 	envMap["FLOW_CURRENT_WORKSPACE"] = ctx.CurrentWorkspace.AssignedName()
-	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.UserConfig.CurrentNamespace
+	envMap["FLOW_CURRENT_NAMESPACE"] = ctx.Config.CurrentNamespace
 	if ctx.ProcessTmpDir != "" {
 		envMap["FLOW_TMP_DIRECTORY"] = ctx.ProcessTmpDir
 	}
 	envMap["FLOW_EXECUTABLE_NAME"] = executable.Name
-	envMap["FLOW_DEFINITION_PATH"] = executable.ConfigPath()
-	envMap["FLOW_DEFINITION_DIR"] = filepath.Dir(executable.ConfigPath())
+	envMap["FLOW_DEFINITION_PATH"] = executable.FlowFilePath()
+	envMap["FLOW_DEFINITION_DIR"] = filepath.Dir(executable.FlowFilePath())
 	envMap["FLOW_WORKSPACE_PATH"] = executable.WorkspacePath()
 	envMap["FLOW_CONFIG_PATH"] = filesystem.ConfigDirPath()
 	envMap["FLOW_CACHE_PATH"] = filesystem.CachedDataDirPath()

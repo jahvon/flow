@@ -23,8 +23,8 @@ type FlowFile struct {
 	// Executables corresponds to the JSON schema field "executables".
 	Executables FlowFileExecutables `json:"executables,omitempty" yaml:"executables,omitempty" mapstructure:"executables,omitempty"`
 
-	// FromFiles corresponds to the JSON schema field "fromFiles".
-	FromFiles FromFiles `json:"fromFiles,omitempty" yaml:"fromFiles,omitempty" mapstructure:"fromFiles,omitempty"`
+	// FromFile corresponds to the JSON schema field "fromFile".
+	FromFile FromFile `json:"fromFile,omitempty" yaml:"fromFile,omitempty" mapstructure:"fromFile,omitempty"`
 
 	// The namespace to be given to all executables in the flow file.
 	// If not set, the executables in the file will be grouped into the root (*)
@@ -55,4 +55,4 @@ type FlowFileVisibility common.Visibility
 
 // A list of `.sh` files to convert into generated executables in the file's
 // executable group.
-type FromFiles []string
+type FromFile []string

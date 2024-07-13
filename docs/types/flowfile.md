@@ -16,7 +16,7 @@ A workspace can have multiple flow files located anywhere in the workspace direc
 | ----- | ----------- | ---- | ------- | -------- |
 | `description` | A description of the executables defined within the flow file. This description will be set as the executables' description if not defined at the executable level.  | `string` |  | [] |
 | `executables` |  | [Executable](#Executable) | [] | [] |
-| `fromFiles` |  | [FromFiles](#FromFiles) | [] | [] |
+| `fromFile` |  | [FromFile](#FromFile) | [] | [] |
 | `namespace` | The namespace to be given to all executables in the flow file. If not set, the executables in the file will be grouped into the root (*) namespace.  Namespaces can be reused across multiple flow files.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.  | `string` |  | [] |
 | `tags` | Tags to be applied to all executables defined within the flow file. | array (``string``) | [] | [] |
 | `visibility` |  | [CommonVisibility](#CommonVisibility) | <no value> | [] |
@@ -373,7 +373,7 @@ This allows users to use the verb that best describes the action they are perfor
 
 
 
-### FromFiles
+### FromFile
 
 A list of `.sh` files to convert into generated executables in the file's executable group.
 

@@ -36,7 +36,7 @@ func generateJSONSchemas() {
 			if err != nil {
 				panic(err)
 			}
-			filePath := filepath.Join(rootDir(), schemaDir, fn.JSONSchemaFile())
+			filePath := filepath.Clean(filepath.Join(rootDir(), schemaDir, fn.JSONSchemaFile()))
 			file, err := os.Create(filePath)
 			if err != nil {
 				panic(err)

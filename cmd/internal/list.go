@@ -55,14 +55,14 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.Fatalx("failure loading workspace configs from cache", "err", err)
 	}
 
-	filteredWorkspaces := make([]workspace.Workspace, 0)
+	filteredWorkspaces := make([]*workspace.Workspace, 0)
 	for name, ws := range workspaceCache.Workspaces {
 		location := workspaceCache.WorkspaceLocations[name]
 		ws.SetContext(name, location)
 		if !common.Tags(ws.Tags).HasAnyTag(tagsFilter) {
 			continue
 		}
-		filteredWorkspaces = append(filteredWorkspaces, *ws)
+		filteredWorkspaces = append(filteredWorkspaces, ws)
 	}
 
 	if len(filteredWorkspaces) == 0 {
@@ -104,12 +104,12 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
-		wsFilter = ctx.UserConfig.CurrentWorkspace
+		wsFilter = ctx.Config.CurrentWorkspace
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
 	if nsFilter == "." {
-		nsFilter = ctx.UserConfig.CurrentNamespace
+		nsFilter = ctx.Config.CurrentNamespace
 	}
 
 	verbFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterVerbFlag, false)

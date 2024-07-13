@@ -1,6 +1,8 @@
 package launch
 
 import (
+	"os"
+
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/internal/context"
@@ -41,11 +43,12 @@ func (r *launchRunner) Exec(ctx *context.Context, e *executable.Executable, inpu
 	if err := runner.SetEnv(ctx.Logger, e.Env(), envMap); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
+	launchSpec.URI = os.ExpandEnv(launchSpec.URI)
 	targetURI := utils.ExpandDirectory(
 		ctx.Logger,
 		launchSpec.URI,
 		e.WorkspacePath(),
-		e.ConfigPath(),
+		e.FlowFilePath(),
 		envMap,
 	)
 

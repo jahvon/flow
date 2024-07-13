@@ -150,7 +150,7 @@ var _ = Describe("Env", func() {
 			ws.SetContext(wsName, wsLocation)
 			ctx := &context.Context{
 				CurrentWorkspace: &ws,
-				UserConfig: &config.Config{
+				Config: &config.Config{
 					CurrentNamespace: nsName,
 				},
 			}

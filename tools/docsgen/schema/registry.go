@@ -12,7 +12,7 @@ func RegisteredSchemaMap() map[FileName]*JSONSchema {
 	schemas := make(map[FileName]*JSONSchema)
 	for _, file := range SchemaFilesForDocs {
 		s := &JSONSchema{}
-		p := filepath.Join(rootDir(), TypesRootDir, file.String())
+		p := filepath.Clean(filepath.Join(rootDir(), TypesRootDir, file.String()))
 		f, err := os.ReadFile(p)
 		if err != nil {
 			panic(err)

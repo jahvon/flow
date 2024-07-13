@@ -56,7 +56,7 @@ func (a *Argument) ValidateValue() error {
 		if _, err := strconv.ParseBool(a.value); err != nil {
 			return fmt.Errorf("value is not a boolean")
 		}
-	case ArgumentTypeString:
+	case ArgumentTypeString, "":
 		// no-op
 	default:
 		return fmt.Errorf("unsupported argument type (%s)", a.Type)

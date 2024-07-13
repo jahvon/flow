@@ -30,30 +30,19 @@ type WorkspaceCacheImpl struct {
 }
 
 func NewWorkspaceCache() WorkspaceCache {
-	if workspaceCache == nil {
-		workspaceCache = &WorkspaceCacheImpl{
-			Data: &WorkspaceCacheData{
-				Workspaces:         make(map[string]*workspace.Workspace),
-				WorkspaceLocations: make(map[string]string),
-			},
-		}
+	workspaceCache := &WorkspaceCacheImpl{
+		Data: &WorkspaceCacheData{
+			Workspaces:         make(map[string]*workspace.Workspace),
+			WorkspaceLocations: make(map[string]string),
+		},
 	}
 	return workspaceCache
 }
 
 func (c *WorkspaceCacheImpl) Update(logger io.Logger) error {
-	if c.Data == nil {
-		logger.Debugf("Initializing workspace cache data")
-		wc, ok := NewWorkspaceCache().(*WorkspaceCacheImpl)
-		if !ok {
-			return errors.New("unable to initialize workspace cache")
-		}
-		c.Data = wc.Data
-	} else {
-		logger.Debugf("Updating workspace cache data")
-	}
+	logger.Debugf("Updating workspace cache data")
 
-	cfg, err := filesystem.LoadUserConfig()
+	cfg, err := filesystem.LoadConfig()
 	if err != nil {
 		return err
 	}
@@ -107,7 +96,7 @@ func (c *WorkspaceCacheImpl) GetLatestData(logger io.Logger) (*WorkspaceCacheDat
 
 func (c *WorkspaceCacheImpl) GetWorkspaceConfigList(logger io.Logger) (workspace.WorkspaceList, error) {
 	var cache *WorkspaceCacheData
-	if c.Data == nil {
+	if len(c.Data.Workspaces) == 0 {
 		var err error
 		cache, err = c.GetLatestData(logger)
 		if err != nil {
@@ -120,7 +109,7 @@ func (c *WorkspaceCacheImpl) GetWorkspaceConfigList(logger io.Logger) (workspace
 	wsCfgs := make(workspace.WorkspaceList, 0, len(c.Data.Workspaces))
 	for wsName, wsCfg := range cache.Workspaces {
 		wsCfg.SetContext(wsName, cache.WorkspaceLocations[wsName])
-		wsCfgs = append(wsCfgs, *wsCfg)
+		wsCfgs = append(wsCfgs, wsCfg)
 	}
 	return wsCfgs, nil
 }

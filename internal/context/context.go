@@ -23,11 +23,11 @@ type Context struct {
 	Ctx                  context.Context
 	CancelFunc           context.CancelFunc
 	Logger               io.Logger
-	UserConfig           *config.Config
+	Config               *config.Config
 	CurrentWorkspace     *workspace.Workspace
+	InteractiveContainer *components.ContainerView
 	WorkspacesCache      cache.WorkspaceCache
 	ExecutableCache      cache.ExecutableCache
-	InteractiveContainer *components.ContainerView
 
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
 	// used to store temporary files all executable runs when the tmpDir value is specified.
@@ -37,7 +37,7 @@ type Context struct {
 }
 
 func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
-	cfg, err := filesystem.LoadUserConfig()
+	cfg, err := filesystem.LoadConfig()
 	if err != nil {
 		panic(errors.Wrap(err, "user config load error"))
 	}
@@ -54,7 +54,7 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 	if workspaceCache == nil {
 		panic("workspace cache initialization error")
 	}
-	executableCache := cache.NewExecutableCache()
+	executableCache := cache.NewExecutableCache(workspaceCache)
 	if executableCache == nil {
 		panic("executable cache initialization error")
 	}
@@ -65,7 +65,7 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 	return &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
-		UserConfig:       cfg,
+		Config:           cfg,
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  workspaceCache,
 		ExecutableCache:  executableCache,
@@ -126,7 +126,7 @@ func ExpandRef(ctx *Context, ref executable.Ref) executable.Ref {
 		ws = ctx.CurrentWorkspace.AssignedName()
 	}
 	if ns == "" {
-		ns = ctx.UserConfig.CurrentNamespace
+		ns = ctx.Config.CurrentNamespace
 	}
 	return executable.NewRef(executable.NewExecutableID(ws, ns, name), ref.GetVerb())
 }

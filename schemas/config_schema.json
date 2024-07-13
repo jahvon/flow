@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/config_schema.json",
-  "description": "User Configuration for the Flow CLI.\nThis configuration is used to define workspaces, templates, and other settings for the CLI.\nIt is stored in the user's flow cache directory (e.g. `$HOME/Library/Application Support/flow` on MacOS).\n",
+  "description": "User Configuration for the Flow CLI.\nIncludes configurations for workspaces, templates, I/O, and other settings for the CLI.\n\nIt is read from the user's flow config directory:\n- **MacOS**: `$HOME/Library/Application Support/flow`\n- **Linux**: `$HOME/.config/flow`\n- **Windows**: `%APPDATA%\\flow`\n\nAlternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment variable.\n",
   "type": "object",
   "required": [
     "workspaces",

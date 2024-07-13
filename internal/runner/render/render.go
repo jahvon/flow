@@ -39,7 +39,7 @@ func (r *renderRunner) IsCompatible(executable *executable.Executable) bool {
 }
 
 func (r *renderRunner) Exec(ctx *context.Context, e *executable.Executable, inputEnv map[string]string) error {
-	if !ctx.UserConfig.ShowTUI() {
+	if !ctx.Config.ShowTUI() {
 		return fmt.Errorf("unable to render when interactive mode is disabled")
 	}
 
@@ -54,7 +54,7 @@ func (r *renderRunner) Exec(ctx *context.Context, e *executable.Executable, inpu
 	targetDir, isTmp, err := renderSpec.Dir.ExpandDirectory(
 		ctx.Logger,
 		e.WorkspacePath(),
-		e.ConfigPath(),
+		e.FlowFilePath(),
 		ctx.ProcessTmpDir,
 		envMap,
 	)

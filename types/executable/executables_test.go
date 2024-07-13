@@ -70,8 +70,8 @@ var _ = Describe("Executable", func() {
 		It("WorkspacePath should return the workspace path of the executable", func() {
 			Expect(exec.WorkspacePath()).To(Equal(testWorkspacePath))
 		})
-		It("ConfigPath should return the exec config path of the executable", func() {
-			Expect(exec.ConfigPath()).To(Equal(testExecCfgPath))
+		It("FlowFilePath should return the exec config path of the executable", func() {
+			Expect(exec.FlowFilePath()).To(Equal(testExecCfgPath))
 		})
 	})
 

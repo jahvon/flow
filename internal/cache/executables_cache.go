@@ -41,33 +41,19 @@ type ExecutableCacheImpl struct {
 	WorkspaceCache WorkspaceCache       `json:"-"       yaml:"-"`
 }
 
-func NewExecutableCache() ExecutableCache {
-	if executableCache == nil {
-		executableCache = &ExecutableCacheImpl{
-			Data: &ExecutableCacheData{
-				ExecutableMap: make(map[executable.Ref]string),
-				AliasMap:      make(map[executable.Ref]executable.Ref),
-				ConfigMap:     make(map[string]WorkspaceInfo),
-			},
-			WorkspaceCache: NewWorkspaceCache(),
-		}
+func NewExecutableCache(wsCache WorkspaceCache) ExecutableCache {
+	return &ExecutableCacheImpl{
+		Data: &ExecutableCacheData{
+			ExecutableMap: make(map[executable.Ref]string),
+			AliasMap:      make(map[executable.Ref]executable.Ref),
+			ConfigMap:     make(map[string]WorkspaceInfo),
+		},
+		WorkspaceCache: wsCache,
 	}
-	return executableCache
 }
 
 func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
-	if c.Data == nil || c.WorkspaceCache == nil {
-		logger.Debugf("Initializing executable cache data")
-		ec, ok := NewExecutableCache().(*ExecutableCacheImpl)
-		if !ok {
-			return errors.New("unable to initialize executable cache")
-		}
-		c.Data = ec.Data
-		c.WorkspaceCache = ec.WorkspaceCache
-	} else {
-		logger.Debugf("Updating executable cache data")
-	}
-
+	logger.Debugf("Updating executable cache data")
 	wsCacheData, err := c.WorkspaceCache.GetLatestData(logger)
 	if err != nil {
 		return fmt.Errorf("failed to get workspace cache data\n%w", err)
@@ -76,43 +62,45 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 	cacheData := c.Data
 	for name, wsCfg := range wsCacheData.Workspaces {
 		wsCfg.SetContext(name, wsCacheData.WorkspaceLocations[name])
-		cfgs, err := filesystem.LoadWorkspaceFlowFiles(logger, wsCfg)
+		flowFiles, err := filesystem.LoadWorkspaceFlowFiles(logger, wsCfg)
 		if err != nil {
 			logger.Errorx("failed to load workspace executable configs", "workspace", wsCfg.AssignedName(), "err", err)
 			continue
 		}
-		for _, cfg := range cfgs {
-			if len(cfg.FromFiles) > 0 {
+		for _, flowFile := range flowFiles {
+			if len(flowFile.FromFile) > 0 {
 				generated, err := generatedExecutables(
 					logger,
 					name,
 					wsCfg.Location(),
-					cfg.Namespace,
-					cfg.ConfigPath(),
-					cfg.FromFiles,
+					flowFile.Namespace,
+					flowFile.ConfigPath(),
+					flowFile.FromFile,
 				)
 				if err != nil {
 					logger.Errorx(
 						"failed to generate executables from files",
-						"cfgPath", cfg.ConfigPath(),
+						"flowFilePath", flowFile.ConfigPath(),
 						"err", err,
 					)
 				}
-				cfg.Executables = append(cfg.Executables, generated...)
+				flowFile.Executables = append(flowFile.Executables, generated...)
 			}
 
-			if cfg.Visibility == nil || common.Visibility(*cfg.Visibility).IsHidden() || len(cfg.Executables) == 0 {
+			if flowFile.Visibility == nil ||
+				common.Visibility(*flowFile.Visibility).IsHidden() ||
+				len(flowFile.Executables) == 0 {
 				continue
 			}
-			for _, e := range cfg.Executables {
+			for _, e := range flowFile.Executables {
 				if e == nil || (e.Visibility != nil && common.Visibility(*e.Visibility).IsHidden()) {
 					continue
 				}
-				cacheData.ExecutableMap[e.Ref()] = cfg.ConfigPath()
+				cacheData.ExecutableMap[e.Ref()] = flowFile.ConfigPath()
 				for _, ref := range enumerateExecutableAliasRefs(e) {
 					cacheData.AliasMap[ref] = e.Ref()
 				}
-				cacheData.ConfigMap[cfg.ConfigPath()] = WorkspaceInfo{
+				cacheData.ConfigMap[flowFile.ConfigPath()] = WorkspaceInfo{
 					WorkspaceName: wsCfg.AssignedName(),
 					WorkspacePath: wsCfg.Location(),
 				}
@@ -178,7 +166,7 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 		wsInfo.WorkspacePath,
 		cfg.Namespace,
 		cfg.ConfigPath(),
-		cfg.FromFiles,
+		cfg.FromFile,
 	)
 	if err != nil {
 		logger.Warnx(
@@ -231,7 +219,7 @@ func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (executable.Ex
 			wsInfo.WorkspacePath,
 			cfg.Namespace,
 			cfg.ConfigPath(),
-			cfg.FromFiles,
+			cfg.FromFile,
 		)
 		if err != nil {
 			logger.Warnx(

@@ -51,7 +51,7 @@ func registerSetWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 func setWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	workspace := args[0]
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if _, found := userConfig.Workspaces[workspace]; !found {
 		logger.Fatalf("workspace %s not found", workspace)
 	}
@@ -82,7 +82,7 @@ func registerSetNamespaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 func setNamespaceFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	namespace := args[0]
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	userConfig.CurrentNamespace = namespace
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
@@ -106,7 +106,7 @@ func setWorkspaceModeFunc(ctx *context.Context, _ *cobra.Command, args []string)
 	logger := ctx.Logger
 	mode := config.ConfigWorkspaceMode(strings.ToLower(args[0]))
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if userConfig.Interactive == nil {
 		userConfig.Interactive = &config.Interactive{}
 	}
@@ -133,7 +133,7 @@ func setLogModeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	mode := tuiKitIO.LogMode(strings.ToLower(args[0]))
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	userConfig.DefaultLogMode = mode
 	if err := filesystem.WriteUserConfig(userConfig); err != nil {
 		logger.FatalErr(err)
@@ -160,7 +160,7 @@ func setInteractiveFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		logger.FatalErr(errors.Wrap(err, "invalid boolean value"))
 	}
 
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if userConfig.Interactive == nil {
 		userConfig.Interactive = &config.Interactive{}
 	}
@@ -197,7 +197,7 @@ func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if err := loadedTemplates.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
-	userConfig := ctx.UserConfig
+	userConfig := ctx.Config
 	if userConfig.Templates == nil {
 		userConfig.Templates = map[string]string{}
 	}

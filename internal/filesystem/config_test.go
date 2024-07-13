@@ -48,7 +48,7 @@ var _ = Describe("FlowFile", func() {
 		})
 	})
 
-	Describe("WriteUserConfig and LoadUserConfig", func() {
+	Describe("WriteUserConfig and LoadConfig", func() {
 		It("writes and reads config correctly", func() {
 			userConfig := &config.Config{
 				Workspaces:       map[string]string{"default": tmpDir},
@@ -62,7 +62,7 @@ var _ = Describe("FlowFile", func() {
 
 			Expect(filesystem.WriteUserConfig(userConfig)).To(Succeed())
 
-			readConfig, err := filesystem.LoadUserConfig()
+			readConfig, err := filesystem.LoadConfig()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(readConfig).To(Equal(userConfig))
 		})

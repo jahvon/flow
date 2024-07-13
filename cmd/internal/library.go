@@ -39,12 +39,12 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
-		wsFilter = ctx.UserConfig.CurrentWorkspace
+		wsFilter = ctx.Config.CurrentWorkspace
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
 	if nsFilter == "." {
-		nsFilter = ctx.UserConfig.CurrentNamespace
+		nsFilter = ctx.Config.CurrentNamespace
 	}
 
 	verbFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterVerbFlag, false)
