@@ -22,7 +22,9 @@ func (c *Config) Validate() error {
 	if _, wsFound := c.Workspaces[c.CurrentWorkspace]; !wsFound {
 		return fmt.Errorf("current workspace %s does not exist", c.CurrentWorkspace)
 	}
-	if c.WorkspaceMode != "" && c.WorkspaceMode != ConfigWorkspaceModeFixed && c.WorkspaceMode != ConfigWorkspaceModeDynamic {
+	if c.WorkspaceMode != "" &&
+		c.WorkspaceMode != ConfigWorkspaceModeFixed &&
+		c.WorkspaceMode != ConfigWorkspaceModeDynamic {
 		return fmt.Errorf("invalid workspace mode %s", c.WorkspaceMode)
 	}
 	if err := c.DefaultLogMode.Validate(); err != nil {

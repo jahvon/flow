@@ -5,6 +5,7 @@ title: Config
 description: |
   User Configuration for the Flow CLI.
   This configuration is used to define workspaces, templates, and other settings for the CLI.
+  It is stored in the user's flow cache directory (e.g. `$HOME/Library/Application Support/flow` on MacOS).
 
 definitions:
   Interactive:
@@ -29,15 +30,15 @@ properties:
       type: string
     description: |
       Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.
-  remoteWorkspaces:
-    type: object
-    additionalProperties:
-      type: string
-    description: |
-      **UNIMPLEMENTED**
-      A map of remote workspace names to their git repository URLs.
-      The repository URL should be a valid git URL that can be cloned.
-    default: {}
+#  remoteWorkspaces:
+#    type: object
+#    additionalProperties:
+#      type: string
+#    description: |
+#      **UNIMPLEMENTED**
+#      A map of remote workspace names to their git repository URLs.
+#      The repository URL should be a valid git URL that can be cloned.
+#    default: {}
   currentWorkspace:
     type: string
     description: The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.

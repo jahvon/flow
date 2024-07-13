@@ -5,6 +5,7 @@ title: Workspace
 description: |
   Configuration for a workspace in the Flow CLI.
   This configuration is used to define the settings for a workspace.
+  Every workspace has a workspace config file named `flow.yaml` in the root of the workspace directory.
 
 definitions:
   ExecutableFilter:

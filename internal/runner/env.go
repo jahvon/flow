@@ -33,7 +33,11 @@ func SetEnv(logger io.Logger, exec *executable.ExecutableEnvironment, promptedEn
 	return nil
 }
 
-func ResolveParameterValue(logger io.Logger, param executable.Parameter, promptedEnv map[string]string) (string, error) {
+func ResolveParameterValue(
+	logger io.Logger,
+	param executable.Parameter,
+	promptedEnv map[string]string,
+) (string, error) {
 	switch {
 	case param.Text == "" && param.SecretRef == "" && param.Prompt == "":
 		return "", nil

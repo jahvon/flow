@@ -14,6 +14,8 @@ type ExecutableFilter struct {
 
 // Configuration for a workspace in the Flow CLI.
 // This configuration is used to define the settings for a workspace.
+// Every workspace has a workspace config file named `flow.yaml` in the root of the
+// workspace directory.
 type Workspace struct {
 	// assignedName corresponds to the JSON schema field "assignedName".
 	assignedName string `json:"assignedName,omitempty" yaml:"assignedName,omitempty" mapstructure:"assignedName,omitempty"`

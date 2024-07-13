@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/config_schema.json",
+  "description": "User Configuration for the Flow CLI.\nThis configuration is used to define workspaces, templates, and other settings for the CLI.\nIt is stored in the user's flow cache directory (e.g. `$HOME/Library/Application Support/flow` on MacOS).\n",
+  "type": "object",
+  "required": [
+    "workspaces",
+    "currentWorkspace"
+  ],
+  "definitions": {
+    "Interactive": {
+      "description": "Configurations for the interactive UI.",
+      "type": "object",
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "notifyOnCompletion": {
+          "description": "Whether to send a desktop notification when a command completes.",
+          "type": "boolean"
+        },
+        "soundOnCompletion": {
+          "description": "Whether to play a sound when a command completes.",
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "properties": {
+    "currentNamespace": {
+      "description": "The name of the current namespace.\n\nNamespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.\nIf the namespace is not set, only executables defined without a namespace will be discovered.\n",
+      "type": "string",
+      "default": ""
+    },
+    "currentWorkspace": {
+      "description": "The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.",
+      "type": "string",
+      "default": ""
+    },
+    "defaultLogMode": {
+      "description": "The default log mode to use when running executables.\nThis can either be `hidden`, `json`, `logfmt` or `text`\n\n`hidden` will not display any logs.\n`json` will display logs in JSON format.\n`logfmt` will display logs with a log level, timestamp, and message.\n`text` will just display the log message.\n",
+      "type": "string",
+      "default": "logfmt"
+    },
+    "interactive": {
+      "$ref": "#/definitions/Interactive"
+    },
+    "templates": {
+      "description": "A map of flowfile template names to their paths.",
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "workspaceMode": {
+      "description": "The mode of the workspace. This can be either `fixed` or `dynamic`.\nIn `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.\nIn `dynamic` mode, the current workspace used at runtime is determined by the current directory.\nIf the current directory is within a workspace, that workspace is used.\n",
+      "type": "string",
+      "default": "dynamic",
+      "enum": [
+        "fixed",
+        "dynamic"
+      ]
+    },
+    "workspaces": {
+      "description": "Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.\n",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

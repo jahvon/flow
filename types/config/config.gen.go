@@ -7,6 +7,8 @@ import "github.com/jahvon/tuikit/io"
 // User Configuration for the Flow CLI.
 // This configuration is used to define workspaces, templates, and other settings
 // for the CLI.
+// It is stored in the user's flow cache directory (e.g. `$HOME/Library/Application
+// Support/flow` on MacOS).
 type Config struct {
 	// The name of the current namespace.
 	//
@@ -34,12 +36,6 @@ type Config struct {
 	// Interactive corresponds to the JSON schema field "interactive".
 	Interactive *Interactive `json:"interactive,omitempty" yaml:"interactive,omitempty" mapstructure:"interactive,omitempty"`
 
-	// **UNIMPLEMENTED**
-	// A map of remote workspace names to their git repository URLs.
-	// The repository URL should be a valid git URL that can be cloned.
-	//
-	RemoteWorkspaces ConfigRemoteWorkspaces `json:"remoteWorkspaces,omitempty" yaml:"remoteWorkspaces,omitempty" mapstructure:"remoteWorkspaces,omitempty"`
-
 	// A map of flowfile template names to their paths.
 	Templates ConfigTemplates `json:"templates,omitempty" yaml:"templates,omitempty" mapstructure:"templates,omitempty"`
 
@@ -57,11 +53,6 @@ type Config struct {
 	//
 	Workspaces ConfigWorkspaces `json:"workspaces" yaml:"workspaces" mapstructure:"workspaces"`
 }
-
-// **UNIMPLEMENTED**
-// A map of remote workspace names to their git repository URLs.
-// The repository URL should be a valid git URL that can be cloned.
-type ConfigRemoteWorkspaces map[string]string
 
 // A map of flowfile template names to their paths.
 type ConfigTemplates map[string]string

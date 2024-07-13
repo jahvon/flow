@@ -44,19 +44,19 @@ func (a *Argument) ValidateValue() error {
 	}
 
 	switch a.Type {
-	case "int":
+	case ArgumentTypeInt:
 		if _, err := strconv.Atoi(a.value); err != nil {
 			return fmt.Errorf("value is not an integer")
 		}
-	case "float":
+	case ArgumentTypeFloat:
 		if _, err := strconv.ParseFloat(a.value, 64); err != nil {
 			return fmt.Errorf("value is not a float")
 		}
-	case "bool":
+	case ArgumentTypeBool:
 		if _, err := strconv.ParseBool(a.value); err != nil {
 			return fmt.Errorf("value is not a boolean")
 		}
-	case "string":
+	case ArgumentTypeString:
 		// no-op
 	default:
 		return fmt.Errorf("unsupported argument type (%s)", a.Type)
@@ -66,7 +66,7 @@ func (a *Argument) ValidateValue() error {
 
 func validateArgType(t ArgumentType) error {
 	switch t {
-	case "string", "int", "bool", "float":
+	case ArgumentTypeString, ArgumentTypeInt, ArgumentTypeBool, ArgumentTypeFloat:
 		return nil
 	default:
 		return fmt.Errorf("unsupported argument type (%s)", t)

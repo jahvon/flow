@@ -1,3 +1,4 @@
+//nolint:lll
 package builder
 
 import (
@@ -162,11 +163,12 @@ func ExecWithParams(opts ...Option) *executable.Executable {
 	}
 	var paramCmds []string
 	for _, param := range params {
-		if param.Text != "" {
+		switch {
+		case param.Text != "":
 			paramCmds = append(paramCmds, fmt.Sprintf("echo 'key=%s, value=%s'", param.EnvKey, param.Text))
-		} else if param.SecretRef != "" {
+		case param.SecretRef != "":
 			paramCmds = append(paramCmds, fmt.Sprintf("echo 'key=%s, secret=%s'", param.EnvKey, param.SecretRef))
-		} else if param.Prompt != "" {
+		case param.Prompt != "":
 			paramCmds = append(
 				paramCmds,
 				fmt.Sprintf("echo 'key=%s, prompt=%s', value=$%[1]s", param.EnvKey, param.Prompt),
@@ -188,7 +190,6 @@ func ExecWithParams(opts ...Option) *executable.Executable {
 		e.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.NamespaceName, vals.FlowFilePath)
 	}
 	return e
-
 }
 
 func ExecWithLogMode(opts ...Option) *executable.Executable {

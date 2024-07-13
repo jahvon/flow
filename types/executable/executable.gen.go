@@ -52,7 +52,7 @@ const ArgumentTypeInt ArgumentType = "int"
 const ArgumentTypeString ArgumentType = "string"
 
 // The directory to execute the command in.
-// If unset, the directory of the executable definition will be used.
+// If unset, the directory of the flow file will be used.
 // If set to `f:tmp`, a temporary directory will be created for the process.
 // If prefixed with `./`, the path will be relative to the current working
 // directory.

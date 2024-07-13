@@ -38,6 +38,16 @@ flow run validate
 flow install gopath
 ```
 
+### Working with generated types
+
+The `flow` project uses [go-jsonschema](github.com/atombender/go-jsonschema) with [go generate](https://blog.golang.org/generate) 
+to generate Go types from JSON schema files (defined in YAML). If you need to make changes to the generated types 
+(found in the `types` package), you should update the associated `*schema.yaml` file and run the flow `run generate` executable
+or go generate directly.
+
+Note that go generate alone does not update generated documentation. 
+Be sure to regenerate the JSON schema files and markdown documentation before submitting a PR.
+
 ### Working with tuikit
 
 The `flow` project uses the [tuikit](github.com/jahvon/tuikit) framework for building the terminal UI.

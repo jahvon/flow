@@ -49,7 +49,7 @@ func (e Directory) ExpandDirectory(
 
 type ExecutableEnvironment struct {
 	Params ParameterList `json:"params" yaml:"params"`
-	Args   ArgumentList  `json:"args" yaml:"args"`
+	Args   ArgumentList  `json:"args"   yaml:"args"`
 }
 
 func (e *ExecExecutableType) SetLogFields(fields map[string]interface{}) {
@@ -147,9 +147,9 @@ func (e *Executable) Env() *ExecutableEnvironment {
 		if typeElem.Field(field).Kind() == reflect.Slice && !typeElem.Field(field).IsZero() {
 			switch typeElem.Field(field).Interface().(type) {
 			case ParameterList:
-				execEnv.Params = typeElem.Field(field).Interface().(ParameterList)
+				execEnv.Params, _ = typeElem.Field(field).Interface().(ParameterList)
 			case ArgumentList:
-				execEnv.Args = typeElem.Field(field).Interface().(ArgumentList)
+				execEnv.Args, _ = typeElem.Field(field).Interface().(ArgumentList)
 			}
 		}
 	}

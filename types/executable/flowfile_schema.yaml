@@ -5,6 +5,7 @@ title: FlowFile
 description: |
   Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered 
   by the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).
+  A workspace can have multiple flow files located anywhere in the workspace directory
 
 definitions:
   FromFiles:
@@ -34,7 +35,7 @@ properties:
       Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.
     default: ""
   executables:
-    $ref: './executable_schema.yaml#/'
+    $ref: '../executable/executable_schema.yaml#/'
     goJSONSchema:
       type: ExecutableList
     default: []

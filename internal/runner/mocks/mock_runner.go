@@ -12,10 +12,9 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "go.uber.org/mock/gomock"
-
-	config "github.com/jahvon/flow/types/executable"
 	context "github.com/jahvon/flow/internal/context"
+	executable "github.com/jahvon/flow/types/executable"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockRunner is a mock of Runner interface.
@@ -42,7 +41,7 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 }
 
 // Exec mocks base method.
-func (m *MockRunner) Exec(arg0 *context.Context, arg1 *config.Executable, arg2 map[string]string) error {
+func (m *MockRunner) Exec(arg0 *context.Context, arg1 *executable.Executable, arg2 map[string]string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Exec", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
@@ -56,7 +55,7 @@ func (mr *MockRunnerMockRecorder) Exec(arg0, arg1, arg2 any) *gomock.Call {
 }
 
 // IsCompatible mocks base method.
-func (m *MockRunner) IsCompatible(arg0 *config.Executable) bool {
+func (m *MockRunner) IsCompatible(arg0 *executable.Executable) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsCompatible", arg0)
 	ret0, _ := ret[0].(bool)
@@ -72,7 +71,7 @@ func (mr *MockRunnerMockRecorder) IsCompatible(arg0 any) *gomock.Call {
 // Name mocks base method.
 func (m *MockRunner) Name() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Title")
+	ret := m.ctrl.Call(m, "Name")
 	ret0, _ := ret[0].(string)
 	return ret0
 }
@@ -80,5 +79,5 @@ func (m *MockRunner) Name() string {
 // Name indicates an expected call of Name.
 func (mr *MockRunnerMockRecorder) Name() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Title", reflect.TypeOf((*MockRunner)(nil).Name))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockRunner)(nil).Name))
 }

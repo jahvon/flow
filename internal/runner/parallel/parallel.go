@@ -37,6 +37,7 @@ func (r *parallelRunner) Exec(ctx *context.Context, e *executable.Executable, pr
 
 	refs := parallelSpec.Refs
 	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
+	defer cancel()
 	group, _ := errgroup.WithContext(groupCtx)
 	limit := parallelSpec.MaxThreads
 	if limit == 0 {
