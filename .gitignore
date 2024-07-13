@@ -12,10 +12,8 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Go
-go.work
-go.work.sum
-vendor
+# Dependency directories (remove the comment below to include it)
+# vendor/
 
 # Code coverage
 coverage.txt
