@@ -36,7 +36,8 @@ properties:
     default: ""
   executables:
     type: array
-    $ref: '../executable/executable_schema.yaml#/'
+    items:
+      $ref: '../executable/executable_schema.yaml#/'
     goJSONSchema:
       type: ExecutableList
     default: []

@@ -177,7 +177,7 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 	}
 	cfg.Executables = append(cfg.Executables, generated...)
 
-	execs := executable.ExecutableList(cfg.Executables)
+	execs := cfg.Executables
 	exec, err := execs.FindByVerbAndID(ref.GetVerb(), ref.GetID())
 	if err != nil {
 		return nil, err

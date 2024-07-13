@@ -46,6 +46,10 @@ func (e SchemaExt) IsExported() bool {
 
 //nolint:gocognit,nestif
 func MergeSchemas(dst, src *JSONSchema, dstFile FileName, schemaMap map[FileName]*JSONSchema) {
+	if src.Items != nil {
+		MergeSchemas(dst, src.Items, dstFile, schemaMap)
+	}
+
 	var match *JSONSchema
 	switch {
 	case src.Ref.String() == "":
@@ -122,9 +126,6 @@ func MergeSchemas(dst, src *JSONSchema, dstFile FileName, schemaMap map[FileName
 	if _, found := dst.Definitions[src.Ref.Key()]; !found {
 		dst.Definitions[src.Ref.Key()] = match
 	}
-	// if match.Items != nil {
-	// 	MergeSchemas(dst, match.Items, dstFile, schemaMap)
-	// }
 	for key, value := range match.Properties {
 		if !value.Ext.IsExported() {
 			delete(match.Properties, key)
