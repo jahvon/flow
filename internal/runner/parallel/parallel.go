@@ -12,7 +12,7 @@ import (
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/utils"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
-	"github.com/jahvon/flow/internal/utils/executables"
+	execUtils "github.com/jahvon/flow/internal/utils/executables"
 	"github.com/jahvon/flow/types/executable"
 )
 
@@ -59,7 +59,6 @@ func handleExecRef(
 	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
 	defer cancel()
 	group, _ := errgroup.WithContext(groupCtx)
-
 	limit := parallelSpec.MaxThreads
 	if limit == 0 {
 		limit = 5
@@ -68,7 +67,7 @@ func handleExecRef(
 	var errs []error
 	for _, ref := range refs {
 		ref = context.ExpandRef(ctx, ref)
-		exec, err := executables.ExecutableForRef(ctx, ref)
+		exec, err := execUtils.ExecutableForRef(ctx, ref)
 		if err != nil {
 			return err
 		}
@@ -111,7 +110,9 @@ func handleExec(
 	ctx *context.Context, parent *executable.Executable,
 	parallelSpec *executable.ParallelExecutableType, promptedEnv map[string]string,
 ) error {
-	group, _ := errgroup.WithContext(ctx.Ctx)
+	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
+	defer cancel()
+	group, _ := errgroup.WithContext(groupCtx)
 	limit := parallelSpec.MaxThreads
 	if limit == 0 {
 		limit = len(parallelSpec.Execs)
@@ -123,12 +124,12 @@ func handleExec(
 		switch {
 		case len(refConfig.Ref) > 0:
 			var err error
-			exec, err = executables.ExecutableForRef(ctx, refConfig.Ref)
+			exec, err = execUtils.ExecutableForRef(ctx, refConfig.Ref)
 			if err != nil {
 				return err
 			}
 		case refConfig.Cmd != "":
-			exec = executables.ExecutableForCmd(parent, refConfig.Cmd, i)
+			exec = execUtils.ExecutableForCmd(parent, refConfig.Cmd, i)
 		}
 
 		if len(refConfig.Args) > 0 {
@@ -151,11 +152,13 @@ func handleExec(
 				if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
 					switch {
 					case refConfig.Retries == 0 && parallelSpec.FailFast:
+						cancel()
 						return errors.Wrapf(err, "execution error ref='%s'", exec.Ref())
 					case refConfig.Retries == 0 && !parallelSpec.FailFast:
 						errs = append(errs, err)
 						ctx.Logger.Error(err, fmt.Sprintf("execution error ref='%s'", exec.Ref()))
 					case refConfig.Retries != 0 && refConfig.AttemptedMaxTimes() && parallelSpec.FailFast:
+						cancel()
 						return fmt.Errorf("retries exceeded ref='%s' max=%d", exec.Ref(), refConfig.Retries)
 					case refConfig.Retries != 0 && refConfig.AttemptedMaxTimes() && !parallelSpec.FailFast:
 						errs = append(errs, err)
@@ -164,6 +167,7 @@ func handleExec(
 						refConfig.RecordAttempt()
 						ctx.Logger.Warnf("retrying ref='%s'", exec.Ref())
 					default:
+						cancel()
 						return errors.Wrapf(err, "unexpected error handling ref='%s'", exec.Ref())
 					}
 					continue

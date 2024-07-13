@@ -138,7 +138,6 @@ func newTestContext(
 		ExecutableCache:  execCache,
 	}
 	ctxx.SetIO(stdIn, stdOut)
-
 	return ctxx
 }
 
@@ -155,7 +154,6 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err := copy.Copy(srcWsDir, tmpWsDir); err != nil {
 		t.Fatalf("unable to copy workspace directory: %v", err)
 	}
-
 	testData := builder.ExamplesExecFlowFile()
 	execDef, err := yaml.Marshal(testData)
 	if err != nil {
@@ -164,7 +162,6 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err := os.WriteFile(filepath.Join(tmpWsDir, "testdata.flow"), execDef, 0600); err != nil {
 		t.Fatalf("unable to write test data: %v", err)
 	}
-
 	tmpConfigDir := filepath.Join(tmpDir, userConfigSubdir)
 	tmpCacheDir := filepath.Join(tmpDir, cacheSubdir)
 
