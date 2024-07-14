@@ -95,7 +95,7 @@ flow completion zsh > ~/.oh-my-zsh/completions/_flow
 ## Documentation
 
 See [flow CLI documentation](docs/cli/flow.md) for more information on all available commands.
-See [flow Configuration documentation](docs/config/config.md) for more information on the configuration file options.
+See [flow Configuration documentation](docs/types/index.md) for more information on the configuration file options.
 
 ### Examples
 
