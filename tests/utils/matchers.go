@@ -1,4 +1,4 @@
-package runner
+package utils
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 type refMatcher struct {
-	ref string
+	ref executable.Ref
 }
 
 func (m *refMatcher) Matches(x any) bool {
@@ -17,7 +17,7 @@ func (m *refMatcher) Matches(x any) bool {
 	if !ok {
 		return false
 	}
-	return e.Ref().String() == m.ref
+	return e.Ref().Equals(m.ref)
 }
 
 func (m *refMatcher) String() string {
@@ -25,7 +25,7 @@ func (m *refMatcher) String() string {
 }
 
 func ExecWithRef(ref executable.Ref) gomock.Matcher {
-	return &refMatcher{ref.String()}
+	return &refMatcher{ref}
 }
 
 type cmdMatcher struct {

@@ -59,7 +59,7 @@ func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 		return
 	}
 
-	if err := filesystem.InitUserConfig(); err != nil {
+	if err := filesystem.InitConfig(); err != nil {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess("Initialized flow global configurations")
@@ -126,7 +126,7 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 		logger.Infof("Workspace '%s' set as current workspace", name)
 	}
 
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 

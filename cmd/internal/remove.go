@@ -76,7 +76,7 @@ func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	}
 
 	delete(userConfig.Workspaces, name)
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 

@@ -50,7 +50,7 @@ func NewWorkspaceView(
 					return nil
 				}
 				curCfg.CurrentWorkspace = ws.AssignedName()
-				if err := filesystem.WriteUserConfig(curCfg); err != nil {
+				if err := filesystem.WriteConfig(curCfg); err != nil {
 					container.HandleError(err)
 				}
 				container.SetContext(fmt.Sprintf("%s/*", ws.AssignedName()))

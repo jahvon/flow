@@ -68,7 +68,7 @@ func NewLibrary(
 		cmdRunFunc:         runFunc,
 		visibleWorkspaces:  make([]string, 0),
 		visibleNamespaces:  make([]string, 0),
-		visibleExecutables: make(config.ExecutableList, 0),
+		visibleExecutables: make(executable.ExecutableList, 0),
 	}
 }
 

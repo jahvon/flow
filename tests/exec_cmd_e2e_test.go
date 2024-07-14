@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/tests/runner"
+	"github.com/jahvon/flow/tests/utils"
 )
 
 var _ = Describe("Examples End-to-end", func() {
@@ -18,7 +18,7 @@ var _ = Describe("Examples End-to-end", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = runner.NewTestContext(stdCtx.Background(), GinkgoT())
+		ctx = utils.NewContext(stdCtx.Background(), GinkgoT())
 	})
 
 	AfterEach(func() {
@@ -26,12 +26,13 @@ var _ = Describe("Examples End-to-end", func() {
 	})
 
 	DescribeTable("with dir example executables", func(ref string) {
-		runner := runner.NewE2ECommandRunner(ctx)
+		runner := utils.NewE2ECommandRunner(ctx)
 		stdOut := ctx.StdOut()
 		Expect(runner.Run(ctx, "exec", ref)).To(Succeed())
 		Expect(readFileContent(stdOut)).To(ContainSubstring("flow completed"))
 	},
-		Entry("tmp dir example", "examples:tmp-dir"),
+		Entry("print example", "examples:simple-print"),
+		Entry("tmp dir example", "examples:with-tmp-dir"),
 	)
 })
 

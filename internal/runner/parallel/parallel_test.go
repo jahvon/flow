@@ -14,7 +14,7 @@ import (
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/mocks"
 	"github.com/jahvon/flow/internal/runner/parallel"
-	testRunner "github.com/jahvon/flow/tests/runner"
+	testRunner "github.com/jahvon/flow/tests/utils"
 	"github.com/jahvon/flow/tools/builder"
 	"github.com/jahvon/flow/types/executable"
 )

@@ -33,6 +33,32 @@ func SerialExecByRef(opts ...Option) *executable.Executable {
 	return e
 }
 
+func SerialExecByRefConfig(opts ...Option) *executable.Executable {
+	name := "serial-config"
+	e1 := SimpleExec(opts...)
+	e2 := ExecWithArgs(opts...)
+	e := &executable.Executable{
+		Verb:       "start",
+		Name:       name,
+		Visibility: privateExecVisibility(),
+		Description: serialBaseDesc +
+			"The `execs` field can be used to define the child executables with more options. " +
+			"This includes defining an executable inline, retries, arguments, and more.",
+		Serial: &executable.SerialExecutableType{
+			Execs: []executable.SerialRefConfig{
+				{Ref: e1.Ref()},
+				{Ref: e2.Ref(), Args: []string{"hello", "x=123"}},
+				{Cmd: "echo 'hello from serial command'"},
+			},
+		},
+	}
+	if len(opts) > 0 {
+		vals := NewOptionValues(opts...)
+		e.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.NamespaceName, vals.FlowFilePath)
+	}
+	return e
+}
+
 func SerialExecWithExit(opts ...Option) *executable.Executable {
 	name := "serial-with-failure"
 	e1 := SimpleExec(opts...)

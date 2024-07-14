@@ -40,7 +40,7 @@ func EnsureConfigDir() error {
 	return nil
 }
 
-func InitUserConfig() error {
+func InitConfig() error {
 	if err := EnsureDefaultWorkspace(); err != nil {
 		return errors.Wrap(err, "unable to ensure default workspace")
 	}
@@ -67,14 +67,14 @@ func InitUserConfig() error {
 	if err != nil {
 		return errors.Wrap(err, "unable to create config file")
 	}
-	err = WriteUserConfig(defaultCfg)
+	err = WriteConfig(defaultCfg)
 	if err != nil {
 		return errors.Wrap(err, "unable to write default config")
 	}
 	return nil
 }
 
-func WriteUserConfig(config *config.Config) error {
+func WriteConfig(config *config.Config) error {
 	file, err := os.OpenFile(filepath.Clean(UserConfigFilePath()), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return errors.Wrap(err, "unable to open config file")
@@ -99,7 +99,7 @@ func LoadConfig() (*config.Config, error) {
 	}
 
 	if _, err := os.Stat(UserConfigFilePath()); os.IsNotExist(err) {
-		if err := InitUserConfig(); err != nil {
+		if err := InitConfig(); err != nil {
 			return nil, errors.Wrap(err, "unable to initialize config file")
 		}
 	} else if err != nil {
