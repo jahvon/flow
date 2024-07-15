@@ -1,4 +1,3 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/workspace_schema.json
-displayName: flow
-git:
-    enabled: false
+displayName: flow repository
+descriptionFile: README.md

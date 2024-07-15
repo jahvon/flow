@@ -14,7 +14,8 @@ A workspace can have multiple flow files located anywhere in the workspace direc
 
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
-| `description` | A description of the executables defined within the flow file. This description will be set as the executables' description if not defined at the executable level.  | `string` |  | [] |
+| `description` | A description of the executables defined within the flow file. This description will used as a shared description for all executables in the flow file.  | `string` |  | [] |
+| `descriptionFile` | A path to a markdown file that contains the description of the executables defined within the flow file. | `string` |  | [] |
 | `executables` |  | `array` ([Executable](#Executable)) | [] | [] |
 | `fromFile` |  | [FromFile](#FromFile) | [] | [] |
 | `namespace` | The namespace to be given to all executables in the flow file. If not set, the executables in the file will be grouped into the root (*) namespace.  Namespaces can be reused across multiple flow files.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.  | `string` |  | [] |

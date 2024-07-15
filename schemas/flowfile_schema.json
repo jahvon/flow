@@ -478,7 +478,12 @@
   },
   "properties": {
     "description": {
-      "description": "A description of the executables defined within the flow file. This description will be set as the executables'\ndescription if not defined at the executable level.\n",
+      "description": "A description of the executables defined within the flow file. This description will used as a shared description\nfor all executables in the flow file.\n",
+      "type": "string",
+      "default": ""
+    },
+    "descriptionFile": {
+      "description": "A path to a markdown file that contains the description of the executables defined within the flow file.",
       "type": "string",
       "default": ""
     },

@@ -8,14 +8,7 @@ import (
 func execMarkdown(e *Executable) string {
 	var mkdwn string
 	mkdwn += fmt.Sprintf("# [Executable] %s\n", e.Ref())
-	if e.Description != "" {
-		mkdwn += "| \n"
-		lines := strings.Split(e.Description, "\n")
-		for _, line := range lines {
-			mkdwn += fmt.Sprintf("| %s\n", line)
-		}
-		mkdwn += "| \n\n"
-	}
+	mkdwn += execDescriptionMarkdown(e)
 	if e.Visibility != nil {
 		mkdwn += fmt.Sprintf("**Visibility:** %s\n", *e.Visibility)
 	}
@@ -40,6 +33,27 @@ func execMarkdown(e *Executable) string {
 
 	mkdwn += execTypeMarkdown(e)
 	mkdwn += fmt.Sprintf("\n\n_Executable can be found in_ [%s](%s)\n", e.flowFilePath, e.flowFilePath)
+	return mkdwn
+}
+
+func execDescriptionMarkdown(e *Executable) string {
+	var mkdwn string
+	const descSpacer = "| \n"
+	if e.Description != "" {
+		mkdwn += descSpacer
+		lines := strings.Split(e.Description, "\n")
+		for _, line := range lines {
+			mkdwn += fmt.Sprintf("| %s\n", line)
+		}
+		mkdwn += descSpacer
+	}
+	if e.inheritedDescription != "" {
+		for _, line := range strings.Split(e.inheritedDescription, "\n") {
+			mkdwn += fmt.Sprintf("| %s\n", line)
+		}
+		mkdwn += descSpacer
+	}
+	mkdwn += "\n"
 	return mkdwn
 }
 

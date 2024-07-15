@@ -389,6 +389,11 @@ properties:
     default: ""
     goJSONSchema:
       identifier: flowFilePath
+  inheritedDescription:
+    type: string
+    default: ""
+    goJSONSchema:
+      identifier: inheritedDescription
   #### Executable runner type fields
   #### go-jsonschema does not support oneOf, so we need to define the types separately and validate them in go.
   exec:
