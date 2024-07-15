@@ -16,11 +16,14 @@ import (
 const generatedTag = "generated"
 
 func generatedExecutables(
-	logger io.Logger,
-	wsName, wsPath, flowFileNs, flowFilePath string,
-	files []string,
+	logger io.Logger, wsName string, flowFile *executable.FlowFile,
 ) (executable.ExecutableList, error) {
 	executables := make(executable.ExecutableList, 0)
+	wsPath := flowFile.WorkspacePath()
+	flowFilePath := flowFile.ConfigPath()
+	flowFileNs := flowFile.Namespace
+	files := flowFile.FromFile
+
 	for _, file := range files {
 		expandedFile := utils.ExpandDirectory(logger, file, wsPath, flowFilePath, nil)
 		exec, err := executablesFromFile(logger, file, expandedFile)
@@ -28,6 +31,7 @@ func generatedExecutables(
 			return nil, err
 		}
 		exec.SetContext(wsName, wsPath, flowFileNs, flowFilePath)
+		exec.SetInheritedFields(flowFile)
 		executables = append(executables, exec)
 	}
 

@@ -15,6 +15,7 @@ Every workspace has a workspace config file named `flow.yaml` in the root of the
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `description` | A description of the workspace. This description is rendered as markdown in the interactive UI. | `string` |  | [] |
+| `descriptionFile` | A path to a markdown file that contains the description of the workspace. | `string` |  | [] |
 | `displayName` | The display name of the workspace. This is used in the interactive UI. | `string` |  | [] |
 | `executables` |  | [ExecutableFilter](#ExecutableFilter) | <no value> | [] |
 | `tags` |  | [CommonTags](#CommonTags) | [] | [] |

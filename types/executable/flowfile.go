@@ -22,7 +22,7 @@ func (f *FlowFile) SetContext(workspaceName, workspacePath, configPath string) {
 			exec.Visibility = &v
 		}
 		exec.SetDefaults()
-		exec.MergeTags(f.Tags)
+		exec.SetInheritedFields(f)
 	}
 }
 

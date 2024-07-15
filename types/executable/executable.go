@@ -75,6 +75,24 @@ func (e *Executable) SetContext(workspaceName, workspacePath, namespace, flowFil
 	e.flowFilePath = flowFilePath
 }
 
+func (e *Executable) SetInheritedFields(flowFile *FlowFile) {
+	e.MergeTags(flowFile.Tags)
+	if e.Visibility == nil && flowFile.Visibility != nil {
+		v := ExecutableVisibility(*flowFile.Visibility)
+		e.Visibility = &v
+	}
+	var descFromFIle string
+	if flowFile.DescriptionFile != "" {
+		mdBytes, err := os.ReadFile(flowFile.DescriptionFile)
+		if err != nil {
+			descFromFIle += fmt.Sprintf("**error rendering description file**: %s", err)
+		} else {
+			descFromFIle += string(mdBytes)
+		}
+	}
+	e.inheritedDescription = strings.Join([]string{flowFile.Description, descFromFIle}, "\n")
+}
+
 func (e *Executable) YAML() (string, error) {
 	enriched := &enrichedExecutable{
 		ID:   e.ID(),

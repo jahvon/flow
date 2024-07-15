@@ -50,8 +50,12 @@ properties:
   description:
     type: string
     description: |
-      A description of the executables defined within the flow file. This description will be set as the executables'
-      description if not defined at the executable level.
+      A description of the executables defined within the flow file. This description will used as a shared description
+      for all executables in the flow file.
+    default: ""
+  descriptionFile:
+    type: string
+    description: A path to a markdown file that contains the description of the executables defined within the flow file.
     default: ""
   #### Executable config context fields
   workspaceName:

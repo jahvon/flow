@@ -49,32 +49,7 @@ func (w *Workspace) JSON() (string, error) {
 }
 
 func (w *Workspace) Markdown() string {
-	var mkdwn string
-	if w.DisplayName != "" {
-		mkdwn = fmt.Sprintf("# [Workspace] %s\n", w.DisplayName)
-	} else {
-		mkdwn = fmt.Sprintf("# [Workspace] %s\n", w.AssignedName())
-	}
-
-	mkdwn += fmt.Sprintf("## Location\n%s\n", w.Location())
-	if w.Description != "" {
-		mkdwn += fmt.Sprintf("## Description\n%s\n", w.Description)
-	}
-	if w.Tags != nil && len(w.Tags) > 0 {
-		mkdwn += "## Tags\n"
-		for _, tag := range w.Tags {
-			mkdwn += fmt.Sprintf("- %s\n", tag)
-		}
-	}
-	if w.Executables != nil {
-		execs, err := yaml.Marshal(w.Executables)
-		if err != nil {
-			mkdwn += "## Executables\nerror\n"
-		} else {
-			mkdwn += fmt.Sprintf("## Executables\n```yaml\n%s```\n", string(execs))
-		}
-	}
-	return mkdwn
+	return workspaceMarkdown(w)
 }
 
 func DefaultWorkspaceConfig(name string) *Workspace {

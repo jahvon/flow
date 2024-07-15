@@ -69,14 +69,7 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 		}
 		for _, flowFile := range flowFiles {
 			if len(flowFile.FromFile) > 0 {
-				generated, err := generatedExecutables(
-					logger,
-					name,
-					wsCfg.Location(),
-					flowFile.Namespace,
-					flowFile.ConfigPath(),
-					flowFile.FromFile,
-				)
+				generated, err := generatedExecutables(logger, name, flowFile)
 				if err != nil {
 					logger.Errorx(
 						"failed to generate executables from files",
@@ -160,14 +153,7 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 	cfg.SetDefaults()
 	cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
-	generated, err := generatedExecutables(
-		logger,
-		wsInfo.WorkspaceName,
-		wsInfo.WorkspacePath,
-		cfg.Namespace,
-		cfg.ConfigPath(),
-		cfg.FromFile,
-	)
+	generated, err := generatedExecutables(logger, wsInfo.WorkspaceName, cfg)
 	if err != nil {
 		logger.Warnx(
 			"failed to generate executables from files",
@@ -213,14 +199,7 @@ func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (executable.Ex
 		cfg.SetDefaults()
 		cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
-		generated, err := generatedExecutables(
-			logger,
-			wsInfo.WorkspaceName,
-			wsInfo.WorkspacePath,
-			cfg.Namespace,
-			cfg.ConfigPath(),
-			cfg.FromFile,
-		)
+		generated, err := generatedExecutables(logger, wsInfo.WorkspaceName, cfg)
 		if err != nil {
 			logger.Warnx(
 				"failed to generate executables from files",
