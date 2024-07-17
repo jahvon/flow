@@ -37,18 +37,21 @@ func execMarkdown(e *Executable) string {
 }
 
 func execDescriptionMarkdown(e *Executable) string {
+	if e.Description == "" && e.inheritedDescription == "" {
+		return ""
+	}
 	var mkdwn string
 	const descSpacer = "| \n"
-	if e.Description != "" {
+	if d := strings.TrimSpace(e.Description); d != "" {
 		mkdwn += descSpacer
-		lines := strings.Split(e.Description, "\n")
+		lines := strings.Split(d, "\n")
 		for _, line := range lines {
 			mkdwn += fmt.Sprintf("| %s\n", line)
 		}
 		mkdwn += descSpacer
 	}
-	if e.inheritedDescription != "" {
-		for _, line := range strings.Split(e.inheritedDescription, "\n") {
+	if d := strings.TrimSpace(e.inheritedDescription); d != "" {
+		for _, line := range strings.Split(d, "\n") {
 			mkdwn += fmt.Sprintf("| %s\n", line)
 		}
 		mkdwn += descSpacer
