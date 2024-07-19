@@ -285,6 +285,14 @@ var _ = Describe("ExecutableList", func() {
 			Expect(filtered).To(HaveLen(1))
 			Expect(filtered[0].Name).To(Equal(exec1.Name))
 		})
+
+		It("should return executables when one of the aliases matches", func() {
+			exec1.Aliases = append(exec1.Aliases, "ijklmn")
+			exec1.Aliases = append(exec1.Aliases, "opqrst")
+			filtered := execs.FilterBySubstring("pqr")
+			Expect(filtered).To(HaveLen(1))
+			Expect(filtered[0].Name).To(Equal(exec1.Name))
+		})
 	})
 
 	Describe("FindByVerbAndID", func() {

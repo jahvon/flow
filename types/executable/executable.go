@@ -403,9 +403,15 @@ func (l ExecutableList) FilterBySubstring(str string) ExecutableList {
 	filteredExecs := make(ExecutableList, 0)
 	for _, exec := range l {
 		ref := exec.Ref().String()
-		// TODO: Include aliases in search
 		if strings.Contains(ref, str) || strings.Contains(exec.Description, str) {
 			filteredExecs = append(filteredExecs, exec)
+		} else { // search in aliases
+			for _, alias := range exec.Aliases {
+				if strings.Contains(alias, str) {
+					filteredExecs = append(filteredExecs, exec)
+					break
+				}
+			}
 		}
 	}
 	return filteredExecs
