@@ -13,7 +13,7 @@ require (
 	github.com/itchyny/gojq v0.12.16
 	github.com/jahvon/glamour v0.7.1-patch2
 	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
-	github.com/jahvon/tuikit v0.0.17
+	github.com/jahvon/tuikit v0.0.18
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
