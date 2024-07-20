@@ -28,12 +28,12 @@ func readFileContent(f *os.File) (string, error) {
 	return outStr, nil
 }
 
-func writeUserInput(f *os.File, input string) error {
-	if _, err := f.WriteString(input); err != nil {
-		return err
-	}
-	if _, err := f.Seek(0, 0); err != nil {
-		return err
-	}
-	return nil
-}
+// func writeUserInput(f *os.File, input string) error {
+// 	if _, err := f.WriteString(input); err != nil {
+// 		return err
+// 	}
+// 	if _, err := f.Seek(0, 0); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
