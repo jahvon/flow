@@ -10,6 +10,13 @@ coverage:
         if_ci_failed: success
         informational: true
         only_pulls: true
+    patch:
+      default:
+          target: auto
+          threshold: 0
+          if_ci_failed: success
+          informational: true
+          only_pulls: true
 ignore:
   - "**/*.gen.go" # ignore generated code
   - "tools/**" # ignore tools directory
