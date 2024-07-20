@@ -9,8 +9,8 @@ flow logs [flags]
 ### Options
 
 ```
-      --copy   Copy the secret value to the clipboard
   -h, --help   help for logs
+      --last   Print the last execution's logs
 ```
 
 ### Options inherited from parent commands
