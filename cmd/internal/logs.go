@@ -31,12 +31,12 @@ func RegisterLogsCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			logFunc(ctx, cmd, args)
 		},
 	}
-	RegisterFlag(ctx, subCmd, *flags.CopyFlag)
+	RegisterFlag(ctx, subCmd, *flags.LastLogEntryFlag)
 	rootCmd.AddCommand(subCmd)
 }
 
 func logFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
-	lastEntry := flags.ValueFor[bool](ctx, cmd, *flags.CopyFlag, false)
+	lastEntry := flags.ValueFor[bool](ctx, cmd, *flags.LastLogEntryFlag, false)
 	if err := filesystem.EnsureLogsDir(); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
