@@ -110,6 +110,13 @@ var NonInteractiveFlag = &Metadata{
 	Required: false,
 }
 
+var CopyFlag = &Metadata{
+	Name:     "copy",
+	Usage:    "Copy the secret value to the clipboard",
+	Default:  false,
+	Required: false,
+}
+
 var LastLogEntryFlag = &Metadata{
 	Name:     "last",
 	Usage:    "Print the last execution's logs",

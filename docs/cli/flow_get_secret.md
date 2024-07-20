@@ -9,6 +9,7 @@ flow get secret REFERENCE [flags]
 ### Options
 
 ```
+      --copy        Copy the secret value to the clipboard
   -h, --help        help for secret
   -p, --plainText   Output the secret value as plain text instead of an obfuscated string
 ```
