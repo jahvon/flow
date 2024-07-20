@@ -236,7 +236,8 @@ func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	case len(args) == 2:
 		value = args[1]
 	default:
-		logger.Fatalf("invalid number of arguments: %d", len(args))
+		logger.Warnx("merging multiple arguments into a single value", "count", len(args))
+		value = strings.Join(args[1:], " ")
 	}
 
 	secret := vault.SecretValue(value)
