@@ -28,7 +28,6 @@ var (
 		"deploy":    ActivateGroupID,
 		"apply":     ActivateGroupID,
 		"delete":    DeactivateGroupID,
-		"remove":    DeactivateGroupID,
 		"uninstall": DeactivateGroupID,
 		"destroy":   DeactivateGroupID,
 		"undeploy":  DeactivateGroupID,

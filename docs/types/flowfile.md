@@ -328,7 +328,7 @@ For example, the `exec` verb can replaced with "run" or "start" when referencing
 This allows users to use the verb that best describes the action they are performing.
 
 **Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`
-**Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`
+**Deactivation verbs**: `delete`, `uninstall`, `destroy`, `undeploy`
 **Update verbs**: `update`, `upgrade`, `refresh`, `reload`
 **Management verbs**: `manage`, `configure`, `monitor`, `edit`
 **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
@@ -349,7 +349,6 @@ This allows users to use the verb that best describes the action they are perfor
 - `deploy`
 - `apply`
 - `delete`
-- `remove`
 - `uninstall`
 - `destroy`
 - `undeploy`

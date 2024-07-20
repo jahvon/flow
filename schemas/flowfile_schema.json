@@ -430,7 +430,7 @@
       }
     },
     "ExecutableVerb": {
-      "description": "Keywords that describe the action an executable performs.\nWhile executables are configured with a single verb, the verb can be aliased to related verbs.\nFor example, the `exec` verb can replaced with \"run\" or \"start\" when referencing an executable.\nThis allows users to use the verb that best describes the action they are performing.\n\n**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`\n**Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`\n**Update verbs**: `update`, `upgrade`, `refresh`, `reload`\n**Management verbs**: `manage`, `configure`, `monitor`, `edit`\n**Launch verbs**: `open`, `launch`, `show`, `view`, `render`\n**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`\n\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
+      "description": "Keywords that describe the action an executable performs.\nWhile executables are configured with a single verb, the verb can be aliased to related verbs.\nFor example, the `exec` verb can replaced with \"run\" or \"start\" when referencing an executable.\nThis allows users to use the verb that best describes the action they are performing.\n\n**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`\n**Deactivation verbs**: `delete`, `uninstall`, `destroy`, `undeploy`\n**Update verbs**: `update`, `upgrade`, `refresh`, `reload`\n**Management verbs**: `manage`, `configure`, `monitor`, `edit`\n**Launch verbs**: `open`, `launch`, `show`, `view`, `render`\n**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`\n\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
       "type": "string",
       "default": "exec",
       "enum": [
@@ -443,7 +443,6 @@
         "deploy",
         "apply",
         "delete",
-        "remove",
         "uninstall",
         "destroy",
         "undeploy",

@@ -38,15 +38,7 @@ func NewTestContext(
 	ctx stdCtx.Context,
 	t ginkgo.FullGinkgoTInterface,
 ) *context.Context {
-	stdOut, err := os.CreateTemp("", "flow-test-out")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
-	stdIn, err := os.CreateTemp("", "flow-test-in")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
-
+	stdOut, stdIn := createTempIOFiles(t)
 	logger := tuikitIO.NewLogger(stdOut, io.Theme(), tuikitIO.Text, "")
 	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
 	return ctxx
@@ -61,19 +53,32 @@ func NewTestContextWithMockLogger(
 	t ginkgo.FullGinkgoTInterface,
 	ctrl *gomock.Controller,
 ) (*context.Context, *tuikitIOMocks.MockLogger) {
-	stdOut, err := os.CreateTemp("", "flow-test-out")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
-	stdIn, err := os.CreateTemp("", "flow-test-in")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
-
+	stdOut, stdIn := createTempIOFiles(t)
 	logger := tuikitIOMocks.NewMockLogger(ctrl)
 	expectInternalMockLoggerCalls(logger)
 	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
 	return ctxx, logger
+}
+
+func ResetTestContext(ctx *context.Context, t ginkgo.FullGinkgoTInterface) {
+	ctx.Ctx = stdCtx.Background()
+	stdIn, stdOut := createTempIOFiles(t)
+	ctx.SetIO(stdIn, stdOut)
+	logger := tuikitIO.NewLogger(stdOut, io.Theme(), tuikitIO.Text, "")
+	ctx.Logger = logger
+}
+
+func createTempIOFiles(t ginkgo.FullGinkgoTInterface) (stdIn *os.File, stdOut *os.File) {
+	var err error
+	stdOut, err = os.CreateTemp("", "flow-test-out")
+	if err != nil {
+		t.Fatalf("unable to create temp file: %v", err)
+	}
+	stdIn, err = os.CreateTemp("", "flow-test-in")
+	if err != nil {
+		t.Fatalf("unable to create temp file: %v", err)
+	}
+	return
 }
 
 func newTestContext(

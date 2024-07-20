@@ -213,7 +213,7 @@ func registerSetSecretCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Use:     "secret NAME [VALUE]",
 		Aliases: []string{"scrt"},
 		Short:   "Update or create a secret in the flow secret vault.",
-		Args:    cobra.ExactArgs(2),
+		Args:    cobra.MinimumNArgs(1),
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setSecretFunc(ctx, cmd, args) },
 	}
@@ -223,15 +223,21 @@ func registerSetSecretCmd(ctx *context.Context, setCmd *cobra.Command) {
 func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
-	value := args[1]
 
-	if value == "" {
+	var value string
+	switch {
+	case len(args) == 1:
 		in := components.TextInput{Key: "value", Prompt: "Enter the secret value"}
 		inputs, err := components.ProcessInputs(io.Theme(), &in)
 		if err != nil {
 			logger.FatalErr(err)
 		}
 		value = inputs.FindByKey("value").Value()
+	case len(args) == 2:
+		value = args[1]
+	default:
+		logger.Warnx("merging multiple arguments into a single value", "count", len(args))
+		value = strings.Join(args[1:], " ")
 	}
 
 	secret := vault.SecretValue(value)
