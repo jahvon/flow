@@ -205,6 +205,8 @@ type ParallelExecutableType struct {
 	// Params corresponds to the JSON schema field "params".
 	Params ParameterList `json:"params,omitempty" yaml:"params,omitempty" mapstructure:"params,omitempty"`
 
+	// DEPRECATED: Use `execs` instead.
+	//
 	// A list of references to other executables to run in parallel.
 	// One of `refs` or `execs` must be set.
 	//
@@ -228,9 +230,6 @@ type ParallelRefConfig struct {
 
 	// The number of times to retry the executable if it fails.
 	Retries int `json:"retries,omitempty" yaml:"retries,omitempty" mapstructure:"retries,omitempty"`
-
-	// retryAttempts corresponds to the JSON schema field "retryAttempts".
-	retryAttempts int `json:"retryAttempts,omitempty" yaml:"retryAttempts,omitempty" mapstructure:"retryAttempts,omitempty"`
 }
 
 // A parameter is a value that can be passed to an executable and all of its
@@ -370,6 +369,8 @@ type SerialExecutableType struct {
 	// Params corresponds to the JSON schema field "params".
 	Params ParameterList `json:"params,omitempty" yaml:"params,omitempty" mapstructure:"params,omitempty"`
 
+	// DEPRECATED: Use `execs` instead.
+	//
 	// A list of references to other executables to run in serial.
 	// One of `refs` or `execs` must be set.
 	//

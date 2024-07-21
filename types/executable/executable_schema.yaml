@@ -222,12 +222,6 @@ definitions:
         description: The number of times to retry the executable if it fails.
         default: 0
         minimum: 0
-      retryAttempts:
-        type: integer
-        default: 0
-        minimum: 0
-        goJSONSchema:
-          identifier: retryAttempts
 
   ParallelExecutableType:
     type: object
@@ -240,6 +234,8 @@ definitions:
       refs:
         $ref: '#/definitions/RefList'
         description: |
+          DEPRECATED: Use `execs` instead.
+          
           A list of references to other executables to run in parallel.
           One of `refs` or `execs` must be set.
       execs:
@@ -397,6 +393,8 @@ definitions:
       refs:
         $ref: '#/definitions/RefList'
         description: |
+          DEPRECATED: Use `execs` instead.
+          
           A list of references to other executables to run in serial.
           One of `refs` or `execs` must be set.
       execs:

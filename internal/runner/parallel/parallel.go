@@ -89,7 +89,7 @@ func handleExecRef(
 				err := runner.Exec(ctx, exec, promptedEnv)
 				if err != nil {
 					errs = append(errs, err)
-					ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", ref))
+					ctx.Logger.Errorx("execution error", "err", err, "ref", exec.Ref())
 				}
 			}
 			return nil
@@ -132,12 +132,14 @@ func handleExec(
 			exec = execUtils.ExecutableForCmd(parent, refConfig.Cmd, i)
 		}
 
+		execPromptedEnv := make(map[string]string)
+		maps.Copy(promptedEnv, execPromptedEnv)
 		if len(refConfig.Args) > 0 {
 			a, err := argUtils.ProcessArgs(exec, refConfig.Args)
 			if err != nil {
 				ctx.Logger.Error(err, "unable to process arguments")
 			}
-			maps.Copy(promptedEnv, a)
+			maps.Copy(execPromptedEnv, a)
 		}
 
 		if exec.Exec != nil {
@@ -148,31 +150,34 @@ func handleExec(
 		}
 
 		group.Go(func() error {
+			var attempts int
+		retryLoop:
 			for {
-				if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
+				attempts++
+				if err := runner.Exec(ctx, exec, execPromptedEnv); err != nil {
 					switch {
 					case refConfig.Retries == 0 && parallelSpec.FailFast:
-						cancel()
 						return errors.Wrapf(err, "execution error ref='%s'", exec.Ref())
 					case refConfig.Retries == 0 && !parallelSpec.FailFast:
 						errs = append(errs, err)
-						ctx.Logger.Error(err, fmt.Sprintf("execution error ref='%s'", exec.Ref()))
-					case refConfig.Retries != 0 && refConfig.AttemptedMaxTimes() && parallelSpec.FailFast:
-						cancel()
+						ctx.Logger.Errorx("execution error", "err", err, "ref", exec.Ref())
+						break retryLoop
+					case refConfig.Retries != 0 && attempts-1 >= refConfig.Retries && parallelSpec.FailFast:
 						return fmt.Errorf("retries exceeded ref='%s' max=%d", exec.Ref(), refConfig.Retries)
-					case refConfig.Retries != 0 && refConfig.AttemptedMaxTimes() && !parallelSpec.FailFast:
+					case refConfig.Retries != 0 && attempts-1 >= refConfig.Retries && !parallelSpec.FailFast:
 						errs = append(errs, err)
-						ctx.Logger.Error(err, fmt.Sprintf("retries exceeded ref='%s' max=%d", exec.Ref(), refConfig.Retries))
-					case refConfig.Retries != 0 && !refConfig.AttemptedMaxTimes():
-						refConfig.RecordAttempt()
-						ctx.Logger.Warnf("retrying ref='%s'", exec.Ref())
+						ctx.Logger.Errorx(
+							"retries exceeded", "err", err, "ref", exec.Ref(), "max", refConfig.Retries,
+						)
+						break retryLoop
+					case refConfig.Retries != 0 && attempts-1 < refConfig.Retries:
+						ctx.Logger.Warnx("retrying", "ref", exec.Ref())
 					default:
-						cancel()
 						return errors.Wrapf(err, "unexpected error handling ref='%s'", exec.Ref())
 					}
-					continue
+				} else {
+					break retryLoop
 				}
-				break
 			}
 			return nil
 		})

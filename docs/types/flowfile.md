@@ -191,7 +191,7 @@ Launches an application or opens a URI.
 | `failFast` | If set to true, the parallel executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
 | `maxThreads` | The maximum number of threads to use when executing the parallel executables. | `integer` | 5 | [] |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `refs` | A list of references to other executables to run in parallel. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+| `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in parallel. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
 
 ### ExecutableParameter
 
@@ -320,7 +320,7 @@ Executes a list of executables in serial.
 | `execs` | A list of executables to run in serial. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | `array` ([SerialRefConfig](#SerialRefConfig)) | <no value> | [] |
 | `failFast` | If set to true, the serial executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `refs` | A list of references to other executables to run in serial. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+| `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in serial. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
 
 ### ExecutableVerb
 

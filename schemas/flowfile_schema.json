@@ -235,7 +235,7 @@
         },
         "refs": {
           "$ref": "#/definitions/ExecutableRefList",
-          "description": "A list of references to other executables to run in parallel.\nOne of `refs` or `execs` must be set.\n"
+          "description": "DEPRECATED: Use `execs` instead.\n\nA list of references to other executables to run in parallel.\nOne of `refs` or `execs` must be set.\n"
         }
       }
     },
@@ -441,7 +441,7 @@
         },
         "refs": {
           "$ref": "#/definitions/ExecutableRefList",
-          "description": "A list of references to other executables to run in serial.\nOne of `refs` or `execs` must be set.\n"
+          "description": "DEPRECATED: Use `execs` instead.\n\nA list of references to other executables to run in serial.\nOne of `refs` or `execs` must be set.\n"
         }
       }
     },

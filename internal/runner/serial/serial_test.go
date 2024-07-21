@@ -143,7 +143,9 @@ var _ = Describe("SerialRunner", func() {
 					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
 					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
 					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(errors.New("error")).Times(1)
-					mockLogger.EXPECT().Error(gomock.Any(), gomock.Any()).Times(1)
+					mockLogger.EXPECT().
+						Errorx("execution error", "err", gomock.Any(), "ref", e.Ref()).
+						Times(1)
 				}
 			}
 
@@ -156,6 +158,7 @@ var _ = Describe("SerialRunner", func() {
 			rootExec *executable.Executable
 			subExecs executable.ExecutableList
 		)
+
 		BeforeEach(func() {
 			ns := "examples"
 			rootExec = builder.SerialExecByRefConfig(

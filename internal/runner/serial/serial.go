@@ -80,7 +80,7 @@ func handleExecRef(
 				return errors.Wrapf(err, "execution error ref='%s'", executableRef)
 			}
 			errs = append(errs, err)
-			ctx.Logger.Error(err, fmt.Sprintf("execution error for %s", executableRef))
+			ctx.Logger.Errorx("execution error", "err", err, "ref", exec.Ref())
 		}
 	}
 	if len(errs) > 0 {
