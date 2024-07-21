@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 
+	"github.com/atotto/clipboard"
 	"github.com/jahvon/tuikit/components"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -178,6 +179,7 @@ func registerGetSecretCmd(ctx *context.Context, getCmd *cobra.Command) {
 		Run:     func(cmd *cobra.Command, args []string) { getSecretFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, secretCmd, *flags.OutputSecretAsPlainTextFlag)
+	RegisterFlag(ctx, secretCmd, *flags.CopyFlag)
 	getCmd.AddCommand(secretCmd)
 }
 
@@ -185,6 +187,7 @@ func getSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
 	asPlainText := flags.ValueFor[bool](ctx, cmd, *flags.OutputSecretAsPlainTextFlag, false)
+	copyValue := flags.ValueFor[bool](ctx, cmd, *flags.CopyFlag, false)
 
 	v := vault.NewVault(logger)
 	secret, err := v.GetSecret(reference)
@@ -196,5 +199,13 @@ func getSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		logger.PlainTextInfo(secret.PlainTextString())
 	} else {
 		logger.PlainTextInfo(secret.String())
+	}
+
+	if copyValue {
+		if err := clipboard.WriteAll(secret.PlainTextString()); err != nil {
+			logger.Error(err, "\nunable to copy secret value to clipboard")
+		} else {
+			logger.PlainTextSuccess("\ncopied secret value to clipboard")
+		}
 	}
 }

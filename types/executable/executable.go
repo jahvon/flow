@@ -219,6 +219,10 @@ func (e *Executable) SetDefaults() {
 }
 
 func (e *Executable) Validate() error {
+	if e == nil {
+		return fmt.Errorf("executable undefined; try running `flow sync`")
+	}
+
 	if e.Verb == "" {
 		return fmt.Errorf("verb cannot be empty")
 	} else if err := e.Verb.Validate(); err != nil {
