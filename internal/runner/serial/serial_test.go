@@ -5,16 +5,13 @@ import (
 	"errors"
 	"testing"
 
-	tuikitIOMocks "github.com/jahvon/tuikit/io/mocks"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
-	"github.com/jahvon/flow/internal/runner/mocks"
 	"github.com/jahvon/flow/internal/runner/serial"
-	testRunner "github.com/jahvon/flow/tests/runner"
+	testUtils "github.com/jahvon/flow/tests/utils"
 	"github.com/jahvon/flow/tools/builder"
 	"github.com/jahvon/flow/types/executable"
 )
@@ -26,18 +23,21 @@ func TestSerialRunner(t *testing.T) {
 
 var _ = Describe("SerialRunner", func() {
 	var (
-		ctx        *context.Context
-		mockLogger *tuikitIOMocks.MockLogger
-		serialRnr  runner.Runner
+		ctx       *testUtils.ContextWithMocks
+		serialRnr runner.Runner
 	)
 
 	BeforeEach(func() {
-		ctrl := gomock.NewController(GinkgoT())
-		ctx, mockLogger = testRunner.NewTestContextWithMockLogger(stdCtx.Background(), GinkgoT(), ctrl)
+		ctx = testUtils.NewContextWithMocks(stdCtx.Background(), GinkgoT())
+		runner.RegisterRunner(ctx.RunnerMock)
 		serialRnr = serial.NewRunner()
 	})
 
-	Context("Title", func() {
+	AfterEach(func() {
+		runner.Reset()
+	})
+
+	Context("Name", func() {
 		It("should return the correct runner name", func() {
 			Expect(serialRnr.Name()).To(Equal("serial"))
 		})
@@ -61,90 +61,285 @@ var _ = Describe("SerialRunner", func() {
 		})
 	})
 
-	Context("Exec", func() {
+	When("Executables with ref", func() {
 		var (
-			rootExec                                    *executable.Executable
-			isSerialExec1, isSerialExec2, isSerialExec3 gomock.Matcher
-			mockRunner                                  *mocks.MockRunner
+			rootExec *executable.Executable
+			subExecs executable.ExecutableList
 		)
 
 		BeforeEach(func() {
-			ctrl := gomock.NewController(GinkgoT())
-			mockRunner = mocks.NewMockRunner(ctrl)
-
 			ns := "examples"
 			rootExec = builder.SerialExecByRef(
 				builder.WithNamespaceName(ns),
-				builder.WithWorkspaceName(ctx.CurrentWorkspace.AssignedName()),
-				builder.WithWorkspacePath(ctx.CurrentWorkspace.Location()),
+				builder.WithWorkspaceName(ctx.Ctx.CurrentWorkspace.AssignedName()),
+				builder.WithWorkspacePath(ctx.Ctx.CurrentWorkspace.Location()),
 			)
-			serialSpec := rootExec.Serial
-			isSerialExec1 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialSpec.Refs[0]) })
-			isSerialExec2 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialSpec.Refs[1]) })
-			isSerialExec3 = gomock.Cond(func(e any) bool { return isExecutableWithRef(e, serialSpec.Refs[2]) })
+			execFlowfile := builder.ExamplesExecFlowFile(
+				builder.WithNamespaceName(ns),
+				builder.WithWorkspaceName(ctx.Ctx.CurrentWorkspace.AssignedName()),
+				builder.WithWorkspacePath(ctx.Ctx.CurrentWorkspace.Location()),
+			)
+			subExecs = testUtils.FindSubExecs(rootExec, executable.FlowFileList{execFlowfile})
 
 			runner.RegisterRunner(serialRnr)
-			runner.RegisterRunner(mockRunner)
-			mockRunner.EXPECT().IsCompatible(rootExec).Return(false).AnyTimes()
-
-			Expect(mockLogger).To(Not(BeNil()))
-		})
-
-		AfterEach(func() {
-			runner.Reset()
+			runner.RegisterRunner(ctx.RunnerMock)
+			ctx.RunnerMock.EXPECT().IsCompatible(rootExec).Return(false).AnyTimes()
 		})
 
 		It("should execute in order", func() {
 			promptedEnv := make(map[string]string)
+			mockRunner := ctx.RunnerMock
+			mockCache := ctx.ExecutableCache
 
-			mockRunner.EXPECT().IsCompatible(isSerialExec1).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec1, promptedEnv).Return(nil).Times(1)
+			for _, e := range subExecs {
+				isSerialExec := testUtils.ExecWithRef(e.Ref())
+				mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+				mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+				mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+			}
 
-			mockRunner.EXPECT().IsCompatible(isSerialExec2).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec2, promptedEnv).Return(nil).Times(1)
-
-			mockRunner.EXPECT().IsCompatible(isSerialExec3).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec3, promptedEnv).Return(nil).Times(1)
-
-			Expect(serialRnr.Exec(ctx, rootExec, promptedEnv)).To(Succeed())
+			Expect(serialRnr.Exec(ctx.Ctx, rootExec, promptedEnv)).To(Succeed())
 		})
 
 		It("should fail fast when enabled", func() {
 			promptedEnv := make(map[string]string)
+			mockRunner := ctx.RunnerMock
+			mockCache := ctx.ExecutableCache
 
-			mockRunner.EXPECT().IsCompatible(isSerialExec1).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec1, promptedEnv).Return(nil).Times(1)
-
-			mockRunner.EXPECT().IsCompatible(isSerialExec2).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec2, promptedEnv).Return(errors.New("error")).Times(1)
+			for i, e := range subExecs {
+				switch i {
+				case 0:
+					isSerialExec := testUtils.ExecWithRef(e.Ref())
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+				case 1:
+					isSerialExec := testUtils.ExecWithRef(e.Ref())
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(errors.New("error")).Times(1)
+				}
+			}
 
 			rootExec.Serial.FailFast = true
-			Expect(serialRnr.Exec(ctx, rootExec, promptedEnv)).ToNot(Succeed())
+			Expect(serialRnr.Exec(ctx.Ctx, rootExec, promptedEnv)).ToNot(Succeed())
 		})
 
 		It("should not fail fast when disabled", func() {
 			promptedEnv := make(map[string]string)
+			mockRunner := ctx.RunnerMock
+			mockLogger := ctx.Logger
+			mockCache := ctx.ExecutableCache
 
-			mockRunner.EXPECT().IsCompatible(isSerialExec1).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec1, promptedEnv).Return(nil).Times(1)
+			for i, e := range subExecs {
+				switch i {
+				case 0, 2:
+					isSerialExec := testUtils.ExecWithRef(e.Ref())
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+				case 1:
+					isSerialExec := testUtils.ExecWithRef(e.Ref())
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(errors.New("error")).Times(1)
+					mockLogger.EXPECT().
+						Errorx("execution error", "err", gomock.Any(), "ref", e.Ref()).
+						Times(1)
+				}
+			}
 
-			mockRunner.EXPECT().IsCompatible(isSerialExec2).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec2, promptedEnv).Return(errors.New("error")).Times(1)
+			Expect(serialRnr.Exec(ctx.Ctx, rootExec, promptedEnv)).ToNot(Succeed())
+		})
+	})
 
-			mockRunner.EXPECT().IsCompatible(isSerialExec3).Return(true).Times(1)
-			mockRunner.EXPECT().Exec(ctx, isSerialExec3, promptedEnv).Return(nil).Times(1)
-			mockLogger.EXPECT().Error(gomock.Any(), gomock.Any()).Times(1)
+	When("Executables with ref configs", func() {
+		var (
+			rootExec *executable.Executable
+			subExecs executable.ExecutableList
+		)
 
-			Expect(serialRnr.Exec(ctx, rootExec, promptedEnv)).ToNot(Succeed())
+		BeforeEach(func() {
+			ns := "examples"
+			rootExec = builder.SerialExecByRefConfig(
+				builder.WithNamespaceName(ns),
+				builder.WithWorkspaceName(ctx.Ctx.CurrentWorkspace.AssignedName()),
+				builder.WithWorkspacePath(ctx.Ctx.CurrentWorkspace.Location()),
+			)
+			execFlowfile := builder.ExamplesExecFlowFile(
+				builder.WithNamespaceName(ns),
+				builder.WithWorkspaceName(ctx.Ctx.CurrentWorkspace.AssignedName()),
+				builder.WithWorkspacePath(ctx.Ctx.CurrentWorkspace.Location()),
+			)
+			subExecs = testUtils.FindSubExecs(rootExec, executable.FlowFileList{execFlowfile})
+
+			runner.RegisterRunner(serialRnr)
+			runner.RegisterRunner(ctx.RunnerMock)
+			ctx.RunnerMock.EXPECT().IsCompatible(rootExec).Return(false).AnyTimes()
+		})
+
+		It("should execute in order", func() {
+			promptedEnv := make(map[string]string)
+			mockRunner := ctx.RunnerMock
+			mockCache := ctx.ExecutableCache
+
+			for i, e := range subExecs {
+				switch i {
+				case 0:
+					isSerialExec := testUtils.ExecWithRef(e.Ref())
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+				case 1:
+					isSerialExec := testUtils.ExecWithRef(e.Ref())
+					serialPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, serialPrompt).Return(nil).Times(1)
+				case 2:
+					isSerialExec := testUtils.ExecWithCmd(e.Exec.Cmd)
+					mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+					mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+				}
+			}
+			Expect(serialRnr.Exec(ctx.Ctx, rootExec, promptedEnv)).To(Succeed())
+		})
+
+		Context("when retries are set on a failed ref config", func() {
+			BeforeEach(func() {
+				rootExec.Serial.Execs[1].Retries = 2
+			})
+
+			When("fail fast is disabled", func() {
+				It("should be retried until attempted max times", func() {
+					mockRunner := ctx.RunnerMock
+					mockCache := ctx.ExecutableCache
+					mockLogger := ctx.Logger
+					promptedEnv := make(map[string]string)
+
+					for i, e := range subExecs {
+						switch i {
+						case 0:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+						case 1:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							serialPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(3)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, serialPrompt).Return(errors.New("error")).Times(3)
+							mockLogger.EXPECT().Warnx("retrying", "ref", e.Ref()).Times(2)
+							mockLogger.EXPECT().
+								Errorx("retries exceeded", "err", gomock.Any(), "ref", e.Ref(), "max", 2).
+								Times(1)
+						case 2:
+							isSerialExec := testUtils.ExecWithCmd(e.Exec.Cmd)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+						}
+					}
+
+					rootExec.Serial.FailFast = false
+					Expect(serialRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
+				})
+			})
+
+			When("fail fast is enabled", func() {
+				It("should fail fast after max attempts when enabled", func() {
+					mockRunner := ctx.RunnerMock
+					mockCache := ctx.ExecutableCache
+					mockLogger := ctx.Logger
+					promptedEnv := make(map[string]string)
+
+					for i, e := range subExecs {
+						switch i {
+						case 0:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+						case 1:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							serialPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(3)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, serialPrompt).Return(errors.New("error")).Times(3)
+							mockLogger.EXPECT().Warnx("retrying", "ref", e.Ref()).Times(2)
+						}
+					}
+
+					rootExec.Serial.FailFast = true
+					Expect(serialRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
+				})
+			})
+		})
+
+		Context("when retries are not enabled on a failed ref config", func() {
+			When("fail fast is disabled", func() {
+				It("should be retried until attempted max times", func() {
+					mockRunner := ctx.RunnerMock
+					mockCache := ctx.ExecutableCache
+					mockLogger := ctx.Logger
+					promptedEnv := make(map[string]string)
+
+					for i, e := range subExecs {
+						switch i {
+						case 0:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+						case 1:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							serialPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, serialPrompt).Return(errors.New("error")).Times(1)
+							mockLogger.EXPECT().
+								Errorx("execution error", "err", gomock.Any(), "ref", e.Ref()).
+								Times(1)
+						case 2:
+							isSerialExec := testUtils.ExecWithCmd(e.Exec.Cmd)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+						}
+					}
+
+					Expect(serialRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
+				})
+			})
+
+			When("fail fast is enabled", func() {
+				BeforeEach(func() {
+					rootExec.Serial.FailFast = true
+				})
+
+				It("should fail fast after max attempts when enabled", func() {
+					mockRunner := ctx.RunnerMock
+					mockCache := ctx.ExecutableCache
+					promptedEnv := make(map[string]string)
+
+					for i, e := range subExecs {
+						switch i {
+						case 0:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, promptedEnv).Return(nil).Times(1)
+						case 1:
+							isSerialExec := testUtils.ExecWithRef(e.Ref())
+							serialPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
+							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+							mockRunner.EXPECT().IsCompatible(isSerialExec).Return(true).Times(1)
+							mockRunner.EXPECT().Exec(ctx.Ctx, isSerialExec, serialPrompt).Return(errors.New("error")).Times(1)
+						}
+					}
+
+					Expect(serialRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
+				})
+			})
 		})
 	})
 })
-
-func isExecutableWithRef(e any, ref executable.Ref) bool {
-	exec, ok := e.(*executable.Executable)
-	if !ok {
-		return false
-	}
-	// fmt.Println("want: ", ref, "got: ", exec.Ref())
-	return exec.Ref() == ref
-}

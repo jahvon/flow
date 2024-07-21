@@ -195,6 +195,41 @@ definitions:
         description: If set to true, the executable will wait for the launched application to exit before continuing.
         default: false
 
+  ParallelRefConfig:
+    type: object
+    description: Configuration for a parallel executable.
+    properties:
+      cmd:
+        type: string
+        description: |
+          The command to execute.
+          One of `cmd` or `ref` must be set.
+        default: ""
+      ref:
+        $ref: '#/definitions/Ref'
+        description: |
+          A reference to another executable to run in serial.
+          One of `cmd` or `ref` must be set.
+        default: ""
+      args:
+        type: array
+        items:
+         type: string
+        description: Arguments to pass to the executable.
+        default: []
+      retries:
+        type: integer
+        description: The number of times to retry the executable if it fails.
+        default: 0
+        minimum: 0
+
+  ParallelRefConfigList:
+    type: array
+    description: |
+      A list of executables to run in parallel. The executables can be defined by it's exec `cmd` or `ref`.
+    items:
+      $ref: '#/definitions/ParallelRefConfig'
+
   ParallelExecutableType:
     type: object
     required: [refs]
@@ -205,6 +240,17 @@ definitions:
         $ref: '#/definitions/ArgumentList'
       refs:
         $ref: '#/definitions/RefList'
+        description: |
+          DEPRECATED: Use `execs` instead.
+          
+          A list of references to other executables to run in parallel.
+          One of `refs` or `execs` must be set.
+      execs:
+          $ref: '#/definitions/ParallelRefConfigList'
+          description: |
+              A list of executables to run in parallel.
+              Each executable can be a command or a reference to another executable.
+              One of `refs` or `execs` must be set.
       maxThreads:
         type: integer
         description: The maximum number of threads to use when executing the parallel executables.
@@ -308,6 +354,45 @@ definitions:
           If not set, the response status code will not be checked.
         default: []
 
+  SerialRefConfig:
+    type: object
+    description: Configuration for a serial executable.
+    properties:
+      cmd:
+        type: string
+        description: |
+          The command to execute.
+          One of `cmd` or `ref` must be set.
+        default: ""
+      ref:
+        $ref: '#/definitions/Ref'
+        description: |
+          A reference to another executable to run in serial.
+          One of `cmd` or `ref` must be set.
+        default: ""
+      args:
+        type: array
+        items:
+          type: string
+        description: Arguments to pass to the executable.
+        default: []
+      reviewRequired:
+        type: boolean
+        description: If set to true, the user will be prompted to review the output of the executable before continuing.
+        default: false
+      retries:
+        type: integer
+        description: The number of times to retry the executable if it fails.
+        default: 0
+        minimum: 0
+
+  SerialRefConfigList:
+    type: array
+    description: |
+      A list of executables to run in serial. The executables can be defined by it's exec `cmd` or `ref`.
+    items:
+      $ref: '#/definitions/SerialRefConfig'
+
   SerialExecutableType:
     type: object
     required: [refs]
@@ -319,6 +404,17 @@ definitions:
         $ref: '#/definitions/ArgumentList'
       refs:
         $ref: '#/definitions/RefList'
+        description: |
+          DEPRECATED: Use `execs` instead.
+          
+          A list of references to other executables to run in serial.
+          One of `refs` or `execs` must be set.
+      execs:
+        $ref: '#/definitions/SerialRefConfigList'
+        description: |
+          A list of executables to run in serial.
+          Each executable can be a command or a reference to another executable.
+          One of `refs` or `execs` must be set.
       failFast:
         type: boolean
         description: If set to true, the serial executable will fail if any of the sub-executables fail.

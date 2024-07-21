@@ -57,15 +57,18 @@ func NewLibrary(
 	p2 := viewport.New(0, 0)
 	p3 := viewport.New(0, 0)
 	return &Library{
-		ctx:              ctx,
-		allWorkspaces:    workspaces,
-		allExecutables:   execs,
-		filter:           filter,
-		paneZeroViewport: p1,
-		paneOneViewport:  p2,
-		paneTwoViewport:  p3,
-		theme:            theme,
-		cmdRunFunc:       runFunc,
+		ctx:                ctx,
+		allWorkspaces:      workspaces,
+		allExecutables:     execs,
+		filter:             filter,
+		paneZeroViewport:   p1,
+		paneOneViewport:    p2,
+		paneTwoViewport:    p3,
+		theme:              theme,
+		cmdRunFunc:         runFunc,
+		visibleWorkspaces:  make([]string, 0),
+		visibleNamespaces:  make([]string, 0),
+		visibleExecutables: make(executable.ExecutableList, 0),
 	}
 }
 

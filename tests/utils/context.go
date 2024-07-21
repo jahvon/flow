@@ -1,22 +1,22 @@
-package runner
+package utils
 
 import (
 	stdCtx "context"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
 	tuikitIOMocks "github.com/jahvon/tuikit/io/mocks"
 	"github.com/onsi/ginkgo/v2"
-	"github.com/otiai10/copy"
 	"go.uber.org/mock/gomock"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/cache"
+	cacheMocks "github.com/jahvon/flow/internal/cache/mocks"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/runner/mocks"
 	"github.com/jahvon/flow/tools/builder"
 	"github.com/jahvon/flow/types/config"
 	"github.com/jahvon/flow/types/workspace"
@@ -30,34 +30,63 @@ const (
 	cacheSubdir      = "cache"
 )
 
-// NewTestContext creates a new context for testing runners. It initializes the context with
+// NewContext creates a new context for testing runners. It initializes the context with
 // a real logger that writes it's output to a temporary file.
 // It also creates a temporary testing directory for the test workspace, user configs, and caches.
 // Test environment variables are set the config and cache directories override paths.
-func NewTestContext(
-	ctx stdCtx.Context,
-	t ginkgo.FullGinkgoTInterface,
-) *context.Context {
+func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *context.Context {
 	stdOut, stdIn := createTempIOFiles(t)
 	logger := tuikitIO.NewLogger(stdOut, io.Theme(), tuikitIO.Text, "")
 	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
 	return ctxx
 }
 
-// NewTestContextWithMockLogger creates a new context for testing runners. It initializes the context with
-// a mock logger.
-// It also creates a temporary testing directory for the test workspace, user configs, and caches.
-// Test environment variables are set the config and cache directories override paths.
-func NewTestContextWithMockLogger(
-	ctx stdCtx.Context,
-	t ginkgo.FullGinkgoTInterface,
-	ctrl *gomock.Controller,
-) (*context.Context, *tuikitIOMocks.MockLogger) {
-	stdOut, stdIn := createTempIOFiles(t)
-	logger := tuikitIOMocks.NewMockLogger(ctrl)
+type ContextWithMocks struct {
+	Ctx             *context.Context
+	Logger          *tuikitIOMocks.MockLogger
+	ExecutableCache *cacheMocks.MockExecutableCache
+	WorkspaceCache  *cacheMocks.MockWorkspaceCache
+	RunnerMock      *mocks.MockRunner
+}
+
+// NewContextWithMocks creates a new context for testing runners. It initializes the context with
+// a mock logger and mock caches. The mock logger is set to expect debug calls.
+func NewContextWithMocks(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *ContextWithMocks {
+	null := os.NewFile(0, os.DevNull)
+	configDir, cacheDir, wsDir := initTestDirectories(t)
+	setTestEnv(t, configDir, cacheDir)
+	testWsCfg, err := testWsConfig(wsDir)
+	if err != nil {
+		t.Fatalf("unable to create workspace config: %v", err)
+	}
+	testUserCfg, err := testConfig(wsDir)
+	if err != nil {
+		t.Fatalf("unable to create config: %v", err)
+	}
+	cancel := func() {
+		<-ctx.Done()
+	}
+	logger := tuikitIOMocks.NewMockLogger(gomock.NewController(t))
 	expectInternalMockLoggerCalls(logger)
-	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
-	return ctxx, logger
+	wsCache := cacheMocks.NewMockWorkspaceCache(gomock.NewController(t))
+	execCache := cacheMocks.NewMockExecutableCache(gomock.NewController(t))
+	ctxx := &context.Context{
+		Ctx:              ctx,
+		CancelFunc:       cancel,
+		Logger:           logger,
+		Config:           testUserCfg,
+		CurrentWorkspace: testWsCfg,
+		WorkspacesCache:  wsCache,
+		ExecutableCache:  execCache,
+	}
+	ctxx.SetIO(null, null)
+	return &ContextWithMocks{
+		Ctx:             ctxx,
+		Logger:          logger,
+		ExecutableCache: execCache,
+		WorkspaceCache:  wsCache,
+		RunnerMock:      mocks.NewMockRunner(gomock.NewController(t)),
+	}
 }
 
 func ResetTestContext(ctx *context.Context, t ginkgo.FullGinkgoTInterface) {
@@ -87,28 +116,29 @@ func newTestContext(
 	logger tuikitIO.Logger,
 	stdIn, stdOut *os.File,
 ) *context.Context {
-	examples := examplesDir()
-	configDir, cacheDir, wsDir := initTestDirectories(t, examples)
+	configDir, cacheDir, wsDir := initTestDirectories(t)
 	setTestEnv(t, configDir, cacheDir)
 
 	testWsCfg, err := testWsConfig(wsDir)
 	if err != nil {
 		t.Fatalf("unable to create workspace config: %v", err)
 	}
-	testUserCfg, err := testUserConfig(wsDir)
+	testCfg, err := testConfig(wsDir)
 	if err != nil {
 		t.Fatalf("unable to create user config: %v", err)
 	}
+
 	wsCache, execCache := testCaches(t, logger)
 
 	cancel := func() {
 		<-ctx.Done()
 	}
+
 	ctxx := &context.Context{
 		Ctx:              ctx,
 		CancelFunc:       cancel,
 		Logger:           logger,
-		Config:           testUserCfg,
+		Config:           testCfg,
 		CurrentWorkspace: testWsCfg,
 		WorkspacesCache:  wsCache,
 		ExecutableCache:  execCache,
@@ -117,7 +147,7 @@ func newTestContext(
 	return ctxx
 }
 
-func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string, string, string) {
+func initTestDirectories(t ginkgo.FullGinkgoTInterface) (string, string, string) {
 	tmpDir, err := os.MkdirTemp("", "flow-test")
 	if err != nil {
 		t.Fatalf("unable to create temp dir: %v", err)
@@ -127,9 +157,7 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	if err := os.Mkdir(filepath.Join(tmpDir, TestWorkspaceName), 0750); err != nil {
 		t.Fatalf("unable to create workspace directory: %v", err)
 	}
-	if err := copy.Copy(srcWsDir, tmpWsDir); err != nil {
-		t.Fatalf("unable to copy workspace directory: %v", err)
-	}
+
 	testData := builder.ExamplesExecFlowFile()
 	execDef, err := yaml.Marshal(testData)
 	if err != nil {
@@ -144,8 +172,8 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface, srcWsDir string) (string
 	return tmpConfigDir, tmpCacheDir, tmpWsDir
 }
 
-func testUserConfig(wsDir string) (*config.Config, error) {
-	if err := filesystem.InitUserConfig(); err != nil {
+func testConfig(wsDir string) (*config.Config, error) {
+	if err := filesystem.InitConfig(); err != nil {
 		return nil, err
 	}
 	userCfg, err := filesystem.LoadConfig()
@@ -158,7 +186,7 @@ func testUserConfig(wsDir string) (*config.Config, error) {
 		TestWorkspaceName: wsDir,
 	}
 	userCfg.Interactive = &config.Interactive{Enabled: false}
-	if err = filesystem.WriteUserConfig(userCfg); err != nil {
+	if err = filesystem.WriteConfig(userCfg); err != nil {
 		return nil, err
 	}
 
@@ -192,12 +220,6 @@ func testCaches(t ginkgo.FullGinkgoTInterface, logger tuikitIO.Logger) (cache.Wo
 		t.Fatalf("unable to update cache: %v", err)
 	}
 	return wsCache, execCache
-}
-
-func examplesDir() string {
-	_, curFile, _, _ := runtime.Caller(0)
-	// tests/runner/context.go -> tests/runner -> tests -> examples
-	return filepath.Join(filepath.Dir(filepath.Dir(filepath.Dir(curFile))), "examples")
 }
 
 func setTestEnv(t ginkgo.FullGinkgoTInterface, configDir, cacheDir string) {

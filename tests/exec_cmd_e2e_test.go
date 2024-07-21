@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/tests/runner"
+	"github.com/jahvon/flow/tests/utils"
 )
 
 var _ = Describe("exec e2e", func() {
@@ -16,7 +16,7 @@ var _ = Describe("exec e2e", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = runner.NewTestContext(stdCtx.Background(), GinkgoT())
+		ctx = utils.NewContext(stdCtx.Background(), GinkgoT())
 	})
 
 	AfterEach(func() {
@@ -24,11 +24,12 @@ var _ = Describe("exec e2e", func() {
 	})
 
 	DescribeTable("with dir example executables", func(ref string) {
-		runner := runner.NewE2ECommandRunner()
+		runner := utils.NewE2ECommandRunner()
 		stdOut := ctx.StdOut()
 		Expect(runner.Run(ctx, "exec", ref)).To(Succeed())
 		Expect(readFileContent(stdOut)).To(ContainSubstring("flow completed"))
 	},
-		Entry("tmp dir example", "examples:tmp-dir"),
+		Entry("print example", "examples:simple-print"),
+		Entry("tmp dir example", "examples:with-tmp-dir"),
 	)
 })

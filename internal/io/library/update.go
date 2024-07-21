@@ -168,7 +168,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				curCfg.CurrentWorkspace = curWsCfg.AssignedName()
 			}
 
-			if err := filesystem.WriteUserConfig(curCfg); err != nil {
+			if err := filesystem.WriteConfig(curCfg); err != nil {
 				l.ctx.Logger.Error(err, "unable to write user config")
 				l.SetNotice("unable to write user config", styles.NoticeLevelError)
 				break

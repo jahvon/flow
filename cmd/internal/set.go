@@ -61,7 +61,7 @@ func setWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		userConfig.WorkspaceMode = config.ConfigWorkspaceModeFixed
 	}
 
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess("Workspace set to " + workspace)
@@ -84,7 +84,7 @@ func setNamespaceFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	namespace := args[0]
 	userConfig := ctx.Config
 	userConfig.CurrentNamespace = namespace
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess("Namespace set to " + namespace)
@@ -111,7 +111,7 @@ func setWorkspaceModeFunc(ctx *context.Context, _ *cobra.Command, args []string)
 		userConfig.Interactive = &config.Interactive{}
 	}
 	userConfig.WorkspaceMode = mode
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess(fmt.Sprintf("Workspace mode set to '%s'", string(mode)))
@@ -135,7 +135,7 @@ func setLogModeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 
 	userConfig := ctx.Config
 	userConfig.DefaultLogMode = mode
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess(fmt.Sprintf("Default log mode set to '%s'", mode))
@@ -165,7 +165,7 @@ func setInteractiveFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		userConfig.Interactive = &config.Interactive{}
 	}
 	userConfig.Interactive.Enabled = enabled
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 	strVal := "disabled"
@@ -189,8 +189,8 @@ func registerSetTemplateCmd(ctx *context.Context, setCmd *cobra.Command) {
 func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
-	definitionPath := args[1]
-	loadedTemplates, err := filesystem.LoadFlowFileTemplate(definitionPath)
+	flowFilePath := args[1]
+	loadedTemplates, err := filesystem.LoadFlowFileTemplate(flowFilePath)
 	if err != nil {
 		logger.FatalErr(err)
 	}
@@ -201,11 +201,11 @@ func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if userConfig.Templates == nil {
 		userConfig.Templates = map[string]string{}
 	}
-	userConfig.Templates[name] = definitionPath
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	userConfig.Templates[name] = flowFilePath
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
-	logger.PlainTextSuccess(fmt.Sprintf("Template %s set to %s", name, definitionPath))
+	logger.PlainTextSuccess(fmt.Sprintf("Template %s set to %s", name, flowFilePath))
 }
 
 func registerSetSecretCmd(ctx *context.Context, setCmd *cobra.Command) {

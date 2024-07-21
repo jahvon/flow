@@ -189,6 +189,12 @@ type ParallelExecutableType struct {
 	// Args corresponds to the JSON schema field "args".
 	Args ArgumentList `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
 
+	// A list of executables to run in parallel.
+	// Each executable can be a command or a reference to another executable.
+	// One of `refs` or `execs` must be set.
+	//
+	Execs ParallelRefConfigList `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
+
 	// If set to true, the parallel executable will fail if any of the sub-executables
 	// fail.
 	FailFast bool `json:"failFast,omitempty" yaml:"failFast,omitempty" mapstructure:"failFast,omitempty"`
@@ -199,9 +205,36 @@ type ParallelExecutableType struct {
 	// Params corresponds to the JSON schema field "params".
 	Params ParameterList `json:"params,omitempty" yaml:"params,omitempty" mapstructure:"params,omitempty"`
 
-	// Refs corresponds to the JSON schema field "refs".
+	// DEPRECATED: Use `execs` instead.
+	//
+	// A list of references to other executables to run in parallel.
+	// One of `refs` or `execs` must be set.
+	//
 	Refs RefList `json:"refs" yaml:"refs" mapstructure:"refs"`
 }
+
+// Configuration for a parallel executable.
+type ParallelRefConfig struct {
+	// Arguments to pass to the executable.
+	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
+
+	// The command to execute.
+	// One of `cmd` or `ref` must be set.
+	//
+	Cmd string `json:"cmd,omitempty" yaml:"cmd,omitempty" mapstructure:"cmd,omitempty"`
+
+	// A reference to another executable to run in serial.
+	// One of `cmd` or `ref` must be set.
+	//
+	Ref Ref `json:"ref,omitempty" yaml:"ref,omitempty" mapstructure:"ref,omitempty"`
+
+	// The number of times to retry the executable if it fails.
+	Retries int `json:"retries,omitempty" yaml:"retries,omitempty" mapstructure:"retries,omitempty"`
+}
+
+// A list of executables to run in parallel. The executables can be defined by it's
+// exec `cmd` or `ref`.
+type ParallelRefConfigList []ParallelRefConfig
 
 // A parameter is a value that can be passed to an executable and all of its
 // sub-executables.
@@ -327,6 +360,12 @@ type SerialExecutableType struct {
 	// Args corresponds to the JSON schema field "args".
 	Args ArgumentList `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
 
+	// A list of executables to run in serial.
+	// Each executable can be a command or a reference to another executable.
+	// One of `refs` or `execs` must be set.
+	//
+	Execs SerialRefConfigList `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
+
 	// If set to true, the serial executable will fail if any of the sub-executables
 	// fail.
 	FailFast bool `json:"failFast,omitempty" yaml:"failFast,omitempty" mapstructure:"failFast,omitempty"`
@@ -334,9 +373,40 @@ type SerialExecutableType struct {
 	// Params corresponds to the JSON schema field "params".
 	Params ParameterList `json:"params,omitempty" yaml:"params,omitempty" mapstructure:"params,omitempty"`
 
-	// Refs corresponds to the JSON schema field "refs".
+	// DEPRECATED: Use `execs` instead.
+	//
+	// A list of references to other executables to run in serial.
+	// One of `refs` or `execs` must be set.
+	//
 	Refs RefList `json:"refs" yaml:"refs" mapstructure:"refs"`
 }
+
+// Configuration for a serial executable.
+type SerialRefConfig struct {
+	// Arguments to pass to the executable.
+	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
+
+	// The command to execute.
+	// One of `cmd` or `ref` must be set.
+	//
+	Cmd string `json:"cmd,omitempty" yaml:"cmd,omitempty" mapstructure:"cmd,omitempty"`
+
+	// A reference to another executable to run in serial.
+	// One of `cmd` or `ref` must be set.
+	//
+	Ref Ref `json:"ref,omitempty" yaml:"ref,omitempty" mapstructure:"ref,omitempty"`
+
+	// The number of times to retry the executable if it fails.
+	Retries int `json:"retries,omitempty" yaml:"retries,omitempty" mapstructure:"retries,omitempty"`
+
+	// If set to true, the user will be prompted to review the output of the
+	// executable before continuing.
+	ReviewRequired bool `json:"reviewRequired,omitempty" yaml:"reviewRequired,omitempty" mapstructure:"reviewRequired,omitempty"`
+}
+
+// A list of executables to run in serial. The executables can be defined by it's
+// exec `cmd` or `ref`.
+type SerialRefConfigList []SerialRefConfig
 
 type Verb string
 

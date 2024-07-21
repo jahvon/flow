@@ -59,7 +59,7 @@ func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 		return
 	}
 
-	if err := filesystem.InitUserConfig(); err != nil {
+	if err := filesystem.InitConfig(); err != nil {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess("Initialized flow global configurations")
@@ -113,8 +113,10 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 		}
 	}
 
-	if err := filesystem.InitWorkspaceConfig(name, path); err != nil {
-		logger.FatalErr(err)
+	if !filesystem.WorkspaceConfigExists(path) {
+		if err := filesystem.InitWorkspaceConfig(name, path); err != nil {
+			logger.FatalErr(err)
+		}
 	}
 	userConfig.Workspaces[name] = path
 
@@ -124,7 +126,7 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 		logger.Infof("Workspace '%s' set as current workspace", name)
 	}
 
-	if err := filesystem.WriteUserConfig(userConfig); err != nil {
+	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
 
@@ -165,7 +167,7 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	fileVal := flags.ValueFor[string](ctx, cmd, *flags.FileFlag, false)
 
 	logger.Infof("Adding '%s' executables to '%s' workspace", definitionName, workspaceName)
-	var definitionPath string
+	var flowFilePath string
 	switch {
 	case template == "" && fileVal == "":
 		logger.Fatalf("one of -f or -t must be provided")
@@ -177,23 +179,24 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		}
 		if path, found := ctx.Config.Templates[template]; !found {
 			logger.Fatalf("template %s not found", template)
-		} else if found {
-			definitionPath = path
+		} else {
+			flowFilePath = path
 		}
 	case fileVal != "":
 		if _, err := os.Stat(fileVal); os.IsNotExist(err) {
 			logger.Fatalf("fileVal %s not found", fileVal)
 		}
-		definitionPath = fileVal
+		flowFilePath = fileVal
 	}
-	execTemplate, err := filesystem.LoadFlowFileTemplate(definitionPath)
+
+	execTemplate, err := filesystem.LoadFlowFileTemplate(flowFilePath)
 	if err != nil {
 		logger.FatalErr(err)
 	}
 	if err := execTemplate.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
-	execTemplate.SetContext(definitionPath)
+	execTemplate.SetContext(flowFilePath)
 
 	wsPath, wsFound := ctx.Config.Workspaces[workspaceName]
 	if !wsFound {
@@ -233,7 +236,7 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger.PlainTextSuccess(
 		fmt.Sprintf(
 			"Executables from %s added to %s\nPath: %s",
-			definitionName, workspaceName, definitionPath,
+			definitionName, workspaceName, flowFilePath,
 		))
 }
 

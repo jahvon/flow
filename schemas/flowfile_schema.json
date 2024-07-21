@@ -213,6 +213,10 @@
         "args": {
           "$ref": "#/definitions/ExecutableArgumentList"
         },
+        "execs": {
+          "$ref": "#/definitions/ExecutableParallelRefConfigList",
+          "description": "A list of executables to run in parallel.\nEach executable can be a command or a reference to another executable.\nOne of `refs` or `execs` must be set.\n"
+        },
         "failFast": {
           "description": "If set to true, the parallel executable will fail if any of the sub-executables fail.",
           "type": "boolean",
@@ -227,8 +231,45 @@
           "$ref": "#/definitions/ExecutableParameterList"
         },
         "refs": {
-          "$ref": "#/definitions/ExecutableRefList"
+          "$ref": "#/definitions/ExecutableRefList",
+          "description": "DEPRECATED: Use `execs` instead.\n\nA list of references to other executables to run in parallel.\nOne of `refs` or `execs` must be set.\n"
         }
+      }
+    },
+    "ExecutableParallelRefConfig": {
+      "description": "Configuration for a parallel executable.",
+      "type": "object",
+      "properties": {
+        "args": {
+          "description": "Arguments to pass to the executable.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "cmd": {
+          "description": "The command to execute.\nOne of `cmd` or `ref` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "ref": {
+          "$ref": "#/definitions/ExecutableRef",
+          "description": "A reference to another executable to run in serial.\nOne of `cmd` or `ref` must be set.\n",
+          "default": ""
+        },
+        "retries": {
+          "description": "The number of times to retry the executable if it fails.",
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
+    "ExecutableParallelRefConfigList": {
+      "description": "A list of executables to run in parallel. The executables can be defined by it's exec `cmd` or `ref`.\n",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExecutableParallelRefConfig"
       }
     },
     "ExecutableParameter": {
@@ -416,6 +457,10 @@
         "args": {
           "$ref": "#/definitions/ExecutableArgumentList"
         },
+        "execs": {
+          "$ref": "#/definitions/ExecutableSerialRefConfigList",
+          "description": "A list of executables to run in serial.\nEach executable can be a command or a reference to another executable.\nOne of `refs` or `execs` must be set.\n"
+        },
         "failFast": {
           "description": "If set to true, the serial executable will fail if any of the sub-executables fail.",
           "type": "boolean",
@@ -425,8 +470,50 @@
           "$ref": "#/definitions/ExecutableParameterList"
         },
         "refs": {
-          "$ref": "#/definitions/ExecutableRefList"
+          "$ref": "#/definitions/ExecutableRefList",
+          "description": "DEPRECATED: Use `execs` instead.\n\nA list of references to other executables to run in serial.\nOne of `refs` or `execs` must be set.\n"
         }
+      }
+    },
+    "ExecutableSerialRefConfig": {
+      "description": "Configuration for a serial executable.",
+      "type": "object",
+      "properties": {
+        "args": {
+          "description": "Arguments to pass to the executable.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "cmd": {
+          "description": "The command to execute.\nOne of `cmd` or `ref` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "ref": {
+          "$ref": "#/definitions/ExecutableRef",
+          "description": "A reference to another executable to run in serial.\nOne of `cmd` or `ref` must be set.\n",
+          "default": ""
+        },
+        "retries": {
+          "description": "The number of times to retry the executable if it fails.",
+          "type": "integer",
+          "default": 0
+        },
+        "reviewRequired": {
+          "description": "If set to true, the user will be prompted to review the output of the executable before continuing.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "ExecutableSerialRefConfigList": {
+      "description": "A list of executables to run in serial. The executables can be defined by it's exec `cmd` or `ref`.\n",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExecutableSerialRefConfig"
       }
     },
     "ExecutableVerb": {

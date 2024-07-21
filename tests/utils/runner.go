@@ -1,4 +1,4 @@
-package runner
+package utils
 
 import (
 	"github.com/jahvon/flow/cmd"

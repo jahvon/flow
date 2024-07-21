@@ -10,22 +10,22 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/vault"
-	"github.com/jahvon/flow/tests/runner"
+	"github.com/jahvon/flow/tests/utils"
 )
 
 var _ = Describe("vault/secrets e2e", Ordered, func() {
 	var (
 		ctx *context.Context
-		run *runner.CommandRunner
+		run *utils.CommandRunner
 	)
 
 	BeforeAll(func() {
-		ctx = runner.NewTestContext(stdCtx.Background(), GinkgoT())
-		run = runner.NewE2ECommandRunner()
+		ctx = utils.NewContext(stdCtx.Background(), GinkgoT())
+		run = utils.NewE2ECommandRunner()
 	})
 
 	BeforeEach(func() {
-		runner.ResetTestContext(ctx, GinkgoT())
+		utils.ResetTestContext(ctx, GinkgoT())
 	})
 
 	AfterEach(func() {

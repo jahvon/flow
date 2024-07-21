@@ -198,6 +198,25 @@ func serialExecMarkdown(e *ExecutableEnvironment, s *SerialExecutableType) strin
 	for i, ref := range s.Refs {
 		mkdwn += fmt.Sprintf("%d. %s\n", i+1, ref)
 	}
+	for i, refCfg := range s.Execs {
+		if refCfg.Ref != "" {
+			mkdwn += fmt.Sprintf("%d. ref: %s\n", i+1, refCfg.Ref)
+		} else if refCfg.Cmd != "" {
+			mkdwn += fmt.Sprintf("%d. cmd: \n```sh\n%s\n```\n", i+1, refCfg.Cmd)
+		}
+		if refCfg.Retries > 0 {
+			mkdwn += fmt.Sprintf("  - **Retries:** %d\n", refCfg.Retries)
+		}
+		if refCfg.ReviewRequired {
+			mkdwn += fmt.Sprintf("  - **Review Required:** %v\n", refCfg.ReviewRequired)
+		}
+		if len(refCfg.Args) > 0 {
+			mkdwn += "  - **Arguments**\n"
+			for _, arg := range refCfg.Args {
+				mkdwn += fmt.Sprintf("    - %s\n", arg)
+			}
+		}
+	}
 	mkdwn += execEnvTable(e)
 	return mkdwn
 }
@@ -216,6 +235,22 @@ func parallelExecMarkdown(e *ExecutableEnvironment, p *ParallelExecutableType) s
 	mkdwn += "**Executables**\n"
 	for _, ref := range p.Refs {
 		mkdwn += fmt.Sprintf("- %s\n", ref)
+	}
+	for i, refCfg := range p.Execs {
+		if refCfg.Ref != "" {
+			mkdwn += fmt.Sprintf("%d. ref: %s\n", i+1, refCfg.Ref)
+		} else if refCfg.Cmd != "" {
+			mkdwn += fmt.Sprintf("%d. cmd: \n```sh\n%s\n```\n", i+1, refCfg.Cmd)
+		}
+		if refCfg.Retries > 0 {
+			mkdwn += fmt.Sprintf("  - **Retries:** %d\n", refCfg.Retries)
+		}
+		if len(refCfg.Args) > 0 {
+			mkdwn += "  - **Arguments**\n"
+			for _, arg := range refCfg.Args {
+				mkdwn += fmt.Sprintf("    - %s\n", arg)
+			}
+		}
 	}
 	mkdwn += execEnvTable(e)
 	return mkdwn

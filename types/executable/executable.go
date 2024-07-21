@@ -189,8 +189,16 @@ func (e *Executable) AliasesIDs() []string {
 	return aliases
 }
 
+func (e *Executable) Workspace() string {
+	return e.workspace
+}
+
 func (e *Executable) WorkspacePath() string {
 	return e.workspacePath
+}
+
+func (e *Executable) Namespace() string {
+	return e.namespace
 }
 
 func (e *Executable) FlowFilePath() string {
