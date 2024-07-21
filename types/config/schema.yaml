@@ -27,6 +27,40 @@ definitions:
         type: boolean
         description: Whether to play a sound when a command completes.
     required: [ enabled ]
+  RemoteWorkspace:
+    type: object
+    required: [url]
+    properties:
+      url:
+        type: string
+        description: The git URL of the remote workspace.
+      branch:
+        type: string
+        description: |
+          The git branch to pin the remote workspace to.
+          Only one of `branch`, `commit`, or `tag` can be specified.
+        default: "main"
+      commit:
+        type: string
+        description: |
+          The git commit to pin the remote workspace to.
+          Only one of `branch`, `commit`, or `tag` can be specified.
+        default: ""
+      tag:
+        type: string
+        description: |
+          The git tag to pin the remote workspace to.
+          Only one of `branch`, `commit`, or `tag` can be specified.
+        default: ""
+      pullOnSync:
+        type: string
+        enum: [never, always, auto]
+        description: |
+          When to pull the latest changes from the remote workspace.
+          - `never`: Never pull changes from the remote workspace.
+          - `always`: Always pull changes from the remote workspace.
+          - `auto`: Pull changes from the remote workspace only if the workspace is not dirty.
+        default: auto
 
 type: object
 properties:
@@ -36,15 +70,12 @@ properties:
       type: string
     description: |
       Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.
-#  remoteWorkspaces:
-#    type: object
-#    additionalProperties:
-#      type: string
-#    description: |
-#      **UNIMPLEMENTED**
-#      A map of remote workspace names to their git repository URLs.
-#      The repository URL should be a valid git URL that can be cloned.
-#    default: {}
+  remoteWorkspaces:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/RemoteWorkspace'
+    description: A map of remote workspace names to their git repository config.
+    default: {}
   currentWorkspace:
     type: string
     description: The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.

@@ -42,6 +42,9 @@ type Config struct {
 	// Interactive corresponds to the JSON schema field "interactive".
 	Interactive *Interactive `json:"interactive,omitempty" yaml:"interactive,omitempty" mapstructure:"interactive,omitempty"`
 
+	// A map of remote workspace names to their git repository config.
+	RemoteWorkspaces ConfigRemoteWorkspaces `json:"remoteWorkspaces,omitempty" yaml:"remoteWorkspaces,omitempty" mapstructure:"remoteWorkspaces,omitempty"`
+
 	// A map of flowfile template names to their paths.
 	Templates ConfigTemplates `json:"templates,omitempty" yaml:"templates,omitempty" mapstructure:"templates,omitempty"`
 
@@ -59,6 +62,9 @@ type Config struct {
 	//
 	Workspaces ConfigWorkspaces `json:"workspaces" yaml:"workspaces" mapstructure:"workspaces"`
 }
+
+// A map of remote workspace names to their git repository config.
+type ConfigRemoteWorkspaces map[string]RemoteWorkspace
 
 // A map of flowfile template names to their paths.
 type ConfigTemplates map[string]string
@@ -83,3 +89,37 @@ type Interactive struct {
 	// Whether to play a sound when a command completes.
 	SoundOnCompletion *bool `json:"soundOnCompletion,omitempty" yaml:"soundOnCompletion,omitempty" mapstructure:"soundOnCompletion,omitempty"`
 }
+
+type RemoteWorkspace struct {
+	// The git branch to pin the remote workspace to.
+	// Only one of `branch`, `commit`, or `tag` can be specified.
+	//
+	Branch string `json:"branch,omitempty" yaml:"branch,omitempty" mapstructure:"branch,omitempty"`
+
+	// The git commit to pin the remote workspace to.
+	// Only one of `branch`, `commit`, or `tag` can be specified.
+	//
+	Commit string `json:"commit,omitempty" yaml:"commit,omitempty" mapstructure:"commit,omitempty"`
+
+	// When to pull the latest changes from the remote workspace.
+	// - `never`: Never pull changes from the remote workspace.
+	// - `always`: Always pull changes from the remote workspace.
+	// - `auto`: Pull changes from the remote workspace only if the workspace is not
+	// dirty.
+	//
+	PullOnSync RemoteWorkspacePullOnSync `json:"pullOnSync,omitempty" yaml:"pullOnSync,omitempty" mapstructure:"pullOnSync,omitempty"`
+
+	// The git tag to pin the remote workspace to.
+	// Only one of `branch`, `commit`, or `tag` can be specified.
+	//
+	Tag string `json:"tag,omitempty" yaml:"tag,omitempty" mapstructure:"tag,omitempty"`
+
+	// The git URL of the remote workspace.
+	URL string `json:"url" yaml:"url" mapstructure:"url"`
+}
+
+type RemoteWorkspacePullOnSync string
+
+const RemoteWorkspacePullOnSyncAlways RemoteWorkspacePullOnSync = "always"
+const RemoteWorkspacePullOnSyncAuto RemoteWorkspacePullOnSync = "auto"
+const RemoteWorkspacePullOnSyncNever RemoteWorkspacePullOnSync = "never"

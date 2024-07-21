@@ -5,11 +5,14 @@ import (
 	"fmt"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
+	"github.com/pkg/errors"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
+
+	"github.com/jahvon/flow/internal/utils"
 )
 
-//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p config -o config.gen.go schema.yaml
+//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p config -o config.gen.go --capitalization URL  schema.yaml
 
 func (c *Config) Validate() error {
 	if c.CurrentWorkspace == "" {
@@ -27,6 +30,11 @@ func (c *Config) Validate() error {
 		c.WorkspaceMode != ConfigWorkspaceModeDynamic {
 		return fmt.Errorf("invalid workspace mode %s", c.WorkspaceMode)
 	}
+	for _, ws := range c.RemoteWorkspaces {
+		if err := ws.Validate(); err != nil {
+			return err
+		}
+	}
 	if err := c.DefaultLogMode.Validate(); err != nil {
 		return err
 	}
@@ -37,6 +45,9 @@ func (c *Config) Validate() error {
 func (c *Config) SetDefaults() {
 	if c.Workspaces == nil {
 		c.Workspaces = make(map[string]string)
+	}
+	if c.RemoteWorkspaces == nil {
+		c.RemoteWorkspaces = make(map[string]RemoteWorkspace)
 	}
 	if c.CurrentWorkspace == "" && len(c.Workspaces) > 0 {
 		c.CurrentWorkspace = maps.Keys(c.Workspaces)[0]
@@ -101,9 +112,27 @@ func (c *Config) Markdown() string {
 			mkdwn += fmt.Sprintf("## Interactive UI config\n```yaml\n%s```\n", string(interactiveConfig))
 		}
 	}
-	mkdwn += "## Registered Workspaces\n"
+	mkdwn += "## Registered Local Workspaces\n"
 	for name, path := range c.Workspaces {
 		mkdwn += fmt.Sprintf("- %s: %s\n", name, path)
+	}
+
+	if len(c.RemoteWorkspaces) > 0 {
+		mkdwn += "## Registered Remote Workspaces\n"
+		for name, ws := range c.RemoteWorkspaces {
+			mkdwn += fmt.Sprintf("- name: %s\n", name)
+			mkdwn += fmt.Sprintf("  url: %s\n", ws.URL)
+			switch {
+			case ws.Branch != "":
+				mkdwn += fmt.Sprintf("  branch: %s\n", ws.Branch)
+			case ws.Commit != "":
+				mkdwn += fmt.Sprintf("  commit: %s\n", ws.Commit)
+			case ws.Tag != "":
+				mkdwn += fmt.Sprintf("  tag: %s\n", ws.Tag)
+			}
+			mkdwn += fmt.Sprintf("  pullOnSync: %s\n", ws.PullOnSync)
+		}
+
 	}
 
 	if len(c.Templates) > 0 {
@@ -114,4 +143,14 @@ func (c *Config) Markdown() string {
 	}
 
 	return mkdwn
+}
+
+func (l RemoteWorkspace) Validate() error {
+	if l.URL == "" {
+		return fmt.Errorf("remote workspace URL is required")
+	}
+	if err := utils.ValidateOneOf("git version identifier", l.Branch, l.Commit, l.Tag); err != nil {
+		return errors.Wrap(err, fmt.Sprintf("remote workspace %s", l.URL))
+	}
+	return nil
 }

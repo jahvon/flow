@@ -27,6 +27,7 @@ Alternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment
 | `currentWorkspace` | The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map. | `string` |  | [] |
 | `defaultLogMode` | The default log mode to use when running executables. This can either be `hidden`, `json`, `logfmt` or `text`  `hidden` will not display any logs. `json` will display logs in JSON format. `logfmt` will display logs with a log level, timestamp, and message. `text` will just display the log message.  | `string` | logfmt | [] |
 | `interactive` |  | [Interactive](#Interactive) | <no value> | [] |
+| `remoteWorkspaces` | A map of remote workspace names to their git repository config. | `map` (`string` -> [RemoteWorkspace](#RemoteWorkspace)) | map[] | [] |
 | `templates` | A map of flowfile template names to their paths. | `map` (`string` -> `string`) | map[] | [] |
 | `workspaceMode` | The mode of the workspace. This can be either `fixed` or `dynamic`. In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field. In `dynamic` mode, the current workspace used at runtime is determined by the current directory. If the current directory is within a workspace, that workspace is used.  | `string` | dynamic | [] |
 | `workspaces` | Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.  | `map` (`string` -> `string`) | <no value> | [] |
@@ -49,5 +50,23 @@ Configurations for the interactive UI.
 | `enabled` |  | `boolean` | <no value> | [] |
 | `notifyOnCompletion` | Whether to send a desktop notification when a command completes. | `boolean` | <no value> | [] |
 | `soundOnCompletion` | Whether to play a sound when a command completes. | `boolean` | <no value> | [] |
+
+### RemoteWorkspace
+
+
+
+**Type:** `object`
+
+
+
+**Properties:**
+
+| Field | Description | Type | Default | Required |
+| ----- | ----------- | ---- | ------- | -------- |
+| `branch` | The git branch to pin the remote workspace to. Only one of `branch`, `commit`, or `tag` can be specified.  | `string` | main | [] |
+| `commit` | The git commit to pin the remote workspace to. Only one of `branch`, `commit`, or `tag` can be specified.  | `string` |  | [] |
+| `pullOnSync` | When to pull the latest changes from the remote workspace. - `never`: Never pull changes from the remote workspace. - `always`: Always pull changes from the remote workspace. - `auto`: Pull changes from the remote workspace only if the workspace is not dirty.  | `string` | auto | [] |
+| `tag` | The git tag to pin the remote workspace to. Only one of `branch`, `commit`, or `tag` can be specified.  | `string` |  | [] |
+| `url` | The git URL of the remote workspace. | `string` | <no value> | [] |
 
 

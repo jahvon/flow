@@ -27,6 +27,43 @@
           "type": "boolean"
         }
       }
+    },
+    "RemoteWorkspace": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "branch": {
+          "description": "The git branch to pin the remote workspace to.\nOnly one of `branch`, `commit`, or `tag` can be specified.\n",
+          "type": "string",
+          "default": "main"
+        },
+        "commit": {
+          "description": "The git commit to pin the remote workspace to.\nOnly one of `branch`, `commit`, or `tag` can be specified.\n",
+          "type": "string",
+          "default": ""
+        },
+        "pullOnSync": {
+          "description": "When to pull the latest changes from the remote workspace.\n- `never`: Never pull changes from the remote workspace.\n- `always`: Always pull changes from the remote workspace.\n- `auto`: Pull changes from the remote workspace only if the workspace is not dirty.\n",
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "never",
+            "always",
+            "auto"
+          ]
+        },
+        "tag": {
+          "description": "The git tag to pin the remote workspace to.\nOnly one of `branch`, `commit`, or `tag` can be specified.\n",
+          "type": "string",
+          "default": ""
+        },
+        "url": {
+          "description": "The git URL of the remote workspace.",
+          "type": "string"
+        }
+      }
     }
   },
   "properties": {
@@ -47,6 +84,14 @@
     },
     "interactive": {
       "$ref": "#/definitions/Interactive"
+    },
+    "remoteWorkspaces": {
+      "description": "A map of remote workspace names to their git repository config.",
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "$ref": "#/definitions/RemoteWorkspace"
+      }
     },
     "templates": {
       "description": "A map of flowfile template names to their paths.",
