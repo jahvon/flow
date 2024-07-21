@@ -384,12 +384,6 @@ definitions:
         description: The number of times to retry the executable if it fails.
         default: 0
         minimum: 0
-      retryAttempts:
-        type: integer
-        default: 0
-        minimum: 0
-        goJSONSchema:
-          identifier: retryAttempts
 
   SerialExecutableType:
     type: object

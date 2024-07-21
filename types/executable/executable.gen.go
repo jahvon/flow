@@ -394,9 +394,6 @@ type SerialRefConfig struct {
 	// The number of times to retry the executable if it fails.
 	Retries int `json:"retries,omitempty" yaml:"retries,omitempty" mapstructure:"retries,omitempty"`
 
-	// retryAttempts corresponds to the JSON schema field "retryAttempts".
-	retryAttempts int `json:"retryAttempts,omitempty" yaml:"retryAttempts,omitempty" mapstructure:"retryAttempts,omitempty"`
-
 	// If set to true, the user will be prompted to review the output of the
 	// executable before continuing.
 	ReviewRequired bool `json:"reviewRequired,omitempty" yaml:"reviewRequired,omitempty" mapstructure:"reviewRequired,omitempty"`

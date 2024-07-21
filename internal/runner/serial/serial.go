@@ -51,7 +51,11 @@ func (r *serialRunner) Exec(ctx *context.Context, e *executable.Executable, prom
 	return fmt.Errorf("no serial executables to run")
 }
 
-func handleExecRef(ctx *context.Context, serialSpec *executable.SerialExecutableType, promptedEnv map[string]string) error {
+func handleExecRef(
+	ctx *context.Context,
+	serialSpec *executable.SerialExecutableType,
+	promptedEnv map[string]string,
+) error {
 	order := serialSpec.Refs
 
 	var errs []error
@@ -96,7 +100,7 @@ func handleExec(
 	for i, refConfig := range serialSpec.Execs {
 		var exec *executable.Executable
 		switch {
-		case len(refConfig.Ref) > 0:
+		case refConfig.Ref != "":
 			var err error
 			exec, err = execUtils.ExecutableForRef(ctx, refConfig.Ref)
 			if err != nil {
@@ -117,27 +121,34 @@ func handleExec(
 			maps.Copy(execPromptedEnv, a)
 		}
 
+		var attempts int
+	retryLoop:
 		for {
+			attempts++
 			if err := runner.Exec(ctx, exec, execPromptedEnv); err != nil {
 				switch {
 				case refConfig.Retries == 0 && serialSpec.FailFast:
 					return errors.Wrapf(err, "execution error ref='%s'", exec.Ref())
 				case refConfig.Retries == 0 && !serialSpec.FailFast:
 					errs = append(errs, err)
-					ctx.Logger.Error(err, fmt.Sprintf("execution error ref='%s'", exec.Ref()))
-				case refConfig.Retries != 0 && refConfig.AttemptedMaxTimes() && serialSpec.FailFast:
+					ctx.Logger.Errorx("execution error", "err", err, "ref", exec.Ref())
+					break retryLoop
+				case refConfig.Retries != 0 && attempts-1 >= refConfig.Retries && serialSpec.FailFast:
 					return fmt.Errorf("retries exceeded ref='%s' max=%d", exec.Ref(), refConfig.Retries)
-				case refConfig.Retries != 0 && refConfig.AttemptedMaxTimes() && !serialSpec.FailFast:
+				case refConfig.Retries != 0 && attempts-1 >= refConfig.Retries && !serialSpec.FailFast:
 					errs = append(errs, err)
-					ctx.Logger.Error(err, fmt.Sprintf("retries exceeded ref='%s' max=%d", exec.Ref(), refConfig.Retries))
-				case refConfig.Retries != 0 && !refConfig.AttemptedMaxTimes():
-					refConfig.RecordAttempt()
-					ctx.Logger.Warnf("retrying ref='%s'", exec.Ref())
+					ctx.Logger.Errorx(
+						"retries exceeded", "err", err, "ref", exec.Ref(), "max", refConfig.Retries,
+					)
+					break retryLoop
+				case refConfig.Retries != 0 && attempts-1 < refConfig.Retries:
+					ctx.Logger.Warnx("retrying", "ref", exec.Ref())
 				default:
 					return errors.Wrapf(err, "unexpected error handling ref='%s'", exec.Ref())
 				}
+			} else {
+				break retryLoop
 			}
-			break
 		}
 
 		if i < len(serialSpec.Execs) && refConfig.ReviewRequired {
