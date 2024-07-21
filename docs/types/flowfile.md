@@ -187,11 +187,38 @@ Launches an application or opens a URI.
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `execs` | A list of executables to run in parallel. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | `array` ([ParallelRefConfig](#ParallelRefConfig)) | <no value> | [] |
+| `execs` | A list of executables to run in parallel. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | [ExecutableParallelRefConfigList](#ExecutableParallelRefConfigList) | <no value> | [] |
 | `failFast` | If set to true, the parallel executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
 | `maxThreads` | The maximum number of threads to use when executing the parallel executables. | `integer` | 5 | [] |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
 | `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in parallel. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+
+### ExecutableParallelRefConfig
+
+Configuration for a parallel executable.
+
+**Type:** `object`
+
+
+
+**Properties:**
+
+| Field | Description | Type | Default | Required |
+| ----- | ----------- | ---- | ------- | -------- |
+| `args` | Arguments to pass to the executable. | `array` (`string`) | [] | [] |
+| `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  | [] |
+| `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  | [] |
+| `retries` | The number of times to retry the executable if it fails. | `integer` | 0 | [] |
+
+### ExecutableParallelRefConfigList
+
+A list of executables to run in parallel. The executables can be defined by it's exec `cmd` or `ref`.
+
+
+**Type:** `array` ([ExecutableParallelRefConfig](#ExecutableParallelRefConfig))
+
+
+
 
 ### ExecutableParameter
 
@@ -317,10 +344,38 @@ Executes a list of executables in serial.
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `execs` | A list of executables to run in serial. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | `array` ([SerialRefConfig](#SerialRefConfig)) | <no value> | [] |
+| `execs` | A list of executables to run in serial. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | [ExecutableSerialRefConfigList](#ExecutableSerialRefConfigList) | <no value> | [] |
 | `failFast` | If set to true, the serial executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
 | `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in serial. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+
+### ExecutableSerialRefConfig
+
+Configuration for a serial executable.
+
+**Type:** `object`
+
+
+
+**Properties:**
+
+| Field | Description | Type | Default | Required |
+| ----- | ----------- | ---- | ------- | -------- |
+| `args` | Arguments to pass to the executable. | `array` (`string`) | [] | [] |
+| `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  | [] |
+| `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  | [] |
+| `retries` | The number of times to retry the executable if it fails. | `integer` | 0 | [] |
+| `reviewRequired` | If set to true, the user will be prompted to review the output of the executable before continuing. | `boolean` | false | [] |
+
+### ExecutableSerialRefConfigList
+
+A list of executables to run in serial. The executables can be defined by it's exec `cmd` or `ref`.
+
+
+**Type:** `array` ([ExecutableSerialRefConfig](#ExecutableSerialRefConfig))
+
+
+
 
 ### ExecutableVerb
 
@@ -380,35 +435,6 @@ This allows users to use the verb that best describes the action they are perfor
 A list of `.sh` files to convert into generated executables in the file's executable group.
 
 **Type:** `array` (`string`)
-
-
-
-
-### ParallelRefConfig
-
-
-
-
-
-
-
-
-### Ref
-
-A reference to another executable to run in serial.
-One of `cmd` or `ref` must be set.
-
-
-
-
-
-
-
-### SerialRefConfig
-
-
-
-
 
 
 

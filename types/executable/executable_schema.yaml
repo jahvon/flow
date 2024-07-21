@@ -223,6 +223,13 @@ definitions:
         default: 0
         minimum: 0
 
+  ParallelRefConfigList:
+    type: array
+    description: |
+      A list of executables to run in parallel. The executables can be defined by it's exec `cmd` or `ref`.
+    items:
+      $ref: '#/definitions/ParallelRefConfig'
+
   ParallelExecutableType:
     type: object
     required: [refs]
@@ -239,9 +246,7 @@ definitions:
           A list of references to other executables to run in parallel.
           One of `refs` or `execs` must be set.
       execs:
-          type: array
-          items:
-              $ref: '#/definitions/ParallelRefConfig'
+          $ref: '#/definitions/ParallelRefConfigList'
           description: |
               A list of executables to run in parallel.
               Each executable can be a command or a reference to another executable.
@@ -381,6 +386,13 @@ definitions:
         default: 0
         minimum: 0
 
+  SerialRefConfigList:
+    type: array
+    description: |
+      A list of executables to run in serial. The executables can be defined by it's exec `cmd` or `ref`.
+    items:
+      $ref: '#/definitions/SerialRefConfig'
+
   SerialExecutableType:
     type: object
     required: [refs]
@@ -398,9 +410,7 @@ definitions:
           A list of references to other executables to run in serial.
           One of `refs` or `execs` must be set.
       execs:
-        type: array
-        items:
-          $ref: '#/definitions/SerialRefConfig'
+        $ref: '#/definitions/SerialRefConfigList'
         description: |
           A list of executables to run in serial.
           Each executable can be a command or a reference to another executable.

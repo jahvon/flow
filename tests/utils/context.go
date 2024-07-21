@@ -41,20 +41,52 @@ func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *context.Cont
 	return ctxx
 }
 
-// NewTestContextWithMockLogger creates a new context for testing runners. It initializes the context with
-// a mock logger.
-// It also creates a temporary testing directory for the test workspace, user configs, and caches.
-// Test environment variables are set the config and cache directories override paths.
-func NewTestContextWithMockLogger(
-	ctx stdCtx.Context,
-	t ginkgo.FullGinkgoTInterface,
-	ctrl *gomock.Controller,
-) (*context.Context, *tuikitIOMocks.MockLogger) {
-	stdOut, stdIn := createTempIOFiles(t)
-	logger := tuikitIOMocks.NewMockLogger(ctrl)
+type ContextWithMocks struct {
+	Ctx             *context.Context
+	Logger          *tuikitIOMocks.MockLogger
+	ExecutableCache *cacheMocks.MockExecutableCache
+	WorkspaceCache  *cacheMocks.MockWorkspaceCache
+	RunnerMock      *mocks.MockRunner
+}
+
+// NewContextWithMocks creates a new context for testing runners. It initializes the context with
+// a mock logger and mock caches. The mock logger is set to expect debug calls.
+func NewContextWithMocks(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *ContextWithMocks {
+	null := os.NewFile(0, os.DevNull)
+	configDir, cacheDir, wsDir := initTestDirectories(t)
+	setTestEnv(t, configDir, cacheDir)
+	testWsCfg, err := testWsConfig(wsDir)
+	if err != nil {
+		t.Fatalf("unable to create workspace config: %v", err)
+	}
+	testUserCfg, err := testConfig(wsDir)
+	if err != nil {
+		t.Fatalf("unable to create config: %v", err)
+	}
+	cancel := func() {
+		<-ctx.Done()
+	}
+	logger := tuikitIOMocks.NewMockLogger(gomock.NewController(t))
 	expectInternalMockLoggerCalls(logger)
-	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
-	return ctxx, logger
+	wsCache := cacheMocks.NewMockWorkspaceCache(gomock.NewController(t))
+	execCache := cacheMocks.NewMockExecutableCache(gomock.NewController(t))
+	ctxx := &context.Context{
+		Ctx:              ctx,
+		CancelFunc:       cancel,
+		Logger:           logger,
+		Config:           testUserCfg,
+		CurrentWorkspace: testWsCfg,
+		WorkspacesCache:  wsCache,
+		ExecutableCache:  execCache,
+	}
+	ctxx.SetIO(null, null)
+	return &ContextWithMocks{
+		Ctx:             ctxx,
+		Logger:          logger,
+		ExecutableCache: execCache,
+		WorkspaceCache:  wsCache,
+		RunnerMock:      mocks.NewMockRunner(gomock.NewController(t)),
+	}
 }
 
 func ResetTestContext(ctx *context.Context, t ginkgo.FullGinkgoTInterface) {
@@ -113,54 +145,6 @@ func newTestContext(
 	}
 	ctxx.SetIO(stdIn, stdOut)
 	return ctxx
-}
-
-type ContextWithMocks struct {
-	Ctx             *context.Context
-	Logger          *tuikitIOMocks.MockLogger
-	ExecutableCache *cacheMocks.MockExecutableCache
-	WorkspaceCache  *cacheMocks.MockWorkspaceCache
-	RunnerMock      *mocks.MockRunner
-}
-
-// NewContextWithMocks creates a new context for testing runners. It initializes the context with
-// a mock logger and mock caches. The mock logger is set to expect debug calls.
-func NewContextWithMocks(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *ContextWithMocks {
-	null := os.NewFile(0, os.DevNull)
-	configDir, cacheDir, wsDir := initTestDirectories(t)
-	setTestEnv(t, configDir, cacheDir)
-	testWsCfg, err := testWsConfig(wsDir)
-	if err != nil {
-		t.Fatalf("unable to create workspace config: %v", err)
-	}
-	testUserCfg, err := testConfig(wsDir)
-	if err != nil {
-		t.Fatalf("unable to create config: %v", err)
-	}
-	cancel := func() {
-		<-ctx.Done()
-	}
-	logger := tuikitIOMocks.NewMockLogger(gomock.NewController(t))
-	expectInternalMockLoggerCalls(logger)
-	wsCache := cacheMocks.NewMockWorkspaceCache(gomock.NewController(t))
-	execCache := cacheMocks.NewMockExecutableCache(gomock.NewController(t))
-	ctxx := &context.Context{
-		Ctx:              ctx,
-		CancelFunc:       cancel,
-		Logger:           logger,
-		Config:           testUserCfg,
-		CurrentWorkspace: testWsCfg,
-		WorkspacesCache:  wsCache,
-		ExecutableCache:  execCache,
-	}
-	ctxx.SetIO(null, null)
-	return &ContextWithMocks{
-		Ctx:             ctxx,
-		Logger:          logger,
-		ExecutableCache: execCache,
-		WorkspaceCache:  wsCache,
-		RunnerMock:      mocks.NewMockRunner(gomock.NewController(t)),
-	}
 }
 
 func initTestDirectories(t ginkgo.FullGinkgoTInterface) (string, string, string) {

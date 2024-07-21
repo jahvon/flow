@@ -193,7 +193,7 @@ type ParallelExecutableType struct {
 	// Each executable can be a command or a reference to another executable.
 	// One of `refs` or `execs` must be set.
 	//
-	Execs []ParallelRefConfig `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
+	Execs ParallelRefConfigList `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
 
 	// If set to true, the parallel executable will fail if any of the sub-executables
 	// fail.
@@ -231,6 +231,10 @@ type ParallelRefConfig struct {
 	// The number of times to retry the executable if it fails.
 	Retries int `json:"retries,omitempty" yaml:"retries,omitempty" mapstructure:"retries,omitempty"`
 }
+
+// A list of executables to run in parallel. The executables can be defined by it's
+// exec `cmd` or `ref`.
+type ParallelRefConfigList []ParallelRefConfig
 
 // A parameter is a value that can be passed to an executable and all of its
 // sub-executables.
@@ -360,7 +364,7 @@ type SerialExecutableType struct {
 	// Each executable can be a command or a reference to another executable.
 	// One of `refs` or `execs` must be set.
 	//
-	Execs []SerialRefConfig `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
+	Execs SerialRefConfigList `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
 
 	// If set to true, the serial executable will fail if any of the sub-executables
 	// fail.
@@ -399,6 +403,10 @@ type SerialRefConfig struct {
 	// executable before continuing.
 	ReviewRequired bool `json:"reviewRequired,omitempty" yaml:"reviewRequired,omitempty" mapstructure:"reviewRequired,omitempty"`
 }
+
+// A list of executables to run in serial. The executables can be defined by it's
+// exec `cmd` or `ref`.
+type SerialRefConfigList []SerialRefConfig
 
 type Verb string
 
