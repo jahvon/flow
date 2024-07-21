@@ -16,7 +16,7 @@ definitions:
       This allows users to use the verb that best describes the action they are performing.
 
       **Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`
-      **Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`
+      **Deactivation verbs**: `delete`, `uninstall`, `destroy`, `undeploy`
       **Update verbs**: `update`, `upgrade`, `refresh`, `reload`
       **Management verbs**: `manage`, `configure`, `monitor`, `edit`
       **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
@@ -24,7 +24,7 @@ definitions:
 
       [Verb group + Name] must be unique within the namespace of the workspace.
     default: exec
-    enum: [ exec, run, start, install, setup, release, deploy, apply, delete, remove, uninstall, destroy, undeploy, update, upgrade, refresh, reload, manage, configure, monitor, edit, open, launch, show, view, render, generate, add, new, build, transform ]
+    enum: [ exec, run, start, install, setup, release, deploy, apply, delete, uninstall, destroy, undeploy, update, upgrade, refresh, reload, manage, configure, monitor, edit, open, launch, show, view, render, generate, add, new, build, transform ]
   Ref:
     type: string
     description: |
@@ -483,6 +483,11 @@ properties:
     default: ""
     goJSONSchema:
       identifier: flowFilePath
+  inheritedDescription:
+    type: string
+    default: ""
+    goJSONSchema:
+      identifier: inheritedDescription
   #### Executable runner type fields
   #### go-jsonschema does not support oneOf, so we need to define the types separately and validate them in go.
   exec:

@@ -24,6 +24,9 @@ type Workspace struct {
 	// interactive UI.
 	Description string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
+	// A path to a markdown file that contains the description of the workspace.
+	DescriptionFile string `json:"descriptionFile,omitempty" yaml:"descriptionFile,omitempty" mapstructure:"descriptionFile,omitempty"`
+
 	// The display name of the workspace. This is used in the interactive UI.
 	DisplayName string `json:"displayName,omitempty" yaml:"displayName,omitempty" mapstructure:"displayName,omitempty"`
 

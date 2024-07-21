@@ -10,11 +10,10 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/mocks"
 	"github.com/jahvon/flow/internal/runner/parallel"
-	testRunner "github.com/jahvon/flow/tests/utils"
+	testUtils "github.com/jahvon/flow/tests/utils"
 	"github.com/jahvon/flow/tools/builder"
 	"github.com/jahvon/flow/types/executable"
 )
@@ -26,14 +25,13 @@ func TestParallelRunner(t *testing.T) {
 
 var _ = Describe("ParallelRunner", func() {
 	var (
-		ctx         *context.Context
+		ctx         *testUtils.ContextWithMocks
 		mockLogger  *tuikitIOMocks.MockLogger
 		parallelRnr runner.Runner
 	)
 
 	BeforeEach(func() {
-		ctrl := gomock.NewController(GinkgoT())
-		ctx, mockLogger = testRunner.NewTestContextWithMocks(stdCtx.Background(), GinkgoT(), ctrl)
+		ctx = testUtils.NewContextWithMocks(stdCtx.Background(), GinkgoT())
 		parallelRnr = parallel.NewRunner()
 	})
 

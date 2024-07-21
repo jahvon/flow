@@ -42,6 +42,7 @@ func ExamplesMultiExecFlowFile(opts ...Option) *executable.FlowFile {
 	}
 	if len(opts) > 0 {
 		vals := NewOptionValues(opts...)
+		d.SetDefaults()
 		d.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.FlowFilePath)
 	}
 	return d
@@ -62,6 +63,7 @@ func ExamplesRequestExecFlowFile(opts ...Option) *executable.FlowFile {
 	}
 	if len(opts) > 0 {
 		vals := NewOptionValues(opts...)
+		d.SetDefaults()
 		d.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.FlowFilePath)
 	}
 	return d

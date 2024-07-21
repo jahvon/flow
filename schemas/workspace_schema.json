@@ -39,6 +39,11 @@
       "type": "string",
       "default": ""
     },
+    "descriptionFile": {
+      "description": "A path to a markdown file that contains the description of the workspace.",
+      "type": "string",
+      "default": ""
+    },
     "displayName": {
       "description": "The display name of the workspace. This is used in the interactive UI.",
       "type": "string",

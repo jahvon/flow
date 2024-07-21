@@ -35,18 +35,58 @@ const (
 // It also creates a temporary testing directory for the test workspace, user configs, and caches.
 // Test environment variables are set the config and cache directories override paths.
 func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *context.Context {
-	stdOut, err := os.CreateTemp("", "flow-test-out")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
-	stdIn, err := os.CreateTemp("", "flow-test-in")
-	if err != nil {
-		t.Fatalf("unable to create temp file: %v", err)
-	}
+	stdOut, stdIn := createTempIOFiles(t)
 	logger := tuikitIO.NewLogger(stdOut, io.Theme(), tuikitIO.Text, "")
+	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
+	return ctxx
+}
 
+// NewTestContextWithMockLogger creates a new context for testing runners. It initializes the context with
+// a mock logger.
+// It also creates a temporary testing directory for the test workspace, user configs, and caches.
+// Test environment variables are set the config and cache directories override paths.
+func NewTestContextWithMockLogger(
+	ctx stdCtx.Context,
+	t ginkgo.FullGinkgoTInterface,
+	ctrl *gomock.Controller,
+) (*context.Context, *tuikitIOMocks.MockLogger) {
+	stdOut, stdIn := createTempIOFiles(t)
+	logger := tuikitIOMocks.NewMockLogger(ctrl)
+	expectInternalMockLoggerCalls(logger)
+	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
+	return ctxx, logger
+}
+
+func ResetTestContext(ctx *context.Context, t ginkgo.FullGinkgoTInterface) {
+	ctx.Ctx = stdCtx.Background()
+	stdIn, stdOut := createTempIOFiles(t)
+	ctx.SetIO(stdIn, stdOut)
+	logger := tuikitIO.NewLogger(stdOut, io.Theme(), tuikitIO.Text, "")
+	ctx.Logger = logger
+}
+
+func createTempIOFiles(t ginkgo.FullGinkgoTInterface) (stdIn *os.File, stdOut *os.File) {
+	var err error
+	stdOut, err = os.CreateTemp("", "flow-test-out")
+	if err != nil {
+		t.Fatalf("unable to create temp file: %v", err)
+	}
+	stdIn, err = os.CreateTemp("", "flow-test-in")
+	if err != nil {
+		t.Fatalf("unable to create temp file: %v", err)
+	}
+	return
+}
+
+func newTestContext(
+	ctx stdCtx.Context,
+	t ginkgo.FullGinkgoTInterface,
+	logger tuikitIO.Logger,
+	stdIn, stdOut *os.File,
+) *context.Context {
 	configDir, cacheDir, wsDir := initTestDirectories(t)
 	setTestEnv(t, configDir, cacheDir)
+
 	testWsCfg, err := testWsConfig(wsDir)
 	if err != nil {
 		t.Fatalf("unable to create workspace config: %v", err)
@@ -57,6 +97,7 @@ func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *context.Cont
 	}
 
 	wsCache, execCache := testCaches(t, logger)
+
 	cancel := func() {
 		<-ctx.Done()
 	}

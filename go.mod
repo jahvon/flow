@@ -13,11 +13,10 @@ require (
 	github.com/itchyny/gojq v0.12.16
 	github.com/jahvon/glamour v0.7.1-patch2
 	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
-	github.com/jahvon/tuikit v0.0.17
+	github.com/jahvon/tuikit v0.0.19
 	github.com/mattn/go-runewidth v0.0.15
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
-	github.com/otiai10/copy v1.14.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5

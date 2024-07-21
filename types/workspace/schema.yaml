@@ -42,6 +42,10 @@ properties:
     type: string
     description: A description of the workspace. This description is rendered as markdown in the interactive UI.
     default: ""
+  descriptionFile:
+    type: string
+    description: A path to a markdown file that contains the description of the workspace.
+    default: ""
   assignedName:
     type: string
     goJSONSchema:

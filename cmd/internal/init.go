@@ -251,7 +251,7 @@ func registerInitVaultCmd(ctx *context.Context, initCmd *cobra.Command) {
 	initCmd.AddCommand(subCmd)
 }
 
-func initVaultFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
+func initVaultFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	generatedKey, err := crypto.GenerateKey()
 	if err != nil {
@@ -261,13 +261,17 @@ func initVaultFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 		logger.FatalErr(err)
 	}
 
-	logger.PlainTextSuccess(fmt.Sprintf("Your vault encryption key is: %s", generatedKey))
-	newKeyMsg := fmt.Sprintf(
-		"You will need this key to modify your vault data. Store it somewhere safe!\n"+
-			"Set this value to the %s environment variable if you do not want to be prompted for it every time.",
-		vault.EncryptionKeyEnvVar,
-	)
-	logger.PlainTextInfo(newKeyMsg)
+	if verbosity := flags.ValueFor[int](ctx, cmd, *flags.VerbosityFlag, false); verbosity >= 0 {
+		logger.PlainTextSuccess(fmt.Sprintf("Your vault encryption key is: %s", generatedKey))
+		newKeyMsg := fmt.Sprintf(
+			"You will need this key to modify your vault data. Store it somewhere safe!\n"+
+				"Set this value to the %s environment variable if you do not want to be prompted for it every time.",
+			vault.EncryptionKeyEnvVar,
+		)
+		logger.PlainTextInfo(newKeyMsg)
+	} else {
+		logger.PlainTextSuccess(fmt.Sprintf("Encryption key: %s", generatedKey))
+	}
 }
 
 //nolint:lll

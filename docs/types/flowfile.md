@@ -14,7 +14,8 @@ A workspace can have multiple flow files located anywhere in the workspace direc
 
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
-| `description` | A description of the executables defined within the flow file. This description will be set as the executables' description if not defined at the executable level.  | `string` |  | [] |
+| `description` | A description of the executables defined within the flow file. This description will used as a shared description for all executables in the flow file.  | `string` |  | [] |
+| `descriptionFile` | A path to a markdown file that contains the description of the executables defined within the flow file. | `string` |  | [] |
 | `executables` |  | `array` ([Executable](#Executable)) | [] | [] |
 | `fromFile` |  | [FromFile](#FromFile) | [] | [] |
 | `namespace` | The namespace to be given to all executables in the flow file. If not set, the executables in the file will be grouped into the root (*) namespace.  Namespaces can be reused across multiple flow files.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.  | `string` |  | [] |
@@ -186,10 +187,11 @@ Launches an application or opens a URI.
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
+| `execs` | A list of executables to run in parallel. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | `array` ([ParallelRefConfig](#ParallelRefConfig)) | <no value> | [] |
 | `failFast` | If set to true, the parallel executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
 | `maxThreads` | The maximum number of threads to use when executing the parallel executables. | `integer` | 5 | [] |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `refs` |  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+| `refs` | A list of references to other executables to run in parallel. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
 
 ### ExecutableParameter
 
@@ -315,9 +317,10 @@ Executes a list of executables in serial.
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
+| `execs` | A list of executables to run in serial. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | `array` ([SerialRefConfig](#SerialRefConfig)) | <no value> | [] |
 | `failFast` | If set to true, the serial executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `refs` |  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+| `refs` | A list of references to other executables to run in serial. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
 
 ### ExecutableVerb
 
@@ -327,7 +330,7 @@ For example, the `exec` verb can replaced with "run" or "start" when referencing
 This allows users to use the verb that best describes the action they are performing.
 
 **Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`
-**Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`
+**Deactivation verbs**: `delete`, `uninstall`, `destroy`, `undeploy`
 **Update verbs**: `update`, `upgrade`, `refresh`, `reload`
 **Management verbs**: `manage`, `configure`, `monitor`, `edit`
 **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
@@ -348,7 +351,6 @@ This allows users to use the verb that best describes the action they are perfor
 - `deploy`
 - `apply`
 - `delete`
-- `remove`
 - `uninstall`
 - `destroy`
 - `undeploy`
@@ -378,6 +380,35 @@ This allows users to use the verb that best describes the action they are perfor
 A list of `.sh` files to convert into generated executables in the file's executable group.
 
 **Type:** `array` (`string`)
+
+
+
+
+### ParallelRefConfig
+
+
+
+
+
+
+
+
+### Ref
+
+A reference to another executable to run in serial.
+One of `cmd` or `ref` must be set.
+
+
+
+
+
+
+
+### SerialRefConfig
+
+
+
+
 
 
 

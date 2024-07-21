@@ -15,10 +15,14 @@ type FlowFile struct {
 	configPath string `json:"configPath,omitempty" yaml:"configPath,omitempty" mapstructure:"configPath,omitempty"`
 
 	// A description of the executables defined within the flow file. This description
-	// will be set as the executables'
-	// description if not defined at the executable level.
+	// will used as a shared description
+	// for all executables in the flow file.
 	//
 	Description string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+
+	// A path to a markdown file that contains the description of the executables
+	// defined within the flow file.
+	DescriptionFile string `json:"descriptionFile,omitempty" yaml:"descriptionFile,omitempty" mapstructure:"descriptionFile,omitempty"`
 
 	// Executables corresponds to the JSON schema field "executables".
 	Executables ExecutableList `json:"executables,omitempty" yaml:"executables,omitempty" mapstructure:"executables,omitempty"`

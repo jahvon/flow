@@ -92,6 +92,7 @@ func LoadWorkspaceFlowFiles(
 			logger.Errorx("unable to load executable config file", "configFile", cfgFile, "err", err)
 			continue
 		}
+		cfg.SetDefaults()
 		cfg.SetContext(workspaceCfg.AssignedName(), workspaceCfg.Location(), cfgFile)
 		cfgs = append(cfgs, cfg)
 	}

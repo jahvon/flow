@@ -108,6 +108,10 @@ type Executable struct {
 	// flowFilePath corresponds to the JSON schema field "flowFilePath".
 	flowFilePath string `json:"flowFilePath,omitempty" yaml:"flowFilePath,omitempty" mapstructure:"flowFilePath,omitempty"`
 
+	// inheritedDescription corresponds to the JSON schema field
+	// "inheritedDescription".
+	inheritedDescription string `json:"inheritedDescription,omitempty" yaml:"inheritedDescription,omitempty" mapstructure:"inheritedDescription,omitempty"`
+
 	// Launch corresponds to the JSON schema field "launch".
 	Launch *LaunchExecutableType `json:"launch,omitempty" yaml:"launch,omitempty" mapstructure:"launch,omitempty"`
 
@@ -419,7 +423,6 @@ const VerbOpen Verb = "open"
 const VerbRefresh Verb = "refresh"
 const VerbRelease Verb = "release"
 const VerbReload Verb = "reload"
-const VerbRemove Verb = "remove"
 const VerbRender Verb = "render"
 const VerbRun Verb = "run"
 const VerbSetup Verb = "setup"

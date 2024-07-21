@@ -213,6 +213,13 @@
         "args": {
           "$ref": "#/definitions/ExecutableArgumentList"
         },
+        "execs": {
+          "description": "A list of executables to run in parallel.\nEach executable can be a command or a reference to another executable.\nOne of `refs` or `execs` must be set.\n",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ParallelRefConfig"
+          }
+        },
         "failFast": {
           "description": "If set to true, the parallel executable will fail if any of the sub-executables fail.",
           "type": "boolean",
@@ -227,7 +234,8 @@
           "$ref": "#/definitions/ExecutableParameterList"
         },
         "refs": {
-          "$ref": "#/definitions/ExecutableRefList"
+          "$ref": "#/definitions/ExecutableRefList",
+          "description": "A list of references to other executables to run in parallel.\nOne of `refs` or `execs` must be set.\n"
         }
       }
     },
@@ -416,6 +424,13 @@
         "args": {
           "$ref": "#/definitions/ExecutableArgumentList"
         },
+        "execs": {
+          "description": "A list of executables to run in serial.\nEach executable can be a command or a reference to another executable.\nOne of `refs` or `execs` must be set.\n",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SerialRefConfig"
+          }
+        },
         "failFast": {
           "description": "If set to true, the serial executable will fail if any of the sub-executables fail.",
           "type": "boolean",
@@ -425,12 +440,13 @@
           "$ref": "#/definitions/ExecutableParameterList"
         },
         "refs": {
-          "$ref": "#/definitions/ExecutableRefList"
+          "$ref": "#/definitions/ExecutableRefList",
+          "description": "A list of references to other executables to run in serial.\nOne of `refs` or `execs` must be set.\n"
         }
       }
     },
     "ExecutableVerb": {
-      "description": "Keywords that describe the action an executable performs.\nWhile executables are configured with a single verb, the verb can be aliased to related verbs.\nFor example, the `exec` verb can replaced with \"run\" or \"start\" when referencing an executable.\nThis allows users to use the verb that best describes the action they are performing.\n\n**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`\n**Deactivation verbs**: `delete`, `remove`, `uninstall`, `destroy`, `undeploy`\n**Update verbs**: `update`, `upgrade`, `refresh`, `reload`\n**Management verbs**: `manage`, `configure`, `monitor`, `edit`\n**Launch verbs**: `open`, `launch`, `show`, `view`, `render`\n**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`\n\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
+      "description": "Keywords that describe the action an executable performs.\nWhile executables are configured with a single verb, the verb can be aliased to related verbs.\nFor example, the `exec` verb can replaced with \"run\" or \"start\" when referencing an executable.\nThis allows users to use the verb that best describes the action they are performing.\n\n**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`\n**Deactivation verbs**: `delete`, `uninstall`, `destroy`, `undeploy`\n**Update verbs**: `update`, `upgrade`, `refresh`, `reload`\n**Management verbs**: `manage`, `configure`, `monitor`, `edit`\n**Launch verbs**: `open`, `launch`, `show`, `view`, `render`\n**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`\n\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
       "type": "string",
       "default": "exec",
       "enum": [
@@ -443,7 +459,6 @@
         "deploy",
         "apply",
         "delete",
-        "remove",
         "uninstall",
         "destroy",
         "undeploy",
@@ -474,11 +489,22 @@
       "items": {
         "type": "string"
       }
-    }
+    },
+    "ParallelRefConfig": {},
+    "Ref": {
+      "description": "A reference to another executable to run in serial.\nOne of `cmd` or `ref` must be set.\n",
+      "default": ""
+    },
+    "SerialRefConfig": {}
   },
   "properties": {
     "description": {
-      "description": "A description of the executables defined within the flow file. This description will be set as the executables'\ndescription if not defined at the executable level.\n",
+      "description": "A description of the executables defined within the flow file. This description will used as a shared description\nfor all executables in the flow file.\n",
+      "type": "string",
+      "default": ""
+    },
+    "descriptionFile": {
+      "description": "A path to a markdown file that contains the description of the executables defined within the flow file.",
       "type": "string",
       "default": ""
     },
