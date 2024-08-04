@@ -70,6 +70,8 @@ github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef h1:4PS/MNVT6Rsv
 github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef/go.mod h1:dUmuT5CN6osIeLSRtTPJOf0Yz+qAbcyU6omnCzI+ZfQ=
 github.com/jahvon/tuikit v0.0.19 h1:yQ6cOZeoDJ2y58taaFSz6zqeTh2lVpMNxEpP6LcWQzY=
 github.com/jahvon/tuikit v0.0.19/go.mod h1:pIu3edo3wSdhiQuBK/x5vpc4dct6aZ6sAWkXgiyigtQ=
+github.com/jahvon/tuikit v0.0.21 h1:updW22PXmFo1mdHA6EUEVmG/DeIwPrkUu0qQmThoLWk=
+github.com/jahvon/tuikit v0.0.21/go.mod h1:1d22nVrCwzxeKomFJAZMUa4mqBbtOfd3bmLWjsY6PrM=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
