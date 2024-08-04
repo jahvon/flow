@@ -90,6 +90,8 @@ func (s Ref) Key() FieldKey {
 			return FlowfileDefinitionTitle
 		case strings.Contains(s.String(), CommonSchema.String()):
 			return CommonDefinitionTitle
+		case strings.Contains(s.String(), TemplateSchema.String()):
+			return TemplateDefinitionTitle
 		}
 		fmt.Println("unknown schema ref; defaulting to the file's title", s.String())
 		return FieldKey(s.ExternalFile().Title())
