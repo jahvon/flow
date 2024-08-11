@@ -24,3 +24,18 @@ executables:
     render:
       dir: types
       templateFile: config.md
+  - verb: install
+    name: dependencies
+    aliases: [deps]
+    description: |
+      Install the documentation site dependencies (globally)
+      Node/npm is required
+    exec:
+      cmd: npm i docsify-cli -g
+  - verb: run
+    name: site
+    description: Run the documentation site locally
+    timeout: 0s # no timeout
+    exec:
+      dir: //
+      cmd: docsify serve docs --open

@@ -27,7 +27,7 @@ We actively welcome pull requests. Here are the steps to contribute:
 4. Ensure the pre-commit commands pass. This includes tests, linting, and code generation. See the [Development](DEVELOPMENT.md) guide for more information.
 5. Open that pull request!
 
-See the [Development guide](../DEVELOPMENT.md) for more information building and testing this project locally.
+See the [Development guide](../docs/development.md) for more information building and testing this project locally.
 
 #### Best Practices
  - Try to keep your PR is up-to-date with the latest changes from the main branch.
