@@ -208,31 +208,6 @@ func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	}
 	ws.SetContext(workspaceName, wsPath)
 
-	if len(execTemplate.Data) != 0 {
-		var inputs []*components.TextInput
-		for _, entry := range execTemplate.Data {
-			inputs = append(inputs, &components.TextInput{
-				Key:         entry.Key,
-				Prompt:      entry.Prompt,
-				Placeholder: entry.Default,
-			})
-		}
-		inputs, err = components.ProcessInputs(io.Theme(), inputs...)
-		if err != nil {
-			logger.FatalErr(err)
-		}
-		for _, input := range inputs {
-			execTemplate.Data.Set(input.Key, input.Value())
-		}
-		if err := execTemplate.Data.ValidateValues(); err != nil {
-			logger.FatalErr(err)
-		}
-	}
-
-	if err := filesystem.InitExecutables(execTemplate, ws, definitionName, subPath); err != nil {
-		logger.FatalErr(err)
-	}
-
 	logger.PlainTextSuccess(
 		fmt.Sprintf(
 			"Executables from %s added to %s\nPath: %s",

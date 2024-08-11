@@ -115,6 +115,13 @@ properties:
       For example, a form field with the key `name` can be used in the template as `{{.name}}`.
     items:
       $ref: '#/definitions/Field'
+    goJSONSchema:
+      type: "FormFields"
+      nillable: false
   template:
     type: string
     description: The flow file template to generate. The template must be a valid flow file after rendering.
+  location:
+    type: string
+    goJSONSchema:
+      identifier: location

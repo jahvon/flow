@@ -84,7 +84,10 @@ type Template struct {
 	// For example, a form field with the key `name` can be used in the template as
 	// `{{.name}}`.
 	//
-	Form []Field `json:"form,omitempty" yaml:"form,omitempty" mapstructure:"form,omitempty"`
+	Form *FormFields `json:"form,omitempty" yaml:"form,omitempty" mapstructure:"form,omitempty"`
+
+	// location corresponds to the JSON schema field "location".
+	location *string `json:"location,omitempty" yaml:"location,omitempty" mapstructure:"location,omitempty"`
 
 	// A list of exec executables to run after generating the flow file.
 	PostRun []TemplatePostRunElem `json:"postRun,omitempty" yaml:"postRun,omitempty" mapstructure:"postRun,omitempty"`

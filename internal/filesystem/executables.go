@@ -28,20 +28,6 @@ func EnsureExecutableDir(workspacePath, subPath string) error {
 	return nil
 }
 
-func InitExecutables(
-	template *executable.FlowFileTemplate,
-	ws *workspace.Workspace,
-	name, subPath string,
-) error {
-	if err := EnsureExecutableDir(ws.Location(), subPath); err != nil {
-		return errors.Wrap(err, "unable to ensure executable directory")
-	}
-	if err := WriteFlowFileFromTemplate(template, ws, name, subPath); err != nil {
-		return errors.Wrap(err, "unable to write executable config template")
-	}
-	return nil
-}
-
 func WriteFlowFile(cfgFile string, cfg *executable.FlowFile) error {
 	file, err := os.OpenFile(filepath.Clean(cfgFile), os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {

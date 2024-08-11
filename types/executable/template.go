@@ -3,107 +3,101 @@ package executable
 import (
 	"errors"
 	"fmt"
+	"regexp"
 )
 
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o template.gen.go template_schema.yaml
 
-type TemplateDataEntry struct {
-	// The key to associate the data with. This is used as the key in the template data map.
-	Key string `yaml:"key"`
-	// A prompt to be displayed to the user when collecting an input value.
-	Prompt string `yaml:"prompt"`
-	// The default value to use if a value is not set.
-	Default string `yaml:"default"`
-	// If true, a value must be set. If false, the default value will be used if a value is not set.
-	Required bool `yaml:"required"`
-
-	value string
+func (f *Field) Set(value string) {
+	f.value = &value
 }
 
-func (t *TemplateDataEntry) Set(value string) {
-	t.value = value
-}
-
-func (t *TemplateDataEntry) Value() string {
-	if t.value == "" {
-		return t.Default
+func (f *Field) Value() string {
+	if f.value == nil {
+		return f.Default
 	}
-	return t.value
+	return *f.value
 }
 
-func (t *TemplateDataEntry) Validate() error {
-	if t.Prompt == "" {
-		return errors.New("must specify prompt for template data")
+func (f *Field) ValidateConfig() error {
+	if f.Key == "" {
+		return errors.New("field is missing a key")
 	}
-	if t.Key == "" {
-		return errors.New("must specify key for template data")
+	if f.Prompt == "" {
+		return fmt.Errorf("field %s is missing a prompt", f.Key)
 	}
 	return nil
 }
 
-func (t *TemplateDataEntry) ValidateValue() error {
-	if t.value == "" && t.Required {
-		return fmt.Errorf("required template data not set")
+func (f *Field) ValidateValue() error {
+	if f.Value() == "" && f.Required {
+		return fmt.Errorf("required field with key %s not set", f.Key)
+	}
+
+	if f.Validate != "" {
+		r, err := regexp.Compile(f.Validate)
+		if err != nil {
+			return fmt.Errorf("unable to compile validation regex for field with key %s: %v", f.Key, err)
+		}
+		if !r.MatchString(f.Value()) {
+			return fmt.Errorf("validation (%s) failed for field with key %s", f.Validate, f.Key)
+		}
 	}
 	return nil
 }
 
-type TemplateData []TemplateDataEntry
+type FormFields []*Field
 
-func (t *TemplateData) Set(key, value string) {
-	for i, entry := range *t {
+func (f FormFields) Set(key, value string) {
+	for i, entry := range f {
 		if entry.Key == key {
-			(*t)[i].Set(value)
+			f[i].Set(value)
 			return
 		}
 	}
 }
 
-func (t *TemplateData) MapInterface() map[string]interface{} {
+func (f FormFields) MapInterface() map[string]interface{} {
 	data := map[string]interface{}{}
-	for _, entry := range *t {
+	for _, entry := range f {
 		data[entry.Key] = entry.Value()
 	}
 	return data
 }
 
-func (t *TemplateData) Validate() error {
-	for _, entry := range *t {
-		if err := entry.Validate(); err != nil {
+func (f FormFields) ValidateConfig() error {
+	for _, field := range f {
+		if err := field.ValidateConfig(); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (t *TemplateData) ValidateValues() error {
-	for _, entry := range *t {
-		if err := entry.ValidateValue(); err != nil {
+func (f FormFields) ValidateValues() error {
+	for _, field := range f {
+		if err := field.ValidateValue(); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-type FlowFileTemplate struct {
-	// A list of template data to be used when rendering the flow executable config file.
-	Data TemplateData `yaml:"data"`
-	// A list of files to include when copying the template in a new location. The files are copied as-is.
-	Artifacts []string `yaml:"artifacts,omitempty"`
-
-	*FlowFile `yaml:",inline"`
-
-	location string
+func (t *Template) SetContext(location string) {
+	*t.location = location
 }
 
-func (t *FlowFileTemplate) SetContext(location string) {
-	t.location = location
+func (t *Template) Location() string {
+	if t.location == nil {
+		return ""
+	}
+	return *t.location
 }
 
-func (t *FlowFileTemplate) Location() string {
-	return t.location
+func (t *Template) ValidateFormConfig() error {
+	return t.Form.ValidateConfig()
 }
 
-func (t *FlowFileTemplate) Validate() error {
-	return t.Data.Validate()
+func (t *Template) ValidateFormValues() error {
+	return t.Form.ValidateValues()
 }
