@@ -6,12 +6,18 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="Description">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+<!--  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">-->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
+  <style>
+    :root {
+      --theme-color: #7FBBB3;
+      --base-font-size: 14px;
+    }
+  </style>
+
 </head>
 <body>
   <div id="app">thinking...</div>
-  <!-- Plugins -->
-  <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
   <!-- Configurations -->
   <script>
     window.$docsify = {
@@ -45,14 +51,12 @@
         errorText: 'Error',
         successText: 'Copied',
       },
-      plugins: [
-        EditOnGithubPlugin.create('https://github.com/jahvon/flow/blob/main/docs/', null, 'Edit on GitHub'),
-      ]
     }
   </script>
   <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
 </body>
 </html>
