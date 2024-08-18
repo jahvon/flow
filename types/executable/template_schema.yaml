@@ -15,7 +15,6 @@ definitions:
     properties:
       if:
         type: string
-        default: ""
         description: |
           A condition to determine if the artifact should be copied. The condition is evaluated using Go templating 
           from the form data. If the condition is not met, the artifact will not be copied.
@@ -109,6 +108,7 @@ properties:
         type: "ExecExecutableType"
   form:
     type: array
+    default: []
     description: |
       Form fields to be displayed to the user when generating a flow file from a template. 
       The form will be rendered first, and the user's input can be used to render the template.
@@ -117,7 +117,6 @@ properties:
       $ref: '#/definitions/Field'
     goJSONSchema:
       type: "FormFields"
-      nillable: false
   template:
     type: string
     description: The flow file template to generate. The template must be a valid flow file after rendering.
@@ -125,3 +124,7 @@ properties:
     type: string
     goJSONSchema:
       identifier: location
+  assignedName:
+    type: string
+    goJSONSchema:
+      identifier: assignedName

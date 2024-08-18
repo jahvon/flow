@@ -34,7 +34,7 @@ type Artifact struct {
 	// {{ if .name }}true{{ end }}
 	// ```
 	//
-	If string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
+	If *string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
 
 	// The directory to copy the file from.
 	// If not set, the file will be copied from the directory of the template file.
@@ -77,6 +77,9 @@ type Template struct {
 	// A list of artifacts to be copied after generating the flow file.
 	Artifacts []Artifact `json:"artifacts,omitempty" yaml:"artifacts,omitempty" mapstructure:"artifacts,omitempty"`
 
+	// assignedName corresponds to the JSON schema field "assignedName".
+	assignedName *string `json:"assignedName,omitempty" yaml:"assignedName,omitempty" mapstructure:"assignedName,omitempty"`
+
 	// Form fields to be displayed to the user when generating a flow file from a
 	// template.
 	// The form will be rendered first, and the user's input can be used to render the
@@ -84,7 +87,7 @@ type Template struct {
 	// For example, a form field with the key `name` can be used in the template as
 	// `{{.name}}`.
 	//
-	Form *FormFields `json:"form,omitempty" yaml:"form,omitempty" mapstructure:"form,omitempty"`
+	Form FormFields `json:"form,omitempty" yaml:"form,omitempty" mapstructure:"form,omitempty"`
 
 	// location corresponds to the JSON schema field "location".
 	location *string `json:"location,omitempty" yaml:"location,omitempty" mapstructure:"location,omitempty"`

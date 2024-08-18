@@ -1,6 +1,10 @@
 package executable
 
 import (
+	"fmt"
+
+	"gopkg.in/yaml.v3"
+
 	"github.com/jahvon/flow/types/common"
 )
 
@@ -36,6 +40,14 @@ func (f *FlowFile) WorkspacePath() string {
 
 func (f *FlowFile) ConfigPath() string {
 	return f.configPath
+}
+
+func (f *FlowFile) YAML() (string, error) {
+	yamlBytes, err := yaml.Marshal(f)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal flowfile - %w", err)
+	}
+	return string(yamlBytes), nil
 }
 
 func (l *FlowFileList) FilterByNamespace(namespace string) FlowFileList {

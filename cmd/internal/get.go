@@ -32,6 +32,7 @@ func RegisterGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	registerGetWsCmd(ctx, getCmd)
 	registerGetExecCmd(ctx, getCmd)
 	registerGetSecretCmd(ctx, getCmd)
+	registerGetTemplateCmd(ctx, getCmd)
 	rootCmd.AddCommand(getCmd)
 }
 
@@ -207,5 +208,41 @@ func getSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		} else {
 			logger.PlainTextSuccess("\ncopied secret value to clipboard")
 		}
+	}
+}
+
+func registerGetTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
+	templateCmd := &cobra.Command{
+		Use:     "template",
+		Aliases: []string{"tmpl"},
+		Short:   "Print a flowfile template using it's registered name or file path.",
+		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
+		Run:     func(cmd *cobra.Command, args []string) { getTemplateFunc(ctx, cmd, args) },
+	}
+	RegisterFlag(ctx, templateCmd, *flags.TemplateFlag)
+	RegisterFlag(ctx, templateCmd, *flags.TemplateFilePathFlag)
+	MarkOneFlagRequired(templateCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
+	RegisterFlag(ctx, templateCmd, *flags.OutputFormatFlag)
+	getCmd.AddCommand(templateCmd)
+}
+
+func getTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+	logger := ctx.Logger
+	template := flags.ValueFor[string](ctx, cmd, *flags.TemplateFlag, false)
+	templateFilePath := flags.ValueFor[string](ctx, cmd, *flags.TemplateFilePathFlag, false)
+
+	tmpl := loadFlowfileTemplate(ctx, template, templateFilePath)
+	if tmpl == nil {
+		logger.Fatalf("unable to load flowfile template")
+	}
+
+	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
+	if interactive.UIEnabled(ctx, cmd) {
+		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
+		view := executableio.NewTemplateView(ctx, tmpl, components.Format(outputFormat), runFunc)
+		ctx.InteractiveContainer.SetView(view)
+	} else {
+		executableio.PrintTemplate(logger, outputFormat, tmpl)
 	}
 }

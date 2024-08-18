@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const flowDirName = "flow"
+const dataDirName = "flow"
 
 func CopyFile(src, dst string) error {
 	in, err := os.Open(filepath.Clean(src))

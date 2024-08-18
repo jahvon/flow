@@ -17,6 +17,7 @@ import (
 	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/templates"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -139,80 +140,51 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 
 func registerInitExecsCmd(ctx *context.Context, initCmd *cobra.Command) {
 	subCmd := &cobra.Command{
-		Use:     "executables WORKSPACE_NAME DEFINITION_NAME [-p SUB_PATH] [-f FILE] [-t TEMPLATE]",
-		Aliases: []string{"execs", "definitions", "defs"},
+		Use:     "executables FLOWFILE_NAME [-w WORKSPACE ] [-o OUTPUT_DIR] [-f FILE | -t TEMPLATE]",
+		Aliases: []string{"execs", "flowfile"},
 		Short:   "Add rendered executables from an executable definition template to a workspace",
 		Long:    initExecLong,
-		Args:    cobra.ExactArgs(2),
+		Args:    cobra.MaximumNArgs(1),
 		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { initExecFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, subCmd, *flags.SubPathFlag)
+	RegisterFlag(ctx, subCmd, *flags.TemplateOutputPathFlag)
 	RegisterFlag(ctx, subCmd, *flags.TemplateFlag)
-	RegisterFlag(ctx, subCmd, *flags.FileFlag)
-	MarkFlagMutuallyExclusive(subCmd, flags.TemplateFlag.Name, flags.FileFlag.Name)
-	MarkOneFlagRequired(subCmd, flags.TemplateFlag.Name, flags.FileFlag.Name)
-	MarkFlagFilename(ctx, subCmd, flags.FileFlag.Name)
-	MarkFlagFilename(ctx, subCmd, flags.SubPathFlag.Name)
+	RegisterFlag(ctx, subCmd, *flags.TemplateFilePathFlag)
+	RegisterFlag(ctx, subCmd, *flags.TemplateWorkspaceFlag)
+	MarkFlagMutuallyExclusive(subCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
+	MarkOneFlagRequired(subCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
+	MarkFlagFilename(ctx, subCmd, flags.TemplateFilePathFlag.Name)
+	MarkFlagFilename(ctx, subCmd, flags.TemplateOutputPathFlag.Name)
 	initCmd.AddCommand(subCmd)
 }
 
-//nolint:gocognit
 func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
-	workspaceName := args[0]
-	definitionName := args[1]
-	subPath := flags.ValueFor[string](ctx, cmd, *flags.SubPathFlag, false)
+	outputPath := flags.ValueFor[string](ctx, cmd, *flags.TemplateOutputPathFlag, false)
 	template := flags.ValueFor[string](ctx, cmd, *flags.TemplateFlag, false)
-	fileVal := flags.ValueFor[string](ctx, cmd, *flags.FileFlag, false)
+	templateFilePath := flags.ValueFor[string](ctx, cmd, *flags.TemplateFilePathFlag, false)
+	workspaceName := flags.ValueFor[string](ctx, cmd, *flags.TemplateWorkspaceFlag, false)
 
-	logger.Infof("Adding '%s' executables to '%s' workspace", definitionName, workspaceName)
-	var flowFilePath string
-	switch {
-	case template == "" && fileVal == "":
-		logger.Fatalf("one of -f or -t must be provided")
-	case template != "" && fileVal != "":
-		logger.Fatalf("only one of -f or -t can be provided")
-	case template != "":
-		if ctx.Config.Templates == nil {
-			logger.Fatalf("template %s not found", template)
-		}
-		if path, found := ctx.Config.Templates[template]; !found {
-			logger.Fatalf("template %s not found", template)
-		} else {
-			flowFilePath = path
-		}
-	case fileVal != "":
-		if _, err := os.Stat(fileVal); os.IsNotExist(err) {
-			logger.Fatalf("fileVal %s not found", fileVal)
-		}
-		flowFilePath = fileVal
-	}
-
-	execTemplate, err := filesystem.LoadFlowFileTemplate(flowFilePath)
-	if err != nil {
-		logger.FatalErr(err)
-	}
-	if err := execTemplate.Validate(); err != nil {
-		logger.FatalErr(err)
-	}
-	execTemplate.SetContext(flowFilePath)
-
-	wsPath, wsFound := ctx.Config.Workspaces[workspaceName]
-	if !wsFound {
+	ws := workspaceOrCurrent(ctx, workspaceName)
+	if ws == nil {
 		logger.Fatalf("workspace %s not found", workspaceName)
 	}
-	ws, err := filesystem.LoadWorkspaceConfig(workspaceName, wsPath)
-	if err != nil {
+
+	tmpl := loadFlowfileTemplate(ctx, template, templateFilePath)
+	if tmpl == nil {
+		logger.Fatalf("unable to load flowfile template")
+	}
+
+	flowFilename := tmpl.Name()
+	if len(args) == 1 {
+		flowFilename = args[0]
+	}
+	if err := templates.ProcessTemplate(ctx, tmpl, ws, flowFilename, outputPath); err != nil {
 		logger.FatalErr(err)
 	}
-	ws.SetContext(workspaceName, wsPath)
 
-	logger.PlainTextSuccess(
-		fmt.Sprintf(
-			"Executables from %s added to %s\nPath: %s",
-			definitionName, workspaceName, flowFilePath,
-		))
+	logger.PlainTextSuccess(fmt.Sprintf("Template '%s' rendered successfully", flowFilename))
 }
 
 func registerInitVaultCmd(ctx *context.Context, initCmd *cobra.Command) {

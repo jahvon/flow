@@ -124,10 +124,18 @@ var LastLogEntryFlag = &Metadata{
 	Required: false,
 }
 
-var SubPathFlag = &Metadata{
-	Name:      "subPath",
-	Shorthand: "p",
-	Usage:     "Sub-path within the workspace to create the executable definition and its artifacts.",
+var TemplateWorkspaceFlag = &Metadata{
+	Name:      "workspace",
+	Shorthand: "w",
+	Usage:     "Workspace to create the flow file and its artifacts. Defaults to the current workspace.",
+	Default:   "",
+	Required:  false,
+}
+
+var TemplateOutputPathFlag = &Metadata{
+	Name:      "output",
+	Shorthand: "o",
+	Usage:     "Output directory (within the workspace) to create the flow file and its artifacts. If the directory does not exist, it will be created.",
 	Default:   "",
 	Required:  false,
 }
@@ -135,15 +143,15 @@ var SubPathFlag = &Metadata{
 var TemplateFlag = &Metadata{
 	Name:      "template",
 	Shorthand: "t",
-	Usage:     "Template to use as the template for the executables. Templates are registered in the flow configuration file.",
+	Usage:     "Registered template name. Templates can be registered in the flow configuration file or with `flow set template`.",
 	Default:   "",
 	Required:  false,
 }
 
-var FileFlag = &Metadata{
+var TemplateFilePathFlag = &Metadata{
 	Name:      "file",
 	Shorthand: "f",
-	Usage:     "File to use as the template for the executables. It must be a valid executable definition template.",
+	Usage:     "Path to the template file. It must be a valid flow file template.",
 	Default:   "",
 	Required:  false,
 }

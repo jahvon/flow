@@ -190,11 +190,11 @@ func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 	flowFilePath := args[1]
-	loadedTemplates, err := filesystem.LoadFlowFileTemplate(flowFilePath)
+	loadedTemplates, err := filesystem.LoadFlowFileTemplate(name, flowFilePath)
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	if err := loadedTemplates.Validate(); err != nil {
+	if err := loadedTemplates.ValidateFormConfig(); err != nil {
 		logger.FatalErr(err)
 	}
 	userConfig := ctx.Config

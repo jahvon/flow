@@ -14,7 +14,7 @@ Configuration for a flowfile template; templates can be used to generate flow fi
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `artifacts` | A list of artifacts to be copied after generating the flow file. | `array` ([Artifact](#Artifact)) | <no value> | [] |
-| `form` | Form fields to be displayed to the user when generating a flow file from a template.  The form will be rendered first, and the user's input can be used to render the template. For example, a form field with the key `name` can be used in the template as `{{.name}}`.  | `array` ([Field](#Field)) | <no value> | [] |
+| `form` | Form fields to be displayed to the user when generating a flow file from a template.  The form will be rendered first, and the user's input can be used to render the template. For example, a form field with the key `name` can be used in the template as `{{.name}}`.  | `array` ([Field](#Field)) | [] | [] |
 | `postRun` | A list of exec executables to run after generating the flow file. | `array` ([ExecExecutableType](#ExecExecutableType)) | <no value> | [] |
 | `preRun` | A list of exec executables to run before generating the flow file. | `array` ([ExecExecutableType](#ExecExecutableType)) | <no value> | [] |
 | `template` | The flow file template to generate. The template must be a valid flow file after rendering. | `string` | <no value> | [] |
@@ -39,7 +39,7 @@ Go templating from form data is supported in all fields.
 | `asTemplate` | If true, the artifact will be copied as a template file. The file will be rendered using Go templating from  the form data. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the template.  | `boolean` | false | [] |
 | `dstDir` | The directory to copy the file to. If not set, the file will be copied to the root of the flow file directory. The directory will be created if it does not exist.  | `string` | <no value> | [] |
 | `dstName` | The name of the file to copy to. If not set, the file will be copied with the same name. | `string` |  | [] |
-| `if` | A condition to determine if the artifact should be copied. The condition is evaluated using Go templating  from the form data. If the condition is not met, the artifact will not be copied. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to copy the artifact only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` |  | [] |
+| `if` | A condition to determine if the artifact should be copied. The condition is evaluated using Go templating  from the form data. If the condition is not met, the artifact will not be copied. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to copy the artifact only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` | <no value> | [] |
 | `srcDir` | The directory to copy the file from.  If not set, the file will be copied from the directory of the template file.  | `string` |  | [] |
 | `srcName` | The name of the file to copy. | `string` | <no value> | [] |
 

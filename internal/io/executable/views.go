@@ -95,3 +95,80 @@ func NewExecutableListView(
 	}
 	return components.NewCollectionView(state, executables, format, selectFunc)
 }
+
+func NewTemplateView(
+	ctx *context.Context,
+	template *executable.Template,
+	format components.Format,
+	runFunc func(string) error,
+) components.TeaModel {
+	container := ctx.InteractiveContainer
+	var templateKeyCallbacks = []components.KeyCallback{
+		{
+			Key: "r", Label: "run",
+			Callback: func() error {
+				ctx.InteractiveContainer.Shutdown()
+				return runFunc(template.Name())
+			},
+		},
+		{
+			Key: "c", Label: "copy location",
+			Callback: func() error {
+				if err := clipboard.WriteAll(template.Location()); err != nil {
+					container.HandleError(fmt.Errorf("unable to copy location to clipboard: %w", err))
+				} else {
+					container.SetNotice("copied location to clipboard", styles.NoticeLevelInfo)
+				}
+				return nil
+			},
+		},
+		{
+			Key: "e", Label: "edit",
+			Callback: func() error {
+				if err := common.OpenInEditor(template.Location(), ctx.StdIn(), ctx.StdOut()); err != nil {
+					container.HandleError(fmt.Errorf("unable to open template: %w", err))
+				}
+				return nil
+			},
+		},
+	}
+	state := &components.TerminalState{
+		Theme:  io.Theme(),
+		Height: container.Height(),
+		Width:  container.Width(),
+	}
+	return components.NewEntityView(
+		state,
+		template,
+		format,
+		templateKeyCallbacks...,
+	)
+}
+
+func NewTemplateListView(
+	ctx *context.Context,
+	templates executable.TemplateList,
+	format components.Format,
+	runFunc func(string) error,
+) components.TeaModel {
+	container := ctx.InteractiveContainer
+	if len(templates.Items()) == 0 {
+		container.HandleError(fmt.Errorf("no templates found"))
+	}
+
+	selectFunc := func(filterVal string) error {
+		template := templates.Find(filterVal)
+		if template == nil {
+			return fmt.Errorf("template %s not found", filterVal)
+		}
+		container.SetView(NewTemplateView(ctx, template, format, runFunc))
+		return nil
+	}
+
+	state := &components.TerminalState{
+		Theme:  io.Theme(),
+		Height: container.Height(),
+		Width:  container.Width(),
+	}
+	return components.NewCollectionView(state, templates, format, selectFunc)
+}
