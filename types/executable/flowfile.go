@@ -10,6 +10,8 @@ import (
 
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o flowfile.gen.go flowfile_schema.yaml
 
+const FlowFileExt = ".flow"
+
 type FlowFileList []*FlowFile
 
 func (f *FlowFile) SetContext(workspaceName, workspacePath, configPath string) {

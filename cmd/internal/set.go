@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
@@ -41,7 +40,7 @@ func registerSetWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Aliases: []string{"ws"},
 		Short:   "Change the current workspace.",
 		Args:    cobra.ExactArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, workspaceCmd, *flags.FixedWsModeFlag)
@@ -73,7 +72,7 @@ func registerSetNamespaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Aliases: []string{"ns"},
 		Short:   "Change the current namespace.",
 		Args:    cobra.ExactArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setNamespaceFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(namespaceCmd)
@@ -96,7 +95,7 @@ func registerSetWorkspaceModeCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Short:     "Switch between fixed and dynamic workspace modes.",
 		Args:      cobra.ExactArgs(1),
 		ValidArgs: []string{"fixed", "dynamic"},
-		PreRun:    func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:    func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:       func(cmd *cobra.Command, args []string) { setWorkspaceModeFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(workspaceModeCmd)
@@ -123,7 +122,7 @@ func registerSetLogModeCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Short:     "Set the default log mode.",
 		Args:      cobra.ExactArgs(1),
 		ValidArgs: []string{"logfmt", "json", "text", "hidden"},
-		PreRun:    func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:    func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:       func(cmd *cobra.Command, args []string) { setLogModeFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(logModeCmd)
@@ -147,7 +146,7 @@ func registerSetInteractiveCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Short:     "Enable or disable the interactive terminal UI experience.",
 		Args:      cobra.ExactArgs(1),
 		ValidArgs: []string{"true", "false"},
-		PreRun:    func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:    func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:       func(cmd *cobra.Command, args []string) { setInteractiveFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(interactiveCmd)
@@ -180,7 +179,7 @@ func registerSetTemplateCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Use:    "template NAME DEFINITION_TEMPLATE_PATH",
 		Short:  "Set a template definition for use in flow.",
 		Args:   cobra.ExactArgs(2),
-		PreRun: func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun: func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:    func(cmd *cobra.Command, args []string) { setTemplateFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(templateCmd)
@@ -194,7 +193,7 @@ func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	if err := loadedTemplates.ValidateFormConfig(); err != nil {
+	if err := loadedTemplates.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
 	userConfig := ctx.Config
@@ -214,25 +213,33 @@ func registerSetSecretCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Aliases: []string{"scrt"},
 		Short:   "Update or create a secret in the flow secret vault.",
 		Args:    cobra.MinimumNArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setSecretFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(secretCmd)
 }
 
-func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func setSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
 
 	var value string
 	switch {
 	case len(args) == 1:
-		in := components.TextInput{Key: "value", Prompt: "Enter the secret value"}
-		inputs, err := components.ProcessInputs(io.Theme(), &in)
+		form, err := components.NewForm(
+			io.Theme(),
+			ctx.StdIn(),
+			ctx.StdOut(),
+			&components.FormField{
+				Key:   "value",
+				Type:  components.PromptTypeMasked,
+				Title: "Enter the secret value",
+			})
 		if err != nil {
 			logger.FatalErr(err)
 		}
-		value = inputs.FindByKey("value").Value()
+		ctx.SetView(form)
+		value = form.FindByKey("value").Value()
 	case len(args) == 2:
 		value = args[1]
 	default:

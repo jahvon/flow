@@ -53,6 +53,10 @@ type Field struct {
 	// A description of the field.
 	Description string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
+	// The group to display the field in. Fields with the same group will be displayed
+	// together.
+	Group int `json:"group,omitempty" yaml:"group,omitempty" mapstructure:"group,omitempty"`
+
 	// The key to associate the data with. This is used as the key in the template
 	// data map.
 	Key string `json:"key" yaml:"key" mapstructure:"key"`

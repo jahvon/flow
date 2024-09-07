@@ -2,12 +2,15 @@ package internal
 
 import (
 	"os"
+	"strconv"
 
+	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/types/executable"
 	"github.com/jahvon/flow/types/workspace"
 )
@@ -48,6 +51,33 @@ func MarkOneFlagRequired(cmd *cobra.Command, names ...string) {
 func MarkFlagFilename(ctx *context.Context, cmd *cobra.Command, name string) {
 	if err := cmd.MarkFlagFilename(name); err != nil {
 		ctx.Logger.FatalErr(err)
+	}
+}
+
+func UIEnabled(ctx *context.Context, cmd *cobra.Command) bool {
+	disabled := flags.ValueFor[bool](ctx, cmd.Root(), *flags.NonInteractiveFlag, true)
+	envDisabled, _ := strconv.ParseBool(os.Getenv("DISABLE_FLOW_INTERACTIVE"))
+	return !disabled && !envDisabled && ctx.Config.ShowTUI()
+}
+
+func SetView(ctx *context.Context, cmd *cobra.Command, view components.TeaModel) {
+	if UIEnabled(ctx, cmd) {
+		ctx.SetView(view)
+	} else {
+		ctx.Logger.Errorx("interactive mode is disabled", "view", view.Type())
+	}
+}
+
+func SetLoadingView(ctx *context.Context, cmd *cobra.Command) {
+	if UIEnabled(ctx, cmd) {
+		view := components.NewLoadingView("thinking...", io.Theme())
+		SetView(ctx, cmd, view)
+	}
+}
+
+func printContext(ctx *context.Context, cmd *cobra.Command) {
+	if UIEnabled(ctx, cmd) {
+		ctx.Logger.Println(io.Theme().RenderHeader(context.AppName, context.HeaderCtxKey, ctx.String(), 0))
 	}
 }
 

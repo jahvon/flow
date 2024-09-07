@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/jahvon/tuikit/components"
@@ -11,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/crypto"
@@ -39,24 +39,30 @@ func registerInitConfigCmd(ctx *context.Context, initCmd *cobra.Command) {
 		Aliases: []string{"cfg"},
 		Short:   "Initialize the flow global configuration.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { initConfigFunc(ctx, cmd, args) },
 	}
 	initCmd.AddCommand(cfgCmd)
 }
 
-func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
+func initConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	inputs, err := components.ProcessInputs(io.Theme(), &components.TextInput{
-		Key:    "confirm",
-		Prompt: "This will overwrite your current flow configurations. Are you sure you want to continue? (y/n)",
-	})
+	form, err := components.NewForm(
+		io.Theme(),
+		ctx.StdIn(),
+		ctx.StdOut(),
+		&components.FormField{
+			Key:   "confirm",
+			Type:  components.PromptTypeConfirm,
+			Title: "This will overwrite your current flow configurations. Are you sure you want to continue?",
+		})
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	resp := inputs.FindByKey("confirm").Value()
-	if strings.ToLower(resp) != "y" && strings.ToLower(resp) != "yes" {
-		logger.Warnf("Aborting", resp)
+	SetView(ctx, cmd, form)
+	resp := form.FindByKey("confirm").Value()
+	if truthy, _ := strconv.ParseBool(resp); truthy {
+		logger.Warnf("Aborting")
 		return
 	}
 
@@ -72,7 +78,7 @@ func registerInitWorkspaceCmd(ctx *context.Context, initCmd *cobra.Command) {
 		Aliases: []string{"ws"},
 		Short:   "Initialize and add a workspace to the list of known workspaces.",
 		Args:    cobra.ExactArgs(2),
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { initWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, wsCmd, *flags.SetAfterCreateFlag)
@@ -141,11 +147,11 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 func registerInitExecsCmd(ctx *context.Context, initCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:     "executables FLOWFILE_NAME [-w WORKSPACE ] [-o OUTPUT_DIR] [-f FILE | -t TEMPLATE]",
-		Aliases: []string{"execs", "flowfile"},
+		Aliases: []string{"execs", "flowfile", "template"},
 		Short:   "Add rendered executables from an executable definition template to a workspace",
 		Long:    initExecLong,
 		Args:    cobra.MaximumNArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { initExecFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, subCmd, *flags.TemplateOutputPathFlag)
@@ -192,7 +198,7 @@ func registerInitVaultCmd(ctx *context.Context, initCmd *cobra.Command) {
 		Use:    "vault",
 		Short:  "Create a new flow secret vault.",
 		Args:   cobra.NoArgs,
-		PreRun: func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun: func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:    func(cmd *cobra.Command, args []string) { initVaultFunc(ctx, cmd, args) },
 	}
 	initCmd.AddCommand(subCmd)
@@ -222,11 +228,10 @@ func initVaultFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 }
 
 //nolint:lll
-var initExecLong = `Add rendered executables from an executable definition template to a workspace.
+var initExecLong = `Add rendered executables from a flowfile template to a workspace.
 
-The WORKSPACE_NAME is the name of the workspace to initialize the executables in.
-The DEFINITION_NAME is the name of the definition to use in rendering the template.
-This name will become the name of the file containing the copied executable definition.
+The WORKSPACE_NAME is the name of the workspace to initialize the flowfile template in.
+The FLOWFILE_NAME is the name to give the flowfile (if applicable) when rendering its template.
 
-One one of -f or -t must be provided and must point to a valid executable definition template.
-The -p flag can be used to specify a sub-path within the workspace to create the executable definition and its artifacts.`
+One one of -f or -t must be provided and must point to a valid flowfile template.
+The -o flag can be used to specify an output path within the workspace to create the flowfile and its artifacts in.`

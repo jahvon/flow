@@ -54,7 +54,7 @@ var _ = Describe("Templates", func() {
 
 			err = WriteFlowFileTemplate(template.Location(), template)
 			Expect(err).ToNot(HaveOccurred())
-			_, err = os.Stat(filepath.Join(tmpDir, "test"+filesystem.FlowFileTemplateExt))
+			_, err = os.Stat(filepath.Join(tmpDir, "test"+executable.FlowFileTemplateExt))
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
@@ -103,10 +103,10 @@ func WriteFlowFileTemplate(templateFilePath string, template *executable.Templat
 
 func templateFullPath(templateDir, templateName string) string {
 	templatePath := filepath.Join(templateDir, templateName)
-	if strings.HasSuffix(templateName, filesystem.FlowFileTemplateExt) {
+	if strings.HasSuffix(templateName, executable.FlowFileTemplateExt) {
 		return templatePath
-	} else if strings.HasSuffix(templatePath, filesystem.FlowFileExt) {
-		return strings.TrimSuffix(templatePath, filesystem.FlowFileExt) + filesystem.FlowFileTemplateExt
+	} else if strings.HasSuffix(templatePath, executable.FlowFileExt) {
+		return strings.TrimSuffix(templatePath, executable.FlowFileExt) + executable.FlowFileTemplateExt
 	}
-	return templatePath + filesystem.FlowFileTemplateExt
+	return templatePath + executable.FlowFileTemplateExt
 }

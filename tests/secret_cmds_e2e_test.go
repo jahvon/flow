@@ -4,6 +4,7 @@ import (
 	stdCtx "context"
 	"os"
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -13,7 +14,7 @@ import (
 	"github.com/jahvon/flow/tests/utils"
 )
 
-var _ = Describe("vault/secrets e2e", Ordered, func() {
+var _ = FDescribe("vault/secrets e2e", Ordered, func() {
 	var (
 		ctx *context.Context
 		run *utils.CommandRunner
@@ -75,14 +76,17 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 		})
 	})
 
-	// TODO: Get e2e tests with stdin working - this will require some updates in tuikit to handle stdin overrides
-	// When("deleting a secret (flow remove secret)", func() {
-	// 	It("should remove the secret from the vault", func() {
-	// 		Eventually(run.Run(ctx, "remove", "secret", "my-secret")).WithTimeout(3 * time.Second).Should(Succeed())
-	// 		Expect(writeUserInput(ctx.StdIn(), "y\n")).To(Succeed())
-	// 		out, err := readFileContent(ctx.StdOut())
-	// 		Expect(err).NotTo(HaveOccurred())
-	// 		Expect(out).To(ContainSubstring("Secret my-secret removed from vault"))
-	// 	})
-	// })
+	When("deleting a secret (flow remove secret)", func() {
+		It("should remove the secret from the vault", func() {
+			go func() {
+				defer GinkgoRecover()
+				Expect(writeUserInput(ctx.StdIn(), "yes")).To(Succeed())
+				Expect(rewindFile(ctx.StdIn())).To(Succeed())
+			}()
+			Eventually(run.Run(ctx, "remove", "secret", "my-secret")).Within(time.Second * 3).Should(Succeed())
+			out, err := readFileContent(ctx.StdOut())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(out).To(ContainSubstring("Secret my-secret removed from vault"))
+		})
+	})
 })

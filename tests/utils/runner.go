@@ -14,6 +14,8 @@ func NewE2ECommandRunner() *CommandRunner {
 func (r *CommandRunner) Run(ctx *context.Context, args ...string) error {
 	rootCmd := cmd.NewRootCmd(ctx)
 	rootCmd.SetArgs(args)
+	rootCmd.SetIn(ctx.StdIn())
+	rootCmd.SetOut(ctx.StdOut())
 	if err := cmd.Execute(ctx, rootCmd); err != nil {
 		return err
 	}

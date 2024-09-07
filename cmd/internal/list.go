@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	executableio "github.com/jahvon/flow/internal/io/executable"
@@ -39,8 +38,7 @@ func registerListWorkspaceCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"ws"},
 		Short:   "Print a list of the registered flow workspaces.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
-		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, workspaceCmd, *flags.OutputFormatFlag)
@@ -73,13 +71,13 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.Fatalf("no workspaces found")
 	}
 
-	if interactive.UIEnabled(ctx, cmd) {
+	if UIEnabled(ctx, cmd) {
 		view := workspaceio.NewWorkspaceListView(
 			ctx,
 			filteredWorkspaces,
 			components.Format(outputFormat),
 		)
-		ctx.InteractiveContainer.SetView(view)
+		SetView(ctx, cmd, view)
 	} else {
 		workspaceio.PrintWorkspaceList(logger, outputFormat, filteredWorkspaces)
 	}
@@ -91,8 +89,7 @@ func registerListExecutableCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"execs"},
 		Short:   "Print a list of executable flows.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
-		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listExecutableFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, executableCmd, *flags.OutputFormatFlag)
@@ -133,7 +130,7 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		FilterByTags(tagsFilter).
 		FilterBySubstring(substr)
 
-	if interactive.UIEnabled(ctx, cmd) {
+	if UIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
 		view := executableio.NewExecutableListView(
 			ctx,
@@ -141,7 +138,7 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 			components.Format(outputFormat),
 			runFunc,
 		)
-		ctx.InteractiveContainer.SetView(view)
+		SetView(ctx, cmd, view)
 	} else {
 		executableio.PrintExecutableList(logger, outputFormat, filteredExec)
 	}
@@ -153,8 +150,7 @@ func registerListSecretCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"scrt"},
 		Short:   "Print a list of secrets in the flow vault.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
-		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listSecretFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, vaultSecretListCmd, *flags.OutputSecretAsPlainTextFlag)
@@ -171,7 +167,7 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.FatalErr(err)
 	}
 
-	interactiveUI := interactive.UIEnabled(ctx, cmd)
+	interactiveUI := UIEnabled(ctx, cmd)
 	if interactiveUI {
 		secretio.LoadSecretListView(ctx, asPlainText)
 	} else {
@@ -191,13 +187,9 @@ func registerListTemplateCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"tmpl"},
 		Short:   "Print a list of registered flowfile templates.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
-		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listTemplateFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, templateCmd, *flags.TemplateFlag)
-	RegisterFlag(ctx, templateCmd, *flags.TemplateFilePathFlag)
-	MarkOneFlagRequired(templateCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
 	RegisterFlag(ctx, templateCmd, *flags.OutputFormatFlag)
 	listCmd.AddCommand(templateCmd)
 }
@@ -211,7 +203,7 @@ func listTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
-	if interactive.UIEnabled(ctx, cmd) {
+	if UIEnabled(ctx, cmd) {
 		view := executableio.NewTemplateListView(
 			ctx, tmpls, components.Format(outputFormat),
 			func(name string) error {
@@ -228,7 +220,7 @@ func listTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 				return nil
 			},
 		)
-		ctx.InteractiveContainer.SetView(view)
+		SetView(ctx, cmd, view)
 	} else {
 		executableio.PrintTemplateList(logger, outputFormat, tmpls)
 	}

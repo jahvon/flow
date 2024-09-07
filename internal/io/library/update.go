@@ -246,7 +246,7 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			}
 
 			go func() {
-				l.ctx.InteractiveContainer.Shutdown()
+				l.ctx.TUIContainer.Shutdown()
 				if err := l.cmdRunFunc(curExec.Ref().String()); err != nil {
 					l.ctx.Logger.Fatalx("unable to execute command", "error", err)
 				}

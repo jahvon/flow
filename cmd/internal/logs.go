@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
@@ -21,12 +20,7 @@ func RegisterLogsCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Aliases: []string{"log"},
 		Short:   "List and view logs for previous flow executions.",
 		Args:    cobra.NoArgs,
-		PreRun: func(cmd *cobra.Command, args []string) {
-			interactive.InitInteractiveContainer(ctx, cmd)
-		},
-		PostRun: func(cmd *cobra.Command, args []string) {
-			interactive.WaitForExit(ctx, cmd)
-		},
+		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
 		Run: func(cmd *cobra.Command, args []string) {
 			logFunc(ctx, cmd, args)
 		},
@@ -40,14 +34,14 @@ func logFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	if err := filesystem.EnsureLogsDir(); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	if interactive.UIEnabled(ctx, cmd) {
+	if UIEnabled(ctx, cmd) {
 		state := &components.TerminalState{
 			Theme:  io.Theme(),
-			Height: ctx.InteractiveContainer.Height(),
-			Width:  ctx.InteractiveContainer.Width(),
+			Height: ctx.TUIContainer.Height(),
+			Width:  ctx.TUIContainer.Width(),
 		}
 		view := components.NewLogArchiveView(state, filesystem.LogsDir(), lastEntry)
-		ctx.InteractiveContainer.SetView(view)
+		SetView(ctx, cmd, view)
 		return
 	}
 	entries, err := tuikitIO.ListArchiveEntries(filesystem.LogsDir())

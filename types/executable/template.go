@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/jahvon/tuikit/types"
@@ -13,6 +12,8 @@ import (
 )
 
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o template.gen.go template_schema.yaml
+
+const FlowFileTemplateExt = ".flow.tmpl"
 
 type TemplateList []*Template
 
@@ -31,25 +32,8 @@ func (f *Field) ValidateConfig() error {
 	if f.Key == "" {
 		return errors.New("field is missing a key")
 	}
-	if f.Prompt == "" {
+	if f.Prompt == "" && f.Description == "" {
 		return fmt.Errorf("field %s is missing a prompt", f.Key)
-	}
-	return nil
-}
-
-func (f *Field) ValidateValue() error {
-	if f.Value() == "" && f.Required {
-		return fmt.Errorf("required field with key %s not set", f.Key)
-	}
-
-	if f.Validate != "" {
-		r, err := regexp.Compile(f.Validate)
-		if err != nil {
-			return fmt.Errorf("unable to compile validation regex for field with key %s: %w", f.Key, err)
-		}
-		if !r.MatchString(f.Value()) {
-			return fmt.Errorf("validation (%s) failed for field with key %s", f.Validate, f.Key)
-		}
 	}
 	return nil
 }
@@ -65,26 +49,17 @@ func (f FormFields) Set(key, value string) {
 	}
 }
 
-func (f FormFields) MapInterface() map[string]interface{} {
-	data := map[string]interface{}{}
+func (f FormFields) ValueMap() map[string]string {
+	data := map[string]string{}
 	for _, entry := range f {
 		data[entry.Key] = entry.Value()
 	}
 	return data
 }
 
-func (f FormFields) ValidateConfig() error {
+func (f FormFields) Validate() error {
 	for _, field := range f {
 		if err := field.ValidateConfig(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (f FormFields) ValidateValues() error {
-	for _, field := range f {
-		if err := field.ValidateValue(); err != nil {
 			return err
 		}
 	}
@@ -99,9 +74,11 @@ func (t *Template) SetContext(name, location string) {
 	t.assignedName = &name
 	if name == "" {
 		fn := filepath.Base(location)
-		fn = strings.TrimSuffix(fn, filepath.Ext(fn))
-		if filepath.Ext(fn) != "" {
-			// remove second extension part
+		if strings.HasSuffix(fn, FlowFileTemplateExt) {
+			fn = strings.TrimSuffix(fn, FlowFileTemplateExt)
+		} else if strings.HasSuffix(fn, FlowFileExt) {
+			fn = strings.TrimSuffix(fn, FlowFileExt)
+		} else {
 			fn = strings.TrimSuffix(fn, filepath.Ext(fn))
 		}
 		t.assignedName = &fn
@@ -119,12 +96,8 @@ func (t *Template) Name() string {
 	return *t.assignedName
 }
 
-func (t *Template) ValidateFormConfig() error {
-	return t.Form.ValidateConfig()
-}
-
-func (t *Template) ValidateFormValues() error {
-	return t.Form.ValidateValues()
+func (t *Template) Validate() error {
+	return t.Form.Validate()
 }
 
 func (t *Template) YAML() (string, error) {

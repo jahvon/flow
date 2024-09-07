@@ -16,16 +16,16 @@ import (
 
 func NewExecutableView(
 	ctx *context.Context,
-	exec executable.Executable,
+	exec *executable.Executable,
 	format components.Format,
 	runFunc func(string) error,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	var executableKeyCallbacks = []components.KeyCallback{
 		{
 			Key: "r", Label: "run",
 			Callback: func() error {
-				ctx.InteractiveContainer.Shutdown()
+				ctx.TUIContainer.Shutdown()
 				return runFunc(exec.Ref().String())
 			},
 		},
@@ -57,7 +57,7 @@ func NewExecutableView(
 	}
 	return components.NewEntityView(
 		state,
-		&exec,
+		exec,
 		format,
 		executableKeyCallbacks...,
 	)
@@ -69,7 +69,7 @@ func NewExecutableListView(
 	format components.Format,
 	runFunc func(string) error,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	if len(executables.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no workspaces found"))
 	}
@@ -84,7 +84,7 @@ func NewExecutableListView(
 		if err != nil {
 			return fmt.Errorf("executable not found")
 		}
-		container.SetView(NewExecutableView(ctx, *exec, format, runFunc))
+		ctx.SetView(NewExecutableView(ctx, exec, format, runFunc))
 		return nil
 	}
 
@@ -102,12 +102,12 @@ func NewTemplateView(
 	format components.Format,
 	runFunc func(string) error,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	var templateKeyCallbacks = []components.KeyCallback{
 		{
 			Key: "r", Label: "run",
 			Callback: func() error {
-				ctx.InteractiveContainer.Shutdown()
+				ctx.TUIContainer.Shutdown()
 				return runFunc(template.Name())
 			},
 		},
@@ -151,7 +151,7 @@ func NewTemplateListView(
 	format components.Format,
 	runFunc func(string) error,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	if len(templates.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no templates found"))
 	}
@@ -161,7 +161,7 @@ func NewTemplateListView(
 		if template == nil {
 			return fmt.Errorf("template %s not found", filterVal)
 		}
-		container.SetView(NewTemplateView(ctx, template, format, runFunc))
+		ctx.SetView(NewTemplateView(ctx, template, format, runFunc))
 		return nil
 	}
 

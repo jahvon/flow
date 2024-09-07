@@ -62,6 +62,10 @@ definitions:
       prompt:
         type: string
         description: A prompt to be displayed to the user when collecting an input value.
+      group:
+        type: integer
+        description: The group to display the field in. Fields with the same group will be displayed together.
+        default: 0
       description:
         type: string
         default: ""

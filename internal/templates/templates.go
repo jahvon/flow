@@ -34,16 +34,16 @@ func ProcessTemplate(
 		flowfileName = fmt.Sprintf("executables_%s", time.Now().Format("20060102150405"))
 	}
 	flowfileName = strings.ReplaceAll(strings.ToLower(flowfileName), " ", "_")
-	if !strings.HasSuffix(flowfileName, filesystem.FlowFileExt) {
-		flowfileName += filesystem.FlowFileExt
+	if !strings.HasSuffix(flowfileName, executable.FlowFileExt) {
+		flowfileName += executable.FlowFileExt
 	}
 
-	data := make(map[string]interface{})
+	data := make(map[string]string)
 	if template.Form != nil {
-		if err := showForm(template.Form); err != nil {
+		if err := showForm(ctx, template.Form); err != nil {
 			return err
 		}
-		data = template.Form.MapInterface()
+		data = template.Form.ValueMap()
 	}
 
 	env := os.Environ()
@@ -73,17 +73,32 @@ func ProcessTemplate(
 		return err
 	}
 
-	if err := copyAllArtifacts(logger, template.Artifacts, ws.Location(), fullPath, data, envMap); err != nil {
+	if err := copyAllArtifacts(
+		logger,
+		template.Artifacts,
+		ws.Location(),
+		filepath.Dir(template.Location()),
+		fullPath,
+		data, envMap,
+	); err != nil {
 		return err
 	}
 
-	flowfile, err := templateToFlowfile(template, data)
-	if err != nil {
-		return err
-	}
+	if template.Template != "" {
+		flowfile, err := templateToFlowfile(template, data)
+		if err != nil {
+			return err
+		}
 
-	if err := filesystem.WriteFlowFile(fullPath, flowfile); err != nil {
-		return errors.Wrap(err, fmt.Sprintf("unable to write flowfile %s from template", flowfileName))
+		dstFlowfile := filepath.Join(fullPath, flowfileName)
+		if _, e := os.Stat(dstFlowfile); e == nil {
+			// TODO: Add a flag to overwrite existing files
+			logger.Warnx("Overwriting existing file", "dst", dstFlowfile)
+		}
+
+		if err := filesystem.WriteFlowFile(dstFlowfile, flowfile); err != nil {
+			return errors.Wrap(err, fmt.Sprintf("unable to write flowfile %s from template", flowfileName))
+		}
 	}
 
 	var postRun []executable.ExecExecutableType
@@ -130,8 +145,7 @@ func parseSourcePath(
 	logger tuikitIO.Logger,
 	name, flowfileDir, wsDir string,
 	artifact executable.Artifact,
-	data map[string]interface{},
-	envMap map[string]string,
+	data, envMap map[string]string,
 ) (string, error) {
 	var err error
 	srcDir := flowfileDir
@@ -150,8 +164,7 @@ func parseDestinationPath(
 	logger tuikitIO.Logger,
 	name, flowfileDir, relPath, wsDir string,
 	artifact executable.Artifact,
-	data map[string]interface{},
-	envMap map[string]string,
+	data, envMap map[string]string,
 ) (string, error) {
 	var err error
 	dstDir := filepath.Dir(filepath.Join(flowfileDir, relPath))
@@ -170,7 +183,7 @@ func parseDestinationPath(
 
 func templateToFlowfile(
 	t *executable.Template,
-	data map[string]interface{},
+	data map[string]string,
 ) (*executable.FlowFile, error) {
 	buf, err := processAsGoTemplate(t.Name(), t.Template, data)
 	if err != nil {
@@ -185,8 +198,8 @@ func templateToFlowfile(
 	return flowfile, nil
 }
 
-func processAsGoTemplate(fileName, txt string, data map[string]interface{}) (*bytes.Buffer, error) {
-	tmpl, err := template.New(fileName).Funcs(sprig.FuncMap()).Parse(txt)
+func processAsGoTemplate(fileName, txt string, data map[string]string) (*bytes.Buffer, error) {
+	tmpl, err := template.New(fileName).Funcs(sprig.TxtFuncMap()).Parse(txt)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("unable to parse %s template", fileName))
 	}
@@ -199,7 +212,7 @@ func processAsGoTemplate(fileName, txt string, data map[string]interface{}) (*by
 	return &buf, nil
 }
 
-func goTemplateEvaluatedTrue(fileName, txt string, data map[string]interface{}) (bool, error) {
+func goTemplateEvaluatedTrue(fileName, txt string, data map[string]string) (bool, error) {
 	t, err := template.New(fileName).Funcs(sprig.FuncMap()).Parse(txt)
 	if err != nil {
 		return false, errors.Wrap(err, fmt.Sprintf("unable to parse %s template", fileName))

@@ -47,40 +47,14 @@ tags: [test]
 		})
 	})
 
-	Describe("ValidateFormConfig", func() {
+	Describe("Validate", func() {
 		It("should validate the form config correctly", func() {
-			Expect(template.ValidateFormConfig()).To(Succeed())
+			Expect(template.Validate()).To(Succeed())
 		})
 
 		It("should error when there is an invalid form field", func() {
 			template.Form = append(template.Form, &executable.Field{Description: "i have missing fields"})
-			Expect(template.ValidateFormConfig()).To(HaveOccurred())
-		})
-	})
-
-	Describe("ValidateFormValues", func() {
-		It("should pass when no validation is necessary", func() {
-			template.Form.Set("testKey", "testValue")
-			Expect(template.ValidateFormValues()).To(Succeed())
-		})
-
-		It("should error when a required value is unset", func() {
-			template.Form = append(template.Form, &executable.Field{
-				Key:      "requiredKey",
-				Prompt:   "requiredPrompt",
-				Required: true,
-			})
-			Expect(template.ValidateFormValues()).To(HaveOccurred())
-		})
-
-		It("should error when a value does not pass validation", func() {
-			template.Form = append(template.Form, &executable.Field{
-				Key:      "validatedKey",
-				Prompt:   "validatedPrompt",
-				Validate: "^[a-z]+$",
-			})
-			template.Form.Set("validatedKey", "123")
-			Expect(template.ValidateFormValues()).To(HaveOccurred())
+			Expect(template.Validate()).To(HaveOccurred())
 		})
 	})
 

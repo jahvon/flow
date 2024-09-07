@@ -20,7 +20,7 @@ func NewWorkspaceView(
 	ws *workspace.Workspace,
 	format components.Format,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	var workspaceKeyCallbacks = []components.KeyCallback{
 		{
 			Key: "o", Label: "open",
@@ -73,7 +73,7 @@ func NewWorkspaceListView(
 	workspaces workspace.WorkspaceList,
 	format components.Format,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	if len(workspaces.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no workspaces found"))
 	}
@@ -90,7 +90,7 @@ func NewWorkspaceListView(
 			return fmt.Errorf("workspace not found")
 		}
 
-		container.SetView(NewWorkspaceView(ctx, ws, format))
+		ctx.SetView(NewWorkspaceView(ctx, ws, format))
 		return nil
 	}
 

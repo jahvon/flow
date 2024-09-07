@@ -11,7 +11,6 @@ import (
 	"github.com/jahvon/tuikit/components"
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
@@ -69,7 +68,7 @@ func execPreRun(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	runner.RegisterRunner(render.NewRunner())
 	runner.RegisterRunner(serial.NewRunner())
 	runner.RegisterRunner(parallel.NewRunner())
-	interactive.InitInteractiveCommand(ctx, cmd)
+	SetLoadingView(ctx, cmd)
 }
 
 //nolint:gocognit
@@ -115,14 +114,17 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	}
 
 	setAuthEnv(ctx, e)
-	textInputs := pendingTextInputs(ctx, e)
+	textInputs := pendingFormFields(ctx, e)
 	if len(textInputs) > 0 {
-		inputs, err := components.ProcessInputs(io.Theme(), textInputs...)
+		form, err := components.NewForm(io.Theme(), ctx.StdIn(), ctx.StdOut(), textInputs...)
 		if err != nil {
 			logger.FatalErr(err)
 		}
-		for _, input := range inputs {
-			envMap[input.Key] = input.Value()
+		if err := ctx.SetView(form); err != nil {
+			logger.FatalErr(err)
+		}
+		for key, val := range form.ValueMap() {
+			envMap[key] = fmt.Sprintf("%v", val)
 		}
 	}
 	startTime := time.Now()
@@ -131,7 +133,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	}
 	dur := time.Since(startTime)
 	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
-	if interactive.UIEnabled(ctx, cmd) {
+	if UIEnabled(ctx, cmd) {
 		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
 			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 		}
@@ -174,17 +176,22 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 
 func setAuthEnv(ctx *context.Context, executable *executable.Executable) {
 	if authRequired(ctx, executable) {
-		resp, err := components.ProcessInputs(
+		form, err := components.NewForm(
 			io.Theme(),
-			&components.TextInput{
-				Key:    vault.EncryptionKeyEnvVar,
-				Prompt: "Enter vault encryption key",
-				Hidden: true,
+			ctx.StdIn(),
+			ctx.StdOut(),
+			&components.FormField{
+				Key:   vault.EncryptionKeyEnvVar,
+				Title: "Enter vault encryption key",
+				Type:  components.PromptTypeMasked,
 			})
 		if err != nil {
 			ctx.Logger.FatalErr(err)
 		}
-		val := resp.ValueMap()[vault.EncryptionKeyEnvVar]
+		if err := ctx.SetView(form); err != nil {
+			ctx.Logger.FatalErr(err)
+		}
+		val := form.FindByKey(vault.EncryptionKeyEnvVar).Value()
 		if val == "" {
 			ctx.Logger.FatalErr(fmt.Errorf("vault encryption key required"))
 		}
@@ -239,6 +246,17 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 				return true
 			}
 		}
+		for _, e := range rootExec.Serial.Execs {
+			if e.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, e.Ref)
+				if err != nil {
+					continue
+				}
+				if authRequired(ctx, childExec) {
+					return true
+				}
+			}
+		}
 	case rootExec.Parallel != nil:
 		for _, param := range rootExec.Parallel.Params {
 			if param.SecretRef != "" {
@@ -254,42 +272,53 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 				return true
 			}
 		}
+		for _, e := range rootExec.Parallel.Execs {
+			if e.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, e.Ref)
+				if err != nil {
+					continue
+				}
+				if authRequired(ctx, childExec) {
+					return true
+				}
+			}
+		}
 	}
 	return false
 }
 
 //nolint:gocognit
-func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []*components.TextInput {
-	pending := make([]*components.TextInput, 0)
+func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []*components.FormField {
+	pending := make([]*components.FormField, 0)
 	switch {
 	case rootExec.Exec != nil:
 		for _, param := range rootExec.Exec.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Launch != nil:
 		for _, param := range rootExec.Launch.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Request != nil:
 		for _, param := range rootExec.Request.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Render != nil:
 		for _, param := range rootExec.Render.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Serial != nil:
 		for _, param := range rootExec.Serial.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Serial.Refs {
@@ -297,13 +326,23 @@ func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []
 			if err != nil {
 				continue
 			}
-			childPending := pendingTextInputs(ctx, childExec)
+			childPending := pendingFormFields(ctx, childExec)
 			pending = append(pending, childPending...)
+		}
+		for _, child := range rootExec.Serial.Execs {
+			if child.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child.Ref)
+				if err != nil {
+					continue
+				}
+				childPending := pendingFormFields(ctx, childExec)
+				pending = append(pending, childPending...)
+			}
 		}
 	case rootExec.Parallel != nil:
 		for _, param := range rootExec.Parallel.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Parallel.Refs {
@@ -311,8 +350,18 @@ func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []
 			if err != nil {
 				continue
 			}
-			childPending := pendingTextInputs(ctx, childExec)
+			childPending := pendingFormFields(ctx, childExec)
 			pending = append(pending, childPending...)
+		}
+		for _, child := range rootExec.Parallel.Execs {
+			if child.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child.Ref)
+				if err != nil {
+					continue
+				}
+				childPending := pendingFormFields(ctx, childExec)
+				pending = append(pending, childPending...)
+			}
 		}
 	}
 	return pending

@@ -16,18 +16,27 @@ func NewSecretView(
 	secret vault.Secret,
 	asPlainText bool,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	v := vault.NewVault(ctx.Logger)
 	var secretKeyCallbacks = []components.KeyCallback{
 		{
 			Key: "r", Label: "rename",
 			Callback: func() error {
-				in := components.TextInput{Key: "value", Prompt: "Enter the new secret name"}
-				inputs, err := components.ProcessInputs(io.Theme(), &in)
+				form, err := components.NewForm(
+					io.Theme(),
+					ctx.StdIn(),
+					ctx.StdOut(),
+					&components.FormField{
+						Key:   "value",
+						Type:  components.PromptTypeText,
+						Title: "Enter the new secret name",
+					})
 				if err != nil {
-					ctx.Logger.FatalErr(err)
+					container.HandleError(fmt.Errorf("encountered error creating the form: %w", err))
+					return nil
 				}
-				newName := inputs.FindByKey("value").Value()
+				ctx.SetView(form)
+				newName := form.FindByKey("value").Value()
 				if err := v.RenameSecret(secret.Reference, newName); err != nil {
 					container.HandleError(fmt.Errorf("unable to rename secret: %w", err))
 					return nil
@@ -40,12 +49,21 @@ func NewSecretView(
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				in := components.TextInput{Key: "value", Prompt: "Enter the new secret value"}
-				inputs, err := components.ProcessInputs(io.Theme(), &in)
+				form, err := components.NewForm(
+					io.Theme(),
+					ctx.StdIn(),
+					ctx.StdOut(),
+					&components.FormField{
+						Key:   "value",
+						Type:  components.PromptTypeMasked,
+						Title: "Enter the new secret value",
+					})
 				if err != nil {
-					ctx.Logger.FatalErr(err)
+					container.HandleError(fmt.Errorf("encountered error creating the form: %w", err))
+					return nil
 				}
-				newValue := inputs.FindByKey("value").Value()
+				ctx.SetView(form)
+				newValue := form.FindByKey("value").Value()
 				secretValue := vault.SecretValue(newValue)
 				if err := v.SetSecret(secret.Reference, secretValue); err != nil {
 					container.HandleError(fmt.Errorf("unable to edit secret: %w", err))
@@ -83,7 +101,7 @@ func NewSecretListView(
 	secrets vault.SecretList,
 	asPlainText bool,
 ) components.TeaModel {
-	container := ctx.InteractiveContainer
+	container := ctx.TUIContainer
 	if len(secrets.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no secrets found"))
 	}
@@ -118,7 +136,6 @@ func LoadSecretListView(
 	ctx *context.Context,
 	asPlainText bool,
 ) {
-	container := ctx.InteractiveContainer
 	v := vault.NewVault(ctx.Logger)
 	secrets, err := v.GetAllSecrets()
 	if err != nil {
@@ -137,5 +154,5 @@ func LoadSecretListView(
 		secretList,
 		asPlainText,
 	)
-	container.SetView(view)
+	ctx.SetView(view)
 }
