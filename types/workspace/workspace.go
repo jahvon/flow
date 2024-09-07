@@ -101,7 +101,7 @@ func (l WorkspaceList) Items() []*types.CollectionItem {
 				location = ws.Location()
 			}
 		}
-		if ws.Tags != nil && len(ws.Tags) > 0 {
+		if len(ws.Tags) > 0 {
 			tags := common.Tags(ws.Tags)
 			d := fmt.Sprintf("[%s]\n", tags.PreviewString()) + ws.Description
 			ws.Description = d

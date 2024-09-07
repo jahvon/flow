@@ -4,7 +4,7 @@ tags: [development]
 executables:
   - verb: run
     name: validate
-    aliases: [precommit]
+    aliases: [precommit, pc, check, ci]
     description: |
       Run the repository validation checks. This includes linting, tests, and code generation.
       Validate should be run before committing changes.
@@ -61,25 +61,37 @@ executables:
       dir: //
       cmd: go test ./... -race
 
-  - verb: install
+  - verb: run
     name: gopath
     aliases: [local]
     description: Install the project to the GOPATH from local source
     exec:
       dir: //
-      cmd: go test ./... -race
+      cmd: go install ./...
 
   - verb: install
     name: deps
-    description: Install project dependencies
-    aliases: [local-deps]
+    description: Install project dependencies using go
+    tags: [go, development]
+    aliases: [tools, go-tools, go-deps]
     exec:
       dir: //
       cmd: |
-        go mod tidy
         echo "installing cobra-cli..."
         go install github.com/spf13/cobra-cli@v1.3.0
         echo "installing golangci-lint..."
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3
         echo "installing ginkgo..."
-        go install github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
+        go install github.com/onsi/ginkgo/v2/ginkgo@v2.20.2
+
+  - verb: update
+    name: modules
+    description: Update project dependencies
+    tags: [go, development]
+    aliases: [gomod, go-mod, deps, go-deps]
+    exec:
+      dir: //
+      cmd: |
+        echo "updating go modules..."
+        go get -u ./...
+        go mod tidy
