@@ -90,17 +90,13 @@ changelog:
   sort: asc
   groups:
   - title: "New features"
-    regexp: '^(feat|\(feat.*\)):'
+    regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
     order: 0
   - title: "Bug fixes"
-    regexp: '^(fix|\(fix.*\)):'
+    regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
     order: 1
   - title: "Documentation updates"
-    regexp: '^(docs|\(docs.*\)):'
+    regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
     order: 2
-  - title: Others
+  - title: "Miscellaneous"
     order: 999
-  filters:
-    exclude:
-      - "^(chore|\\(chore\\))"
-      - "^(test|\\(test\\))"
