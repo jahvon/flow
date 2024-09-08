@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/_media/logo.png" alt="flow" width="200"/></p>
 
----
+<br>
 
 <p align="center">
     <a href="https://img.shields.io/github/v/release/jahvon/flow"><img src="https://img.shields.io/github/v/release/jahvon/flow" alt="GitHub release"></a>
