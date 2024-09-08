@@ -181,3 +181,13 @@ executables:
       cmd: |
         echo "pushing container image..."
         $BUILDER push $IMAGE_REPO:$IMAGE_TAG
+
+  - verb: release
+    name: snapshot
+    description: Create a snapshot release
+    aliases: [snap]
+    exec:
+      dir: //
+      cmd: |
+        echo "creating snapshot release..."
+        goreleaser release --snapshot --clean
