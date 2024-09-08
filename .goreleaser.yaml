@@ -48,6 +48,7 @@ brews:
     repository:
       owner: jahvon
       name: homebrew-flow
+      token: "{{ .Env.HOMEBREW_FLOW_GITHUB_TOKEN }}"
     dependencies:
       - name: xclip
         os: linux
