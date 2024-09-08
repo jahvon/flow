@@ -1,11 +1,14 @@
-# flow
+<p align="center"><img src="_media/logo.png" alt="flow" width="300"/></p>
 
-[![GitHub release](https://img.shields.io/github/v/release/jahvon/flow)](https://github.com/jahvon/flow/releases)
+<p align="center">
+  <a href="https://img.shields.io/github/v/release/jahvon/flow"><img src="https://img.shields.io/github/v/release/jahvon/flow" alt="GitHub release"></a>
+  <a href="https://pkg.go.dev/github.com/jahvon/flow"><img src="https://pkg.go.dev/badge/github.com/jahvon/flow.svg" alt="Go Reference"></a>
+</p>
 
-flow is a versatile Command Line Interface (CLI) tool designed to streamline and enhance your local development and operations
-workflows. Whether you're running scripts, transforming API responses, or opening applications, flow has you covered. 
-It's driven by "executable" YAML configurations organized across workspaces and namespaces defined in a workspace, easily
-discoverable from anywhere on your system.
+flow is a customizable and interactive CLI tool designed to streamline how you manage and run local development and 
+operations workflows.
+
+**This project is currently in beta and documentation is a work in progress.** We welcome contributions and feedback.
 
 ## Features
 
