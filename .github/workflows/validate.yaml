@@ -21,7 +21,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.5"
+          go-version: "^1.23.1"
 
       - name: Install Go Tools
         run: |
@@ -69,7 +69,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.57.2
+          version: v1.60.3
 
       #   _____         _
       #  |_   _|__  ___| |_
