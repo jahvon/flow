@@ -32,6 +32,15 @@ var osArch = fmt.Sprintf("%s %s", runtime.GOOS, runtime.GOARCH)
 
 // generateOutput return the output of the version command.
 func generateOutput() string {
+	if gitCommit == "" {
+		gitCommit = "unknown"
+	}
+	if version == "" {
+		version = "unknown"
+	}
+	if buildDate == "" {
+		buildDate = "unknown"
+	}
 	return fmt.Sprintf(`
 
 Version: %s

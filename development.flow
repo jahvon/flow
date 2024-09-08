@@ -41,7 +41,11 @@ executables:
     exec:
       dir: //
       cmd: |
+        echo "generating code..."
         go generate ./...
+        echo "generating completions..."
+        ./scripts/completions.sh
+        
         go run ./tools/docsgen/.
 
   - verb: run
@@ -83,6 +87,8 @@ executables:
         go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3
         echo "installing ginkgo..."
         go install github.com/onsi/ginkgo/v2/ginkgo@v2.20.2
+        echo "installing goreleaser..."
+        go install github.com/goreleaser/goreleaser@v2.2.0
 
   - verb: update
     name: modules
@@ -95,3 +101,83 @@ executables:
         echo "updating go modules..."
         go get -u ./...
         go mod tidy
+
+  - verb: build
+    name: container
+    description: Build the flow container image
+    tags: [docker, development]
+    aliases: [docker, image]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "building container image..."
+        $BUILDER build -t $IMAGE_REPO:$IMAGE_TAG .
+
+  - verb: run
+    name: container
+    description: Run the flow container image
+    tags: [docker, development]
+    aliases: [image, docker]
+    exec:
+      dir: //
+      logMode: text
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+        - envKey: WORKSPACE
+          default: active
+          flag: workspace
+        - envKey: GIT_REPO
+          default: https://github.com/jahvon/flow.git
+          flag: repo
+        - envKey: BRANCH
+          default: main
+          flag: branch
+        - envKey: CONTAINER_CMD
+          default: "get workspace"
+          flag: cmd
+      cmd: |
+        echo "running container image..."
+        $BUILDER run -it -e GIT_REPO=$GIT_REPO \
+          -e BRANCH=$BRANCH \
+          -e WORKSPACE=$WORKSPACE \
+          -t $IMAGE_REPO:$IMAGE_TAG \
+          $CONTAINER_CMD
+
+  - verb: release
+    name: container
+    description: Push the flow container image to the registry
+    tags: [docker, development]
+    aliases: [image, docker]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "pushing container image..."
+        $BUILDER push $IMAGE_REPO:$IMAGE_TAG
