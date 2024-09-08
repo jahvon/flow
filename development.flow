@@ -120,6 +120,8 @@ executables:
           default: latest
           flag: tag
       cmd: |
+        echo "building go binary..."
+        GOOS=linux GOARCH=amd64 go build -o flow
         echo "building container image..."
         $BUILDER build -t $IMAGE_REPO:$IMAGE_TAG .
 

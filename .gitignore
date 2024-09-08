@@ -25,5 +25,4 @@ coverage.txt
 .bin
 flow
 flow*.tar.gz
-cmd/internal/version/*.txt
 dist/

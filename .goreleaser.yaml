@@ -7,7 +7,6 @@ version: 2
 before:
   hooks:
     - go mod tidy
-    - go generate ./cmd/internal/version
 
 builds:
   - binary: flow
@@ -20,6 +19,11 @@ builds:
       - amd64
       - arm64
     mod_timestamp: '{{ .CommitTimestamp }}'
+    ldflags: >-
+      -s -w
+      -X "github.com/jahvon/flow/cmd/internal/version.gitCommit={{ .Commit }}"
+      -X "github.com/jahvon/flow/cmd/internal/version.version={{ .Version }}"
+      -X "github.com/jahvon/flow/cmd/internal/version.buildDate={{ .Date }}"
 
 gomod:
   proxy: true
@@ -57,8 +61,29 @@ brews:
   
 dockers:
   - image_templates:
-      - ghcr.io/jahvon/flow:latest
-      - ghcr.io/jahvon/flow:{{.Tag}}
+      - "ghcr.io/jahvon/flow:{{ .Tag }}-amd64"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+    goarch: amd64
+  - image_templates:
+      - "ghcr.io/jahvon/flow:{{ .Tag }}-arm64"
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+    goarch: arm64
+
+docker_manifests:
+  - name_template: "ghcr.io/jahvon/flow:{{ .Tag }}"
+    image_templates:
+      - "ghcr.io/jahvon/flow:{{ .Tag }}-amd64"
+      - "ghcr.io/jahvon/flow{{ .Tag }}-arm64"
+  - name_template: "ghcr.io/jahvon/flow:latest"
+    image_templates:
+      - "ghcr.io/jahvon/flow:{{ .Tag }}-amd64"
+      - "ghcr.io/jahvon/flow{{ .Tag }}-arm64"
 
 changelog:
   sort: asc
