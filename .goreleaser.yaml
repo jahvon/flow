@@ -79,11 +79,11 @@ docker_manifests:
   - name_template: "ghcr.io/jahvon/flow:{{ .Tag }}"
     image_templates:
       - "ghcr.io/jahvon/flow:{{ .Tag }}-amd64"
-      - "ghcr.io/jahvon/flow{{ .Tag }}-arm64"
+      - "ghcr.io/jahvon/flow:{{ .Tag }}-arm64"
   - name_template: "ghcr.io/jahvon/flow:latest"
     image_templates:
       - "ghcr.io/jahvon/flow:{{ .Tag }}-amd64"
-      - "ghcr.io/jahvon/flow{{ .Tag }}-arm64"
+      - "ghcr.io/jahvon/flow:{{ .Tag }}-arm64"
 
 changelog:
   sort: asc

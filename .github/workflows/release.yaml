@@ -7,7 +7,6 @@ on:
 
 jobs:
   releases:
-    name: Release flow Artifacts
     permissions:
       contents: write
       packages: write
