@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/_media/logo.png" alt="flow" width="200"/></p>
+<p align="center"><a href="https://flowexec.io"><img src="docs/_media/logo.png" alt="flow" width="200"/></a></p>
 
 <br>
 
@@ -10,9 +10,8 @@
 
 <p align="center">
     <b>flow</b> is a customizable and interactive CLI automation tool designed to streamline how you manage and run local 
-    development and operations workflows. Whether you're running build scripts, transforming API responses, or generating 
-    file systems from templates, flow has you covered. It's driven by "executable" YAML configurations organized across 
-    workspaces and namespaces, easily discoverable from anywhere on your system.
+    development and operations workflows. It uses executable YAML configurations, organized across workspaces and namespaces, 
+    for tasks like running scripts, transforming APIs, or generating file systems from templates. <a href="https://charm.sh">Charming</a> interactive TUI included!
 </p>
 
 <p align="center"><b>Learn more at <a href="https://flowexec.io">flowexec.io</a></b></p>
