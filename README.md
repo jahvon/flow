@@ -11,7 +11,7 @@
 <p align="center">
     <b>flow</b> is a customizable and interactive CLI automation tool designed to streamline how you manage and run local 
     development and operations workflows. It uses executable YAML configurations, organized across workspaces and namespaces, 
-    for tasks like running scripts, transforming APIs, or generating file systems from templates. <a href="https://charm.sh">Charming</a> interactive TUI included!
+    for tasks like running scripts, transforming APIs, or generating file systems from templates. <i>Charming</i>, interactive TUI included!
 </p>
 
 <p align="center"><b>Learn more at <a href="https://flowexec.io">flowexec.io</a></b></p>
