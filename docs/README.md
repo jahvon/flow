@@ -1,21 +1,23 @@
-# flow
+<p align="center"><img src="_media/logo.png" alt="flow" width="300"/></p>
 
-[![GitHub release](https://img.shields.io/github/v/release/jahvon/flow)](https://github.com/jahvon/flow/releases)
+<p align="center">
+  <a href="https://img.shields.io/github/v/release/jahvon/flow"><img src="https://img.shields.io/github/v/release/jahvon/flow" alt="GitHub release"></a>
+  <a href="https://pkg.go.dev/github.com/jahvon/flow"><img src="https://pkg.go.dev/badge/github.com/jahvon/flow.svg" alt="Go Reference"></a>
+</p>
 
-flow is a versatile Command Line Interface (CLI) tool designed to streamline and enhance your local development and operations
-workflows. Whether you're running scripts, transforming API responses, or opening applications, flow has you covered. 
-It's driven by "executable" YAML configurations organized across workspaces and namespaces defined in a workspace, easily
-discoverable from anywhere on your system.
+flow is a customizable and interactive CLI tool designed to streamline how you manage and run local development and 
+operations workflows.
+
+**This project is currently in beta and documentation is a work in progress.** We welcome contributions and feedback.
 
 ## Features
 
-- **Workflow Runner**: Easily define, manage, and run your [workflows](guide/executable.md) from the command line. Example use cases includes running a set of scripts, opening an application after running setup tasks,
-  and rendering a markdown document that is dynamically generated from data in an external system.
-- **Secret Management**: Safely store sensitive secrets in an encrypted local [vault](guide/vault.md), easily referencable in your executable configurations.
+- **Task Runner**: Easily define, manage, and run your tasks (called [executables](guide/executable.md)) from the command line.
+- **Secret Management**: Safely store sensitive secrets in a secure local [vault](guide/vault.md), easily referencable in your executable configurations.
 - **Input Handling**: Pass values into executables via environment variables defined by configuration, flags, or interactive prompts, ensuring your workflows are flexible and easy to use.
 - **Executable Organization**: Group your executables into workspace and namespace, making them easily discoverable and accessible from anywhere on your system. Tag your executables and workspaces for easy filtering and searching.
 - **Customizable TUI**: Enjoy a seamless [TUI experience](guide/interactive.md) with log formatting, log archiving, and execution notifications, enhancing your productivity.
-- **Generate w/ Templates and Comments**: Automatically generate executable configurations from [flow file templates](guide/templating.md) or comments in your script files, making it easy to onboard new executables.
+- **Generate w/ Templates and Comments**: Automatically generate executable configurations and workspace scaffolding from [flow file templates](guide/templating.md) or comments in your script files, making it easy to onboard new executables.
 - **Comprehensive Commands**:
     - `get` and `list`: Retrieve and display executable details, formatted as markdown documentation, YAML, or JSON.
     - `library`: Access a fully searchable and interactive TUI for running and exploring executables.
@@ -82,10 +84,10 @@ suggestions. You can add the following comment to the top of your flow files to 
 
 See the [schemas](../schemas/) directory all available schemas.
 
-### Running and managing workflows
+### Running and managing executables
 
-The main command for running workflows is `flow exec`. This command will execute the workflow with the provided
-executable ID. `exec` can be replaced with any verb known to flow but should match the verb defined in the executable's
-definition or an alias of the verb.
+The main command for running executables is `flow exec`. This command will execute the workflow with the provided
+executable ID. `exec` can be replaced with any verb known to flow but should match the verb defined in the flow file
+configurations or an alias of that verb.
 
 As you make changes to executables on your system, you can run `flow sync` to trigger a re-index of your executables.

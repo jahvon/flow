@@ -4,7 +4,7 @@ tags: [development]
 executables:
   - verb: run
     name: validate
-    aliases: [precommit]
+    aliases: [precommit, pc, check, ci]
     description: |
       Run the repository validation checks. This includes linting, tests, and code generation.
       Validate should be run before committing changes.
@@ -41,7 +41,11 @@ executables:
     exec:
       dir: //
       cmd: |
+        echo "generating code..."
         go generate ./...
+        echo "generating completions..."
+        ./scripts/completions.sh
+        
         go run ./tools/docsgen/.
 
   - verb: run
@@ -61,25 +65,131 @@ executables:
       dir: //
       cmd: go test ./... -race
 
-  - verb: install
+  - verb: run
     name: gopath
     aliases: [local]
     description: Install the project to the GOPATH from local source
     exec:
       dir: //
-      cmd: go test ./... -race
+      cmd: go install ./...
 
   - verb: install
     name: deps
-    description: Install project dependencies
-    aliases: [local-deps]
+    description: Install project dependencies using go
+    tags: [go, development]
+    aliases: [tools, go-tools, go-deps]
     exec:
       dir: //
       cmd: |
-        go mod tidy
         echo "installing cobra-cli..."
         go install github.com/spf13/cobra-cli@v1.3.0
         echo "installing golangci-lint..."
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3
         echo "installing ginkgo..."
-        go install github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
+        go install github.com/onsi/ginkgo/v2/ginkgo@v2.20.2
+        echo "installing goreleaser..."
+        go install github.com/goreleaser/goreleaser@v2.2.0
+
+  - verb: update
+    name: modules
+    description: Update project dependencies
+    tags: [go, development]
+    aliases: [gomod, go-mod, deps, go-deps]
+    exec:
+      dir: //
+      cmd: |
+        echo "updating go modules..."
+        go get -u ./...
+        go mod tidy
+
+  - verb: build
+    name: container
+    description: Build the flow container image
+    tags: [docker, development]
+    aliases: [docker, image]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "building go binary..."
+        GOOS=linux GOARCH=amd64 go build -o flow
+        echo "building container image..."
+        $BUILDER build -t $IMAGE_REPO:$IMAGE_TAG .
+
+  - verb: run
+    name: container
+    description: Run the flow container image
+    tags: [docker, development]
+    aliases: [image, docker]
+    exec:
+      dir: //
+      logMode: text
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+        - envKey: WORKSPACE
+          default: active
+          flag: workspace
+        - envKey: GIT_REPO
+          default: https://github.com/jahvon/flow.git
+          flag: repo
+        - envKey: BRANCH
+          default: main
+          flag: branch
+        - envKey: CONTAINER_CMD
+          default: "get workspace"
+          flag: cmd
+      cmd: |
+        echo "running container image..."
+        $BUILDER run -it -e GIT_REPO=$GIT_REPO \
+          -e BRANCH=$BRANCH \
+          -e WORKSPACE=$WORKSPACE \
+          -t $IMAGE_REPO:$IMAGE_TAG \
+          $CONTAINER_CMD
+
+  - verb: release
+    name: container
+    description: Push the flow container image to the registry
+    tags: [docker, development]
+    aliases: [image, docker]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "pushing container image..."
+        $BUILDER push $IMAGE_REPO:$IMAGE_TAG
+
+  - verb: release
+    name: snapshot
+    description: Create a snapshot release
+    aliases: [snap]
+    exec:
+      dir: //
+      cmd: |
+        echo "creating snapshot release..."
+        goreleaser release --snapshot --clean

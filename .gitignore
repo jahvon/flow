@@ -25,6 +25,4 @@ coverage.txt
 .bin
 flow
 flow*.tar.gz
-dist
-completions/
-
+dist/

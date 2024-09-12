@@ -1,73 +1,43 @@
-name: Release Binaries
+name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "*"
 
 jobs:
-  commit_version_files:
-    name: Commit Version Files
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-tags: true
-
-      - name: Generate Version Files
-        run: |
-            go generate ./cmd/internal/version
-
-      - name: Commit Version Files
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "release: update version files"
-          branch: main
-
-  releases-matrix:
-    name: Release Go Binary
+  releases:
     permissions:
       contents: write
       packages: write
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # build and publish in parallel: linux/amd64, linux/arm64, darwin/amd64, darwin/arm64
-        goos: [linux, darwin]
-        goarch: [amd64, arm64]
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22.5"
+          go-version: "1.23.1"
 
-      - name: Generate Version Files
-        run: |
-            go generate ./cmd/internal/version
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Release for Linux
-        uses: wangyoucao577/go-release-action@v1
-        if: matrix.goos == 'linux'
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          goversion: "1.22.5"
-          extra_files: LICENSE README.md
-          # This linux dependency is required for the clipboard package
-          pre_command: "apt-get update && apt-get -y install xclip"
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Release for MacOS
-        uses: wangyoucao577/go-release-action@v1
-        if: matrix.goos == 'darwin'
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          goversion: "1.22.5"
-          extra_files: LICENSE README.md
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_FLOW_GITHUB_TOKEN: ${{ secrets.HOMEBREW_FLOW_GITHUB_TOKEN }}

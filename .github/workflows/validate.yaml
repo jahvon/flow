@@ -21,7 +21,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.5"
+          go-version: "^1.23.1"
 
       - name: Install Go Tools
         run: |
@@ -51,14 +51,14 @@ jobs:
       #  |____/ \___|\___|\__,_|_|  |_|\__|\__, |
       #                                    |___/
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
+        uses: securego/gosec@v2.21.1
         with:
           args: "-no-fail -fmt sarif -out results.sarif ./..."
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+#      - name: Upload SARIF file
+#        uses: github/codeql-action/upload-sarif@v3
+#        with:
+#          sarif_file: results.sarif
 
       #   _     _       _
       #  | |   (_)_ __ | |_
@@ -69,7 +69,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.57.2
+          version: v1.60.3
 
       #   _____         _
       #  |_   _|__  ___| |_
