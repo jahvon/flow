@@ -3,7 +3,7 @@ package templates
 import (
 	"fmt"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
@@ -20,9 +20,9 @@ func showForm(ctx *context.Context, fields executable.FormFields) error {
 	if err := fields.Validate(); err != nil {
 		return fmt.Errorf("invalid form fields: %w", err)
 	}
-	var ff []*components.FormField
+	var ff []*views.FormField
 	for _, f := range fields {
-		ff = append(ff, &components.FormField{
+		ff = append(ff, &views.FormField{
 			Key:            f.Key,
 			Group:          uint(f.Group),
 			Description:    f.Description,
@@ -33,11 +33,13 @@ func showForm(ctx *context.Context, fields executable.FormFields) error {
 			ValidationExpr: f.Validate,
 		})
 	}
-	form, err := components.NewForm(io.Theme(), in, out, ff...)
+	form, err := views.NewForm(io.Theme(), in, out, ff...)
 	if err != nil {
 		return fmt.Errorf("encountered form init error: %w", err)
 	}
-	ctx.SetView(form)
+	if err = form.Run(ctx.Ctx); err != nil {
+		return fmt.Errorf("encountered form run error: %w", err)
+	}
 	for _, f := range fields {
 		v, ok := form.ValueMap()[f.Key]
 		if !ok {

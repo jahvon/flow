@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/atotto/clipboard"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/types"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -41,7 +41,8 @@ func registerGetConfigCmd(ctx *context.Context, getCmd *cobra.Command) {
 		Aliases: []string{"cfg"},
 		Short:   "Print the current global configuration values.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { getConfigFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, configCmd, *flags.OutputFormatFlag)
@@ -52,8 +53,8 @@ func getConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	userConfig := ctx.Config
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
-	if UIEnabled(ctx, cmd) {
-		view := configio.NewUserConfigView(ctx.TUIContainer, *userConfig, components.Format(outputFormat))
+	if TUIEnabled(ctx, cmd) {
+		view := configio.NewUserConfigView(ctx.TUIContainer, *userConfig, types.Format(outputFormat))
 		SetView(ctx, cmd, view)
 	} else {
 		configio.PrintUserConfig(logger, outputFormat, userConfig)
@@ -69,8 +70,9 @@ func registerGetWsCmd(ctx *context.Context, getCmd *cobra.Command) {
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
-		PreRun: func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
-		Run:    func(cmd *cobra.Command, args []string) { getWsFunc(ctx, cmd, args) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
+		Run:     func(cmd *cobra.Command, args []string) { getWsFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, wsCmd, *flags.OutputFormatFlag)
 	getCmd.AddCommand(wsCmd)
@@ -95,8 +97,8 @@ func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	}
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
-	if UIEnabled(ctx, cmd) {
-		view := workspaceio.NewWorkspaceView(ctx, wsCfg, components.Format(outputFormat))
+	if TUIEnabled(ctx, cmd) {
+		view := workspaceio.NewWorkspaceView(ctx, wsCfg, types.Format(outputFormat))
 		SetView(ctx, cmd, view)
 	} else {
 		workspaceio.PrintWorkspaceConfig(logger, outputFormat, wsCfg)
@@ -116,9 +118,10 @@ func registerGetExecCmd(ctx *context.Context, getCmd *cobra.Command) {
 				io.TypesDocsURL("flowfile", "ExecutableVerb"),
 				io.TypesDocsURL("flowfile", "ExecutableRef"),
 			),
-		Args:   cobra.ExactArgs(2),
-		PreRun: func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
-		Run:    func(cmd *cobra.Command, args []string) { getExecFunc(ctx, cmd, args) },
+		Args:    cobra.ExactArgs(2),
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
+		Run:     func(cmd *cobra.Command, args []string) { getExecFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, execCmd, *flags.OutputFormatFlag)
 	getCmd.AddCommand(execCmd)
@@ -157,9 +160,9 @@ func getExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	}
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
-	if UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-		view := executableio.NewExecutableView(ctx, exec, components.Format(outputFormat), runFunc)
+		view := executableio.NewExecutableView(ctx, exec, types.Format(outputFormat), runFunc)
 		SetView(ctx, cmd, view)
 	} else {
 		executableio.PrintExecutable(logger, outputFormat, exec)
@@ -212,7 +215,8 @@ func registerGetTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
 		Use:     "template",
 		Aliases: []string{"tmpl"},
 		Short:   "Print a flowfile template using it's registered name or file path.",
-		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { getTemplateFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, templateCmd, *flags.TemplateFlag)
@@ -233,9 +237,9 @@ func getTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
-	if UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-		view := executableio.NewTemplateView(ctx, tmpl, components.Format(outputFormat), runFunc)
+		view := executableio.NewTemplateView(ctx, tmpl, types.Format(outputFormat), runFunc)
 		SetView(ctx, cmd, view)
 	} else {
 		executableio.PrintTemplate(logger, outputFormat, tmpl)

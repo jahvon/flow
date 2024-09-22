@@ -37,9 +37,9 @@ Go templating from form data is supported in all fields.
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | -------- |
 | `asTemplate` | If true, the artifact will be copied as a template file. The file will be rendered using Go templating from  the form data. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the template.  | `boolean` | false | [] |
-| `dstDir` | The directory to copy the file to. If not set, the file will be copied to the root of the flow file directory. The directory will be created if it does not exist.  | `string` | <no value> | [] |
+| `dstDir` | The directory to copy the file to. If not set, the file will be copied to the root of the flow file directory. The directory will be created if it does not exist.  | `string` |  | [] |
 | `dstName` | The name of the file to copy to. If not set, the file will be copied with the same name. | `string` |  | [] |
-| `if` | A condition to determine if the artifact should be copied. The condition is evaluated using Go templating  from the form data. If the condition is not met, the artifact will not be copied. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to copy the artifact only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` | <no value> | [] |
+| `if` | A condition to determine if the artifact should be copied. The condition is evaluated using Go templating  from the form data. If the condition is not met, the artifact will not be copied. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to copy the artifact only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` |  | [] |
 | `srcDir` | The directory to copy the file from.  If not set, the file will be copied from the directory of the template file.  | `string` |  | [] |
 | `srcName` | The name of the file to copy. | `string` | <no value> | [] |
 
@@ -57,6 +57,7 @@ A field to be displayed to the user when generating a flow file from a template.
 | ----- | ----------- | ---- | ------- | -------- |
 | `default` | The default value to use if a value is not set. | `string` |  | [] |
 | `description` | A description of the field. | `string` |  | [] |
+| `group` | The group to display the field in. Fields with the same group will be displayed together. | `integer` | 0 | [] |
 | `key` | The key to associate the data with. This is used as the key in the template data map. | `string` | <no value> | [] |
 | `prompt` | A prompt to be displayed to the user when collecting an input value. | `string` | <no value> | [] |
 | `required` | If true, a value must be set. If false, the default value will be used if a value is not set. | `boolean` | false | [] |

@@ -66,7 +66,7 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 
 	ctxx, cancel := context.WithCancel(ctx)
 	logMode := cfg.DefaultLogMode
-	return &Context{
+	c := &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
 		Config:           cfg,
@@ -77,6 +77,22 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		stdOut:           stdOut,
 		stdIn:            stdIn,
 	}
+
+	app := tuikit.NewApplication(
+		AppName,
+		tuikit.WithState(HeaderCtxKey, c.String()),
+		tuikit.WithLoadingMsg("thinking..."),
+	)
+	c.TUIContainer, err = tuikit.NewContainer(
+		ctx, app,
+		tuikit.WithInput(stdIn),
+		tuikit.WithOutput(stdOut),
+		tuikit.WithTheme(flowIO.Theme()),
+	)
+	if err != nil {
+		panic(errors.Wrap(err, "TUI container initialization error"))
+	}
+	return c
 }
 
 func (ctx *Context) String() string {
@@ -108,9 +124,6 @@ func (ctx *Context) SetIO(stdIn, stdOut *os.File) {
 }
 
 func (ctx *Context) SetView(view tuikit.View) error {
-	if ctx.TUIContainer == nil {
-		ctx.TUIContainer = newContainer(ctx)
-	}
 	return ctx.TUIContainer.SetView(view)
 }
 
@@ -140,13 +153,6 @@ func (ctx *Context) Finalize() {
 		}
 		panic(err)
 	}
-}
-
-func newContainer(ctx *Context) *tuikit.Container {
-	return tuikit.NewContainer(ctx.Ctx, ctx.StdIn(), ctx.StdOut(), flowIO.Theme()).
-		WithAppName(AppName).
-		WithHeaderContext(HeaderCtxKey, ctx.String()).
-		WithLoadingMsg("thinking...")
 }
 
 func ExpandRef(ctx *Context, ref executable.Ref) executable.Ref {

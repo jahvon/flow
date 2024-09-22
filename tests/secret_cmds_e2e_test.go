@@ -4,7 +4,6 @@ import (
 	stdCtx "context"
 	"os"
 	"strings"
-	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,7 +13,7 @@ import (
 	"github.com/jahvon/flow/tests/utils"
 )
 
-var _ = FDescribe("vault/secrets e2e", Ordered, func() {
+var _ = Describe("vault/secrets e2e", Ordered, func() {
 	var (
 		ctx *context.Context
 		run *utils.CommandRunner
@@ -78,12 +77,13 @@ var _ = FDescribe("vault/secrets e2e", Ordered, func() {
 
 	When("deleting a secret (flow remove secret)", func() {
 		It("should remove the secret from the vault", func() {
-			go func() {
-				defer GinkgoRecover()
-				Expect(writeUserInput(ctx.StdIn(), "yes")).To(Succeed())
-				Expect(rewindFile(ctx.StdIn())).To(Succeed())
-			}()
-			Eventually(run.Run(ctx, "remove", "secret", "my-secret")).Within(time.Second * 3).Should(Succeed())
+			reader, writer, err := os.Pipe()
+			Expect(err).NotTo(HaveOccurred())
+			_, err = writer.Write([]byte("yes\n"))
+			Expect(err).ToNot(HaveOccurred())
+
+			ctx.SetIO(reader, ctx.StdOut())
+			Expect(run.Run(ctx, "remove", "secret", "my-secret")).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("Secret my-secret removed from vault"))

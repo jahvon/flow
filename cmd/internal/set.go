@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jahvon/tuikit/components"
 	tuiKitIO "github.com/jahvon/tuikit/io"
+	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -219,26 +219,28 @@ func registerSetSecretCmd(ctx *context.Context, setCmd *cobra.Command) {
 	setCmd.AddCommand(secretCmd)
 }
 
-func setSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
 
 	var value string
 	switch {
 	case len(args) == 1:
-		form, err := components.NewForm(
+		form, err := views.NewForm(
 			io.Theme(),
 			ctx.StdIn(),
 			ctx.StdOut(),
-			&components.FormField{
+			&views.FormField{
 				Key:   "value",
-				Type:  components.PromptTypeMasked,
+				Type:  views.PromptTypeMasked,
 				Title: "Enter the secret value",
 			})
 		if err != nil {
 			logger.FatalErr(err)
 		}
-		ctx.SetView(form)
+		if err := form.Run(ctx.Ctx); err != nil {
+			logger.FatalErr(err)
+		}
 		value = form.FindByKey("value").Value()
 	case len(args) == 2:
 		value = args[1]

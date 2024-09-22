@@ -332,13 +332,13 @@ func templateArtifactsMarkdown(t *Template) string {
 	mkdwn := "## Artifacts\n"
 	for _, a := range t.Artifacts {
 		mkdwn += fmt.Sprintf("- Source: `%s`\n", filepath.Join(a.SrcDir, a.SrcName))
-		if a.DstDir != nil {
-			mkdwn += fmt.Sprintf("  Destination: `%s`\n", filepath.Join(*a.DstDir, a.DstName))
+		if a.DstDir != "" {
+			mkdwn += fmt.Sprintf("  Destination: `%s`\n", filepath.Join(a.DstDir, a.DstName))
 		} else if a.DstName != "" {
 			mkdwn += fmt.Sprintf("  Destination: `%s`\n", a.DstName)
 		}
-		if a.If != nil {
-			mkdwn += fmt.Sprintf("  Conditional: `%s`\n", *a.If)
+		if a.If != "" {
+			mkdwn += fmt.Sprintf("  Conditional: `%s`\n", a.If)
 		}
 		mkdwn += fmt.Sprintf("  Rendered as a template: %t\n", a.AsTemplate)
 	}

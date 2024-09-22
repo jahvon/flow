@@ -17,13 +17,13 @@ import (
 func copyAllArtifacts(
 	logger tuikitIO.Logger,
 	artifacts []executable.Artifact,
-	wsDir, flowfileDir, dstDir string,
+	wsDir, srcDir, dstDir string,
 	data, envMap map[string]string,
 ) error {
 	var errs []error
 	for i, a := range artifacts {
 		if err := copyArtifact(
-			logger, fmt.Sprintf("artifact-%d", i), wsDir, flowfileDir, dstDir, a, data, envMap,
+			logger, fmt.Sprintf("artifact-%d", i), wsDir, srcDir, dstDir, a, data, envMap,
 		); err != nil {
 			errs = append(errs, err)
 		}
@@ -37,17 +37,17 @@ func copyAllArtifacts(
 //nolint:gocognit
 func copyArtifact(
 	logger tuikitIO.Logger,
-	name, wsPath, flowfileDir, dstDir string,
+	name, wsPath, srcDir, dstDir string,
 	artifact executable.Artifact,
 	data, envMap map[string]string,
 ) error {
-	srcPath, err := parseSourcePath(logger, name, flowfileDir, wsPath, artifact, data, envMap)
+	srcPath, err := parseSourcePath(logger, name, srcDir, wsPath, artifact, data, envMap)
 	if err != nil {
 		return errors.Wrap(err, "unable to parse source path")
 	}
 
-	if artifact.If != nil {
-		eval, err := goTemplateEvaluatedTrue(name, *artifact.If, data)
+	if artifact.If != "" {
+		eval, err := goTemplateEvaluatedTrue(name, artifact.If, data)
 		if err != nil {
 			return errors.Wrap(err, "unable to evaluate if condition")
 		}
@@ -68,7 +68,7 @@ func copyArtifact(
 			m := artifact
 			m.SrcName = filepath.Base(match)
 			m.SrcDir = filepath.Dir(match)
-			mErr := copyArtifact(logger, fmt.Sprintf("%s-%d", name, i), wsPath, flowfileDir, dstDir, m, data, envMap)
+			mErr := copyArtifact(logger, fmt.Sprintf("%s-%d", name, i), wsPath, srcDir, dstDir, m, data, envMap)
 			if mErr != nil {
 				errs = append(errs, mErr)
 			}
@@ -96,20 +96,19 @@ func copyArtifact(
 			a.SrcName = filepath.Base(path)
 			a.SrcDir = filepath.Dir(path)
 			aName := fmt.Sprintf("%s-%s", name, a.SrcName)
-			return copyArtifact(logger, aName, wsPath, flowfileDir, dstDir, a, data, envMap)
+			return copyArtifact(logger, aName, wsPath, srcDir, dstDir, a, data, envMap)
 		})
 		if err != nil {
 			return errors.Wrap(err, "unable to walk directory")
 		}
 	}
-	relPath, err := filepath.Rel(flowfileDir, srcPath)
-	if err != nil {
-		return errors.Wrap(err, "unable to get relative path")
+	if artifact.DstName == "" {
+		artifact.DstName = srcName
 	}
 	dstPath, err := parseDestinationPath(
 		logger,
 		name,
-		dstDir, relPath, wsPath,
+		dstDir, srcDir, wsPath,
 		artifact,
 		data, envMap,
 	)

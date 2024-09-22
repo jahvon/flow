@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/viewport"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/types/common"
@@ -79,9 +80,9 @@ func NewLibraryView(
 	filter Filter,
 	theme styles.Theme,
 	runFunc func(string) error,
-) components.TeaModel {
+) tuikit.View {
 	l := NewLibrary(ctx, workspaces, execs, filter, theme, runFunc)
-	return components.NewFrameView(l)
+	return views.NewFrameView(l)
 }
 
 func ctxVal(ws, ns string) string {

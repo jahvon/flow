@@ -27,7 +27,7 @@ func ProcessTemplate(
 	ctx *context.Context,
 	template *executable.Template,
 	ws *workspace.Workspace,
-	flowfileName, flowfilePath string,
+	flowfileName, flowfileDir string,
 ) error {
 	logger := ctx.Logger
 	if flowfileName == "" {
@@ -52,9 +52,8 @@ func ProcessTemplate(
 		pair := strings.SplitN(e, "=", 2)
 		envMap[pair[0]] = pair[1]
 	}
-	flowfilePath = utils.ExpandDirectory(logger, flowfilePath, ws.Location(), template.Location(), envMap)
-	fullPath := filepath.Join(ws.Location(), flowfilePath)
-	template.SetContext(flowfileName, fullPath)
+	flowfileDir = utils.ExpandDirectory(logger, flowfileDir, ws.Location(), template.Location(), envMap)
+	fullPath := filepath.Join(flowfileDir, flowfileName)
 	logger.Debugx(
 		fmt.Sprintf("processing %s template", flowfileName),
 		"template", template.Location(), "output", fullPath,
@@ -62,14 +61,14 @@ func ProcessTemplate(
 
 	data["FlowWorkspace"] = ws.AssignedName()
 	data["FlowWorkspacePath"] = ws.Location()
-	data["FlowFileName"] = template.Name()
-	data["FlowFilePath"] = flowfilePath
+	data["FlowFileName"] = flowfileName
+	data["FlowFilePath"] = fullPath
 
 	var preRun []executable.ExecExecutableType
 	for _, e := range template.PreRun {
 		preRun = append(preRun, executable.ExecExecutableType(e))
 	}
-	if err := runExecutables(ctx, "pre-run", flowfilePath, preRun, envMap); err != nil {
+	if err := runExecutables(ctx, "pre-run", flowfileDir, preRun, envMap); err != nil {
 		return err
 	}
 
@@ -78,7 +77,7 @@ func ProcessTemplate(
 		template.Artifacts,
 		ws.Location(),
 		filepath.Dir(template.Location()),
-		fullPath,
+		flowfileDir,
 		data, envMap,
 	); err != nil {
 		return err
@@ -90,13 +89,12 @@ func ProcessTemplate(
 			return err
 		}
 
-		dstFlowfile := filepath.Join(fullPath, flowfileName)
-		if _, e := os.Stat(dstFlowfile); e == nil {
+		if _, e := os.Stat(fullPath); e == nil {
 			// TODO: Add a flag to overwrite existing files
-			logger.Warnx("Overwriting existing file", "dst", dstFlowfile)
+			logger.Warnx("Overwriting existing file", "dst", fullPath)
 		}
 
-		if err := filesystem.WriteFlowFile(dstFlowfile, flowfile); err != nil {
+		if err := filesystem.WriteFlowFile(fullPath, flowfile); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("unable to write flowfile %s from template", flowfileName))
 		}
 	}
@@ -105,7 +103,7 @@ func ProcessTemplate(
 	for _, e := range template.PostRun {
 		postRun = append(postRun, executable.ExecExecutableType(e))
 	}
-	if err := runExecutables(ctx, "post-run", flowfilePath, postRun, envMap); err != nil {
+	if err := runExecutables(ctx, "post-run", flowfileDir, postRun, envMap); err != nil {
 		return err
 	}
 
@@ -143,17 +141,16 @@ func runExecutables(
 
 func parseSourcePath(
 	logger tuikitIO.Logger,
-	name, flowfileDir, wsDir string,
+	name, flowFileSrc, wsDir string,
 	artifact executable.Artifact,
 	data, envMap map[string]string,
 ) (string, error) {
 	var err error
-	srcDir := flowfileDir
 	if artifact.SrcDir != "" {
-		srcDir = utils.ExpandDirectory(logger, artifact.SrcDir, wsDir, flowfileDir, envMap)
+		flowFileSrc = utils.ExpandDirectory(logger, artifact.SrcDir, wsDir, flowFileSrc, envMap)
 	}
 	var sb *bytes.Buffer
-	sb, err = processAsGoTemplate(name, filepath.Join(srcDir, artifact.SrcName), data)
+	sb, err = processAsGoTemplate(name, filepath.Join(flowFileSrc, artifact.SrcName), data)
 	if err != nil {
 		return "", errors.Wrap(err, "unable to process artifact as template")
 	}
@@ -162,14 +159,13 @@ func parseSourcePath(
 
 func parseDestinationPath(
 	logger tuikitIO.Logger,
-	name, flowfileDir, relPath, wsDir string,
+	name, dstDir, flowFileSrc, wsDir string,
 	artifact executable.Artifact,
 	data, envMap map[string]string,
 ) (string, error) {
 	var err error
-	dstDir := filepath.Dir(filepath.Join(flowfileDir, relPath))
-	if artifact.DstDir != nil {
-		dstDir = utils.ExpandDirectory(logger, *artifact.DstDir, wsDir, flowfileDir, envMap)
+	if artifact.DstDir != "" {
+		dstDir = utils.ExpandDirectory(logger, artifact.DstDir, wsDir, flowFileSrc, envMap)
 	}
 	dstName := artifact.DstName
 	var db *bytes.Buffer

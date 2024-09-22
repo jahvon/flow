@@ -74,11 +74,12 @@ func (t *Template) SetContext(name, location string) {
 	t.assignedName = &name
 	if name == "" {
 		fn := filepath.Base(location)
-		if strings.HasSuffix(fn, FlowFileTemplateExt) {
+		switch {
+		case strings.HasSuffix(fn, FlowFileTemplateExt):
 			fn = strings.TrimSuffix(fn, FlowFileTemplateExt)
-		} else if strings.HasSuffix(fn, FlowFileExt) {
+		case strings.HasSuffix(fn, FlowFileExt):
 			fn = strings.TrimSuffix(fn, FlowFileExt)
-		} else {
+		default:
 			fn = strings.TrimSuffix(fn, filepath.Ext(fn))
 		}
 		t.assignedName = &fn
@@ -144,10 +145,10 @@ func (t TemplateList) Plural() string {
 	return "templates"
 }
 
-func (t TemplateList) Items() []*types.CollectionItem {
-	items := make([]*types.CollectionItem, len(t))
+func (t TemplateList) Items() []*types.EntityInfo {
+	items := make([]*types.EntityInfo, len(t))
 	for i, template := range t {
-		items[i] = &types.CollectionItem{
+		items[i] = &types.EntityInfo{
 			ID:     template.Name(),
 			Header: template.Name(),
 		}

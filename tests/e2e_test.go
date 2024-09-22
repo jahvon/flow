@@ -29,20 +29,3 @@ func readFileContent(f *os.File) (string, error) {
 	}
 	return outStr, nil
 }
-
-func writeUserInput(f *os.File, input string) error {
-	if _, err := f.WriteString(fmt.Sprintf("%s\r\n", input)); err != nil {
-		return err
-	}
-	if truthy, _ := strconv.ParseBool(os.Getenv(PrintEnvVar)); truthy {
-		fmt.Println(input)
-	}
-	return nil
-}
-
-func rewindFile(f *os.File) error {
-	if _, err := f.Seek(0, 0); err != nil {
-		return err
-	}
-	return nil
-}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -48,25 +48,27 @@ func registerRemoveWsCmd(ctx *context.Context, removeCmd *cobra.Command) {
 	removeCmd.AddCommand(wsCmd)
 }
 
-func removeWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 
-	form, err := components.NewForm(
+	form, err := views.NewForm(
 		io.Theme(),
 		ctx.StdIn(),
 		ctx.StdOut(),
-		&components.FormField{
+		&views.FormField{
 			Key:   "confirm",
-			Type:  components.PromptTypeConfirm,
+			Type:  views.PromptTypeConfirm,
 			Title: fmt.Sprintf("Are you sure you want to remove the workspace '%s'?", name),
 		})
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	SetView(ctx, cmd, form)
+	if err := form.Run(ctx.Ctx); err != nil {
+		logger.FatalErr(err)
+	}
 	resp := form.FindByKey("confirm").Value()
-	if truthy, _ := strconv.ParseBool(resp); truthy {
+	if truthy, _ := strconv.ParseBool(resp); !truthy {
 		logger.Warnf("Aborting")
 		return
 	}
@@ -111,21 +113,23 @@ func removeSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
 
-	form, err := components.NewForm(
+	form, err := views.NewForm(
 		io.Theme(),
 		ctx.StdIn(),
 		ctx.StdOut(),
-		&components.FormField{
+		&views.FormField{
 			Key:   "confirm",
-			Type:  components.PromptTypeConfirm,
+			Type:  views.PromptTypeConfirm,
 			Title: fmt.Sprintf("Are you sure you want to remove the secret '%s'?", reference),
 		})
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	SetView(ctx, nil, form)
+	if err := form.Run(ctx.Ctx); err != nil {
+		logger.FatalErr(err)
+	}
 	resp := form.FindByKey("confirm").Value()
-	if truthy, _ := strconv.ParseBool(resp); truthy {
+	if truthy, _ := strconv.ParseBool(resp); !truthy {
 		logger.Warnf("Aborting")
 		return
 	}

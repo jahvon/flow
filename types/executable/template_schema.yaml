@@ -24,6 +24,7 @@ definitions:
           ```
           {{ if .name }}true{{ end }}
           ```
+        default: ""
       asTemplate:
         type: boolean
         default: false
@@ -44,6 +45,7 @@ definitions:
         description: |
           The directory to copy the file to. If not set, the file will be copied to the root of the flow file directory.
           The directory will be created if it does not exist.
+        default: ""
       dstName:
         type: string
         default: ""

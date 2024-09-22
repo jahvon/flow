@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
@@ -54,29 +54,40 @@ func MarkFlagFilename(ctx *context.Context, cmd *cobra.Command, name string) {
 	}
 }
 
-func UIEnabled(ctx *context.Context, cmd *cobra.Command) bool {
+func TUIEnabled(ctx *context.Context, cmd *cobra.Command) bool {
 	disabled := flags.ValueFor[bool](ctx, cmd.Root(), *flags.NonInteractiveFlag, true)
 	envDisabled, _ := strconv.ParseBool(os.Getenv("DISABLE_FLOW_INTERACTIVE"))
 	return !disabled && !envDisabled && ctx.Config.ShowTUI()
 }
 
-func SetView(ctx *context.Context, cmd *cobra.Command, view components.TeaModel) {
-	if UIEnabled(ctx, cmd) {
-		ctx.SetView(view)
+func SetView(ctx *context.Context, cmd *cobra.Command, view tuikit.View) {
+	if TUIEnabled(ctx, cmd) {
+		if err := ctx.SetView(view); err != nil {
+			ctx.Logger.Fatalx("unable to set view", "view", view.Type(), "error", err)
+		}
 	} else {
 		ctx.Logger.Errorx("interactive mode is disabled", "view", view.Type())
 	}
 }
 
-func SetLoadingView(ctx *context.Context, cmd *cobra.Command) {
-	if UIEnabled(ctx, cmd) {
-		view := components.NewLoadingView("thinking...", io.Theme())
-		SetView(ctx, cmd, view)
+func StartTUI(ctx *context.Context, cmd *cobra.Command) {
+	if !TUIEnabled(ctx, cmd) {
+		return
+	}
+	if err := ctx.TUIContainer.Start(); err != nil {
+		ctx.Logger.FatalErr(err)
 	}
 }
 
+func WaitForTUI(ctx *context.Context, cmd *cobra.Command) {
+	if !TUIEnabled(ctx, cmd) {
+		return
+	}
+	ctx.TUIContainer.WaitForExit()
+}
+
 func printContext(ctx *context.Context, cmd *cobra.Command) {
-	if UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		ctx.Logger.Println(io.Theme().RenderHeader(context.AppName, context.HeaderCtxKey, ctx.String(), 0))
 	}
 }

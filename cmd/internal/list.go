@@ -3,7 +3,7 @@ package internal
 import (
 	"fmt"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/types"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
@@ -38,7 +38,8 @@ func registerListWorkspaceCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"ws"},
 		Short:   "Print a list of the registered flow workspaces.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, workspaceCmd, *flags.OutputFormatFlag)
@@ -71,11 +72,11 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.Fatalf("no workspaces found")
 	}
 
-	if UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		view := workspaceio.NewWorkspaceListView(
 			ctx,
 			filteredWorkspaces,
-			components.Format(outputFormat),
+			types.Format(outputFormat),
 		)
 		SetView(ctx, cmd, view)
 	} else {
@@ -89,7 +90,8 @@ func registerListExecutableCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"execs"},
 		Short:   "Print a list of executable flows.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listExecutableFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, executableCmd, *flags.OutputFormatFlag)
@@ -130,12 +132,12 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		FilterByTags(tagsFilter).
 		FilterBySubstring(substr)
 
-	if UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
 		view := executableio.NewExecutableListView(
 			ctx,
 			filteredExec,
-			components.Format(outputFormat),
+			types.Format(outputFormat),
 			runFunc,
 		)
 		SetView(ctx, cmd, view)
@@ -150,7 +152,8 @@ func registerListSecretCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"scrt"},
 		Short:   "Print a list of secrets in the flow vault.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listSecretFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, vaultSecretListCmd, *flags.OutputSecretAsPlainTextFlag)
@@ -167,7 +170,7 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.FatalErr(err)
 	}
 
-	interactiveUI := UIEnabled(ctx, cmd)
+	interactiveUI := TUIEnabled(ctx, cmd)
 	if interactiveUI {
 		secretio.LoadSecretListView(ctx, asPlainText)
 	} else {
@@ -187,7 +190,8 @@ func registerListTemplateCmd(ctx *context.Context, listCmd *cobra.Command) {
 		Aliases: []string{"tmpl"},
 		Short:   "Print a list of registered flowfile templates.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listTemplateFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, templateCmd, *flags.OutputFormatFlag)
@@ -203,9 +207,9 @@ func listTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
-	if UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		view := executableio.NewTemplateListView(
-			ctx, tmpls, components.Format(outputFormat),
+			ctx, tmpls, types.Format(outputFormat),
 			func(name string) error {
 				tmpl := tmpls.Find(name)
 				if tmpl == nil {

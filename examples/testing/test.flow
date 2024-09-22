@@ -1,8 +1,0 @@
-executables:
-    - description: Created from a template in flow
-      exec:
-        cmd: cat message.txt
-      name: green-msg
-      verb: run
-namespace: examples
-visibility: private

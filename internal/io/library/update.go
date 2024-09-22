@@ -246,10 +246,11 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			}
 
 			go func() {
-				l.ctx.TUIContainer.Shutdown()
-				if err := l.cmdRunFunc(curExec.Ref().String()); err != nil {
-					l.ctx.Logger.Fatalx("unable to execute command", "error", err)
-				}
+				l.ctx.TUIContainer.Shutdown(func() {
+					if err := l.cmdRunFunc(curExec.Ref().String()); err != nil {
+						l.ctx.Logger.Fatalx("unable to execute command", "error", err)
+					}
+				})
 			}()
 		case "f":
 			if l.currentPane == 1 {

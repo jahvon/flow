@@ -23,5 +23,5 @@ Print a flow entity.
 * [flow get executable](flow_get_executable.md)	 - Print an executable flow by reference.
 * [flow get secret](flow_get_secret.md)	 - Print the value of a secret in the flow secret vault.
 * [flow get template](flow_get_template.md)	 - Print a flowfile template using it's registered name or file path.
-* [flow get workspace](flow_get_workspace.md)	 - Print a workspace's configuration. If the name is omitted, the current workspace is used.
+* [flow get workspace](flow_get_workspace.md)	 - Print a workspaces configuration. If the name is omitted, the current workspace is used.
 

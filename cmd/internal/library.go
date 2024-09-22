@@ -18,7 +18,8 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Short:   "View and manage your library of workspaces and executables.",
 		Aliases: []string{"lib"},
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { SetLoadingView(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { libraryFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, libraryCmd, *flags.FilterWorkspaceFlag)
@@ -31,7 +32,7 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 
 func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	if !UIEnabled(ctx, cmd) {
+	if !TUIEnabled(ctx, cmd) {
 		logger.FatalErr(errors.New("library command requires an interactive terminal"))
 	}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -69,6 +68,8 @@ var _ = Describe("flowfile template commands e2e", Ordered, func() {
 		data, err := template.YAML()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(os.WriteFile(filepath.Join(workDir, "flowfile.tmpl.flow"), []byte(data), 0644)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(workDir, "artifact1"), []byte("artifact1"), 0644)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(workDir, "artifact2"), []byte("artifact2"), 0644)).To(Succeed())
 
 		expectedFlowFile = &executable.FlowFile{
 			Namespace:   "test",
@@ -148,30 +149,16 @@ var _ = Describe("flowfile template commands e2e", Ordered, func() {
 
 	When("Rendering a template (flow init template)", func() {
 		It("should process the template options and render the flowfile", func() {
-			stdIn := ctx.StdIn()
-			stdOut := ctx.StdOut()
 			name := "test"
 			outputDir := filepath.Join(ctx.CurrentWorkspace.Location(), "output")
-			writeInput := func() {
-				defer GinkgoRecover()
-				t := time.Tick(time.Millisecond)
-				deadline := time.Now().Add(time.Second * 3)
-				for range t {
-					if ctx.TUIContainer != nil && ctx.TUIContainer.Ready() {
-						break
-					} else if time.Now().After(deadline) {
-						Fail("timed out waiting for interactive container to be ready")
-					}
-				}
-				Expect(writeUserInput(stdIn, "test")).To(Succeed())
-				Expect(writeUserInput(stdIn, "hello")).To(Succeed())
-				Expect(rewindFile(stdIn)).To(Succeed())
-			}
-			go writeInput()
-			Eventually(
-				run.Run(ctx, "init", "template", name, "-t", template.Name(), "-o", outputDir),
-			).Within(time.Second * 3).Should(Succeed())
-			out, err := readFileContent(stdOut)
+			reader, writer, err := os.Pipe()
+			Expect(err).NotTo(HaveOccurred())
+			_, err = writer.Write([]byte("test\nhello\n"))
+			Expect(err).ToNot(HaveOccurred())
+
+			ctx.SetIO(reader, ctx.StdOut())
+			Expect(run.Run(ctx, "init", "template", name, "-t", template.Name(), "-o", outputDir)).To(Succeed())
+			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring(fmt.Sprintf("Template '%s' rendered successfully", name)))
 		})

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gen2brain/beeep"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/internal/cache"
@@ -61,14 +61,13 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	rootCmd.AddCommand(subCmd)
 }
 
-func execPreRun(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 	runner.RegisterRunner(exec.NewRunner())
 	runner.RegisterRunner(launch.NewRunner())
 	runner.RegisterRunner(request.NewRunner())
 	runner.RegisterRunner(render.NewRunner())
 	runner.RegisterRunner(serial.NewRunner())
 	runner.RegisterRunner(parallel.NewRunner())
-	SetLoadingView(ctx, cmd)
 }
 
 //nolint:gocognit
@@ -113,14 +112,14 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		envMap = make(map[string]string)
 	}
 
-	setAuthEnv(ctx, e)
+	setAuthEnv(ctx, cmd, e)
 	textInputs := pendingFormFields(ctx, e)
 	if len(textInputs) > 0 {
-		form, err := components.NewForm(io.Theme(), ctx.StdIn(), ctx.StdOut(), textInputs...)
+		form, err := views.NewForm(io.Theme(), ctx.StdIn(), ctx.StdOut(), textInputs...)
 		if err != nil {
 			logger.FatalErr(err)
 		}
-		if err := ctx.SetView(form); err != nil {
+		if err := form.Run(ctx.Ctx); err != nil {
 			logger.FatalErr(err)
 		}
 		for key, val := range form.ValueMap() {
@@ -133,7 +132,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	}
 	dur := time.Since(startTime)
 	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
-	if UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
 			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 		}
@@ -174,21 +173,21 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 	return nil
 }
 
-func setAuthEnv(ctx *context.Context, executable *executable.Executable) {
+func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.Executable) {
 	if authRequired(ctx, executable) {
-		form, err := components.NewForm(
+		form, err := views.NewForm(
 			io.Theme(),
 			ctx.StdIn(),
 			ctx.StdOut(),
-			&components.FormField{
+			&views.FormField{
 				Key:   vault.EncryptionKeyEnvVar,
 				Title: "Enter vault encryption key",
-				Type:  components.PromptTypeMasked,
+				Type:  views.PromptTypeMasked,
 			})
 		if err != nil {
 			ctx.Logger.FatalErr(err)
 		}
-		if err := ctx.SetView(form); err != nil {
+		if err := form.Run(ctx.Ctx); err != nil {
 			ctx.Logger.FatalErr(err)
 		}
 		val := form.FindByKey(vault.EncryptionKeyEnvVar).Value()
@@ -201,7 +200,8 @@ func setAuthEnv(ctx *context.Context, executable *executable.Executable) {
 	}
 }
 
-//nolint:gocognit
+// TODO: refactor this function to simplify the logic
+//nolint
 func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 	if os.Getenv(vault.EncryptionKeyEnvVar) != "" {
 		return false
@@ -287,38 +287,38 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 	return false
 }
 
-//nolint:gocognit
-func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []*components.FormField {
-	pending := make([]*components.FormField, 0)
+//nolint:gocognit,funlen
+func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []*views.FormField {
+	pending := make([]*views.FormField, 0)
 	switch {
 	case rootExec.Exec != nil:
 		for _, param := range rootExec.Exec.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Launch != nil:
 		for _, param := range rootExec.Launch.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Request != nil:
 		for _, param := range rootExec.Request.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Render != nil:
 		for _, param := range rootExec.Render.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Serial != nil:
 		for _, param := range rootExec.Serial.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Serial.Refs {
@@ -342,7 +342,7 @@ func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []
 	case rootExec.Parallel != nil:
 		for _, param := range rootExec.Parallel.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.FormField{Key: param.EnvKey, Title: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Parallel.Refs {

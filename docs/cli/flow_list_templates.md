@@ -9,10 +9,8 @@ flow list templates [flags]
 ### Options
 
 ```
-  -f, --file string                  Path to the template file. It must be a valid flow file template.
-  -h, --help                         help for templates
-  -o, --output string                Output format. One of: yaml, json, doc, or list.
-  -t, --template flow set template   Registered template name. Templates can be registered in the flow configuration file or with flow set template.
+  -h, --help            help for templates
+  -o, --output string   Output format. One of: yaml, json, doc, or list.
 ```
 
 ### Options inherited from parent commands

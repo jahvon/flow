@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -17,6 +17,8 @@ import (
 	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/exec"
 	"github.com/jahvon/flow/internal/templates"
 	"github.com/jahvon/flow/internal/vault"
 )
@@ -45,23 +47,25 @@ func registerInitConfigCmd(ctx *context.Context, initCmd *cobra.Command) {
 	initCmd.AddCommand(cfgCmd)
 }
 
-func initConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	form, err := components.NewForm(
+	form, err := views.NewForm(
 		io.Theme(),
 		ctx.StdIn(),
 		ctx.StdOut(),
-		&components.FormField{
+		&views.FormField{
 			Key:   "confirm",
-			Type:  components.PromptTypeConfirm,
+			Type:  views.PromptTypeConfirm,
 			Title: "This will overwrite your current flow configurations. Are you sure you want to continue?",
 		})
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	SetView(ctx, cmd, form)
+	if err := form.Run(ctx.Ctx); err != nil {
+		logger.FatalErr(err)
+	}
 	resp := form.FindByKey("confirm").Value()
-	if truthy, _ := strconv.ParseBool(resp); truthy {
+	if truthy, _ := strconv.ParseBool(resp); !truthy {
 		logger.Warnf("Aborting")
 		return
 	}
@@ -151,8 +155,11 @@ func registerInitExecsCmd(ctx *context.Context, initCmd *cobra.Command) {
 		Short:   "Add rendered executables from an executable definition template to a workspace",
 		Long:    initExecLong,
 		Args:    cobra.MaximumNArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { initExecFunc(ctx, cmd, args) },
+		PreRun: func(cmd *cobra.Command, args []string) {
+			runner.RegisterRunner(exec.NewRunner())
+			printContext(ctx, cmd)
+		},
+		Run: func(cmd *cobra.Command, args []string) { initExecFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, subCmd, *flags.TemplateOutputPathFlag)
 	RegisterFlag(ctx, subCmd, *flags.TemplateFlag)
@@ -227,7 +234,6 @@ func initVaultFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 }
 
-//nolint:lll
 var initExecLong = `Add rendered executables from a flowfile template to a workspace.
 
 The WORKSPACE_NAME is the name of the workspace to initialize the flowfile template in.

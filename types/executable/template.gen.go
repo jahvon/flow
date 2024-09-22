@@ -16,7 +16,7 @@ type Artifact struct {
 	// root of the flow file directory.
 	// The directory will be created if it does not exist.
 	//
-	DstDir *string `json:"dstDir,omitempty" yaml:"dstDir,omitempty" mapstructure:"dstDir,omitempty"`
+	DstDir string `json:"dstDir,omitempty" yaml:"dstDir,omitempty" mapstructure:"dstDir,omitempty"`
 
 	// The name of the file to copy to. If not set, the file will be copied with the
 	// same name.
@@ -34,7 +34,7 @@ type Artifact struct {
 	// {{ if .name }}true{{ end }}
 	// ```
 	//
-	If *string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
+	If string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
 
 	// The directory to copy the file from.
 	// If not set, the file will be copied from the directory of the template file.

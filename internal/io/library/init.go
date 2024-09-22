@@ -7,7 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/types"
 
 	"github.com/jahvon/flow/types/executable"
 	"github.com/jahvon/flow/types/workspace"
@@ -19,7 +19,7 @@ func (l *Library) Init() tea.Cmd {
 		cmds,
 		tea.SetWindowTitle("flow library"),
 		tea.Tick(time.Millisecond*250, func(t time.Time) tea.Msg {
-			return components.TickMsg(t)
+			return types.Tick()
 		}),
 	)
 	cmds = append(

@@ -30,20 +30,20 @@ description: {{ .testKey }}
 tags: [test]
 `,
 		}
-		template.SetContext("flowfile", "flowfile.tmpl.flow")
+		template.SetContext("flowfile", "flowfile.flow.tmpl")
 	})
 
 	Describe("SetContext", func() {
 		It("should set the context correctly", func() {
-			template.SetContext("newName", "new/flowfile.tmpl.flow")
+			template.SetContext("newName", "new/flowfile.flow.tmpl")
 			Expect(template.Name()).To(Equal("newName"))
-			Expect(template.Location()).To(Equal("new/flowfile.tmpl.flow"))
+			Expect(template.Location()).To(Equal("new/flowfile.flow.tmpl"))
 		})
 
 		It("should set the name from the location when empty", func() {
-			template.SetContext("", "new/flowfile.tmpl.flow")
+			template.SetContext("", "new/flowfile.flow.tmpl")
 			Expect(template.Name()).To(Equal("flowfile"))
-			Expect(template.Location()).To(Equal("new/flowfile.tmpl.flow"))
+			Expect(template.Location()).To(Equal("new/flowfile.flow.tmpl"))
 		})
 	})
 

@@ -4,14 +4,13 @@ Add rendered executables from an executable definition template to a workspace
 
 ### Synopsis
 
-Add rendered executables from an executable definition template to a workspace.
+Add rendered executables from a flowfile template to a workspace.
 
-The WORKSPACE_NAME is the name of the workspace to initialize the executables in.
-The DEFINITION_NAME is the name of the definition to use in rendering the template.
-This name will become the name of the file containing the copied executable definition.
+The WORKSPACE_NAME is the name of the workspace to initialize the flowfile template in.
+The FLOWFILE_NAME is the name to give the flowfile (if applicable) when rendering its template.
 
-One one of -f or -t must be provided and must point to a valid executable definition template.
-The -p flag can be used to specify a sub-path within the workspace to create the executable definition and its artifacts.
+One one of -f or -t must be provided and must point to a valid flowfile template.
+The -o flag can be used to specify an output path within the workspace to create the flowfile and its artifacts in.
 
 ```
 flow init executables FLOWFILE_NAME [-w WORKSPACE ] [-o OUTPUT_DIR] [-f FILE | -t TEMPLATE] [flags]
