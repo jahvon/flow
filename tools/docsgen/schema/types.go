@@ -50,7 +50,7 @@ func (s Ref) ExternalFile() FileName {
 		fmt.Println("invalid schema ref", s.String())
 		return ""
 	}
-	// remove leading './' from file name if present to avoid relative paths
+	// remove leading '.' and `/` from file name if present to avoid relative paths
 	return FileName(strings.Trim(parts[0], "./"))
 }
 
@@ -60,6 +60,25 @@ func (s Ref) DefinitionPath() string {
 	}
 
 	return fmt.Sprintf("#/definitions/%s", s.Key())
+}
+
+func (s Ref) IsRoot() bool {
+	if s.String() == "" {
+		return false
+	}
+
+	var def string
+	if strings.HasPrefix(s.String(), "#") {
+		def = strings.Trim(s.String(), "./")
+	} else {
+		parts := strings.Split(s.String(), "#")
+		if len(parts) != 2 {
+			fmt.Println("invalid schema ref", s.String())
+			return false
+		}
+		def = parts[1]
+	}
+	return def == "/"
 }
 
 func (s Ref) Key() FieldKey {
@@ -84,19 +103,19 @@ func (s Ref) Key() FieldKey {
 			return WorkspaceDefinitionTitle
 		case strings.Contains(s.String(), ConfigSchema.String()):
 			return ConfigDefinitionTitle
-		case strings.Contains(s.String(), ExecutableSchema.String()):
-			return ExecutableDefinitionTitle
 		case strings.Contains(s.String(), FlowfileSchema.String()):
 			return FlowfileDefinitionTitle
 		case strings.Contains(s.String(), CommonSchema.String()):
 			return CommonDefinitionTitle
 		case strings.Contains(s.String(), TemplateSchema.String()):
 			return TemplateDefinitionTitle
+		case strings.Contains(s.String(), ExecutableSchema.String()):
+			return ExecutableDefinitionTitle
 		}
 		fmt.Println("unknown schema ref; defaulting to the file's title", s.String())
 		return FieldKey(s.ExternalFile().Title())
 	}
-	parts := strings.Split(def, "/")
+	parts := strings.Split(strings.Trim(def, "./"), "/")
 	if len(parts) < 2 {
 		fmt.Println("invalid schema ref", s.String())
 		return ""

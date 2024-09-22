@@ -15,8 +15,8 @@ Configuration for a flowfile template; templates can be used to generate flow fi
 | ----- | ----------- | ---- | ------- | -------- |
 | `artifacts` | A list of artifacts to be copied after generating the flow file. | `array` ([Artifact](#Artifact)) | <no value> | [] |
 | `form` | Form fields to be displayed to the user when generating a flow file from a template.  The form will be rendered first, and the user's input can be used to render the template. For example, a form field with the key `name` can be used in the template as `{{.name}}`.  | `array` ([Field](#Field)) | [] | [] |
-| `postRun` | A list of exec executables to run after generating the flow file. | `array` ([ExecExecutableType](#ExecExecutableType)) | <no value> | [] |
-| `preRun` | A list of exec executables to run before generating the flow file. | `array` ([ExecExecutableType](#ExecExecutableType)) | <no value> | [] |
+| `postRun` | A list of exec executables to run after generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> | [] |
+| `preRun` | A list of exec executables to run before generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> | [] |
 | `template` | The flow file template to generate. The template must be a valid flow file after rendering. | `string` | <no value> | [] |
 
 
@@ -42,6 +42,52 @@ Go templating from form data is supported in all fields.
 | `if` | A condition to determine if the artifact should be copied. The condition is evaluated using Go templating  from the form data. If the condition is not met, the artifact will not be copied. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to copy the artifact only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` |  | [] |
 | `srcDir` | The directory to copy the file from.  If not set, the file will be copied from the directory of the template file.  | `string` |  | [] |
 | `srcName` | The name of the file to copy. | `string` | <no value> | [] |
+
+### ExecutableArgumentList
+
+
+
+
+
+
+
+
+### ExecutableDirectory
+
+
+
+
+
+
+
+
+### ExecutableExecExecutableType
+
+Standard executable type. Runs a command/file in a subprocess.
+
+**Type:** `object`
+
+
+
+**Properties:**
+
+| Field | Description | Type | Default | Required |
+| ----- | ----------- | ---- | ------- | -------- |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
+| `cmd` | The command to execute. Only one of `cmd` or `file` must be set.  | `string` |  | [] |
+| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  | [] |
+| `file` | The file to execute. Only one of `cmd` or `file` must be set.  | `string` |  | [] |
+| `logMode` | The log mode to use when running the executable. This can either be `hidden`, `json`, `logfmt` or `text`  | `string` | logfmt | [] |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
+
+### ExecutableParameterList
+
+
+
+
+
+
+
 
 ### Field
 

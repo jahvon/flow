@@ -201,7 +201,8 @@ func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.E
 }
 
 // TODO: refactor this function to simplify the logic
-//nolint
+//
+//nolint:all
 func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 	if os.Getenv(vault.EncryptionKeyEnvVar) != "" {
 		return false

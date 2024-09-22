@@ -24,7 +24,7 @@ var (
 )
 
 func main() {
-	fmt.Println("Generating CLI docs...")
+	fmt.Println("generating CLI docs...")
 	ctx := context.NewContext(stdCtx.Background(), os.Stdin, os.Stdout)
 	defer ctx.Finalize()
 
@@ -38,10 +38,10 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("Generating markdown docs...")
+	fmt.Println("generating markdown docs...")
 	generateMarkdownDocs()
 
-	fmt.Println("Generating schema files...")
+	fmt.Println("generating schema files...")
 	generateJSONSchemas()
 }
 
