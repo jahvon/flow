@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	tuiKitIO "github.com/jahvon/tuikit/io"
+	io2 "github.com/jahvon/tuikit/io"
+	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -14,24 +15,80 @@ import (
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
-	"github.com/jahvon/flow/internal/vault"
+	config2 "github.com/jahvon/flow/internal/io/config"
 	"github.com/jahvon/flow/types/config"
 )
 
-func RegisterSetCmd(ctx *context.Context, rootCmd *cobra.Command) {
+func RegisterConfigCmd(ctx *context.Context, rootCmd *cobra.Command) {
+	setCmd := &cobra.Command{
+		Use:     "config",
+		Aliases: []string{"c", "cfg"},
+		Short:   "Update flow configuration values.",
+	}
+	registerConfigInitCmd(ctx, setCmd)
+	registerSetConfigCmd(ctx, setCmd)
+	registerGetConfigCmd(ctx, setCmd)
+	registerSetWorkspaceCmd(ctx, setCmd)
+	registerSetNamespaceCmd(ctx, setCmd)
+	registerSetWorkspaceModeCmd(ctx, setCmd)
+	registerSetLogModeCmd(ctx, setCmd)
+	registerSetTUICmd(ctx, setCmd)
+	registerSetTemplateCmd(ctx, setCmd)
+	registerSetSecretCmd(ctx, setCmd)
+	rootCmd.AddCommand(setCmd)
+}
+
+func registerConfigInitCmd(ctx *context.Context, configCmd *cobra.Command) {
+	initCmd := &cobra.Command{
+		Use:   "init",
+		Short: "Initialize the flow global configuration. This will overwrite the current configuration.",
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { initConfigFunc(ctx, cmd, args) },
+	}
+	configCmd.AddCommand(initCmd)
+}
+
+func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
+	logger := ctx.Logger
+	form, err := views.NewForm(
+		io.Theme(),
+		ctx.StdIn(),
+		ctx.StdOut(),
+		&views.FormField{
+			Key:   "confirm",
+			Type:  views.PromptTypeConfirm,
+			Title: "This will overwrite your current flow configurations. Are you sure you want to continue?",
+		})
+	if err != nil {
+		logger.FatalErr(err)
+	}
+	if err := form.Run(ctx.Ctx); err != nil {
+		logger.FatalErr(err)
+	}
+	resp := form.FindByKey("confirm").Value()
+	if truthy, _ := strconv.ParseBool(resp); !truthy {
+		logger.Warnf("Aborting")
+		return
+	}
+
+	if err := filesystem.InitConfig(); err != nil {
+		logger.FatalErr(err)
+	}
+	logger.PlainTextSuccess("Initialized flow global configurations")
+}
+
+func registerSetConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
 	setCmd := &cobra.Command{
 		Use:     "set",
-		Aliases: []string{"s"},
-		Short:   "Update global or workspace configuration values.",
+		Aliases: []string{"s", "update"},
+		Short:   "Update flow configuration values.",
 	}
 	registerSetWorkspaceCmd(ctx, setCmd)
 	registerSetNamespaceCmd(ctx, setCmd)
 	registerSetWorkspaceModeCmd(ctx, setCmd)
 	registerSetLogModeCmd(ctx, setCmd)
-	registerSetInteractiveCmd(ctx, setCmd)
-	registerSetTemplateCmd(ctx, setCmd)
-	registerSetSecretCmd(ctx, setCmd)
-	rootCmd.AddCommand(setCmd)
+	registerSetTUICmd(ctx, setCmd)
+	configCmd.AddCommand(setCmd)
 }
 
 func registerSetWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
@@ -130,7 +187,7 @@ func registerSetLogModeCmd(ctx *context.Context, setCmd *cobra.Command) {
 
 func setLogModeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
-	mode := tuiKitIO.LogMode(strings.ToLower(args[0]))
+	mode := io2.LogMode(strings.ToLower(args[0]))
 
 	userConfig := ctx.Config
 	userConfig.DefaultLogMode = mode
@@ -140,16 +197,15 @@ func setLogModeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger.PlainTextSuccess(fmt.Sprintf("Default log mode set to '%s'", mode))
 }
 
-func registerSetInteractiveCmd(ctx *context.Context, setCmd *cobra.Command) {
-	interactiveCmd := &cobra.Command{
-		Use:       "interactive [true|false]",
+func registerSetTUICmd(ctx *context.Context, setCmd *cobra.Command) {
+	tuiCmd := &cobra.Command{
+		Use:       "tui [true|false]",
 		Short:     "Enable or disable the interactive terminal UI experience.",
 		Args:      cobra.ExactArgs(1),
 		ValidArgs: []string{"true", "false"},
-		PreRun:    func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:       func(cmd *cobra.Command, args []string) { setInteractiveFunc(ctx, cmd, args) },
 	}
-	setCmd.AddCommand(interactiveCmd)
+	setCmd.AddCommand(tuiCmd)
 }
 
 func setInteractiveFunc(ctx *context.Context, _ *cobra.Command, args []string) {
@@ -174,86 +230,28 @@ func setInteractiveFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger.PlainTextSuccess("Interactive UI " + strVal)
 }
 
-func registerSetTemplateCmd(ctx *context.Context, setCmd *cobra.Command) {
-	templateCmd := &cobra.Command{
-		Use:    "template NAME DEFINITION_TEMPLATE_PATH",
-		Short:  "Set a template definition for use in flow.",
-		Args:   cobra.ExactArgs(2),
-		PreRun: func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
-		Run:    func(cmd *cobra.Command, args []string) { setTemplateFunc(ctx, cmd, args) },
+func registerGetConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
+	getCmd := &cobra.Command{
+		Use:     "get",
+		Aliases: []string{"current"},
+		Short:   "View the current global configuration values.",
+		Args:    cobra.NoArgs,
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
+		Run:     func(cmd *cobra.Command, args []string) { getConfigFunc(ctx, cmd, args) },
 	}
-	setCmd.AddCommand(templateCmd)
+	RegisterFlag(ctx, getCmd, *flags.OutputFormatFlag)
+	configCmd.AddCommand(getCmd)
 }
 
-func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func getConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	name := args[0]
-	flowFilePath := args[1]
-	loadedTemplates, err := filesystem.LoadFlowFileTemplate(name, flowFilePath)
-	if err != nil {
-		logger.FatalErr(err)
-	}
-	if err := loadedTemplates.Validate(); err != nil {
-		logger.FatalErr(err)
-	}
 	userConfig := ctx.Config
-	if userConfig.Templates == nil {
-		userConfig.Templates = map[string]string{}
+	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
+	if TUIEnabled(ctx, cmd) {
+		view := config2.NewUserConfigView(ctx.TUIContainer, *userConfig, types.Format(outputFormat))
+		SetView(ctx, cmd, view)
+	} else {
+		config2.PrintUserConfig(logger, outputFormat, userConfig)
 	}
-	userConfig.Templates[name] = flowFilePath
-	if err := filesystem.WriteConfig(userConfig); err != nil {
-		logger.FatalErr(err)
-	}
-	logger.PlainTextSuccess(fmt.Sprintf("Template %s set to %s", name, flowFilePath))
-}
-
-func registerSetSecretCmd(ctx *context.Context, setCmd *cobra.Command) {
-	secretCmd := &cobra.Command{
-		Use:     "secret NAME [VALUE]",
-		Aliases: []string{"scrt"},
-		Short:   "Update or create a secret in the flow secret vault.",
-		Args:    cobra.MinimumNArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { setSecretFunc(ctx, cmd, args) },
-	}
-	setCmd.AddCommand(secretCmd)
-}
-
-func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
-	logger := ctx.Logger
-	reference := args[0]
-
-	var value string
-	switch {
-	case len(args) == 1:
-		form, err := views.NewForm(
-			io.Theme(),
-			ctx.StdIn(),
-			ctx.StdOut(),
-			&views.FormField{
-				Key:   "value",
-				Type:  views.PromptTypeMasked,
-				Title: "Enter the secret value",
-			})
-		if err != nil {
-			logger.FatalErr(err)
-		}
-		if err := form.Run(ctx.Ctx); err != nil {
-			logger.FatalErr(err)
-		}
-		value = form.FindByKey("value").Value()
-	case len(args) == 2:
-		value = args[1]
-	default:
-		logger.Warnx("merging multiple arguments into a single value", "count", len(args))
-		value = strings.Join(args[1:], " ")
-	}
-
-	secret := vault.SecretValue(value)
-	v := vault.NewVault(logger)
-	err := v.SetSecret(reference, secret)
-	if err != nil {
-		logger.FatalErr(err)
-	}
-	logger.PlainTextSuccess(fmt.Sprintf("Secret %s set in vault", reference))
 }
