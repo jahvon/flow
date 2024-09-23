@@ -9,17 +9,14 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/types/executable"
 )
-
-const appName = "flow renderer"
 
 type renderRunner struct{}
 
@@ -93,10 +90,8 @@ func (r *renderRunner) Exec(ctx *context.Context, e *executable.Executable, inpu
 
 	ctx.Logger.Infof("Rendering content from file %s", contentFile)
 	filename := filepath.Base(contentFile)
-	if err = components.RunMarkdownView(io.Theme(), appName, "file", filename, buff.String()); err != nil {
-		return errors.Wrap(err, "unable to render content")
-	}
-	return nil
+	ctx.TUIContainer.SetState("file", filename)
+	return ctx.TUIContainer.SetView(views.NewMarkdownView(ctx.TUIContainer.RenderState(), buff.String()))
 }
 
 func readDataFile(dir, path string) (map[string]interface{}, error) {

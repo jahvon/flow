@@ -83,8 +83,8 @@ func (l *Library) SetNotice(notice string, level styles.NoticeLevel) {
 }
 
 func (l *Library) setSize() {
-	l.termWidth = l.ctx.InteractiveContainer.Width()
-	l.termHeight = l.ctx.InteractiveContainer.FullHeight()
+	l.termWidth = l.ctx.TUIContainer.Width()
+	l.termHeight = l.ctx.TUIContainer.Height()
 	p0, p1, p2 := calculateViewportWidths(l.termWidth-widthPadding, l.splitView)
 	l.paneZeroViewport.Width = p0
 	l.paneOneViewport.Width = p1

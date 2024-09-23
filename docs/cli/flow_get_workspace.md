@@ -1,6 +1,6 @@
 ## flow get workspace
 
-Print a workspace's configuration. If the name is omitted, the current workspace is used.
+Print a workspaces configuration. If the name is omitted, the current workspace is used.
 
 ```
 flow get workspace [NAME] [flags]

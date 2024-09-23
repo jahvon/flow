@@ -2,6 +2,7 @@ package executable
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 )
 
@@ -257,6 +258,9 @@ func parallelExecMarkdown(e *ExecutableEnvironment, p *ParallelExecutableType) s
 }
 
 func execEnvTable(env *ExecutableEnvironment) string {
+	if env == nil {
+		return ""
+	}
 	var table string
 	if len(env.Params) > 0 {
 		table += "### Parameters\n"
@@ -296,4 +300,62 @@ func execEnvTable(env *ExecutableEnvironment) string {
 		}
 	}
 	return table
+}
+
+func templateMarkdown(t *Template) string {
+	mkdwn := fmt.Sprintf("# [Template] %s\n", t.Name())
+	mkdwn += templateFormMarkdown(t)
+	mkdwn += templateArtifactsMarkdown(t)
+	if len(t.PreRun) > 0 {
+		mkdwn += "## Pre-Run\n"
+		for _, e := range t.PreRun {
+			exec := ExecExecutableType(e)
+			mkdwn += shellExecMarkdown(nil, &exec)
+		}
+	}
+	if len(t.PostRun) > 0 {
+		mkdwn += "## Post-Run\n"
+		for _, e := range t.PostRun {
+			exec := ExecExecutableType(e)
+			mkdwn += shellExecMarkdown(nil, &exec)
+		}
+	}
+	mkdwn += fmt.Sprintf("## Flow File\n```yaml\n%s\n```\n", t.Template)
+	mkdwn += fmt.Sprintf("\n\n_Template can be found in_ [%s](%s)\n", t.Name(), t.Location())
+	return mkdwn
+}
+
+func templateArtifactsMarkdown(t *Template) string {
+	if len(t.Artifacts) == 0 {
+		return ""
+	}
+	mkdwn := "## Artifacts\n"
+	for _, a := range t.Artifacts {
+		mkdwn += fmt.Sprintf("- Source: `%s`\n", filepath.Join(a.SrcDir, a.SrcName))
+		if a.DstDir != "" {
+			mkdwn += fmt.Sprintf("  Destination: `%s`\n", filepath.Join(a.DstDir, a.DstName))
+		} else if a.DstName != "" {
+			mkdwn += fmt.Sprintf("  Destination: `%s`\n", a.DstName)
+		}
+		if a.If != "" {
+			mkdwn += fmt.Sprintf("  Conditional: `%s`\n", a.If)
+		}
+		mkdwn += fmt.Sprintf("  Rendered as a template: %t\n", a.AsTemplate)
+	}
+	return mkdwn
+}
+
+func templateFormMarkdown(t *Template) string {
+	if len(t.Form) == 0 {
+		return ""
+	}
+	mkdwn := "## Form Fields\n"
+	mkdwn += "| Field | Prompt | Description | Default Value | Required |\n"
+	for _, f := range t.Form {
+		mkdwn += fmt.Sprintf(
+			"| %s | %s | %s | %s | %t |\n",
+			f.Key, f.Prompt, f.Description, f.Default, f.Required,
+		)
+	}
+	return mkdwn
 }

@@ -4,19 +4,22 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/exec"
+	"github.com/jahvon/flow/internal/templates"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -38,7 +41,7 @@ func registerInitConfigCmd(ctx *context.Context, initCmd *cobra.Command) {
 		Aliases: []string{"cfg"},
 		Short:   "Initialize the flow global configuration.",
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { initConfigFunc(ctx, cmd, args) },
 	}
 	initCmd.AddCommand(cfgCmd)
@@ -46,16 +49,24 @@ func registerInitConfigCmd(ctx *context.Context, initCmd *cobra.Command) {
 
 func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	inputs, err := components.ProcessInputs(io.Theme(), &components.TextInput{
-		Key:    "confirm",
-		Prompt: "This will overwrite your current flow configurations. Are you sure you want to continue? (y/n)",
-	})
+	form, err := views.NewForm(
+		io.Theme(),
+		ctx.StdIn(),
+		ctx.StdOut(),
+		&views.FormField{
+			Key:   "confirm",
+			Type:  views.PromptTypeConfirm,
+			Title: "This will overwrite your current flow configurations. Are you sure you want to continue?",
+		})
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	resp := inputs.FindByKey("confirm").Value()
-	if strings.ToLower(resp) != "y" && strings.ToLower(resp) != "yes" {
-		logger.Warnf("Aborting", resp)
+	if err := form.Run(ctx.Ctx); err != nil {
+		logger.FatalErr(err)
+	}
+	resp := form.FindByKey("confirm").Value()
+	if truthy, _ := strconv.ParseBool(resp); !truthy {
+		logger.Warnf("Aborting")
 		return
 	}
 
@@ -71,7 +82,7 @@ func registerInitWorkspaceCmd(ctx *context.Context, initCmd *cobra.Command) {
 		Aliases: []string{"ws"},
 		Short:   "Initialize and add a workspace to the list of known workspaces.",
 		Args:    cobra.ExactArgs(2),
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { initWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, wsCmd, *flags.SetAfterCreateFlag)
@@ -139,105 +150,54 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 
 func registerInitExecsCmd(ctx *context.Context, initCmd *cobra.Command) {
 	subCmd := &cobra.Command{
-		Use:     "executables WORKSPACE_NAME DEFINITION_NAME [-p SUB_PATH] [-f FILE] [-t TEMPLATE]",
-		Aliases: []string{"execs", "definitions", "defs"},
+		Use:     "executables FLOWFILE_NAME [-w WORKSPACE ] [-o OUTPUT_DIR] [-f FILE | -t TEMPLATE]",
+		Aliases: []string{"execs", "flowfile", "template"},
 		Short:   "Add rendered executables from an executable definition template to a workspace",
 		Long:    initExecLong,
-		Args:    cobra.ExactArgs(2),
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { initExecFunc(ctx, cmd, args) },
+		Args:    cobra.MaximumNArgs(1),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			runner.RegisterRunner(exec.NewRunner())
+			printContext(ctx, cmd)
+		},
+		Run: func(cmd *cobra.Command, args []string) { initExecFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, subCmd, *flags.SubPathFlag)
+	RegisterFlag(ctx, subCmd, *flags.TemplateOutputPathFlag)
 	RegisterFlag(ctx, subCmd, *flags.TemplateFlag)
-	RegisterFlag(ctx, subCmd, *flags.FileFlag)
-	MarkFlagMutuallyExclusive(subCmd, flags.TemplateFlag.Name, flags.FileFlag.Name)
-	MarkOneFlagRequired(subCmd, flags.TemplateFlag.Name, flags.FileFlag.Name)
-	MarkFlagFilename(ctx, subCmd, flags.FileFlag.Name)
-	MarkFlagFilename(ctx, subCmd, flags.SubPathFlag.Name)
+	RegisterFlag(ctx, subCmd, *flags.TemplateFilePathFlag)
+	RegisterFlag(ctx, subCmd, *flags.TemplateWorkspaceFlag)
+	MarkFlagMutuallyExclusive(subCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
+	MarkOneFlagRequired(subCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
+	MarkFlagFilename(ctx, subCmd, flags.TemplateFilePathFlag.Name)
+	MarkFlagFilename(ctx, subCmd, flags.TemplateOutputPathFlag.Name)
 	initCmd.AddCommand(subCmd)
 }
 
-//nolint:gocognit
 func initExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
-	workspaceName := args[0]
-	definitionName := args[1]
-	subPath := flags.ValueFor[string](ctx, cmd, *flags.SubPathFlag, false)
+	outputPath := flags.ValueFor[string](ctx, cmd, *flags.TemplateOutputPathFlag, false)
 	template := flags.ValueFor[string](ctx, cmd, *flags.TemplateFlag, false)
-	fileVal := flags.ValueFor[string](ctx, cmd, *flags.FileFlag, false)
+	templateFilePath := flags.ValueFor[string](ctx, cmd, *flags.TemplateFilePathFlag, false)
+	workspaceName := flags.ValueFor[string](ctx, cmd, *flags.TemplateWorkspaceFlag, false)
 
-	logger.Infof("Adding '%s' executables to '%s' workspace", definitionName, workspaceName)
-	var flowFilePath string
-	switch {
-	case template == "" && fileVal == "":
-		logger.Fatalf("one of -f or -t must be provided")
-	case template != "" && fileVal != "":
-		logger.Fatalf("only one of -f or -t can be provided")
-	case template != "":
-		if ctx.Config.Templates == nil {
-			logger.Fatalf("template %s not found", template)
-		}
-		if path, found := ctx.Config.Templates[template]; !found {
-			logger.Fatalf("template %s not found", template)
-		} else {
-			flowFilePath = path
-		}
-	case fileVal != "":
-		if _, err := os.Stat(fileVal); os.IsNotExist(err) {
-			logger.Fatalf("fileVal %s not found", fileVal)
-		}
-		flowFilePath = fileVal
-	}
-
-	execTemplate, err := filesystem.LoadFlowFileTemplate(flowFilePath)
-	if err != nil {
-		logger.FatalErr(err)
-	}
-	if err := execTemplate.Validate(); err != nil {
-		logger.FatalErr(err)
-	}
-	execTemplate.SetContext(flowFilePath)
-
-	wsPath, wsFound := ctx.Config.Workspaces[workspaceName]
-	if !wsFound {
+	ws := workspaceOrCurrent(ctx, workspaceName)
+	if ws == nil {
 		logger.Fatalf("workspace %s not found", workspaceName)
 	}
-	ws, err := filesystem.LoadWorkspaceConfig(workspaceName, wsPath)
-	if err != nil {
-		logger.FatalErr(err)
-	}
-	ws.SetContext(workspaceName, wsPath)
 
-	if len(execTemplate.Data) != 0 {
-		var inputs []*components.TextInput
-		for _, entry := range execTemplate.Data {
-			inputs = append(inputs, &components.TextInput{
-				Key:         entry.Key,
-				Prompt:      entry.Prompt,
-				Placeholder: entry.Default,
-			})
-		}
-		inputs, err = components.ProcessInputs(io.Theme(), inputs...)
-		if err != nil {
-			logger.FatalErr(err)
-		}
-		for _, input := range inputs {
-			execTemplate.Data.Set(input.Key, input.Value())
-		}
-		if err := execTemplate.Data.ValidateValues(); err != nil {
-			logger.FatalErr(err)
-		}
+	tmpl := loadFlowfileTemplate(ctx, template, templateFilePath)
+	if tmpl == nil {
+		logger.Fatalf("unable to load flowfile template")
 	}
 
-	if err := filesystem.InitExecutables(execTemplate, ws, definitionName, subPath); err != nil {
+	flowFilename := tmpl.Name()
+	if len(args) == 1 {
+		flowFilename = args[0]
+	}
+	if err := templates.ProcessTemplate(ctx, tmpl, ws, flowFilename, outputPath); err != nil {
 		logger.FatalErr(err)
 	}
 
-	logger.PlainTextSuccess(
-		fmt.Sprintf(
-			"Executables from %s added to %s\nPath: %s",
-			definitionName, workspaceName, flowFilePath,
-		))
+	logger.PlainTextSuccess(fmt.Sprintf("Template '%s' rendered successfully", flowFilename))
 }
 
 func registerInitVaultCmd(ctx *context.Context, initCmd *cobra.Command) {
@@ -245,7 +205,7 @@ func registerInitVaultCmd(ctx *context.Context, initCmd *cobra.Command) {
 		Use:    "vault",
 		Short:  "Create a new flow secret vault.",
 		Args:   cobra.NoArgs,
-		PreRun: func(cmd *cobra.Command, args []string) { interactive.InitInteractiveCommand(ctx, cmd) },
+		PreRun: func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:    func(cmd *cobra.Command, args []string) { initVaultFunc(ctx, cmd, args) },
 	}
 	initCmd.AddCommand(subCmd)
@@ -274,12 +234,10 @@ func initVaultFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 }
 
-//nolint:lll
-var initExecLong = `Add rendered executables from an executable definition template to a workspace.
+var initExecLong = `Add rendered executables from a flowfile template to a workspace.
 
-The WORKSPACE_NAME is the name of the workspace to initialize the executables in.
-The DEFINITION_NAME is the name of the definition to use in rendering the template.
-This name will become the name of the file containing the copied executable definition.
+The WORKSPACE_NAME is the name of the workspace to initialize the flowfile template in.
+The FLOWFILE_NAME is the name to give the flowfile (if applicable) when rendering its template.
 
-One one of -f or -t must be provided and must point to a valid executable definition template.
-The -p flag can be used to specify a sub-path within the workspace to create the executable definition and its artifacts.`
+One one of -f or -t must be provided and must point to a valid flowfile template.
+The -o flag can be used to specify an output path within the workspace to create the flowfile and its artifacts in.`

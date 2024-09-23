@@ -49,7 +49,7 @@ var _ = Describe("Executables", func() {
 				},
 			}
 
-			definitionFile := filepath.Join(tmpDir, "test"+filesystem.FlowFileExt)
+			definitionFile := filepath.Join(tmpDir, "test"+executable.FlowFileExt)
 			Expect(filesystem.WriteFlowFile(definitionFile, executableDefinition)).To(Succeed())
 
 			readDefinition, err := filesystem.LoadFlowFile(definitionFile)
@@ -70,7 +70,7 @@ var _ = Describe("Executables", func() {
 				},
 			}
 
-			definitionFile := filepath.Join(tmpDir, "test"+filesystem.FlowFileExt)
+			definitionFile := filepath.Join(tmpDir, "test"+executable.FlowFileExt)
 			Expect(filesystem.WriteFlowFile(definitionFile, executableDefinition)).To(Succeed())
 
 			workspaceCfg := &workspace.Workspace{}
@@ -96,7 +96,7 @@ var _ = Describe("Executables", func() {
 				},
 			}
 
-			definitionFile := filepath.Join(tmpDir, "test"+filesystem.FlowFileExt)
+			definitionFile := filepath.Join(tmpDir, "test"+executable.FlowFileExt)
 			Expect(filesystem.WriteFlowFile(definitionFile, executableDefinition)).To(Succeed())
 
 			workspaceCfg := &workspace.Workspace{
@@ -131,7 +131,7 @@ var _ = Describe("Executables", func() {
 			excludedDir, err := os.MkdirTemp(tmpDir, "excluded")
 			Expect(err).NotTo(HaveOccurred())
 
-			definitionFile := filepath.Join(excludedDir, "test"+filesystem.FlowFileExt)
+			definitionFile := filepath.Join(excludedDir, "test"+executable.FlowFileExt)
 			Expect(filesystem.WriteFlowFile(definitionFile, executableDefinition)).To(Succeed())
 
 			workspaceCfg := &workspace.Workspace{

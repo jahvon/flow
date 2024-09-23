@@ -5,28 +5,34 @@ import (
 	"strings"
 
 	"github.com/atotto/clipboard"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/types"
+	"github.com/jahvon/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/common"
 	"github.com/jahvon/flow/types/executable"
 )
 
 func NewExecutableView(
 	ctx *context.Context,
-	exec executable.Executable,
-	format components.Format,
+	exec *executable.Executable,
+	format types.Format,
 	runFunc func(string) error,
-) components.TeaModel {
-	container := ctx.InteractiveContainer
-	var executableKeyCallbacks = []components.KeyCallback{
+) tuikit.View {
+	container := ctx.TUIContainer
+	var executableKeyCallbacks = []types.KeyCallback{
 		{
 			Key: "r", Label: "run",
 			Callback: func() error {
-				ctx.InteractiveContainer.Shutdown()
-				return runFunc(exec.Ref().String())
+				ctx.TUIContainer.Shutdown(func() {
+					err := runFunc(exec.Ref().String())
+					if err != nil {
+						ctx.Logger.Error(err, "executable view runner error")
+					}
+				})
+				return nil
 			},
 		},
 		{
@@ -50,14 +56,9 @@ func NewExecutableView(
 			},
 		},
 	}
-	state := &components.TerminalState{
-		Theme:  io.Theme(),
-		Height: container.Height(),
-		Width:  container.Width(),
-	}
-	return components.NewEntityView(
-		state,
-		&exec,
+	return views.NewEntityView(
+		container.RenderState(),
+		exec,
 		format,
 		executableKeyCallbacks...,
 	)
@@ -66,10 +67,10 @@ func NewExecutableView(
 func NewExecutableListView(
 	ctx *context.Context,
 	executables executable.ExecutableList,
-	format components.Format,
+	format types.Format,
 	runFunc func(string) error,
-) components.TeaModel {
-	container := ctx.InteractiveContainer
+) tuikit.View {
+	container := ctx.TUIContainer
 	if len(executables.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no workspaces found"))
 	}
@@ -84,14 +85,75 @@ func NewExecutableListView(
 		if err != nil {
 			return fmt.Errorf("executable not found")
 		}
-		container.SetView(NewExecutableView(ctx, *exec, format, runFunc))
-		return nil
+		return ctx.SetView(NewExecutableView(ctx, exec, format, runFunc))
 	}
 
-	state := &components.TerminalState{
-		Theme:  io.Theme(),
-		Height: container.Height(),
-		Width:  container.Width(),
+	return views.NewCollectionView(container.RenderState(), executables, format, selectFunc)
+}
+
+func NewTemplateView(
+	ctx *context.Context,
+	template *executable.Template,
+	format types.Format,
+	runFunc func(string) error,
+) tuikit.View {
+	container := ctx.TUIContainer
+	var templateKeyCallbacks = []types.KeyCallback{
+		{
+			Key: "r", Label: "run",
+			Callback: func() error {
+				ctx.TUIContainer.Shutdown()
+				return runFunc(template.Name())
+			},
+		},
+		{
+			Key: "c", Label: "copy location",
+			Callback: func() error {
+				if err := clipboard.WriteAll(template.Location()); err != nil {
+					container.HandleError(fmt.Errorf("unable to copy location to clipboard: %w", err))
+				} else {
+					container.SetNotice("copied location to clipboard", styles.NoticeLevelInfo)
+				}
+				return nil
+			},
+		},
+		{
+			Key: "e", Label: "edit",
+			Callback: func() error {
+				if err := common.OpenInEditor(template.Location(), ctx.StdIn(), ctx.StdOut()); err != nil {
+					container.HandleError(fmt.Errorf("unable to open template: %w", err))
+				}
+				return nil
+			},
+		},
 	}
-	return components.NewCollectionView(state, executables, format, selectFunc)
+	return views.NewEntityView(
+		container.RenderState(),
+		template,
+		format,
+		templateKeyCallbacks...,
+	)
+}
+
+func NewTemplateListView(
+	ctx *context.Context,
+	templates executable.TemplateList,
+	format types.Format,
+	runFunc func(string) error,
+) tuikit.View {
+	container := ctx.TUIContainer
+	if len(templates.Items()) == 0 {
+		container.HandleError(fmt.Errorf("no templates found"))
+	}
+
+	selectFunc := func(filterVal string) error {
+		template := templates.Find(filterVal)
+		if template == nil {
+			return fmt.Errorf("template %s not found", filterVal)
+		}
+
+		return ctx.SetView(NewTemplateView(ctx, template, format, runFunc))
+	}
+
+	return views.NewCollectionView(container.RenderState(), templates, format, selectFunc)
 }

@@ -3,7 +3,6 @@ package internal
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 )
@@ -14,7 +13,7 @@ func RegisterSyncCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Short: "Scan workspaces and update flow cache.",
 		Args:  cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			interactive.InitInteractiveCommand(ctx, cmd)
+			printContext(ctx, cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			syncFunc(ctx, cmd, args)

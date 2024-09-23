@@ -16,28 +16,12 @@ import (
 	"github.com/jahvon/flow/types/workspace"
 )
 
-const FlowFileExt = ".flow"
-
 func EnsureExecutableDir(workspacePath, subPath string) error {
 	if _, err := os.Stat(filepath.Join(workspacePath, subPath)); os.IsNotExist(err) {
 		err = os.MkdirAll(filepath.Join(workspacePath, subPath), 0750)
 		if err != nil {
 			return errors.Wrap(err, "unable to create executable directory")
 		}
-	}
-	return nil
-}
-
-func InitExecutables(
-	template *executable.FlowFileTemplate,
-	ws *workspace.Workspace,
-	name, subPath string,
-) error {
-	if err := EnsureExecutableDir(ws.Location(), subPath); err != nil {
-		return errors.Wrap(err, "unable to ensure executable directory")
-	}
-	if err := WriteFlowFileFromTemplate(template, ws, name, subPath); err != nil {
-		return errors.Wrap(err, "unable to write executable config template")
 	}
 	return nil
 }
@@ -132,7 +116,7 @@ func findFlowFiles(logger io.Logger, workspaceCfg *workspace.Workspace) ([]strin
 				return filepath.SkipDir
 			}
 
-			if filepath.Ext(entry.Name()) == FlowFileExt {
+			if filepath.Ext(entry.Name()) == executable.FlowFileExt {
 				cfgPaths = append(cfgPaths, path)
 			}
 		}

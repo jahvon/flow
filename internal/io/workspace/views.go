@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/types"
+	"github.com/jahvon/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/common"
 	"github.com/jahvon/flow/internal/services/open"
 	"github.com/jahvon/flow/types/workspace"
@@ -18,10 +19,10 @@ import (
 func NewWorkspaceView(
 	ctx *context.Context,
 	ws *workspace.Workspace,
-	format components.Format,
-) components.TeaModel {
-	container := ctx.InteractiveContainer
-	var workspaceKeyCallbacks = []components.KeyCallback{
+	format types.Format,
+) tuikit.View {
+	container := ctx.TUIContainer
+	var workspaceKeyCallbacks = []types.KeyCallback{
 		{
 			Key: "o", Label: "open",
 			Callback: func() error {
@@ -53,27 +54,22 @@ func NewWorkspaceView(
 				if err := filesystem.WriteConfig(curCfg); err != nil {
 					container.HandleError(err)
 				}
-				container.SetContext(fmt.Sprintf("%s/*", ws.AssignedName()))
+				container.SetState(common.HeaderContextKey, fmt.Sprintf("%s/*", ws.AssignedName()))
 				container.SetNotice("workspace updated", styles.NoticeLevelInfo)
 				return nil
 			},
 		},
 	}
 
-	state := &components.TerminalState{
-		Theme:  io.Theme(),
-		Height: container.Height(),
-		Width:  container.Width(),
-	}
-	return components.NewEntityView(state, ws, format, workspaceKeyCallbacks...)
+	return views.NewEntityView(container.RenderState(), ws, format, workspaceKeyCallbacks...)
 }
 
 func NewWorkspaceListView(
 	ctx *context.Context,
 	workspaces workspace.WorkspaceList,
-	format components.Format,
-) components.TeaModel {
-	container := ctx.InteractiveContainer
+	format types.Format,
+) tuikit.View {
+	container := ctx.TUIContainer
 	if len(workspaces.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no workspaces found"))
 	}
@@ -90,14 +86,8 @@ func NewWorkspaceListView(
 			return fmt.Errorf("workspace not found")
 		}
 
-		container.SetView(NewWorkspaceView(ctx, ws, format))
-		return nil
+		return ctx.SetView(NewWorkspaceView(ctx, ws, format))
 	}
 
-	state := &components.TerminalState{
-		Theme:  io.Theme(),
-		Height: container.Height(),
-		Width:  container.Width(),
-	}
-	return components.NewCollectionView(state, workspaces, format, selectFunc)
+	return views.NewCollectionView(container.RenderState(), workspaces, format, selectFunc)
 }

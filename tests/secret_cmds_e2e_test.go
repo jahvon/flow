@@ -75,14 +75,18 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 		})
 	})
 
-	// TODO: Get e2e tests with stdin working - this will require some updates in tuikit to handle stdin overrides
-	// When("deleting a secret (flow remove secret)", func() {
-	// 	It("should remove the secret from the vault", func() {
-	// 		Eventually(run.Run(ctx, "remove", "secret", "my-secret")).WithTimeout(3 * time.Second).Should(Succeed())
-	// 		Expect(writeUserInput(ctx.StdIn(), "y\n")).To(Succeed())
-	// 		out, err := readFileContent(ctx.StdOut())
-	// 		Expect(err).NotTo(HaveOccurred())
-	// 		Expect(out).To(ContainSubstring("Secret my-secret removed from vault"))
-	// 	})
-	// })
+	When("deleting a secret (flow remove secret)", func() {
+		It("should remove the secret from the vault", func() {
+			reader, writer, err := os.Pipe()
+			Expect(err).NotTo(HaveOccurred())
+			_, err = writer.Write([]byte("yes\n"))
+			Expect(err).ToNot(HaveOccurred())
+
+			ctx.SetIO(reader, ctx.StdOut())
+			Expect(run.Run(ctx, "remove", "secret", "my-secret")).To(Succeed())
+			out, err := readFileContent(ctx.StdOut())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(out).To(ContainSubstring("Secret my-secret removed from vault"))
+		})
+	})
 })

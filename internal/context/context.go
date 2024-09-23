@@ -7,27 +7,32 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/styles"
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/filesystem"
+	flowIO "github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/types/config"
 	"github.com/jahvon/flow/types/executable"
 	"github.com/jahvon/flow/types/workspace"
 )
 
+const (
+	AppName      = "flow"
+	HeaderCtxKey = "ctx"
+)
+
 type Context struct {
-	Ctx                  context.Context
-	CancelFunc           context.CancelFunc
-	Logger               io.Logger
-	Config               *config.Config
-	CurrentWorkspace     *workspace.Workspace
-	InteractiveContainer *components.ContainerView
-	WorkspacesCache      cache.WorkspaceCache
-	ExecutableCache      cache.ExecutableCache
+	Ctx              context.Context
+	CancelFunc       context.CancelFunc
+	Logger           io.Logger
+	Config           *config.Config
+	CurrentWorkspace *workspace.Workspace
+	TUIContainer     *tuikit.Container
+	WorkspacesCache  cache.WorkspaceCache
+	ExecutableCache  cache.ExecutableCache
 
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
 	// used to store temporary files all executable runs when the tmpDir value is specified.
@@ -60,19 +65,46 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 	}
 
 	ctxx, cancel := context.WithCancel(ctx)
-	theme := styles.EverforestTheme()
 	logMode := cfg.DefaultLogMode
-	return &Context{
+	c := &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
 		Config:           cfg,
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  workspaceCache,
 		ExecutableCache:  executableCache,
-		Logger:           io.NewLogger(stdOut, theme, logMode, filesystem.LogsDir()),
+		Logger:           io.NewLogger(stdOut, flowIO.Theme(), logMode, filesystem.LogsDir()),
 		stdOut:           stdOut,
 		stdIn:            stdIn,
 	}
+
+	app := tuikit.NewApplication(
+		AppName,
+		tuikit.WithState(HeaderCtxKey, c.String()),
+		tuikit.WithLoadingMsg("thinking..."),
+	)
+	c.TUIContainer, err = tuikit.NewContainer(
+		ctx, app,
+		tuikit.WithInput(stdIn),
+		tuikit.WithOutput(stdOut),
+		tuikit.WithTheme(flowIO.Theme()),
+	)
+	if err != nil {
+		panic(errors.Wrap(err, "TUI container initialization error"))
+	}
+	return c
+}
+
+func (ctx *Context) String() string {
+	ws := ctx.CurrentWorkspace.AssignedName()
+	ns := ctx.Config.CurrentNamespace
+	if ws == "" {
+		ws = "unk"
+	}
+	if ns == "" {
+		ns = "*"
+	}
+	return fmt.Sprintf("%s/%s", ws, ns)
 }
 
 func (ctx *Context) StdOut() *os.File {
@@ -89,6 +121,10 @@ func (ctx *Context) StdIn() *os.File {
 func (ctx *Context) SetIO(stdIn, stdOut *os.File) {
 	ctx.stdIn = stdIn
 	ctx.stdOut = stdOut
+}
+
+func (ctx *Context) SetView(view tuikit.View) error {
+	return ctx.TUIContainer.SetView(view)
 }
 
 func (ctx *Context) Finalize() {

@@ -1,15 +1,16 @@
-data:
+form:
   - key: Color
     prompt: What is your favorite color?
     default: blue
 artifacts:
-  - message.txt
-
-visibility: private
-namespace: examples
-executables:
-  - verb: run
-    name: "{{ .Color }}-msg"
-    description: Created from a template in {{ .Workspace }}
-    exec:
-      cmd: cat message.txt
+  - srcName: message.txt
+    dstName: message.txt
+template: |
+  visibility: private
+  namespace: examples
+  executables:
+    - verb: run
+      name: "{{ .Color }}-msg"
+      description: Created from a template in {{ .FlowWorkspace }}
+      exec:
+        cmd: cat message.txt

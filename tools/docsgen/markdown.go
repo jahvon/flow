@@ -23,6 +23,7 @@ var (
 		schema.FlowfileDefinitionTitle,
 		schema.ConfigDefinitionTitle,
 		schema.WorkspaceDefinitionTitle,
+		schema.TemplateDefinitionTitle,
 	}
 )
 

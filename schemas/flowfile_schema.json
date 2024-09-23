@@ -30,7 +30,6 @@
       ]
     },
     "Executable": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "description": "The executable schema defines the structure of an executable in the Flow CLI.\nExecutables are the building blocks of workflows and are used to define the actions that can be performed in a workspace.\n",
       "type": "object",
       "required": [

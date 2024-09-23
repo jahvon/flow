@@ -83,8 +83,8 @@ func (l WorkspaceList) FindByName(name string) *Workspace {
 	return nil
 }
 
-func (l WorkspaceList) Items() []*types.CollectionItem {
-	items := make([]*types.CollectionItem, 0)
+func (l WorkspaceList) Items() []*types.EntityInfo {
+	items := make([]*types.EntityInfo, 0)
 	for _, ws := range l {
 		name := ws.AssignedName()
 		if ws.DisplayName != "" {
@@ -107,7 +107,7 @@ func (l WorkspaceList) Items() []*types.CollectionItem {
 			ws.Description = d
 		}
 
-		item := types.CollectionItem{
+		item := types.EntityInfo{
 			Header:    name,
 			SubHeader: location,
 			Desc:      ws.Description,

@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/template_schema.json",
+  "description": "Configuration for a flowfile template; templates can be used to generate flow files.",
+  "type": "object",
+  "required": [
+    "template"
+  ],
+  "definitions": {
+    "Artifact": {
+      "description": "File source and destination configuration.\nGo templating from form data is supported in all fields.\n",
+      "type": "object",
+      "required": [
+        "srcName"
+      ],
+      "properties": {
+        "asTemplate": {
+          "description": "If true, the artifact will be copied as a template file. The file will be rendered using Go templating from \nthe form data. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the template.\n",
+          "type": "boolean",
+          "default": false
+        },
+        "dstDir": {
+          "description": "The directory to copy the file to. If not set, the file will be copied to the root of the flow file directory.\nThe directory will be created if it does not exist.\n",
+          "type": "string",
+          "default": ""
+        },
+        "dstName": {
+          "description": "The name of the file to copy to. If not set, the file will be copied with the same name.",
+          "type": "string",
+          "default": ""
+        },
+        "if": {
+          "description": "A condition to determine if the artifact should be copied. The condition is evaluated using Go templating \nfrom the form data. If the condition is not met, the artifact will not be copied.\n[Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.\n\nFor example, to copy the artifact only if the `name` field is set:\n```\n{{ if .name }}true{{ end }}\n```\n",
+          "type": "string",
+          "default": ""
+        },
+        "srcDir": {
+          "description": "The directory to copy the file from. \nIf not set, the file will be copied from the directory of the template file.\n",
+          "type": "string",
+          "default": ""
+        },
+        "srcName": {
+          "description": "The name of the file to copy.",
+          "type": "string"
+        }
+      }
+    },
+    "ExecutableArgumentList": {},
+    "ExecutableDirectory": {
+      "default": ""
+    },
+    "ExecutableExecExecutableType": {
+      "description": "Standard executable type. Runs a command/file in a subprocess.",
+      "type": "object",
+      "properties": {
+        "args": {
+          "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "cmd": {
+          "description": "The command to execute.\nOnly one of `cmd` or `file` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "dir": {
+          "$ref": "#/definitions/ExecutableDirectory",
+          "default": ""
+        },
+        "file": {
+          "description": "The file to execute.\nOnly one of `cmd` or `file` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "logMode": {
+          "description": "The log mode to use when running the executable.\nThis can either be `hidden`, `json`, `logfmt` or `text`\n",
+          "type": "string",
+          "default": "logfmt"
+        },
+        "params": {
+          "$ref": "#/definitions/ExecutableParameterList"
+        }
+      }
+    },
+    "ExecutableParameterList": {},
+    "Field": {
+      "description": "A field to be displayed to the user when generating a flow file from a template.",
+      "type": "object",
+      "required": [
+        "key",
+        "prompt"
+      ],
+      "properties": {
+        "default": {
+          "description": "The default value to use if a value is not set.",
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "description": "A description of the field.",
+          "type": "string",
+          "default": ""
+        },
+        "group": {
+          "description": "The group to display the field in. Fields with the same group will be displayed together.",
+          "type": "integer",
+          "default": 0
+        },
+        "key": {
+          "description": "The key to associate the data with. This is used as the key in the template data map.",
+          "type": "string"
+        },
+        "prompt": {
+          "description": "A prompt to be displayed to the user when collecting an input value.",
+          "type": "string"
+        },
+        "required": {
+          "description": "If true, a value must be set. If false, the default value will be used if a value is not set.",
+          "type": "boolean",
+          "default": false
+        },
+        "validate": {
+          "description": "A regular expression to validate the input value against.",
+          "type": "string",
+          "default": ""
+        }
+      }
+    }
+  },
+  "properties": {
+    "artifacts": {
+      "description": "A list of artifacts to be copied after generating the flow file.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Artifact"
+      }
+    },
+    "form": {
+      "description": "Form fields to be displayed to the user when generating a flow file from a template. \nThe form will be rendered first, and the user's input can be used to render the template.\nFor example, a form field with the key `name` can be used in the template as `{{.name}}`.\n",
+      "type": "array",
+      "default": [],
+      "items": {
+        "$ref": "#/definitions/Field"
+      }
+    },
+    "postRun": {
+      "description": "A list of exec executables to run after generating the flow file.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExecutableExecExecutableType"
+      }
+    },
+    "preRun": {
+      "description": "A list of exec executables to run before generating the flow file.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExecutableExecExecutableType"
+      }
+    },
+    "template": {
+      "description": "The flow file template to generate. The template must be a valid flow file after rendering.",
+      "type": "string"
+    }
+  }
+}

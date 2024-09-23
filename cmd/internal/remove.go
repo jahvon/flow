@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
@@ -40,7 +39,7 @@ func registerRemoveWsCmd(ctx *context.Context, removeCmd *cobra.Command) {
 			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
-			interactive.InitInteractiveCommand(ctx, cmd)
+			printContext(ctx, cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			removeWsFunc(ctx, cmd, args)
@@ -53,16 +52,23 @@ func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 
-	inputs, err := components.ProcessInputs(io.Theme(), &components.TextInput{
-		Key:    "confirm",
-		Prompt: fmt.Sprintf("Are you sure you want to remove the workspace '%s'? (y/n)", name),
-	})
+	form, err := views.NewForm(
+		io.Theme(),
+		ctx.StdIn(),
+		ctx.StdOut(),
+		&views.FormField{
+			Key:   "confirm",
+			Type:  views.PromptTypeConfirm,
+			Title: fmt.Sprintf("Are you sure you want to remove the workspace '%s'?", name),
+		})
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	resp := inputs.FindByKey("confirm").Value()
-	confirmed, _ := strconv.ParseBool(resp)
-	if !confirmed {
+	if err := form.Run(ctx.Ctx); err != nil {
+		logger.FatalErr(err)
+	}
+	resp := form.FindByKey("confirm").Value()
+	if truthy, _ := strconv.ParseBool(resp); !truthy {
 		logger.Warnf("Aborting")
 		return
 	}
@@ -94,7 +100,7 @@ func registerRemoveSecretCmd(ctx *context.Context, removeCmd *cobra.Command) {
 		Short:   "Remove a secret from the vault.",
 		Args:    cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			interactive.InitInteractiveCommand(ctx, cmd)
+			printContext(ctx, cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			removeSecretFunc(ctx, cmd, args)
@@ -107,16 +113,23 @@ func removeSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
 
-	inputs, err := components.ProcessInputs(io.Theme(), &components.TextInput{
-		Key:    "confirm",
-		Prompt: fmt.Sprintf("Are you sure you want to remove the secret '%s'? (y/n)", reference),
-	})
+	form, err := views.NewForm(
+		io.Theme(),
+		ctx.StdIn(),
+		ctx.StdOut(),
+		&views.FormField{
+			Key:   "confirm",
+			Type:  views.PromptTypeConfirm,
+			Title: fmt.Sprintf("Are you sure you want to remove the secret '%s'?", reference),
+		})
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	resp := inputs.FindByKey("confirm").Value()
-	confirmed, _ := strconv.ParseBool(resp)
-	if !confirmed {
+	if err := form.Run(ctx.Ctx); err != nil {
+		logger.FatalErr(err)
+	}
+	resp := form.FindByKey("confirm").Value()
+	if truthy, _ := strconv.ParseBool(resp); !truthy {
 		logger.Warnf("Aborting")
 		return
 	}

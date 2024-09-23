@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/library"
@@ -19,8 +18,8 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Short:   "View and manage your library of workspaces and executables.",
 		Aliases: []string{"lib"},
 		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { interactive.InitInteractiveContainer(ctx, cmd) },
-		PostRun: func(cmd *cobra.Command, args []string) { interactive.WaitForExit(ctx, cmd) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { libraryFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, libraryCmd, *flags.FilterWorkspaceFlag)
@@ -33,7 +32,7 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 
 func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
-	if !interactive.UIEnabled(ctx, cmd) {
+	if !TUIEnabled(ctx, cmd) {
 		logger.FatalErr(errors.New("library command requires an interactive terminal"))
 	}
 
@@ -73,5 +72,5 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		io.Theme(),
 		runFunc,
 	)
-	ctx.InteractiveContainer.SetView(libraryModel)
+	SetView(ctx, cmd, libraryModel)
 }

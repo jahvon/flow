@@ -30,6 +30,7 @@ var _ = Describe("MergeSchemas", func() {
 				"prop1": {Ref: "#/definitions/MyEnum"},
 				"prop2": {Ref: "../alfa/schema.yaml#/definitions/MyString"},
 				"prop3": {Ref: "../charlie/schema.yaml#/"},
+				"prop4": {Ref: "../bravo/other_schema.yaml#/definitions/MyString"},
 			},
 		}
 		//nolint:exhaustive
@@ -42,6 +43,11 @@ var _ = Describe("MergeSchemas", func() {
 				Required: []string{"MyString"},
 			},
 			"bravo/schema.yaml": dst,
+			"bravo/other_schema.yaml": {
+				Definitions: map[schema.FieldKey]*schema.JSONSchema{
+					"MyString": {Type: "string"},
+				},
+			},
 			"charlie/schema.yaml": {
 				Definitions: map[schema.FieldKey]*schema.JSONSchema{
 					"MyInt": {Type: "integer"},
@@ -93,6 +99,20 @@ var _ = Describe("MergeSchemas", func() {
 			Expect(dst.Definitions).To(HaveKey(schema.FieldKey("Charlie")))
 			Expect(dst.Definitions).To(HaveKey(schema.FieldKey("CharlieMyInt")))
 			Expect(src.Ref).To(Equal(schema.Ref("#/definitions/Charlie")))
+		})
+	})
+
+	Context("when the source is an external ref with a path to a definition", func() {
+		var src *schema.JSONSchema
+		BeforeEach(func() {
+			src = dst.Properties["prop4"]
+		})
+
+		It("should merge the external schema", func() {
+			schema.MergeSchemas(dst, src, dstFile, schemaMap)
+			Expect(dst.Definitions).To(HaveKey(schema.FieldKey("MyEnum")))
+			Expect(dst.Definitions).To(HaveKey(schema.FieldKey("OtherMyString")))
+			Expect(src.Ref).To(Equal(schema.Ref("#/definitions/OtherMyString")))
 		})
 	})
 })

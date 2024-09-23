@@ -19,7 +19,12 @@ const (
 func generateJSONSchemas() {
 	sm := schema.RegisteredSchemaMap()
 	for fn, s := range sm {
-		if slices.Contains(TopLevelPages, fn.Title()) {
+		if slices.Contains(TopLevelPages, fn.Title()) { //nolint:nestif
+			if fn.Title() == "Template" {
+				// TODO: fix schema gem bug where the common executable definitions used by the flowfile
+				// and template schemas are non-deterministically generated
+				continue
+			}
 			updateFileID(s, fn)
 			for key, value := range s.Properties {
 				if !value.Ext.IsExported() {
