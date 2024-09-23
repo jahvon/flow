@@ -87,7 +87,50 @@
         }
       }
     },
-    "ExecutableArgument": {},
+    "ExecutableArgument": {
+      "type": "object",
+      "required": [
+        "envKey"
+      ],
+      "properties": {
+        "default": {
+          "description": "The default value to use if the argument is not provided.\nIf the argument is required and no default is provided, the executable will fail.\n",
+          "type": "string",
+          "default": ""
+        },
+        "envKey": {
+          "description": "The name of the environment variable that will be assigned the value.",
+          "type": "string",
+          "default": ""
+        },
+        "flag": {
+          "description": "The flag to use when setting the argument from the command line.\nEither `flag` or `pos` must be set, but not both.\n",
+          "type": "string",
+          "default": ""
+        },
+        "pos": {
+          "description": "The position of the argument in the command line ArgumentList. Values start at 1.\nEither `flag` or `pos` must be set, but not both.\n",
+          "type": "integer",
+          "default": 0
+        },
+        "required": {
+          "description": "If the argument is required, the executable will fail if the argument is not provided.\nIf the argument is not required, the default value will be used if the argument is not provided.\n",
+          "type": "boolean",
+          "default": false
+        },
+        "type": {
+          "description": "The type of the argument. This is used to determine how to parse the value of the argument.",
+          "type": "string",
+          "default": "string",
+          "enum": [
+            "string",
+            "int",
+            "float",
+            "bool"
+          ]
+        }
+      }
+    },
     "ExecutableArgumentList": {
       "type": "array",
       "items": {
@@ -228,7 +271,35 @@
         "$ref": "#/definitions/ExecutableParallelRefConfig"
       }
     },
-    "ExecutableParameter": {},
+    "ExecutableParameter": {
+      "description": "A parameter is a value that can be passed to an executable and all of its sub-executables.\nOnly one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.\n",
+      "type": "object",
+      "required": [
+        "envKey"
+      ],
+      "properties": {
+        "envKey": {
+          "description": "The name of the environment variable that will be assigned the value.",
+          "type": "string",
+          "default": ""
+        },
+        "prompt": {
+          "description": "A prompt to be displayed to the user when collecting an input value.",
+          "type": "string",
+          "default": ""
+        },
+        "secretRef": {
+          "description": "A reference to a secret to be passed to the executable.",
+          "type": "string",
+          "default": ""
+        },
+        "text": {
+          "description": "A static value to be passed to the executable.",
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
     "ExecutableParameterList": {
       "type": "array",
       "items": {
