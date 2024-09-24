@@ -19,13 +19,12 @@ See github.com/jahvon/flow for more information.
 
 ### SEE ALSO
 
+* [flow config](flow_config.md)	 - Update flow configuration values.
 * [flow exec](flow_exec.md)	 - Execute a flow by ID.
-* [flow get](flow_get.md)	 - Print a flow entity.
-* [flow init](flow_init.md)	 - Initialize or restore the flow application state.
 * [flow library](flow_library.md)	 - View and manage your library of workspaces and executables.
-* [flow list](flow_list.md)	 - Print a list of flow entities.
 * [flow logs](flow_logs.md)	 - List and view logs for previous flow executions.
-* [flow remove](flow_remove.md)	 - Remove a flow entity.
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow secret](flow_secret.md)	 - Manage flow secrets.
 * [flow sync](flow_sync.md)	 - Scan workspaces and update flow cache.
+* [flow template](flow_template.md)	 - Manage flowfile templates.
+* [flow workspace](flow_workspace.md)	 - Manage flow workspaces.
 

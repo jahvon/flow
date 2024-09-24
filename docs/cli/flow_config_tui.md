@@ -1,17 +1,15 @@
-## flow get secret
+## flow config tui
 
-Print the value of a secret in the flow secret vault.
+Enable or disable the interactive terminal UI experience.
 
 ```
-flow get secret REFERENCE [flags]
+flow config tui [true|false] [flags]
 ```
 
 ### Options
 
 ```
-      --copy        Copy the secret value to the clipboard
-  -h, --help        help for secret
-  -p, --plainText   Output the secret value as plain text instead of an obfuscated string
+  -h, --help   help for tui
 ```
 
 ### Options inherited from parent commands
@@ -24,5 +22,5 @@ flow get secret REFERENCE [flags]
 
 ### SEE ALSO
 
-* [flow get](flow_get.md)	 - Print a flow entity.
+* [flow config](flow_config.md)	 - Update flow configuration values.
 

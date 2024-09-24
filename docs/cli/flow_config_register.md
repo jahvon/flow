@@ -1,16 +1,15 @@
-## flow list templates
+## flow config register
 
-Print a list of registered flowfile templates.
+Register a flowfile template.
 
 ```
-flow list templates [flags]
+flow config register NAME DEFINITION_TEMPLATE_PATH [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for templates
-  -o, --output string   Output format. One of: yaml, json, doc, or list.
+  -h, --help   help for register
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +22,5 @@ flow list templates [flags]
 
 ### SEE ALSO
 
-* [flow list](flow_list.md)	 - Print a list of flow entities.
+* [flow config](flow_config.md)	 - Update flow configuration values.
 

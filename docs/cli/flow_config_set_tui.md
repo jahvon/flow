@@ -1,16 +1,15 @@
-## flow set workspace
+## flow config set tui
 
-Change the current workspace.
+Enable or disable the interactive terminal UI experience.
 
 ```
-flow set workspace NAME [flags]
+flow config set tui [true|false] [flags]
 ```
 
 ### Options
 
 ```
-  -f, --fixed   Set the workspace mode to fixed
-  -h, --help    help for workspace
+  -h, --help   help for tui
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +22,5 @@ flow set workspace NAME [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow config set](flow_config_set.md)	 - Update flow configuration values.
 

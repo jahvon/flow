@@ -1,15 +1,15 @@
-## flow init vault
+## flow secret set
 
-Create a new flow secret vault.
+Update or create a secret in the flow secret vault.
 
 ```
-flow init vault [flags]
+flow secret set NAME [VALUE] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for vault
+  -h, --help   help for set
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +22,5 @@ flow init vault [flags]
 
 ### SEE ALSO
 
-* [flow init](flow_init.md)	 - Initialize or restore the flow application state.
+* [flow secret](flow_secret.md)	 - Manage flow secrets.
 

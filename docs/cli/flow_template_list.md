@@ -1,16 +1,16 @@
-## flow list secrets
+## flow template list
 
-Print a list of secrets in the flow vault.
+View a list of registered flowfile templates.
 
 ```
-flow list secrets [flags]
+flow template list [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help        help for secrets
-  -p, --plainText   Output the secret value as plain text instead of an obfuscated string
+  -h, --help            help for list
+  -o, --output string   Output format. One of: yaml, json, doc, or list.
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +23,5 @@ flow list secrets [flags]
 
 ### SEE ALSO
 
-* [flow list](flow_list.md)	 - Print a list of flow entities.
+* [flow template](flow_template.md)	 - Manage flowfile templates.
 

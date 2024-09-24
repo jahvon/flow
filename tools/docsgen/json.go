@@ -19,7 +19,7 @@ const (
 func generateJSONSchemas() {
 	sm := schema.RegisteredSchemaMap()
 	for fn, s := range sm {
-		if slices.Contains(TopLevelPages, fn.Title()) { //nolint:nestif
+		if slices.Contains(TopLevelPages, fn.Title()) {
 			updateFileID(s, fn)
 			for key, value := range s.Properties {
 				if !value.Ext.IsExported() {

@@ -1,15 +1,15 @@
-## flow set interactive
+## flow config namespace
 
-Enable or disable the interactive terminal UI experience.
+Change the current namespace.
 
 ```
-flow set interactive [true|false] [flags]
+flow config namespace NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for interactive
+  -h, --help   help for namespace
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +22,5 @@ flow set interactive [true|false] [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow config](flow_config.md)	 - Update flow configuration values.
 

@@ -1,15 +1,17 @@
-## flow set workspace-mode
+## flow workspace list
 
-Switch between fixed and dynamic workspace modes.
+View a list of registered workspaces.
 
 ```
-flow set workspace-mode [fixed|dynamic] [flags]
+flow workspace list [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for workspace-mode
+  -h, --help              help for list
+  -o, --output string     Output format. One of: yaml, json, doc, or list.
+  -t, --tag stringArray   Filter by tags.
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +24,5 @@ flow set workspace-mode [fixed|dynamic] [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow workspace](flow_workspace.md)	 - Manage flow workspaces.
 

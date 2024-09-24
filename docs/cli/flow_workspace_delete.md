@@ -1,6 +1,6 @@
-## flow remove workspace
+## flow workspace delete
 
-Remove an existing workspace from the list of known workspaces.
+Remove an existing workspace from the global configuration's workspaces list.
 
 ### Synopsis
 
@@ -8,13 +8,13 @@ Remove an existing workspace. File contents will remain in the corresponding dir
 Note: You cannot remove the current workspace.
 
 ```
-flow remove workspace NAME [flags]
+flow workspace delete NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for workspace
+  -h, --help   help for delete
 ```
 
 ### Options inherited from parent commands
@@ -27,5 +27,5 @@ flow remove workspace NAME [flags]
 
 ### SEE ALSO
 
-* [flow remove](flow_remove.md)	 - Remove a flow entity.
+* [flow workspace](flow_workspace.md)	 - Manage flow workspaces.
 

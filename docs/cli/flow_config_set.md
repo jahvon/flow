@@ -1,19 +1,15 @@
-## flow set use-plain-text-logger
+## flow config set
 
-Enable or disable the plain text logger.
-
-### Synopsis
-
-Enable or disable the plain text logger. When enabled, the log output will include log level and timestamp.
+Update or create a secret in the flow secret vault.
 
 ```
-flow set use-plain-text-logger (true|false) [flags]
+flow config set NAME [VALUE] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for use-plain-text-logger
+  -h, --help   help for set
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +22,5 @@ flow set use-plain-text-logger (true|false) [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow config](flow_config.md)	 - Update flow configuration values.
 

@@ -1,15 +1,15 @@
-## flow init config
+## flow config set namespace
 
-Initialize the flow global configuration.
+Change the current namespace.
 
 ```
-flow init config [flags]
+flow config set namespace NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for config
+  -h, --help   help for namespace
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +22,5 @@ flow init config [flags]
 
 ### SEE ALSO
 
-* [flow init](flow_init.md)	 - Initialize or restore the flow application state.
+* [flow config set](flow_config_set.md)	 - Update flow configuration values.
 

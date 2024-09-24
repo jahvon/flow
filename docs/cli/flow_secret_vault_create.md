@@ -1,16 +1,15 @@
-## flow get config
+## flow secret vault create
 
-Print the current global configuration values.
+Create a new flow secret vault.
 
 ```
-flow get config [flags]
+flow secret vault create [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for config
-  -o, --output string   Output format. One of: yaml, json, doc, or list.
+  -h, --help   help for create
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +22,5 @@ flow get config [flags]
 
 ### SEE ALSO
 
-* [flow get](flow_get.md)	 - Print a flow entity.
+* [flow secret vault](flow_secret_vault.md)	 - Manage flow secret vault.
 

@@ -1,15 +1,15 @@
-## flow set template
+## flow config log-mode
 
-Set a template definition for use in flow.
+Set the default log mode.
 
 ```
-flow set template NAME DEFINITION_TEMPLATE_PATH [flags]
+flow config log-mode [logfmt|json|text|hidden] [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for template
+  -h, --help   help for log-mode
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +22,5 @@ flow set template NAME DEFINITION_TEMPLATE_PATH [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow config](flow_config.md)	 - Update flow configuration values.
 

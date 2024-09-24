@@ -1,15 +1,16 @@
-## flow set namespace
+## flow secret list
 
-Change the current namespace.
+View a list of secrets in the flow vault.
 
 ```
-flow set namespace NAME [flags]
+flow secret list [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for namespace
+  -h, --help        help for list
+  -p, --plainText   Output the secret value as plain text instead of an obfuscated string
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +23,5 @@ flow set namespace NAME [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow secret](flow_secret.md)	 - Manage flow secrets.
 

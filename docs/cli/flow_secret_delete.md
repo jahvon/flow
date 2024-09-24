@@ -1,15 +1,15 @@
-## flow remove secret
+## flow secret delete
 
 Remove a secret from the vault.
 
 ```
-flow remove secret <name> [flags]
+flow secret delete NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for secret
+  -h, --help   help for delete
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +22,5 @@ flow remove secret <name> [flags]
 
 ### SEE ALSO
 
-* [flow remove](flow_remove.md)	 - Remove a flow entity.
+* [flow secret](flow_secret.md)	 - Manage flow secrets.
 

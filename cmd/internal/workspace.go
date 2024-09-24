@@ -29,26 +29,26 @@ func RegisterWorkspaceCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Aliases: []string{"ws"},
 		Short:   "Manage flow workspaces.",
 	}
-	registerInitWorkspaceCmd(ctx, wsCmd)
-	registerRemoveWsCmd(ctx, wsCmd)
+	registerNewWorkspaceCmd(ctx, wsCmd)
+	registerDeleteWsCmd(ctx, wsCmd)
 	registerListWorkspaceCmd(ctx, wsCmd)
-	registerGetWsCmd(ctx, wsCmd)
+	registerViewWsCmd(ctx, wsCmd)
 	rootCmd.AddCommand(wsCmd)
 }
 
-func registerInitWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
-	initCMd := &cobra.Command{
-		Use:     "init NAME PATH",
-		Aliases: []string{"new", "create"},
-		Short:   "Initialize a new workspace and register it in the global configurations.",
+func registerNewWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
+	newCmd := &cobra.Command{
+		Use:     "new NAME PATH",
+		Aliases: []string{"init", "create"},
+		Short:   "Initialize a new workspace and register it in the user configurations.",
 		Args:    cobra.ExactArgs(2),
-		Run:     func(cmd *cobra.Command, args []string) { initWorkspaceFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { newWorkspaceFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, initCMd, *flags.SetAfterCreateFlag)
-	wsCmd.AddCommand(initCMd)
+	RegisterFlag(ctx, newCmd, *flags.SetAfterCreateFlag)
+	wsCmd.AddCommand(newCmd)
 }
 
-func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func newWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 	path := args[1]
@@ -107,10 +107,10 @@ func initWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) 
 	logger.PlainTextSuccess(fmt.Sprintf("Workspace '%s' created in %s", name, path))
 }
 
-func registerRemoveWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
-	removeCmd := &cobra.Command{
-		Use:     "remove NAME",
-		Aliases: []string{"delete", "destroy"},
+func registerDeleteWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
+	deleteCmd := &cobra.Command{
+		Use:     "delete NAME",
+		Aliases: []string{"del", "remove", "rm"},
 		Short:   "Remove an existing workspace from the global configuration's workspaces list.",
 		Long: "Remove an existing workspace. File contents will remain in the corresponding directory but the " +
 			"workspace will be unlinked from the flow global configurations.\nNote: You cannot remove the current workspace.",
@@ -118,12 +118,12 @@ func registerRemoveWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
-		Run: func(cmd *cobra.Command, args []string) { removeWsFunc(ctx, cmd, args) },
+		Run: func(cmd *cobra.Command, args []string) { deleteWsFunc(ctx, cmd, args) },
 	}
-	wsCmd.AddCommand(removeCmd)
+	wsCmd.AddCommand(deleteCmd)
 }
 
-func removeWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func deleteWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 
@@ -220,10 +220,10 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 }
 
-func registerGetWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
-	getCmd := &cobra.Command{
-		Use:     "get [NAME]",
-		Aliases: []string{"find"},
+func registerViewWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
+	viewCmd := &cobra.Command{
+		Use:     "view NAME",
+		Aliases: []string{"show"},
 		Short:   "View the documentation for a workspace. If the name is omitted, the current workspace is used.",
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -231,13 +231,13 @@ func registerGetWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
 		},
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { getWsFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { viewWsFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, getCmd, *flags.OutputFormatFlag)
-	wsCmd.AddCommand(getCmd)
+	RegisterFlag(ctx, viewCmd, *flags.OutputFormatFlag)
+	wsCmd.AddCommand(viewCmd)
 }
 
-func getWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func viewWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	var workspaceName, wsPath string
 	if len(args) == 1 {

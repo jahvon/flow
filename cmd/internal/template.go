@@ -21,35 +21,35 @@ func RegisterTemplateCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Aliases: []string{"tmpl", "t"},
 		Short:   "Manage flowfile templates.",
 	}
-	registerInitTemplateCmd(ctx, templateCmd)
-	registerSetTemplateCmd(ctx, templateCmd)
+	registerGenerateTemplateCmd(ctx, templateCmd)
+	registerRegisterTemplateCmd(ctx, templateCmd)
 	registerListTemplateCmd(ctx, templateCmd)
-	registerGetTemplateCmd(ctx, templateCmd)
+	registerViewTemplateCmd(ctx, templateCmd)
 	rootCmd.AddCommand(templateCmd)
 }
 
-func registerInitTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
-	initCmd := &cobra.Command{
-		Use:     "init FLOWFILE_NAME [-w WORKSPACE ] [-o OUTPUT_DIR] [-f FILE | -t TEMPLATE]",
-		Aliases: []string{"render", "run"},
-		Short:   "Render a flowfile template into a workspace.",
+func registerGenerateTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
+	generateCmd := &cobra.Command{
+		Use:     "generate FLOWFILE_NAME [-w WORKSPACE ] [-o OUTPUT_DIR] [-f FILE | -t TEMPLATE]",
+		Aliases: []string{"init", "render", "run"},
+		Short:   "Generate workspace executables and scaffolding from a flowfile template.",
 		Long:    templateLong,
 		Args:    cobra.MaximumNArgs(1),
 		PreRun:  func(cmd *cobra.Command, args []string) { runner.RegisterRunner(exec.NewRunner()) },
-		Run:     func(cmd *cobra.Command, args []string) { templateFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { generateTemplateFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, initCmd, *flags.TemplateOutputPathFlag)
-	RegisterFlag(ctx, initCmd, *flags.TemplateFlag)
-	RegisterFlag(ctx, initCmd, *flags.TemplateFilePathFlag)
-	RegisterFlag(ctx, initCmd, *flags.TemplateWorkspaceFlag)
-	MarkFlagMutuallyExclusive(initCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
-	MarkOneFlagRequired(initCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
-	MarkFlagFilename(ctx, initCmd, flags.TemplateFilePathFlag.Name)
-	MarkFlagFilename(ctx, initCmd, flags.TemplateOutputPathFlag.Name)
-	templateCmd.AddCommand(initCmd)
+	RegisterFlag(ctx, generateCmd, *flags.TemplateOutputPathFlag)
+	RegisterFlag(ctx, generateCmd, *flags.TemplateFlag)
+	RegisterFlag(ctx, generateCmd, *flags.TemplateFilePathFlag)
+	RegisterFlag(ctx, generateCmd, *flags.TemplateWorkspaceFlag)
+	MarkFlagMutuallyExclusive(generateCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
+	MarkOneFlagRequired(generateCmd, flags.TemplateFlag.Name, flags.TemplateFilePathFlag.Name)
+	MarkFlagFilename(ctx, generateCmd, flags.TemplateFilePathFlag.Name)
+	MarkFlagFilename(ctx, generateCmd, flags.TemplateOutputPathFlag.Name)
+	templateCmd.AddCommand(generateCmd)
 }
 
-func templateFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func generateTemplateFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	outputPath := flags.ValueFor[string](ctx, cmd, *flags.TemplateOutputPathFlag, false)
 	template := flags.ValueFor[string](ctx, cmd, *flags.TemplateFlag, false)
@@ -77,15 +77,15 @@ func templateFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger.PlainTextSuccess(fmt.Sprintf("Template '%s' rendered successfully", flowFilename))
 }
 
-func registerSetTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
-	setCmd := &cobra.Command{
-		Use:     "set NAME DEFINITION_TEMPLATE_PATH",
-		Aliases: []string{"new"},
+func registerRegisterTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
+	registerCmd := &cobra.Command{
+		Use:     "register NAME DEFINITION_TEMPLATE_PATH",
+		Aliases: []string{"set", "new"},
 		Short:   "Register a flowfile template.",
 		Args:    cobra.ExactArgs(2),
 		Run:     func(cmd *cobra.Command, args []string) { setTemplateFunc(ctx, cmd, args) },
 	}
-	templateCmd.AddCommand(setCmd)
+	templateCmd.AddCommand(registerCmd)
 }
 
 func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
@@ -156,14 +156,14 @@ func listTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 }
 
-func registerGetTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
+func registerViewTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
 	templateCmd := &cobra.Command{
-		Use:     "get",
-		Aliases: []string{"find"},
+		Use:     "view",
+		Aliases: []string{"show"},
 		Short:   "View a flowfile template's documentation. Either it's registered name or file path can be used.",
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { getTemplateFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { viewTemplateFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, templateCmd, *flags.TemplateFlag)
 	RegisterFlag(ctx, templateCmd, *flags.TemplateFilePathFlag)
@@ -172,7 +172,7 @@ func registerGetTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
 	getCmd.AddCommand(templateCmd)
 }
 
-func getTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func viewTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	template := flags.ValueFor[string](ctx, cmd, *flags.TemplateFlag, false)
 	templateFilePath := flags.ValueFor[string](ctx, cmd, *flags.TemplateFilePathFlag, false)

@@ -1,15 +1,15 @@
-## flow version
+## flow template register
 
-Print the current flow version.
+Register a flowfile template.
 
 ```
-flow version [flags]
+flow template register NAME DEFINITION_TEMPLATE_PATH [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for version
+  -h, --help   help for register
 ```
 
 ### Options inherited from parent commands
@@ -17,10 +17,10 @@ flow version [flags]
 ```
   -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
       --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (from 0 to 4 where 4 is most verbose)
+      --verbosity int     Log verbosity level (-1 to 1)
 ```
 
 ### SEE ALSO
 
-* [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
+* [flow template](flow_template.md)	 - Manage flowfile templates.
 

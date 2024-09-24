@@ -1,17 +1,16 @@
-## flow list workspaces
+## flow workspace new
 
-Print a list of the registered flow workspaces.
+Initialize a new workspace and register it in the user configurations.
 
 ```
-flow list workspaces [flags]
+flow workspace new NAME PATH [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help              help for workspaces
-  -o, --output string     Output format. One of: yaml, json, doc, or list.
-  -t, --tag stringArray   Filter by tags.
+  -h, --help   help for new
+  -s, --set    Set the newly created workspace as the current workspace
 ```
 
 ### Options inherited from parent commands
@@ -24,5 +23,5 @@ flow list workspaces [flags]
 
 ### SEE ALSO
 
-* [flow list](flow_list.md)	 - Print a list of flow entities.
+* [flow workspace](flow_workspace.md)	 - Manage flow workspaces.
 

@@ -1,11 +1,11 @@
-## flow init
+## flow secret
 
-Initialize or restore the flow application state.
+Manage flow secrets.
 
 ### Options
 
 ```
-  -h, --help   help for init
+  -h, --help   help for secret
 ```
 
 ### Options inherited from parent commands
@@ -19,8 +19,9 @@ Initialize or restore the flow application state.
 ### SEE ALSO
 
 * [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
-* [flow init config](flow_init_config.md)	 - Initialize the flow global configuration.
-* [flow init executables](flow_init_executables.md)	 - Add rendered executables from an executable definition template to a workspace
-* [flow init vault](flow_init_vault.md)	 - Create a new flow secret vault.
-* [flow init workspace](flow_init_workspace.md)	 - Initialize and add a workspace to the list of known workspaces.
+* [flow secret delete](flow_secret_delete.md)	 - Remove a secret from the vault.
+* [flow secret list](flow_secret_list.md)	 - View a list of secrets in the flow vault.
+* [flow secret set](flow_secret_set.md)	 - Update or create a secret in the flow secret vault.
+* [flow secret vault](flow_secret_vault.md)	 - Manage flow secret vault.
+* [flow secret view](flow_secret_view.md)	 - Show the value of a secret in the secret vault.
 

@@ -1,16 +1,15 @@
-## flow init workspace
+## flow config reset
 
-Initialize and add a workspace to the list of known workspaces.
+Restore the default flow configuration values. This will overwrite the current configuration.
 
 ```
-flow init workspace NAME PATH [flags]
+flow config reset [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for workspace
-  -s, --set    Set the newly created workspace as the current workspace
+  -h, --help   help for reset
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +22,5 @@ flow init workspace NAME PATH [flags]
 
 ### SEE ALSO
 
-* [flow init](flow_init.md)	 - Initialize or restore the flow application state.
+* [flow config](flow_config.md)	 - Update flow configuration values.
 

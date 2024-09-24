@@ -1,15 +1,11 @@
-## flow set log-mode
+## flow secret vault
 
-Set the default log mode.
-
-```
-flow set log-mode [logfmt|json|text|hidden] [flags]
-```
+Manage flow secret vault.
 
 ### Options
 
 ```
-  -h, --help   help for log-mode
+  -h, --help   help for vault
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +18,6 @@ flow set log-mode [logfmt|json|text|hidden] [flags]
 
 ### SEE ALSO
 
-* [flow set](flow_set.md)	 - Update global or workspace configuration values.
+* [flow secret](flow_secret.md)	 - Manage flow secrets.
+* [flow secret vault create](flow_secret_vault_create.md)	 - Create a new flow secret vault.
 

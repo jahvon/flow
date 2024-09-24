@@ -1,16 +1,16 @@
-## flow get template
+## flow template view
 
-Print a flowfile template using it's registered name or file path.
+View a flowfile template's documentation. Either it's registered name or file path can be used.
 
 ```
-flow get template [flags]
+flow template view [flags]
 ```
 
 ### Options
 
 ```
   -f, --file string                  Path to the template file. It must be a valid flow file template.
-  -h, --help                         help for template
+  -h, --help                         help for view
   -o, --output string                Output format. One of: yaml, json, doc, or list.
   -t, --template flow set template   Registered template name. Templates can be registered in the flow configuration file or with flow set template.
 ```
@@ -25,5 +25,5 @@ flow get template [flags]
 
 ### SEE ALSO
 
-* [flow get](flow_get.md)	 - Print a flow entity.
+* [flow template](flow_template.md)	 - Manage flowfile templates.
 

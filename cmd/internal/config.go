@@ -25,30 +25,30 @@ func RegisterConfigCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Aliases: []string{"c", "cfg"},
 		Short:   "Update flow configuration values.",
 	}
-	registerConfigInitCmd(ctx, setCmd)
+	registerConfigResetCmd(ctx, setCmd)
 	registerSetConfigCmd(ctx, setCmd)
-	registerGetConfigCmd(ctx, setCmd)
+	registerViewConfigCmd(ctx, setCmd)
 	registerSetWorkspaceCmd(ctx, setCmd)
 	registerSetNamespaceCmd(ctx, setCmd)
 	registerSetWorkspaceModeCmd(ctx, setCmd)
 	registerSetLogModeCmd(ctx, setCmd)
 	registerSetTUICmd(ctx, setCmd)
-	registerSetTemplateCmd(ctx, setCmd)
+	registerRegisterTemplateCmd(ctx, setCmd)
 	registerSetSecretCmd(ctx, setCmd)
 	rootCmd.AddCommand(setCmd)
 }
 
-func registerConfigInitCmd(ctx *context.Context, configCmd *cobra.Command) {
-	initCmd := &cobra.Command{
-		Use:   "init",
-		Short: "Initialize the flow global configuration. This will overwrite the current configuration.",
+func registerConfigResetCmd(ctx *context.Context, configCmd *cobra.Command) {
+	resetCmd := &cobra.Command{
+		Use:   "reset",
+		Short: "Restore the default flow configuration values. This will overwrite the current configuration.",
 		Args:  cobra.NoArgs,
-		Run:   func(cmd *cobra.Command, args []string) { initConfigFunc(ctx, cmd, args) },
+		Run:   func(cmd *cobra.Command, args []string) { resetConfigFunc(ctx, cmd, args) },
 	}
-	configCmd.AddCommand(initCmd)
+	configCmd.AddCommand(resetCmd)
 }
 
-func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
+func resetConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	form, err := views.NewForm(
 		io.Theme(),
@@ -74,7 +74,7 @@ func initConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 	if err := filesystem.InitConfig(); err != nil {
 		logger.FatalErr(err)
 	}
-	logger.PlainTextSuccess("Initialized flow global configurations")
+	logger.PlainTextSuccess("Restored flow configurations")
 }
 
 func registerSetConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
@@ -230,21 +230,21 @@ func setInteractiveFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger.PlainTextSuccess("Interactive UI " + strVal)
 }
 
-func registerGetConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
-	getCmd := &cobra.Command{
-		Use:     "get",
-		Aliases: []string{"current"},
+func registerViewConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
+	viewCmd := &cobra.Command{
+		Use:     "view",
+		Aliases: []string{"show", "current"},
 		Short:   "View the current global configuration values.",
 		Args:    cobra.NoArgs,
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { getConfigFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { viewConfigFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, getCmd, *flags.OutputFormatFlag)
-	configCmd.AddCommand(getCmd)
+	RegisterFlag(ctx, viewCmd, *flags.OutputFormatFlag)
+	configCmd.AddCommand(viewCmd)
 }
 
-func getConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func viewConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	userConfig := ctx.Config
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)

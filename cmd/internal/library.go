@@ -31,8 +31,8 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	RegisterFlag(ctx, libraryCmd, *flags.FilterVerbFlag)
 	RegisterFlag(ctx, libraryCmd, *flags.FilterTagFlag)
 	RegisterFlag(ctx, libraryCmd, *flags.FilterExecSubstringFlag)
-	registerListExecutableCmd(ctx, libraryCmd)
-	registerGetExecCmd(ctx, libraryCmd)
+	registerGlanceLibraryCmd(ctx, libraryCmd)
+	registerViewLibraryCmd(ctx, libraryCmd)
 	rootCmd.AddCommand(libraryCmd)
 }
 
@@ -81,26 +81,25 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	SetView(ctx, cmd, libraryModel)
 }
 
-func registerListExecutableCmd(ctx *context.Context, libraryCmd *cobra.Command) {
-	listCmd := &cobra.Command{
-		Use:     "list",
-		Aliases: []string{"ls"},
-		Short:   "View a list of executables.",
+func registerGlanceLibraryCmd(ctx *context.Context, libraryCmd *cobra.Command) {
+	glanceCmd := &cobra.Command{
+		Use:     "glance",
+		Short:   "View a list of just executables.",
 		Args:    cobra.NoArgs,
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { listExecutableFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { glanceLibraryCmd(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, listCmd, *flags.OutputFormatFlag)
-	RegisterFlag(ctx, listCmd, *flags.FilterWorkspaceFlag)
-	RegisterFlag(ctx, listCmd, *flags.FilterNamespaceFlag)
-	RegisterFlag(ctx, listCmd, *flags.FilterVerbFlag)
-	RegisterFlag(ctx, listCmd, *flags.FilterTagFlag)
-	RegisterFlag(ctx, listCmd, *flags.FilterExecSubstringFlag)
-	libraryCmd.AddCommand(listCmd)
+	RegisterFlag(ctx, glanceCmd, *flags.OutputFormatFlag)
+	RegisterFlag(ctx, glanceCmd, *flags.FilterWorkspaceFlag)
+	RegisterFlag(ctx, glanceCmd, *flags.FilterNamespaceFlag)
+	RegisterFlag(ctx, glanceCmd, *flags.FilterVerbFlag)
+	RegisterFlag(ctx, glanceCmd, *flags.FilterTagFlag)
+	RegisterFlag(ctx, glanceCmd, *flags.FilterExecSubstringFlag)
+	libraryCmd.AddCommand(glanceCmd)
 }
 
-func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func glanceLibraryCmd(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
@@ -143,10 +142,10 @@ func listExecutableFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 }
 
-func registerGetExecCmd(ctx *context.Context, libraryCmd *cobra.Command) {
-	getCmd := &cobra.Command{
-		Use:     "get VERB ID",
-		Aliases: []string{"find"},
+func registerViewLibraryCmd(ctx *context.Context, libraryCmd *cobra.Command) {
+	viewCmd := &cobra.Command{
+		Use:     "view VERB ID",
+		Aliases: []string{"show", "find"},
 		Short:   "View an executable's documentation. The executable is found by reference.",
 		Long: "View an executable by the executable's verb and ID.\nThe target executable's ID should be in the  " +
 			"form of 'ws/ns:name' and the verb should match the target executable's verb or one of its aliases.\n\n" +
@@ -159,13 +158,13 @@ func registerGetExecCmd(ctx *context.Context, libraryCmd *cobra.Command) {
 		Args:    cobra.ExactArgs(2),
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { getExecFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { viewLibraryFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, getCmd, *flags.OutputFormatFlag)
-	libraryCmd.AddCommand(getCmd)
+	RegisterFlag(ctx, viewCmd, *flags.OutputFormatFlag)
+	libraryCmd.AddCommand(viewCmd)
 }
 
-func getExecFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func viewLibraryFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	verbStr := args[0]
 	verb := executable.Verb(verbStr)

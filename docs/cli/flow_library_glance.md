@@ -1,20 +1,20 @@
-## flow list executables
+## flow library glance
 
-Print a list of executable flows.
+View a list of just executables.
 
 ```
-flow list executables [flags]
+flow library glance [flags]
 ```
 
 ### Options
 
 ```
   -f, --filter string      Filter executable by reference substring.
-  -h, --help               help for executables
+  -h, --help               help for glance
   -n, --namespace string   Filter executables by namespace.
   -o, --output string      Output format. One of: yaml, json, doc, or list.
   -t, --tag stringArray    Filter by tags.
-  -v, --verb string        Filter executables by verb. One of: [add apply build configure delete deploy destroy edit exec generate install launch manage monitor new open refresh release reload render run setup show start transform undeploy uninstall update upgrade view]
+  -v, --verb string        Filter executables by verb. One of: [activate add analyze apply audit build bundle check clean clear configure create deactivate delete deploy destroy disable edit enable exec generate init install kill launch lint manage new open package patch publish purge push reboot refresh release reload remove render restart run scan send set setup show start stop teardown test transform undeploy uninstall unset update upgrade validate verify view watch]
   -w, --workspace string   Filter executables by workspace.
 ```
 
@@ -28,5 +28,5 @@ flow list executables [flags]
 
 ### SEE ALSO
 
-* [flow list](flow_list.md)	 - Print a list of flow entities.
+* [flow library](flow_library.md)	 - View and manage your library of workspaces and executables.
 

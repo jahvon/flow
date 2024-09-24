@@ -1,16 +1,16 @@
-## flow get workspace
+## flow config workspace
 
-Print a workspaces configuration. If the name is omitted, the current workspace is used.
+Change the current workspace.
 
 ```
-flow get workspace [NAME] [flags]
+flow config workspace NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for workspace
-  -o, --output string   Output format. One of: yaml, json, doc, or list.
+  -f, --fixed   Set the workspace mode to fixed
+  -h, --help    help for workspace
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +23,5 @@ flow get workspace [NAME] [flags]
 
 ### SEE ALSO
 
-* [flow get](flow_get.md)	 - Print a flow entity.
+* [flow config](flow_config.md)	 - Update flow configuration values.
 
