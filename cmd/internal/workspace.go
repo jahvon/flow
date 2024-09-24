@@ -18,7 +18,7 @@ import (
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
-	workspace2 "github.com/jahvon/flow/internal/io/workspace"
+	workspaceIO "github.com/jahvon/flow/internal/io/workspace"
 	"github.com/jahvon/flow/types/common"
 	"github.com/jahvon/flow/types/workspace"
 )
@@ -209,14 +209,14 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	if TUIEnabled(ctx, cmd) {
-		view := workspace2.NewWorkspaceListView(
+		view := workspaceIO.NewWorkspaceListView(
 			ctx,
 			filteredWorkspaces,
 			types.Format(outputFormat),
 		)
 		SetView(ctx, cmd, view)
 	} else {
-		workspace2.PrintWorkspaceList(logger, outputFormat, filteredWorkspaces)
+		workspaceIO.PrintWorkspaceList(logger, outputFormat, filteredWorkspaces)
 	}
 }
 
@@ -257,9 +257,9 @@ func viewWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
-		view := workspace2.NewWorkspaceView(ctx, wsCfg, types.Format(outputFormat))
+		view := workspaceIO.NewWorkspaceView(ctx, wsCfg, types.Format(outputFormat))
 		SetView(ctx, cmd, view)
 	} else {
-		workspace2.PrintWorkspaceConfig(logger, outputFormat, wsCfg)
+		workspaceIO.PrintWorkspaceConfig(logger, outputFormat, wsCfg)
 	}
 }

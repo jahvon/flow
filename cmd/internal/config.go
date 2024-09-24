@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	io2 "github.com/jahvon/tuikit/io"
+	tuikitIO "github.com/jahvon/tuikit/io"
 	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
@@ -15,7 +15,7 @@ import (
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
-	config2 "github.com/jahvon/flow/internal/io/config"
+	configIO "github.com/jahvon/flow/internal/io/config"
 	"github.com/jahvon/flow/types/config"
 )
 
@@ -187,7 +187,7 @@ func registerSetLogModeCmd(ctx *context.Context, setCmd *cobra.Command) {
 
 func setLogModeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
-	mode := io2.LogMode(strings.ToLower(args[0]))
+	mode := tuikitIO.LogMode(strings.ToLower(args[0]))
 
 	userConfig := ctx.Config
 	userConfig.DefaultLogMode = mode
@@ -249,9 +249,9 @@ func viewConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	userConfig := ctx.Config
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
-		view := config2.NewUserConfigView(ctx.TUIContainer, *userConfig, types.Format(outputFormat))
+		view := configIO.NewUserConfigView(ctx.TUIContainer, *userConfig, types.Format(outputFormat))
 		SetView(ctx, cmd, view)
 	} else {
-		config2.PrintUserConfig(logger, outputFormat, userConfig)
+		configIO.PrintUserConfig(logger, outputFormat, userConfig)
 	}
 }
