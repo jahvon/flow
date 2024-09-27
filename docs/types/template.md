@@ -12,12 +12,12 @@ Configuration for a flowfile template; templates can be used to generate flow fi
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `artifacts` | A list of artifacts to be copied after generating the flow file. | `array` ([Artifact](#Artifact)) | <no value> | [] |
-| `form` | Form fields to be displayed to the user when generating a flow file from a template.  The form will be rendered first, and the user's input can be used to render the template. For example, a form field with the key `name` can be used in the template as `{{.name}}`.  | `array` ([Field](#Field)) | [] | [] |
-| `postRun` | A list of exec executables to run after generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> | [] |
-| `preRun` | A list of exec executables to run before generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> | [] |
-| `template` | The flow file template to generate. The template must be a valid flow file after rendering. | `string` | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `artifacts` | A list of artifacts to be copied after generating the flow file. | `array` ([Artifact](#Artifact)) | <no value> |  |
+| `form` | Form fields to be displayed to the user when generating a flow file from a template.  The form will be rendered first, and the user's input can be used to render the template. For example, a form field with the key `name` can be used in the template as `{{.name}}`.  | `array` ([Field](#Field)) | [] |  |
+| `postRun` | A list of exec executables to run after generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> |  |
+| `preRun` | A list of exec executables to run before generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> |  |
+| `template` | The flow file template to generate. The template must be a valid flow file after rendering. | `string` | <no value> |  |
 
 
 ## Definitions
@@ -35,13 +35,13 @@ Go templating from form data is supported in all fields.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `asTemplate` | If true, the artifact will be copied as a template file. The file will be rendered using Go templating from  the form data. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the template.  | `boolean` | false | [] |
-| `dstDir` | The directory to copy the file to. If not set, the file will be copied to the root of the flow file directory. The directory will be created if it does not exist.  | `string` |  | [] |
-| `dstName` | The name of the file to copy to. If not set, the file will be copied with the same name. | `string` |  | [] |
-| `if` | A condition to determine if the artifact should be copied. The condition is evaluated using Go templating  from the form data. If the condition is not met, the artifact will not be copied. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to copy the artifact only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` |  | [] |
-| `srcDir` | The directory to copy the file from.  If not set, the file will be copied from the directory of the template file.  | `string` |  | [] |
-| `srcName` | The name of the file to copy. | `string` | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `asTemplate` | If true, the artifact will be copied as a template file. The file will be rendered using Go templating from  the form data. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the template.  | `boolean` | false |  |
+| `dstDir` | The directory to copy the file to. If not set, the file will be copied to the root of the flow file directory. The directory will be created if it does not exist.  | `string` |  |  |
+| `dstName` | The name of the file to copy to. If not set, the file will be copied with the same name. | `string` |  |  |
+| `if` | A condition to determine if the artifact should be copied. The condition is evaluated using Go templating  from the form data. If the condition is not met, the artifact will not be copied. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to copy the artifact only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` |  |  |
+| `srcDir` | The directory to copy the file from.  If not set, the file will be copied from the directory of the template file.  | `string` |  |  |
+| `srcName` | The name of the file to copy. | `string` | <no value> |  |
 
 ### ExecutableArgumentList
 
@@ -72,13 +72,13 @@ Standard executable type. Runs a command/file in a subprocess.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `cmd` | The command to execute. Only one of `cmd` or `file` must be set.  | `string` |  | [] |
-| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  | [] |
-| `file` | The file to execute. Only one of `cmd` or `file` must be set.  | `string` |  | [] |
-| `logMode` | The log mode to use when running the executable. This can either be `hidden`, `json`, `logfmt` or `text`  | `string` | logfmt | [] |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `cmd` | The command to execute. Only one of `cmd` or `file` must be set.  | `string` |  |  |
+| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  |  |
+| `file` | The file to execute. Only one of `cmd` or `file` must be set.  | `string` |  |  |
+| `logMode` | The log mode to use when running the executable. This can either be `hidden`, `json`, `logfmt` or `text`  | `string` | logfmt |  |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
 
 ### ExecutableParameterList
 
@@ -100,13 +100,13 @@ A field to be displayed to the user when generating a flow file from a template.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `default` | The default value to use if a value is not set. | `string` |  | [] |
-| `description` | A description of the field. | `string` |  | [] |
-| `group` | The group to display the field in. Fields with the same group will be displayed together. | `integer` | 0 | [] |
-| `key` | The key to associate the data with. This is used as the key in the template data map. | `string` | <no value> | [] |
-| `prompt` | A prompt to be displayed to the user when collecting an input value. | `string` | <no value> | [] |
-| `required` | If true, a value must be set. If false, the default value will be used if a value is not set. | `boolean` | false | [] |
-| `validate` | A regular expression to validate the input value against. | `string` |  | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `default` | The default value to use if a value is not set. | `string` |  |  |
+| `description` | A description of the field. | `string` |  |  |
+| `group` | The group to display the field in. Fields with the same group will be displayed together. | `integer` | 0 |  |
+| `key` | The key to associate the data with. This is used as the key in the template data map. | `string` | <no value> | ✘ |
+| `prompt` | A prompt to be displayed to the user when collecting an input value. | `string` | <no value> | ✘ |
+| `required` | If true, a value must be set. If false, the default value will be used if a value is not set. | `boolean` | false |  |
+| `validate` | A regular expression to validate the input value against. | `string` |  |  |
 
 

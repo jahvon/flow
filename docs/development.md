@@ -55,7 +55,7 @@ Be sure to regenerate the JSON schema files and markdown documentation before su
 
 ### Working with tuikit
 
-The `flow` project uses the [tuikit](github.com/jahvon/tuikit) framework for building the terminal UI.
+The `flow` project uses the [tuikit](tuikit.md) framework for building the terminal UI.
 Contributions to the components and helpers in `tuikit` are welcome.
 
 _You should test all tuikit changes with a local flow build before submitting a PR._

@@ -7,8 +7,8 @@ View an executable's documentation. The executable is found by reference.
 View an executable by the executable's verb and ID.
 The target executable's ID should be in the  form of 'ws/ns:name' and the verb should match the target executable's verb or one of its aliases.
 
-See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableVerb for more information on executable verbs.
-See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableRef for more information on executable IDs.
+See https://flowexec.io/#/types/flowfile#ExecutableVerb for more information on executable verbs.
+See https://flowexec.io/#/types/flowfile#ExecutableRef for more information on executable IDs.
 
 ```
 flow library view VERB ID [flags]

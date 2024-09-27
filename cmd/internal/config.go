@@ -26,15 +26,8 @@ func RegisterConfigCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Short:   "Update flow configuration values.",
 	}
 	registerConfigResetCmd(ctx, setCmd)
-	registerSetConfigCmd(ctx, setCmd)
 	registerViewConfigCmd(ctx, setCmd)
-	registerSetWorkspaceCmd(ctx, setCmd)
-	registerSetNamespaceCmd(ctx, setCmd)
-	registerSetWorkspaceModeCmd(ctx, setCmd)
-	registerSetLogModeCmd(ctx, setCmd)
-	registerSetTUICmd(ctx, setCmd)
-	registerRegisterTemplateCmd(ctx, setCmd)
-	registerSetSecretCmd(ctx, setCmd)
+	registerSetConfigCmd(ctx, setCmd)
 	rootCmd.AddCommand(setCmd)
 }
 

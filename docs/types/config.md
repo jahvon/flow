@@ -22,14 +22,14 @@ Alternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `currentNamespace` | The name of the current namespace.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`. If the namespace is not set, only executables defined without a namespace will be discovered.  | `string` |  | [] |
-| `currentWorkspace` | The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map. | `string` |  | [] |
-| `defaultLogMode` | The default log mode to use when running executables. This can either be `hidden`, `json`, `logfmt` or `text`  `hidden` will not display any logs. `json` will display logs in JSON format. `logfmt` will display logs with a log level, timestamp, and message. `text` will just display the log message.  | `string` | logfmt | [] |
-| `interactive` |  | [Interactive](#Interactive) | <no value> | [] |
-| `templates` | A map of flowfile template names to their paths. | `map` (`string` -> `string`) | map[] | [] |
-| `workspaceMode` | The mode of the workspace. This can be either `fixed` or `dynamic`. In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field. In `dynamic` mode, the current workspace used at runtime is determined by the current directory. If the current directory is within a workspace, that workspace is used.  | `string` | dynamic | [] |
-| `workspaces` | Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.  | `map` (`string` -> `string`) | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `currentNamespace` | The name of the current namespace.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`. If the namespace is not set, only executables defined without a namespace will be discovered.  | `string` |  |  |
+| `currentWorkspace` | The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map. | `string` |  |  |
+| `defaultLogMode` | The default log mode to use when running executables. This can either be `hidden`, `json`, `logfmt` or `text`  `hidden` will not display any logs. `json` will display logs in JSON format. `logfmt` will display logs with a log level, timestamp, and message. `text` will just display the log message.  | `string` | logfmt |  |
+| `interactive` |  | [Interactive](#Interactive) | <no value> |  |
+| `templates` | A map of flowfile template names to their paths. | `map` (`string` -> `string`) | map[] |  |
+| `workspaceMode` | The mode of the workspace. This can be either `fixed` or `dynamic`. In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field. In `dynamic` mode, the current workspace used at runtime is determined by the current directory. If the current directory is within a workspace, that workspace is used.  | `string` | dynamic |  |
+| `workspaces` | Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.  | `map` (`string` -> `string`) | <no value> |  |
 
 
 ## Definitions
@@ -45,9 +45,9 @@ Configurations for the interactive UI.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `enabled` |  | `boolean` | <no value> | [] |
-| `notifyOnCompletion` | Whether to send a desktop notification when a command completes. | `boolean` | <no value> | [] |
-| `soundOnCompletion` | Whether to play a sound when a command completes. | `boolean` | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `enabled` |  | `boolean` | <no value> | ✘ |
+| `notifyOnCompletion` | Whether to send a desktop notification when a command completes. | `boolean` | <no value> |  |
+| `soundOnCompletion` | Whether to play a sound when a command completes. | `boolean` | <no value> |  |
 
 

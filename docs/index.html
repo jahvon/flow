@@ -23,12 +23,6 @@
   <script>
     window.$docsify = {
       name: 'flow',
-      nameLink: {
-        '/guide/': '#/guide/',
-        '/cli/': '#/cli/',
-        '/types/': '#/types',
-        '/': '#/',
-      },
       repo: 'jahvon/flow',
       homepage: 'README.md',
       relativePath: true,
@@ -39,10 +33,9 @@
       subMaxLevel: 3,
       coverpage: true,
       onlyCover: true,
+      nameLink: '#/README',
+      auto2top: true,
       alias: {
-        '/types/?(.*)': '/types/$1',
-        '/cli/?(.*)': '/cli/$1',
-        '/guide/?(.*)': '/guide/$1',
         '/releases/(.*)': 'https://github.com/jahvon/flow/releases/$1',
         '/schemas/(.*)': 'https://github.com/jahvon/flow/tree/main/schemas/$1',
         '/issues/(.*)': 'https://github.com/jahvon/flow/issues/$1',
@@ -59,6 +52,7 @@
   <script src="//cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>
   <script src="//unpkg.com/docsify-plugin-flexible-alerts"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
 </body>
 </html>

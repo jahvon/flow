@@ -1,1 +1,3 @@
 coming soon...
+
+In the meantime, see [FlowFile](../types/flowfile.md).

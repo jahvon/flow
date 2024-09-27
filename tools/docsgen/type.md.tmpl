@@ -16,9 +16,9 @@
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
+| ----- | ----------- | ---- | ------- | :--------: |
 {{ range $key, $prop := .Properties -}}
-| `{{$key.Lower}}` | {{OneLine $prop.Description}} | {{TypeStr $prop}} | {{$prop.Default}} | {{$prop.Required}} |
+| `{{$key.Lower}}` | {{OneLine $prop.Description}} | {{TypeStr $prop}} | {{$prop.Default}} | {{IsRequired .Required $key}} |
 {{ end -}}
 {{end}}
 
@@ -43,9 +43,9 @@
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
+| ----- | ----------- | ---- | ------- | :--------: |
 {{ range $propKey, $prop := .Properties -}}
-| `{{$propKey.Lower}}` | {{OneLine $prop.Description}} | {{TypeStr $prop}} | {{$prop.Default}} | {{$prop.Required}} |
+| `{{$propKey.Lower}}` | {{OneLine $prop.Description}} | {{TypeStr $prop}} | {{$prop.Default}} | {{IsRequired $def.Required $propKey}} |
 {{ end -}}
 {{end}}
 {{end}}

@@ -1,1 +1,3 @@
 coming soon...
+
+In the meantime, see [FlowFile](../types/workspace.md) and [flow workspace](../cli/flow_workspace.md).

@@ -47,7 +47,7 @@ brews:
     directory: Formula
     repository:
       owner: jahvon
-      name: homebrew-flow
+      name: homebrew-tap
       token: "{{ .Env.HOMEBREW_FLOW_GITHUB_TOKEN }}"
     dependencies:
       - name: xclip
