@@ -13,12 +13,12 @@ Every workspace has a workspace config file named `flow.yaml` in the root of the
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `description` | A description of the workspace. This description is rendered as markdown in the interactive UI. | `string` |  | [] |
-| `descriptionFile` | A path to a markdown file that contains the description of the workspace. | `string` |  | [] |
-| `displayName` | The display name of the workspace. This is used in the interactive UI. | `string` |  | [] |
-| `executables` |  | [ExecutableFilter](#ExecutableFilter) | <no value> | [] |
-| `tags` |  | [CommonTags](#CommonTags) | [] | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `description` | A description of the workspace. This description is rendered as markdown in the interactive UI. | `string` |  |  |
+| `descriptionFile` | A path to a markdown file that contains the description of the workspace. | `string` |  |  |
+| `displayName` | The display name of the workspace. This is used in the interactive UI. | `string` |  |  |
+| `executables` |  | [ExecutableFilter](#ExecutableFilter) | <no value> |  |
+| `tags` |  | [CommonTags](#CommonTags) | [] |  |
 
 
 ## Definitions
@@ -45,8 +45,8 @@ Tags can be used with list commands to filter returned data.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `excluded` | A list of directories to exclude from the executable search. | `array` (`string`) | [] | [] |
-| `included` | A list of directories to include in the executable search. | `array` (`string`) | [] | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `excluded` | A list of directories to exclude from the executable search. | `array` (`string`) | [] |  |
+| `included` | A list of directories to include in the executable search. | `array` (`string`) | [] |  |
 
 

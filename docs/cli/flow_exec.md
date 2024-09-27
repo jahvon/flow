@@ -5,29 +5,35 @@ Execute a flow by ID.
 ### Synopsis
 
 
-Execute a flow where <executable-id> is the target executable's ID in the form of 'ws/ns:name'.
+Execute an executable where EXECUTABLE_ID is the target executable's ID in the form of 'ws/ns:name'.
 The flow subcommand used should match the target executable's verb or one of its aliases.
 
 If the target executable accept arguments, they can be passed in the form of flag or positional arguments.
 Flag arguments are specified with the format 'flag=value' and positional arguments are specified as values without any prefix.
 
 
+See https://flowexec.io/#/types/flowfile#ExecutableVerb for more information on executable verbs and https://flowexec.io/#/types/flowfile#ExecutableRef for more information on executable IDs.
 
-# Execute the 'build' flow in the current workspace and namespace
+
+#### Examples
+**Execute the 'build' flow in the current workspace and namespace**
+
 flow exec build
-flow run build # Equivalent to the above since 'run' is an alias for the 'exec' verb
 
-# Execute the 'docs' flow with the 'show' verb in the current workspace and namespace
+flow run build  (Equivalent to the above since 'run' is an alias for the 'exec' verb)
+
+**Execute the 'docs' flow with the 'show' verb in the current workspace and namespace**
+
 flow show docs
 
-# Execute the 'build' flow in the 'ws' workspace and 'ns' namespace
+**Execute the 'build' flow in the 'ws' workspace and 'ns' namespace**
+
 flow exec ws/ns:build
 
-# Execute the 'build' flow in the 'ws' workspace and 'ns' namespace with flag and positional arguments
+**Execute the 'build' flow in the 'ws' workspace and 'ns' namespace with flag and positional arguments**
+
 flow exec ws/ns:build flag1=value1 flag2=value2 value3 value4
 
-
-See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableVerb for more information on executable verbs.See https://github.com/jahvon/flow/blob/main/docs/types/flowfile.md#ExecutableRef for more information on executable IDs.
 
 ```
 flow exec EXECUTABLE_ID [args...] [flags]

@@ -1,1 +1,3 @@
 coming soon...
+
+In the meantime, see [flow config](../types/config.md) and [flow config](../cli/flow_config.md).

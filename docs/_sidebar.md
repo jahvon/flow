@@ -1,4 +1,6 @@
-- [flow](README.md "flow documentation")
+- [Home](README.md "flow documentation")
+- [Install](installation.md "Installation guide")
+- [Quick start](quickstart.md "Quick start guide")
 
 - User guides
 

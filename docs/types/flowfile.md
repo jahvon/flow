@@ -13,14 +13,14 @@ A workspace can have multiple flow files located anywhere in the workspace direc
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `description` | A description of the executables defined within the flow file. This description will used as a shared description for all executables in the flow file.  | `string` |  | [] |
-| `descriptionFile` | A path to a markdown file that contains the description of the executables defined within the flow file. | `string` |  | [] |
-| `executables` |  | `array` ([Executable](#Executable)) | [] | [] |
-| `fromFile` |  | [FromFile](#FromFile) | [] | [] |
-| `namespace` | The namespace to be given to all executables in the flow file. If not set, the executables in the file will be grouped into the root (*) namespace.  Namespaces can be reused across multiple flow files.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.  | `string` |  | [] |
-| `tags` | Tags to be applied to all executables defined within the flow file. | `array` (`string`) | [] | [] |
-| `visibility` |  | [CommonVisibility](#CommonVisibility) | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `description` | A description of the executables defined within the flow file. This description will used as a shared description for all executables in the flow file.  | `string` |  |  |
+| `descriptionFile` | A path to a markdown file that contains the description of the executables defined within the flow file. | `string` |  |  |
+| `executables` |  | `array` ([Executable](#Executable)) | [] |  |
+| `fromFile` |  | [FromFile](#FromFile) | [] |  |
+| `namespace` | The namespace to be given to all executables in the flow file. If not set, the executables in the file will be grouped into the root (*) namespace.  Namespaces can be reused across multiple flow files.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.  | `string` |  |  |
+| `tags` | Tags to be applied to all executables defined within the flow file. | `array` (`string`) | [] |  |
+| `visibility` |  | [CommonVisibility](#CommonVisibility) | <no value> |  |
 
 
 ## Definitions
@@ -79,20 +79,20 @@ Executables are the building blocks of workflows and are used to define the acti
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `aliases` |  | [CommonAliases](#CommonAliases) | [] | [] |
-| `description` | A description of the executable. This description is rendered as markdown in the interactive UI.  | `string` |  | [] |
-| `exec` |  | [ExecutableExecExecutableType](#ExecutableExecExecutableType) | <no value> | [] |
-| `launch` |  | [ExecutableLaunchExecutableType](#ExecutableLaunchExecutableType) | <no value> | [] |
-| `name` | The name of the executable.   Name is used to reference the executable in the CLI using the format `workspace:namespace/name`. [Verb group + Name] must be unique within the namespace of the workspace.  | `string` |  | [] |
-| `parallel` |  | [ExecutableParallelExecutableType](#ExecutableParallelExecutableType) | <no value> | [] |
-| `render` |  | [ExecutableRenderExecutableType](#ExecutableRenderExecutableType) | <no value> | [] |
-| `request` |  | [ExecutableRequestExecutableType](#ExecutableRequestExecutableType) | <no value> | [] |
-| `serial` |  | [ExecutableSerialExecutableType](#ExecutableSerialExecutableType) | <no value> | [] |
-| `tags` |  | [CommonTags](#CommonTags) | [] | [] |
-| `timeout` | The maximum amount of time the executable is allowed to run before being terminated. The timeout is specified in Go duration format (e.g. 30s, 5m, 1h).  | `string` | 30m0s | [] |
-| `verb` |  | [ExecutableVerb](#ExecutableVerb) | exec | [] |
-| `visibility` |  | [CommonVisibility](#CommonVisibility) | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `aliases` |  | [CommonAliases](#CommonAliases) | [] |  |
+| `description` | A description of the executable. This description is rendered as markdown in the interactive UI.  | `string` |  |  |
+| `exec` |  | [ExecutableExecExecutableType](#ExecutableExecExecutableType) | <no value> |  |
+| `launch` |  | [ExecutableLaunchExecutableType](#ExecutableLaunchExecutableType) | <no value> |  |
+| `name` | The name of the executable.   Name is used to reference the executable in the CLI using the format `workspace:namespace/name`. [Verb group + Name] must be unique within the namespace of the workspace.  | `string` |  | ✘ |
+| `parallel` |  | [ExecutableParallelExecutableType](#ExecutableParallelExecutableType) | <no value> |  |
+| `render` |  | [ExecutableRenderExecutableType](#ExecutableRenderExecutableType) | <no value> |  |
+| `request` |  | [ExecutableRequestExecutableType](#ExecutableRequestExecutableType) | <no value> |  |
+| `serial` |  | [ExecutableSerialExecutableType](#ExecutableSerialExecutableType) | <no value> |  |
+| `tags` |  | [CommonTags](#CommonTags) | [] |  |
+| `timeout` | The maximum amount of time the executable is allowed to run before being terminated. The timeout is specified in Go duration format (e.g. 30s, 5m, 1h).  | `string` | 30m0s |  |
+| `verb` |  | [ExecutableVerb](#ExecutableVerb) | exec | ✘ |
+| `visibility` |  | [CommonVisibility](#CommonVisibility) | <no value> |  |
 
 ### ExecutableArgument
 
@@ -105,13 +105,13 @@ Executables are the building blocks of workflows and are used to define the acti
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `default` | The default value to use if the argument is not provided. If the argument is required and no default is provided, the executable will fail.  | `string` |  | [] |
-| `envKey` | The name of the environment variable that will be assigned the value. | `string` |  | [] |
-| `flag` | The flag to use when setting the argument from the command line. Either `flag` or `pos` must be set, but not both.  | `string` |  | [] |
-| `pos` | The position of the argument in the command line ArgumentList. Values start at 1. Either `flag` or `pos` must be set, but not both.  | `integer` | 0 | [] |
-| `required` | If the argument is required, the executable will fail if the argument is not provided. If the argument is not required, the default value will be used if the argument is not provided.  | `boolean` | false | [] |
-| `type` | The type of the argument. This is used to determine how to parse the value of the argument. | `string` | string | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `default` | The default value to use if the argument is not provided. If the argument is required and no default is provided, the executable will fail.  | `string` |  |  |
+| `envKey` | The name of the environment variable that will be assigned the value. | `string` |  |  |
+| `flag` | The flag to use when setting the argument from the command line. Either `flag` or `pos` must be set, but not both.  | `string` |  |  |
+| `pos` | The position of the argument in the command line ArgumentList. Values start at 1. Either `flag` or `pos` must be set, but not both.  | `integer` | 0 |  |
+| `required` | If the argument is required, the executable will fail if the argument is not provided. If the argument is not required, the default value will be used if the argument is not provided.  | `boolean` | false |  |
+| `type` | The type of the argument. This is used to determine how to parse the value of the argument. | `string` | string |  |
 
 ### ExecutableArgumentList
 
@@ -148,13 +148,13 @@ Standard executable type. Runs a command/file in a subprocess.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `cmd` | The command to execute. Only one of `cmd` or `file` must be set.  | `string` |  | [] |
-| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  | [] |
-| `file` | The file to execute. Only one of `cmd` or `file` must be set.  | `string` |  | [] |
-| `logMode` | The log mode to use when running the executable. This can either be `hidden`, `json`, `logfmt` or `text`  | `string` | logfmt | [] |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `cmd` | The command to execute. Only one of `cmd` or `file` must be set.  | `string` |  |  |
+| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  |  |
+| `file` | The file to execute. Only one of `cmd` or `file` must be set.  | `string` |  |  |
+| `logMode` | The log mode to use when running the executable. This can either be `hidden`, `json`, `logfmt` or `text`  | `string` | logfmt |  |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
 
 ### ExecutableLaunchExecutableType
 
@@ -167,12 +167,12 @@ Launches an application or opens a URI.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `app` | The application to launch the URI with. | `string` |  | [] |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `uri` | The URI to launch. This can be a file path or a web URL. | `string` |  | [] |
-| `wait` | If set to true, the executable will wait for the launched application to exit before continuing. | `boolean` | false | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `app` | The application to launch the URI with. | `string` |  |  |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
+| `uri` | The URI to launch. This can be a file path or a web URL. | `string` |  | ✘ |
+| `wait` | If set to true, the executable will wait for the launched application to exit before continuing. | `boolean` | false |  |
 
 ### ExecutableParallelExecutableType
 
@@ -185,13 +185,13 @@ Launches an application or opens a URI.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `execs` | A list of executables to run in parallel. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | [ExecutableParallelRefConfigList](#ExecutableParallelRefConfigList) | <no value> | [] |
-| `failFast` | If set to true, the parallel executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
-| `maxThreads` | The maximum number of threads to use when executing the parallel executables. | `integer` | 5 | [] |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in parallel. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `execs` | A list of executables to run in parallel. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | [ExecutableParallelRefConfigList](#ExecutableParallelRefConfigList) | <no value> |  |
+| `failFast` | If set to true, the parallel executable will fail if any of the sub-executables fail. | `boolean` | false |  |
+| `maxThreads` | The maximum number of threads to use when executing the parallel executables. | `integer` | 5 |  |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
+| `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in parallel. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | ✘ |
 
 ### ExecutableParallelRefConfig
 
@@ -204,11 +204,11 @@ Configuration for a parallel executable.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` | Arguments to pass to the executable. | `array` (`string`) | [] | [] |
-| `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  | [] |
-| `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  | [] |
-| `retries` | The number of times to retry the executable if it fails. | `integer` | 0 | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` | Arguments to pass to the executable. | `array` (`string`) | [] |  |
+| `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  |  |
+| `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  |  |
+| `retries` | The number of times to retry the executable if it fails. | `integer` | 0 |  |
 
 ### ExecutableParallelRefConfigList
 
@@ -233,11 +233,11 @@ Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than o
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `envKey` | The name of the environment variable that will be assigned the value. | `string` |  | [] |
-| `prompt` | A prompt to be displayed to the user when collecting an input value. | `string` |  | [] |
-| `secretRef` | A reference to a secret to be passed to the executable. | `string` |  | [] |
-| `text` | A static value to be passed to the executable. | `string` |  | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `envKey` | The name of the environment variable that will be assigned the value. | `string` |  |  |
+| `prompt` | A prompt to be displayed to the user when collecting an input value. | `string` |  |  |
+| `secretRef` | A reference to a secret to be passed to the executable. | `string` |  |  |
+| `text` | A static value to be passed to the executable. | `string` |  |  |
 
 ### ExecutableParameterList
 
@@ -284,12 +284,12 @@ Renders a markdown template file with data.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  | [] |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `templateDataFile` | The path to the JSON or YAML file containing the template data. | `string` |  | [] |
-| `templateFile` | The path to the markdown template file to render. | `string` |  | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  |  |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
+| `templateDataFile` | The path to the JSON or YAML file containing the template data. | `string` |  |  |
+| `templateFile` | The path to the markdown template file to render. | `string` |  |  |
 
 ### ExecutableRequestExecutableType
 
@@ -302,18 +302,18 @@ Makes an HTTP request.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `body` | The body of the request. | `string` |  | [] |
-| `headers` | A map of headers to include in the request. | `map` (`string` -> `string`) | map[] | [] |
-| `logResponse` | If set to true, the response will be logged as program output. | `boolean` | false | [] |
-| `method` | The HTTP method to use when making the request. | `string` | GET | [] |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `responseFile` |  | [ExecutableRequestResponseFile](#ExecutableRequestResponseFile) | <no value> | [] |
-| `timeout` | The timeout for the request in Go duration format (e.g. 30s, 5m, 1h). | `string` | 30m0s | [] |
-| `transformResponse` | JQ query to transform the response before saving it to a file or outputting it. | `string` |  | [] |
-| `url` | The URL to make the request to. | `string` |  | [] |
-| `validStatusCodes` | A list of valid status codes. If the response status code is not in this list, the executable will fail. If not set, the response status code will not be checked.  | `array` (`integer`) | [] | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `body` | The body of the request. | `string` |  |  |
+| `headers` | A map of headers to include in the request. | `map` (`string` -> `string`) | map[] |  |
+| `logResponse` | If set to true, the response will be logged as program output. | `boolean` | false |  |
+| `method` | The HTTP method to use when making the request. | `string` | GET |  |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
+| `responseFile` |  | [ExecutableRequestResponseFile](#ExecutableRequestResponseFile) | <no value> |  |
+| `timeout` | The timeout for the request in Go duration format (e.g. 30s, 5m, 1h). | `string` | 30m0s |  |
+| `transformResponse` | JQ query to transform the response before saving it to a file or outputting it. | `string` |  |  |
+| `url` | The URL to make the request to. | `string` |  | ✘ |
+| `validStatusCodes` | A list of valid status codes. If the response status code is not in this list, the executable will fail. If not set, the response status code will not be checked.  | `array` (`integer`) | [] |  |
 
 ### ExecutableRequestResponseFile
 
@@ -326,10 +326,10 @@ Configuration for saving the response of a request to a file.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  | [] |
-| `filename` | The name of the file to save the response to. | `string` |  | [] |
-| `saveAs` | The format to save the response as. | `string` | raw | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  |  |
+| `filename` | The name of the file to save the response to. | `string` |  | ✘ |
+| `saveAs` | The format to save the response as. | `string` | raw |  |
 
 ### ExecutableSerialExecutableType
 
@@ -342,12 +342,12 @@ Executes a list of executables in serial.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> | [] |
-| `execs` | A list of executables to run in serial. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | [ExecutableSerialRefConfigList](#ExecutableSerialRefConfigList) | <no value> | [] |
-| `failFast` | If set to true, the serial executable will fail if any of the sub-executables fail. | `boolean` | false | [] |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> | [] |
-| `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in serial. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `execs` | A list of executables to run in serial. Each executable can be a command or a reference to another executable. One of `refs` or `execs` must be set.  | [ExecutableSerialRefConfigList](#ExecutableSerialRefConfigList) | <no value> |  |
+| `failFast` | If set to true, the serial executable will fail if any of the sub-executables fail. | `boolean` | false |  |
+| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
+| `refs` | DEPRECATED: Use `execs` instead.  A list of references to other executables to run in serial. One of `refs` or `execs` must be set.  | [ExecutableRefList](#ExecutableRefList) | <no value> | ✘ |
 
 ### ExecutableSerialRefConfig
 
@@ -360,12 +360,12 @@ Configuration for a serial executable.
 **Properties:**
 
 | Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | -------- |
-| `args` | Arguments to pass to the executable. | `array` (`string`) | [] | [] |
-| `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  | [] |
-| `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  | [] |
-| `retries` | The number of times to retry the executable if it fails. | `integer` | 0 | [] |
-| `reviewRequired` | If set to true, the user will be prompted to review the output of the executable before continuing. | `boolean` | false | [] |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` | Arguments to pass to the executable. | `array` (`string`) | [] |  |
+| `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  |  |
+| `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  |  |
+| `retries` | The number of times to retry the executable if it fails. | `integer` | 0 |  |
+| `reviewRequired` | If set to true, the user will be prompted to review the output of the executable before continuing. | `boolean` | false |  |
 
 ### ExecutableSerialRefConfigList
 
@@ -384,12 +384,19 @@ While executables are configured with a single verb, the verb can be aliased to 
 For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.
 This allows users to use the verb that best describes the action they are performing.
 
-**Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`
-**Deactivation verbs**: `delete`, `uninstall`, `destroy`, `undeploy`
-**Update verbs**: `update`, `upgrade`, `refresh`, `reload`
-**Management verbs**: `manage`, `configure`, `monitor`, `edit`
-**Launch verbs**: `open`, `launch`, `show`, `view`, `render`
-**Creation verbs**: `generate`, `add`, `new`, `build`, `transform`
+- **Activation verbs**: `exec`, `run`, `start`, `activate`, `enable`, `watch`
+- **Deactivation verbs**: `deactivate`, `disable`, `stop`, `kill`
+- **Restart verbs**: `restart`, `reboot`, `reload`, `refresh`
+- **Install verbs**: `install`, `setup`, `build`, `package`, `bundle`
+- **Uninstall verbs**: `uninstall`, `teardown`, `undeploy`
+- **Update verbs**: `update`, `upgrade`, `patch`, `edit`, `transform`, `manage`, `configure`
+- **Publish verbs**: `publish`, `release`, `deploy`, `apply`, `push`, `send`
+- **Management verbs**: `manage`, `configure`, `monitor`, `edit`
+- **Test verbs**: `test`, `validate`, `check`, `verify`
+- **Analyze verbs**: `analyze`, `scan`, `lint`, `audit`
+- **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
+- **Creation verbs**: `generate`, `add`, `new`, `create`, `init`, `set`
+- **Destruction verbs**: `remove`, `delete`, `unset`, `destroy`, `clean`, `clear`, `purge`
 
 [Verb group + Name] must be unique within the namespace of the workspace.
 

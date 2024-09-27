@@ -1,1 +1,3 @@
 coming soon...
+
+In the meantime, see [Template](../types/template.md) and [flow template](../cli/flow_template.md).

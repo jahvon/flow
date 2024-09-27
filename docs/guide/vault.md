@@ -1,1 +1,3 @@
 coming soon...
+
+In the meantime, see [flow secret](../cli/flow_secret.md).

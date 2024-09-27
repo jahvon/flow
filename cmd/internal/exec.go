@@ -32,10 +32,11 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Aliases: executable.SortedValidVerbs(),
 		Short:   "Execute a flow by ID.",
 		Long: execDocumentation + fmt.Sprintf(
-			"\n\n%s\n\nSee %s for more information on executable verbs."+
-				"See %s for more information on executable IDs.",
-			execExamples, io.TypesDocsURL("flowfile", "ExecutableVerb"),
+			"\n\nSee %s for more information on executable verbs and "+
+				"%s for more information on executable IDs.\n\n%s",
+			io.TypesDocsURL("flowfile", "ExecutableVerb"),
 			io.TypesDocsURL("flowfile", "ExecutableRef"),
+			execExamples,
 		),
 		Args: cobra.MinimumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -371,24 +372,30 @@ func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []
 var (
 	//nolint:lll
 	execDocumentation = `
-Execute a flow where <executable-id> is the target executable's ID in the form of 'ws/ns:name'.
+Execute an executable where EXECUTABLE_ID is the target executable's ID in the form of 'ws/ns:name'.
 The flow subcommand used should match the target executable's verb or one of its aliases.
 
 If the target executable accept arguments, they can be passed in the form of flag or positional arguments.
 Flag arguments are specified with the format 'flag=value' and positional arguments are specified as values without any prefix.
 `
 	execExamples = `
-# Execute the 'build' flow in the current workspace and namespace
-flow exec build
-flow run build # Equivalent to the above since 'run' is an alias for the 'exec' verb
+#### Examples
+**Execute the 'build' flow in the current workspace and namespace**
 
-# Execute the 'docs' flow with the 'show' verb in the current workspace and namespace
+flow exec build
+
+flow run build  (Equivalent to the above since 'run' is an alias for the 'exec' verb)
+
+**Execute the 'docs' flow with the 'show' verb in the current workspace and namespace**
+
 flow show docs
 
-# Execute the 'build' flow in the 'ws' workspace and 'ns' namespace
+**Execute the 'build' flow in the 'ws' workspace and 'ns' namespace**
+
 flow exec ws/ns:build
 
-# Execute the 'build' flow in the 'ws' workspace and 'ns' namespace with flag and positional arguments
+**Execute the 'build' flow in the 'ws' workspace and 'ns' namespace with flag and positional arguments**
+
 flow exec ws/ns:build flag1=value1 flag2=value2 value3 value4
 `
 )
