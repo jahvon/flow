@@ -11,7 +11,7 @@ A workspace can be created anywhere on your system but must be registered in ord
 To create a new workspace, run the following command in the directory where you want the workspace to be created:
 
 ```shell
-flow workspace new my-workspace .
+flow workspace create my-workspace .
 ```
 
 You can replace `my-workspace` with any name you want to give your workspace and `.` with the path to the root directory 

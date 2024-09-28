@@ -1,16 +1,16 @@
-## flow workspace new
+## flow workspace set
 
-Initialize a new workspace and register it in the user configurations.
+Change the current workspace.
 
 ```
-flow workspace new NAME PATH [flags]
+flow workspace set NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for new
-  -s, --set    Set the newly created workspace as the current workspace
+  -f, --fixed   Set the workspace mode to fixed
+  -h, --help    help for set
 ```
 
 ### Options inherited from parent commands

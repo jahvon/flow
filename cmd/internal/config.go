@@ -76,44 +76,11 @@ func registerSetConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
 		Aliases: []string{"s", "update"},
 		Short:   "Update flow configuration values.",
 	}
-	registerSetWorkspaceCmd(ctx, setCmd)
 	registerSetNamespaceCmd(ctx, setCmd)
 	registerSetWorkspaceModeCmd(ctx, setCmd)
 	registerSetLogModeCmd(ctx, setCmd)
 	registerSetTUICmd(ctx, setCmd)
 	configCmd.AddCommand(setCmd)
-}
-
-func registerSetWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
-	workspaceCmd := &cobra.Command{
-		Use:     "workspace NAME",
-		Aliases: []string{"ws"},
-		Short:   "Change the current workspace.",
-		Args:    cobra.ExactArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { setWorkspaceFunc(ctx, cmd, args) },
-	}
-	RegisterFlag(ctx, workspaceCmd, *flags.FixedWsModeFlag)
-	setCmd.AddCommand(workspaceCmd)
-}
-
-func setWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
-	logger := ctx.Logger
-	workspace := args[0]
-	userConfig := ctx.Config
-	if _, found := userConfig.Workspaces[workspace]; !found {
-		logger.Fatalf("workspace %s not found", workspace)
-	}
-	userConfig.CurrentWorkspace = workspace
-	fixedMode := flags.ValueFor[bool](ctx, cmd, *flags.FixedWsModeFlag, false)
-	if fixedMode {
-		userConfig.WorkspaceMode = config.ConfigWorkspaceModeFixed
-	}
-
-	if err := filesystem.WriteConfig(userConfig); err != nil {
-		logger.FatalErr(err)
-	}
-	logger.PlainTextSuccess("Workspace set to " + workspace)
 }
 
 func registerSetNamespaceCmd(ctx *context.Context, setCmd *cobra.Command) {
