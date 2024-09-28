@@ -19,8 +19,9 @@ Manage flow workspaces.
 ### SEE ALSO
 
 * [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
+* [flow workspace create](flow_workspace_create.md)	 - Initialize a new workspace and register it in the user configurations.
 * [flow workspace delete](flow_workspace_delete.md)	 - Remove an existing workspace from the global configuration's workspaces list.
 * [flow workspace list](flow_workspace_list.md)	 - View a list of registered workspaces.
-* [flow workspace new](flow_workspace_new.md)	 - Initialize a new workspace and register it in the user configurations.
+* [flow workspace set](flow_workspace_set.md)	 - Change the current workspace.
 * [flow workspace view](flow_workspace_view.md)	 - View the documentation for a workspace. If the name is omitted, the current workspace is used.
 

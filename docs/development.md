@@ -13,12 +13,12 @@ building the project.
 ## Getting Started
 
 Before developing on this project, you will need to make sure you have the latest `flow` version installed.
-Refer to the [Installation](../README.md#installation) section for more information.
+Refer to the [Installation](installation.md) section for more information.
 
 After cloning the repository, you can start using the below commands after registering the repo workspace:
 
 ```sh
-flow workspace new flow <repo-path>
+flow workspace create flow <repo-path>
 ```
 
 ### Development Executables
@@ -63,10 +63,11 @@ _You should test all tuikit changes with a local flow build before submitting a 
 
 ## Development Tools
 
-The following tools are required for development:
+Required tools for development:
 
 - [mockgen](https://github.com/uber-go/mock) for generating test mocks
 - [golangci-lint](https://golangci-lint.run/) for linting
 
-Additionally, we recommend using the [ginkgo CLI](https://onsi.github.io/ginkgo/#ginkgo-cli-overview) for setting up and running tests.
-
+Other tools used in the project:
+- [goreleaser](https://goreleaser.com/) for releasing the project
+- [ginkgo](https://onsi.github.io/ginkgo/) and [gomega](https://onsi.github.io/gomega/) for testing

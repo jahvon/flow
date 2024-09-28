@@ -22,6 +22,5 @@ Update flow configuration values.
 * [flow config set log-mode](flow_config_set_log-mode.md)	 - Set the default log mode.
 * [flow config set namespace](flow_config_set_namespace.md)	 - Change the current namespace.
 * [flow config set tui](flow_config_set_tui.md)	 - Enable or disable the interactive terminal UI experience.
-* [flow config set workspace](flow_config_set_workspace.md)	 - Change the current workspace.
 * [flow config set workspace-mode](flow_config_set_workspace-mode.md)	 - Switch between fixed and dynamic workspace modes.
 
