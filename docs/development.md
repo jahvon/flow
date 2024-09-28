@@ -18,7 +18,7 @@ Refer to the [Installation](../README.md#installation) section for more informat
 After cloning the repository, you can start using the below commands after registering the repo workspace:
 
 ```sh
-flow init workspace flow <repo-path>
+flow workspace new flow <repo-path>
 ```
 
 ### Development Executables
@@ -31,16 +31,13 @@ workspace, you can run the following commands:
 flow install deps
 
 # Build the project
-flow run build <output-path>
+flow build binary <output-path>
+
+# Validate code changes (runs tests, linters, codegen, etc)
+flow run checks
 
 # Run tests
 flow run tests
-
-# Validate code changes
-flow run validate
-
-# Install the flow binary in your $GOPATH
-flow install gopath
 ```
 
 ### Working with generated types

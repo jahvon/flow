@@ -3,20 +3,22 @@ visibility: private
 tags: [development]
 executables:
   - verb: run
-    name: validate
-    aliases: [precommit, pc, check, ci]
+    name: checks
+    aliases: [precommit, pc, ci]
     description: |
       Run the repository validation checks. This includes linting, tests, and code generation.
       Validate should be run before committing changes.
     serial:
       failFast: true
       refs:
-        - run generate
-        - run lint
+        - generate code
+        - generate docs
+        - run linters
         - run tests
 
-  - verb: run
-    name: build
+  - verb: build
+    name: binary
+    aliases: [bin, flow]
     description: |
         Build the flow binary. The binary is built at the path specified in the first positional argument.
         If not set, the binary is built at .bin/flow.
@@ -34,22 +36,26 @@ executables:
         go build -o ${BIN_PATH}/${BIN_NAME}
         echo "flow built at ${BIN_PATH}/${BIN_NAME}"
 
-  - verb: run
-    name: generate
-    description: Generate code and documentation
-    aliases: [docsgen, codegen, gen]
+  - verb: generate
+    name: docs
+    aliases: [documentation]
     exec:
       dir: //
       cmd: |
-        echo "generating code..."
-        go generate ./...
         echo "generating completions..."
         ./scripts/completions.sh
         
         go run ./tools/docsgen/.
 
+  - verb: generate
+    name: code
+    exec:
+      dir: //
+      cmd: echo "generating code..."; go generate ./...
+
   - verb: run
-    name: lint
+    name: linters
+    aliases: [formatters]
     description: Run linters and formatters
     exec:
       dir: //
@@ -60,12 +66,13 @@ executables:
 
   - verb: run
     name: tests
+    aliases: [test, unit, e2e]
     description: Run all project tests
     exec:
       dir: //
       cmd: go test ./... -race
 
-  - verb: run
+  - verb: install
     name: gopath
     aliases: [local]
     description: Install the project to the GOPATH from local source
@@ -163,7 +170,7 @@ executables:
           -t $IMAGE_REPO:$IMAGE_TAG \
           $CONTAINER_CMD
 
-  - verb: release
+  - verb: push
     name: container
     description: Push the flow container image to the registry
     tags: [docker, development]
@@ -184,10 +191,10 @@ executables:
         echo "pushing container image..."
         $BUILDER push $IMAGE_REPO:$IMAGE_TAG
 
-  - verb: release
+  - verb: create
     name: snapshot
     description: Create a snapshot release
-    aliases: [snap]
+    aliases: [release, snap]
     exec:
       dir: //
       cmd: |

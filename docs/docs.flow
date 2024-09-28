@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
 visibility: public
 namespace: docs
-tags: [documentation]
+tags: [development]
 executables:
   - verb: show
     name: flowfile
@@ -32,7 +32,7 @@ executables:
       Node/npm is required
     exec:
       cmd: npm i docsify-cli -g
-  - verb: run
+  - verb: start
     name: site
     description: Run the documentation site locally
     timeout: 0s # no timeout
