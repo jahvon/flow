@@ -1,6 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
 visibility: private
 namespace: examples
+description: This is a flow executable that demonstrates how to use launch executable types.
+tags: [launch]
 executables:
   - verb: open
     name: github
@@ -10,7 +12,7 @@ executables:
   - verb: open
     name: mac-settings
     launch:
-      app: System Preferences
+      app: "System Preferences"
 
   - verb: open
     name: ws-config

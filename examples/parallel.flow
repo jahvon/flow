@@ -1,11 +1,13 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
 visibility: private
 namespace: examples
+description: This is a flow executable that demonstrates how to use parallel executable types.
+tags: [parallel]
 executables:
-  - verb: start
-    name: parallel-exec
+  - verb: watch
+    name: parallel
     parallel:
       refs:
-        - run examples:output-exec
-        - run examples:input-exec
-        - run examples:internal-exec
+        - run examples:with-output
+        - run examples:with-input
+        - run examples:from-file
