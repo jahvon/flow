@@ -50,6 +50,7 @@ func registerCreateWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
 	wsCmd.AddCommand(createCmd)
 }
 
+//nolint:gocognit
 func createWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
