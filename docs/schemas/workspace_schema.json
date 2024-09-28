@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/workspace_schema.json",
+  "$id": "https://flowexec.io/schemas/workspace_schema.json",
   "description": "Configuration for a workspace in the Flow CLI.\nThis configuration is used to define the settings for a workspace.\nEvery workspace has a workspace config file named `flow.yaml` in the root of the workspace directory.\n",
   "type": "object",
   "definitions": {

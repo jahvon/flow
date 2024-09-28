@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	schemaDir = "schemas"
-	idBase    = "https://raw.githubusercontent.com/jahvon/flow/HEAD"
+	schemaDir = "docs/schemas"
+	idBase    = "https://flowexec.io/schemas"
 )
 
 //nolint:gocognit
@@ -50,5 +50,5 @@ func generateJSONSchemas() {
 }
 
 func updateFileID(s *schema.JSONSchema, file schema.FileName) {
-	s.ID, _ = url.JoinPath(idBase, schemaDir, file.JSONSchemaFile())
+	s.ID, _ = url.JoinPath(idBase, file.JSONSchemaFile())
 }

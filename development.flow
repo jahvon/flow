@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
 visibility: private
 tags: [development]
 executables:

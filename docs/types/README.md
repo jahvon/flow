@@ -11,7 +11,7 @@ All flow configuration files also have YAML schemas available for use in IDEs wi
 You can add the following comment to the top of your flow files to enable this:
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
 ```
 
 See the [schemas directory on GitHub](https://github.com/jahvon/flow/tree/main/schemas) for all available schemas.
