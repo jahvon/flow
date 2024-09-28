@@ -41,6 +41,7 @@ var (
 func (l *Library) View() string {
 	l.paneZeroViewport.Style = paneStyle(0, l.theme, l.splitView)
 	l.paneZeroViewport.SetContent(l.paneZeroContent())
+	l.paneZeroViewport.SetYOffset(int(l.currentWorkspace + l.currentNamespace))
 
 	l.paneOneViewport.Style = paneStyle(1, l.theme, l.splitView)
 	l.paneOneViewport.SetContent(l.paneOneContent())

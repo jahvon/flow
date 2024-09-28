@@ -29,7 +29,7 @@ func (l *Library) Init() tea.Cmd {
 		l.paneTwoViewport.Init(),
 	)
 
-	if l.ctx.TUIContainer.Width() >= 100 {
+	if l.ctx.TUIContainer.Width() >= 150 {
 		l.splitView = true
 	}
 	l.setSize()
