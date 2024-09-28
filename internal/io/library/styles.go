@@ -3,10 +3,13 @@ package library
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jahvon/tuikit/styles"
 	"github.com/mattn/go-runewidth"
+
+	"github.com/jahvon/flow/types/executable"
 )
 
 func renderSelection(s string, theme styles.Theme) string {
@@ -65,6 +68,17 @@ func calculateViewportWidths(termWidth int, splitView bool) (int, int, int) {
 		paneThree := termWidth
 		return int(paneOne), int(paneTwo), paneThree
 	}
+}
+
+func shortRef(ref executable.Ref, ws, ns string) string {
+	shortID := ref.ID()
+	if ws != "" && ref.Workspace() == ws {
+		shortID = strings.Replace(shortID, ws+"/", "", 1)
+	}
+	if ns != "" && ref.Namespace() == ns {
+		shortID = strings.Replace(shortID, ns+":", "", 1)
+	}
+	return executable.NewRef(shortID, ref.Verb()).String()
 }
 
 func truncateText(s string, w int) string {

@@ -9,6 +9,7 @@ flow library glance [flags]
 ### Options
 
 ```
+  -a, --all                List from all namespaces.
   -f, --filter string      Filter executable by reference substring.
   -h, --help               help for glance
   -n, --namespace string   Filter executables by namespace.

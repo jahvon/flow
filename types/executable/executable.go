@@ -451,7 +451,7 @@ func (l ExecutableList) FilterByWorkspace(ws string) ExecutableList {
 }
 
 func (l ExecutableList) FilterByNamespace(ns string) ExecutableList {
-	if ns == "" || ns == "*" {
+	if ns == "*" {
 		return l
 	}
 

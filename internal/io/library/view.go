@@ -164,11 +164,16 @@ func (l *Library) paneOneContent() string {
 
 	_, paneWidth, _ := calculateViewportWidths(l.termWidth, l.splitView)
 
+	curWs := l.visibleWorkspaces[l.currentWorkspace]
+	var curNs string
+	if len(l.visibleNamespaces) > 0 {
+		curNs = l.visibleNamespaces[l.currentNamespace]
+	}
 	for i, ex := range l.visibleExecutables {
 		if uint(i) == l.currentExecutable {
-			sb.WriteString(renderSelection("* "+truncateText(ex.Ref().String(), paneWidth), l.theme))
+			sb.WriteString(renderSelection("* "+truncateText(shortRef(ex.Ref(), curWs, curNs), paneWidth), l.theme))
 		} else {
-			sb.WriteString(renderInactive("  "+truncateText(ex.Ref().String(), paneWidth), l.theme))
+			sb.WriteString(renderInactive("  "+truncateText(shortRef(ex.Ref(), curWs, curNs), paneWidth), l.theme))
 		}
 		sb.WriteString("\n")
 	}

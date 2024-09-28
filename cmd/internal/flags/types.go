@@ -45,6 +45,14 @@ var FilterWorkspaceFlag = &Metadata{
 	Required:  false,
 }
 
+var AllNamespacesFlag = &Metadata{
+	Name:      "all",
+	Shorthand: "a",
+	Usage:     "List from all namespaces.",
+	Default:   false,
+	Required:  false,
+}
+
 var FilterNamespaceFlag = &Metadata{
 	Name:      "namespace",
 	Shorthand: "n",

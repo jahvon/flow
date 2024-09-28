@@ -31,6 +31,7 @@ func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	RegisterFlag(ctx, libraryCmd, *flags.FilterVerbFlag)
 	RegisterFlag(ctx, libraryCmd, *flags.FilterTagFlag)
 	RegisterFlag(ctx, libraryCmd, *flags.FilterExecSubstringFlag)
+	RegisterFlag(ctx, libraryCmd, *flags.AllNamespacesFlag)
 	registerGlanceLibraryCmd(ctx, libraryCmd)
 	registerViewLibraryCmd(ctx, libraryCmd)
 	rootCmd.AddCommand(libraryCmd)
@@ -48,7 +49,14 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
-	if nsFilter == "." {
+	allNs := flags.ValueFor[bool](ctx, cmd, *flags.AllNamespacesFlag, false)
+	switch {
+	case allNs && nsFilter != "":
+		logger.PlainTextWarn("cannot use both --all and --namespace flags, ignoring --namespace")
+		fallthrough
+	case allNs:
+		nsFilter = "*"
+	case nsFilter == ".":
 		nsFilter = ctx.Config.CurrentNamespace
 	}
 
@@ -96,6 +104,7 @@ func registerGlanceLibraryCmd(ctx *context.Context, libraryCmd *cobra.Command) {
 	RegisterFlag(ctx, glanceCmd, *flags.FilterVerbFlag)
 	RegisterFlag(ctx, glanceCmd, *flags.FilterTagFlag)
 	RegisterFlag(ctx, glanceCmd, *flags.FilterExecSubstringFlag)
+	RegisterFlag(ctx, glanceCmd, *flags.AllNamespacesFlag)
 	libraryCmd.AddCommand(glanceCmd)
 }
 
@@ -107,7 +116,14 @@ func glanceLibraryCmd(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
-	if nsFilter == "." {
+	allNs := flags.ValueFor[bool](ctx, cmd, *flags.AllNamespacesFlag, false)
+	switch {
+	case allNs && nsFilter != "":
+		logger.PlainTextWarn("cannot use both --all and --namespace flags, ignoring --namespace")
+		fallthrough
+	case allNs:
+		nsFilter = "*"
+	case nsFilter == ".":
 		nsFilter = ctx.Config.CurrentNamespace
 	}
 

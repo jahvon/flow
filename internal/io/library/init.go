@@ -29,7 +29,7 @@ func (l *Library) Init() tea.Cmd {
 		l.paneTwoViewport.Init(),
 	)
 
-	if l.ctx.TUIContainer.Width() >= 150 {
+	if l.ctx.TUIContainer.Width() >= 100 {
 		l.splitView = true
 	}
 	l.setSize()
@@ -120,8 +120,8 @@ func (l *Library) setVisibleNamespaces() {
 	filterWs := l.visibleWorkspaces[l.currentWorkspace]
 	nsSet := make(map[string]struct{})
 	for _, ex := range l.allExecutables {
-		ns := ex.Ref().GetNamespace()
-		ws := ex.Ref().GetWorkspace()
+		ns := ex.Ref().Namespace()
+		ws := ex.Ref().Workspace()
 		if filter.Namespace != "*" && filter.Namespace != "" && ns != filter.Namespace {
 			continue
 		} else if filterWs != allWorkspacesLabel && filterWs != "" && ws != filterWs {

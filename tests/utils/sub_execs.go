@@ -22,7 +22,7 @@ func findSerialSubExecs(root *executable.Executable, flowFiles executable.FlowFi
 	var subExecs []*executable.Executable
 	for _, ref := range serial.Refs {
 		for _, flowFile := range flowFiles {
-			if e, _ := flowFile.Executables.FindByVerbAndID(ref.GetVerb(), ref.GetID()); e != nil {
+			if e, _ := flowFile.Executables.FindByVerbAndID(ref.Verb(), ref.ID()); e != nil {
 				subExecs = append(subExecs, e)
 				break
 			}
@@ -34,7 +34,7 @@ func findSerialSubExecs(root *executable.Executable, flowFiles executable.FlowFi
 		}
 
 		for _, flowFile := range flowFiles {
-			if e, _ := flowFile.Executables.FindByVerbAndID(refCfg.Ref.GetVerb(), refCfg.Ref.GetID()); e != nil {
+			if e, _ := flowFile.Executables.FindByVerbAndID(refCfg.Ref.Verb(), refCfg.Ref.ID()); e != nil {
 				subExecs = append(subExecs, e)
 				break
 			}
@@ -48,7 +48,7 @@ func findParallelSubExecs(root *executable.Executable, flowFiles executable.Flow
 	var subExecs []*executable.Executable
 	for _, ref := range parallel.Refs {
 		for _, flowFile := range flowFiles {
-			if e, _ := flowFile.Executables.FindByVerbAndID(ref.GetVerb(), ref.GetID()); e != nil {
+			if e, _ := flowFile.Executables.FindByVerbAndID(ref.Verb(), ref.ID()); e != nil {
 				subExecs = append(subExecs, e)
 				break
 			}
@@ -60,7 +60,7 @@ func findParallelSubExecs(root *executable.Executable, flowFiles executable.Flow
 		}
 
 		for _, flowFile := range flowFiles {
-			if e, _ := flowFile.Executables.FindByVerbAndID(refCfg.Ref.GetVerb(), refCfg.Ref.GetID()); e != nil {
+			if e, _ := flowFile.Executables.FindByVerbAndID(refCfg.Ref.Verb(), refCfg.Ref.ID()); e != nil {
 				subExecs = append(subExecs, e)
 				break
 			}
