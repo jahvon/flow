@@ -83,6 +83,12 @@ func createWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string
 		} else {
 			path = fmt.Sprintf("%s/%s", hd, path[2:])
 		}
+	case !filepath.IsAbs(path):
+		wd, err := os.Getwd()
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		path = fmt.Sprintf("%s/%s", wd, path)
 	}
 
 	if !filesystem.WorkspaceConfigExists(path) {
