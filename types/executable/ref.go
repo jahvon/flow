@@ -176,12 +176,12 @@ func (r Ref) Validate() error {
 	return nil
 }
 
-func (r Ref) GetVerb() Verb {
+func (r Ref) Verb() Verb {
 	refParts := strings.Split(string(r), " ")
 	return Verb(refParts[0])
 }
 
-func (r Ref) GetID() string {
+func (r Ref) ID() string {
 	refParts := strings.Split(string(r), " ")
 	if len(refParts) != 2 {
 		// TODO: return or log error
@@ -190,24 +190,24 @@ func (r Ref) GetID() string {
 	return refParts[1]
 }
 
-func (r Ref) GetNamespace() string {
-	id := r.GetID()
+func (r Ref) Namespace() string {
+	id := r.ID()
 	_, ns, _ := ParseExecutableID(id)
 	return ns
 }
 
-func (r Ref) GetWorkspace() string {
-	id := r.GetID()
+func (r Ref) Workspace() string {
+	id := r.ID()
 	ws, _, _ := ParseExecutableID(id)
 	return ws
 }
 
 func (r Ref) Equals(other Ref) bool {
-	rVerb := r.GetVerb()
-	oVerb := other.GetVerb()
+	rVerb := r.Verb()
+	oVerb := other.Verb()
 	if !rVerb.Equals(oVerb) {
 		return false
 	}
 
-	return r.GetID() == other.GetID()
+	return r.ID() == other.ID()
 }

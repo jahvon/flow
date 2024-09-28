@@ -156,7 +156,7 @@ func (ctx *Context) Finalize() {
 }
 
 func ExpandRef(ctx *Context, ref executable.Ref) executable.Ref {
-	id := ref.GetID()
+	id := ref.ID()
 	ws, ns, name := executable.ParseExecutableID(id)
 	if ws == "" {
 		ws = ctx.CurrentWorkspace.AssignedName()
@@ -164,7 +164,7 @@ func ExpandRef(ctx *Context, ref executable.Ref) executable.Ref {
 	if ns == "" {
 		ns = ctx.Config.CurrentNamespace
 	}
-	return executable.NewRef(executable.NewExecutableID(ws, ns, name), ref.GetVerb())
+	return executable.NewRef(executable.NewExecutableID(ws, ns, name), ref.Verb())
 }
 
 func currentWorkspace(cfg *config.Config) (*workspace.Workspace, error) {
