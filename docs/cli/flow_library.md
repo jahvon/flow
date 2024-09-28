@@ -9,6 +9,7 @@ flow library [flags]
 ### Options
 
 ```
+  -a, --all                List from all namespaces.
   -f, --filter string      Filter executable by reference substring.
   -h, --help               help for library
   -n, --namespace string   Filter executables by namespace.
