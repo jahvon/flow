@@ -72,12 +72,10 @@ func handleExecRef(
 			return err
 		}
 
-		if exec.Exec != nil {
-			fields := map[string]interface{}{
-				"e": exec.ID(),
-			}
-			exec.Exec.SetLogFields(fields)
+		fields := map[string]interface{}{
+			"step": exec.ID(),
 		}
+		exec.Exec.SetLogFields(fields)
 
 		group.Go(func() error {
 			if parallelSpec.FailFast {
@@ -142,12 +140,10 @@ func handleExec(
 			maps.Copy(execPromptedEnv, a)
 		}
 
-		if exec.Exec != nil {
-			fields := map[string]interface{}{
-				"e": exec.ID(),
-			}
-			exec.Exec.SetLogFields(fields)
+		fields := map[string]interface{}{
+			"step": exec.ID(),
 		}
+		exec.Exec.SetLogFields(fields)
 
 		group.Go(func() error {
 			var attempts int
