@@ -1,9 +1,11 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
 visibility: private
 namespace: examples
+description: This is a flow executable that demonstrates how to use request executable types.
+tags: [request]
 executables:
-  - verb: run
-    name: simple-request
+  - verb: send
+    name: post-request
     request:
       method: POST
       url: https://httpbin.org/post
@@ -12,15 +14,15 @@ executables:
       body: '{"hello": "world"}'
       logResponse: true
 
-  - verb: run
+  - verb: send
     name: failed-request
     request:
       url: https://httpbin.org/status/500
       logResponse: true
       validStatusCodes: [200]
 
-  - verb: run
-    name: saved-request
+  - verb: get
+    name: request-response
     request:
       method: POST
       url: https://httpbin.org/post
@@ -32,8 +34,8 @@ executables:
         filename: savedResponse.yaml
         saveAs: yaml
 
-  - verb: run
-    name: transformed-request
+  - verb: transform
+    name: request-response
     request:
       method: POST
       url: https://httpbin.org/post
@@ -41,7 +43,7 @@ executables:
       logResponse: true
       transformResponse: .args.hello = "universe" | .args
 
-  - verb: run
+  - verb: send
     name: param-request
     request:
       params:
@@ -54,7 +56,7 @@ executables:
       body: '{"hello": "$NAME"}'
       logResponse: true
 
-  - verb: run
+  - verb: watch
     name: timeout-request
     request:
       url: https://httpbin.org/delay/10
