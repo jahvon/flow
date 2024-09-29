@@ -39,7 +39,7 @@ TMP_DIR=$(mktemp -d)
 DOWNLOAD_PATH="${TMP_DIR}/${BINARY}_${VERSION}_${OS}_${ARCH}.tar.gz"
 
 echo "Downloading $BINARY $VERSION for $OS/$ARCH..."
-wget "$DOWNLOAD_URL" -O "$DOWNLOAD_PATH"
+wget -q "$DOWNLOAD_URL" -O "$DOWNLOAD_PATH"
 if [ $? -ne 0 ]; then
     echo "Failed to download $DOWNLOAD_URL"
     exit 1
