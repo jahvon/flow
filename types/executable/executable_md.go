@@ -42,20 +42,17 @@ func execDescriptionMarkdown(e *Executable) string {
 		return ""
 	}
 	var mkdwn string
-	const descSpacer = "| \n"
+	const prefix = "│ "
 	if d := strings.TrimSpace(e.Description); d != "" {
-		mkdwn += descSpacer
-		lines := strings.Split(d, "\n")
-		for _, line := range lines {
-			mkdwn += fmt.Sprintf("| %s\n", line)
-		}
-		mkdwn += descSpacer
+		mkdwn += prefix + "\n"
+		mkdwn += addPrefx(d, prefix)
 	}
 	if d := strings.TrimSpace(e.inheritedDescription); d != "" {
-		for _, line := range strings.Split(d, "\n") {
-			mkdwn += fmt.Sprintf("| %s\n", line)
-		}
-		mkdwn += descSpacer
+		mkdwn += prefix + "\n"
+		mkdwn += addPrefx(d, prefix)
+	}
+	if mkdwn != "" {
+		mkdwn += prefix + "\n"
 	}
 	mkdwn += "\n"
 	return mkdwn
@@ -358,4 +355,13 @@ func templateFormMarkdown(t *Template) string {
 		)
 	}
 	return mkdwn
+}
+
+func addPrefx(s, prefix string) string {
+	lines := strings.Split(s, "\n")
+	var final string
+	for _, line := range lines {
+		final += prefix + line + "\n"
+	}
+	return final
 }

@@ -56,32 +56,43 @@
 #   Show                            Show the subsequent commands in the output
 
 Output demo.gif
-Require flow
-
-# Setup
+Set WindowBar Colorful
+Set WindowBarSize 80
 Set Shell "bash"
-Set FontSize 32
-Set Width 3200
+Set FontSize 28
+Set Width 3400
 Set Height 1200
+Set PlaybackSpeed 0.5
+Set Padding 20
 
 # Launch flow library
+Hide
+Env DISABLE_FLOW_INTERACTIVE "false"
+Type "go build -o .bin/flow"
+Enter
+Type "alias flow=.bin/flow"
+Enter
+Type "clear"
+Enter
+Sleep 1s
+Show
 Type "flow library"
 Sleep 2s
 Enter
 
 # Navigate to flow workspace / examples namespace
 Sleep 5s
-Down@1s
-Space@1s
-Sleep 5s
+Down@2s
+Space@2s
 Down@1s 3
 Sleep 3s
 
 # Pick an executable to run
 Right@1s
-Sleep 2s
-Down@3s 5
+Sleep 3s
+Down@2s 5
+Sleep 3s
 
 # Run the selected executable
 Type "r"
-Sleep 5s
+Sleep 15s

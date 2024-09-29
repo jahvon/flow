@@ -55,7 +55,7 @@ func NewWorkspaceView(
 					container.HandleError(err)
 				}
 				container.SetState(common.HeaderContextKey, fmt.Sprintf("%s/*", ws.AssignedName()))
-				container.SetNotice("workspace updated", styles.NoticeLevelInfo)
+				container.SetNotice("workspace updated", styles.OutputLevelInfo)
 				return nil
 			},
 		},

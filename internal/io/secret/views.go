@@ -44,7 +44,7 @@ func NewSecretView(
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret renamed", styles.NoticeLevelInfo)
+				container.SetNotice("secret renamed", styles.OutputLevelInfo)
 				return nil
 			},
 		},
@@ -73,7 +73,7 @@ func NewSecretView(
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret value updated", styles.NoticeLevelInfo)
+				container.SetNotice("secret value updated", styles.OutputLevelInfo)
 				return nil
 			},
 		},
@@ -85,7 +85,7 @@ func NewSecretView(
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret deleted", styles.NoticeLevelInfo)
+				container.SetNotice("secret deleted", styles.OutputLevelInfo)
 				return nil
 			},
 		},

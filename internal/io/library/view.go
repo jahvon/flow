@@ -76,11 +76,11 @@ func (l *Library) View() string {
 	return lipgloss.JoinVertical(lipgloss.Top, header, panes, footer)
 }
 
-func (l *Library) SetNotice(notice string, level styles.NoticeLevel) {
+func (l *Library) SetNotice(notice string, level styles.OutputLevel) {
 	if level == "" {
-		level = styles.NoticeLevelInfo
+		level = styles.OutputLevelInfo
 	}
-	l.noticeText = l.theme.RenderNotice(notice, level)
+	l.noticeText = l.theme.RenderLevel(notice, level)
 }
 
 func (l *Library) setSize() {
