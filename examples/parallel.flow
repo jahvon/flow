@@ -7,7 +7,28 @@ executables:
   - verb: watch
     name: parallel
     parallel:
-      refs:
-        - run examples:with-output
-        - run examples:with-input
-        - run examples:from-file
+      execs:
+        - ref: run examples:with-output
+        - ref: run examples:with-input
+        - ref: run examples:from-file
+  - verb: restart
+    name: foo-sequence
+    parallel:
+      dir: f:tmp
+      execs:
+        - cmd: |
+            echo "Creating foo.txt" 1>&2
+            echo "foo bar baz" > foo.txt
+        - cmd: |
+            echo "Crunching the numbers..."
+            echo "Number of files in current directory: $(ls | wc -l)"
+            echo "Number of lines in this file: $(wc -l < foo.txt)"
+            echo "Number of words in this file: $(wc -w < foo.txt)"
+        - cmd: |
+            echo "Reviewing the data..."
+            sleep 2
+            cat foo.txt
+            sleep 2
+            echo "Deleting foo.txt" 1>&2
+            rm foo.txt
+        - ref: run examples:with-output

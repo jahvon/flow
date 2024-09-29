@@ -39,3 +39,14 @@ executables:
     exec:
       dir: //
       cmd: docsify serve docs --open
+  - verb: start
+    name: recording
+    aliases: [vhs]
+    description: Record a demo of the Flow CLI and save it
+    tags: [vhs]
+    exec:
+      params:
+        - envKey: OUTPUT
+          text: docs/_media/demo.gif
+      dir: //
+      cmd: vhs -o $OUTPUT docs/demo.tape

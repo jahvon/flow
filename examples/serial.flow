@@ -7,7 +7,7 @@ executables:
   - verb: start
     name: serial
     serial:
-      refs:
-        - run examples:with-output
-        - run examples:with-input
-        - run examples:from-file
+      execs:
+        - ref: run examples:with-output
+        - ref: run examples:with-input
+        - ref: run examples:from-file

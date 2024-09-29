@@ -10,7 +10,7 @@ operations workflows.
 
 **This project is currently in beta and documentation is a work in progress.** Contributions and feedback are welcome.
 
-## Features <!-- {docsify-ignore} -->
+#### _Features_ <!-- {docsify-ignore} -->
 
 - **Task Runner**: Easily define, manage, and run your tasks (called [executables](guide/executable.md)) from the command line.
 - **Secret Vault**: Store sensitive secrets in a secure local [vault](guide/vault.md).
@@ -19,3 +19,8 @@ operations workflows.
 - **Executable Organizer**: Group, reference, and search for executables by workspace, namespace, verbs, and tags.
 - **Input Handler**: Pass values into executables with environment variables defined by secrets, command-line args, or interactive prompts.
 - **Customizable TUI**: Personalize your [TUI experience](guide/interactive.md) with settings for log formatting, log archiving, and execution notifications, and more.
+
+---
+
+<p align="center"><img src="_media/demo.gif" width="1600"></p>
+
