@@ -11,7 +11,7 @@ WORKDIR /workspaces
 COPY flow /usr/bin/flow
 
 RUN if [ -z "$BRANCH" ]; then git clone $REPO .; else git clone -b $BRANCH $REPO .; fi
-RUN flow init workspace $WORKSPACE . --set
+RUN flow workspace create $WORKSPACE . --set
 
 ENTRYPOINT ["flow"]
-CMD ["get", "workspace"]
+CMD ["--version"]
