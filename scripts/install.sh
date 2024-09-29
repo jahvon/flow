@@ -21,12 +21,12 @@ get_arch() {
 }
 
 get_latest_version() {
-    curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest" | grep -o '"tag_name": ".*"' | sed 's/"tag_name": "//;s/"//'
+    curl -s "https://api.github.com/repos/$OWNER/$NAME/releases/latest" | grep -o '"tag_name": ".*"' | sed 's/"tag_name": "//;s/"//'
 }
 
-REPO_OWNER="jahvon"
-REPO_NAME="flow"
-CLI_BINARY="flow"
+OWNER="jahvon"
+NAME="flow"
+BINARY="flow"
 
 OS=$(get_os)
 ARCH=$(get_arch)
@@ -34,26 +34,27 @@ if [ -z "$VERSION" ]; then
     VERSION=$(get_latest_version)
 fi
 
-DOWNLOAD_URL="https://github.com/$REPO_OWNER/$REPO_NAME/releases/download/$VERSION/$CLI_BINARY-$VERSION-$OS-$ARCH.tar.gz"
+DOWNLOAD_URL="https://github.com/${OWNER}/${NAME}/releases/download/${VERSION}/${BINARY}_${VERSION}_${OS}_${ARCH}.tar.gz"
 TMP_DIR=$(mktemp -d)
+DOWNLOAD_PATH="${TMP_DIR}/${BINARY}_${VERSION}_${OS}_${ARCH}.tar.gz"
 
-echo "Downloading $CLI_BINARY $VERSION for $OS/$ARCH..."
-wget -q "$DOWNLOAD_URL" -O "$TMP_DIR/$CLI_BINARY-$VERSION-$OS-$ARCH.tar.gz"
+echo "Downloading $BINARY $VERSION for $OS/$ARCH..."
+wget "$DOWNLOAD_URL" -O "$DOWNLOAD_PATH"
 if [ $? -ne 0 ]; then
     echo "Failed to download $DOWNLOAD_URL"
     exit 1
 fi
 
 INSTALL_DIR="/usr/local/bin"
-echo "Installing $CLI_BINARY $VERSION to $INSTALL_DIR..."
-tar -xzf "$TMP_DIR/$CLI_BINARY-$VERSION-$OS-$ARCH.tar.gz" -C "$TMP_DIR"
+echo "Installing $BINARY $VERSION to $INSTALL_DIR..."
+tar -xzf "$DOWNLOAD_PATH" -C "$TMP_DIR"
 
-chmod +x "$TMP_DIR/$CLI_BINARY"
-sudo mv "$TMP_DIR/$CLI_BINARY" "$INSTALL_DIR/$CLI_BINARY"
+chmod +x "$TMP_DIR/$BINARY"
+sudo mv "$TMP_DIR/$BINARY" "$INSTALL_DIR/$BINARY"
 
-echo "$CLI_BINARY was installed successfully to $INSTALL_DIR/$CLI_BINARY"
-if command -v $CLI_BINARY --version >/dev/null; then
-    echo "Run '$CLI_BINARY --help' to get started"
+echo "$BINARY was installed successfully to $INSTALL_DIR/$BINARY"
+if command -v $BINARY --version >/dev/null; then
+    echo "Run '$BINARY --help' to get started"
 else
     echo "Manually add the directory to your \$HOME/.bash_profile (or similar)"
     echo "  export PATH=$INSTALL_DIR:\$PATH"
