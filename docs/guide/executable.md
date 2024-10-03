@@ -1,8 +1,7 @@
-Executables are customizable actions defined in a YAML [flowfile](#flowfile).
-
 ## Finding Executables
 
-There are a few different [flow library](../cli/flow_library.md) command that can be used to find executables:
+Executables are customizable actions defined in a YAML [flowfile](#flowfile). There are a few [flow library](../cli/flow_library.md)
+command that can be used to find executables:
     
 ```shell
 flow library # Multi-pane view for browsing executables
@@ -14,7 +13,10 @@ The `flow library` and `flow library glance` commands accept optional command-li
 executables by workspace, namespace, verb, or tag:
 
 ```shell
-flow library --workspace ws --namespace ns --verb exec --tag my-tag
+flow library --workspace ws --namespace ns --verb exec --tag my-tag 
+# additionally, the --all flag can be used to show executables from all namespaces and the 
+# --filter flag can be used to search the executable names and descriptions
+flow library --all --filter "search string"
 ```
 
 ## Running Executables
@@ -215,7 +217,7 @@ executables:
   - verb: "test"
     name: "unit"
     exec:
-      file: "run-tests.sh"
+      cmd: "cp $HOME/unit-tests.sh . && ./unit-tests.sh"
       dir: "f:tmp"
 ```
 
@@ -309,10 +311,10 @@ executables:
 
 ```yaml
 executables:
-  - verb: open
-    name: ws-config
+  - verb: "open"
+    name: "ws-config"
     launch:
-      uri: $FLOW_WORKSPACE_PATH
+      uri: "$FLOW_WORKSPACE_PATH"
       wait: true
 ```
 
@@ -320,23 +322,23 @@ executables:
 
 ```yaml
 executables:
-  - verb: transform
-    name: request-response
+  - verb: "transform"
+    name: "greeting"
     request:
-      method: POST
-      url: https://httpbin.org/post
+      method: "POST"
+      url: "https://httpbin.org/post"
       body: '{"hello": "world"}'
       logResponse: true
-      transformResponse: .args.hello = "universe" | .args
+      transformResponse: ".args.hello = 'universe' | .args"
 ```
 
 ##### render
 
 ```yaml
 executables:
-  - verb: render
-    name: documentation
+  - verb: "render"
+    name: "documentation"
     render:
-      templateFile: template.md
-      templateDataFile: template-data.yaml
+      templateFile: "template.md"
+      templateDataFile: "template-data.yaml"
 ```
