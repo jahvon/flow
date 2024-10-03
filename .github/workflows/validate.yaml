@@ -51,7 +51,7 @@ jobs:
       #  |____/ \___|\___|\__,_|_|  |_|\__|\__, |
       #                                    |___/
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.21.1
+        uses: securego/gosec@v2.21.4
         with:
           args: "-no-fail -fmt sarif -out results.sarif ./..."
 
