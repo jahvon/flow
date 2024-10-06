@@ -13,7 +13,7 @@ operations workflows.
 #### _Features_ <!-- {docsify-ignore} -->
 
 - **Task Runner**: Easily define, manage, and run your tasks (called [executables](guide/executable.md)) from the command line.
-- **Secret Vault**: Store sensitive secrets in a secure local [vault](guide/vault.md).
+- **Secret Vault**: Store sensitive secrets in a secure local [vault](guide/secret.md#vault-setup).
 - **Template Generator**: Generate executables and workspace scaffolding with [flow file templates](guide/templating.md).
 - **TUI Library**: Explore and run executables from the interactive and searchable TUI [library](cli/flow_library.md).
 - **Executable Organizer**: Group, reference, and search for executables by workspace, namespace, verbs, and tags.
