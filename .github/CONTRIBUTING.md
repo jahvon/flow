@@ -1,5 +1,10 @@
 # Contributing
 
+Contributions are welcome!
+
+Looking for a place to start? Check out the [issues](https://github.com/jahvon/flow/issues) for ideas. Be
+sure to read the contribution guidelines below!
+
 ## How We Develop
 
 This projects uses GitHub to host code, to track issues and feature requests, and to open and review pull requests.
