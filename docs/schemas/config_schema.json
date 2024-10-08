@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://flowexec.io/schemas/config_schema.json",
+  "description": "User Configuration for the Flow CLI.\nIncludes configurations for workspaces, templates, I/O, and other settings for the CLI.\n\nIt is read from the user's flow config directory:\n- **MacOS**: `$HOME/Library/Application Support/flow`\n- **Linux**: `$HOME/.config/flow`\n- **Windows**: `%APPDATA%\\flow`\n\nAlternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment variable.\n",
+  "type": "object",
+  "required": [
+    "workspaces",
+    "currentWorkspace"
+  ],
+  "definitions": {
+    "Interactive": {
+      "description": "Configurations for the interactive UI.",
+      "type": "object",
+      "required": [
+        "enabled"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "notifyOnCompletion": {
+          "description": "Whether to send a desktop notification when a command completes.",
+          "type": "boolean"
+        },
+        "soundOnCompletion": {
+          "description": "Whether to play a sound when a command completes.",
+          "type": "boolean"
+        }
+      }
+    },
+    "RemoteWorkspace": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "branch": {
+          "description": "The git branch to pin the remote workspace to.\nOnly one of `branch`, `commit`, or `tag` can be specified.\n",
+          "type": "string",
+          "default": "main"
+        },
+        "commit": {
+          "description": "The git commit to pin the remote workspace to.\nOnly one of `branch`, `commit`, or `tag` can be specified.\n",
+          "type": "string",
+          "default": ""
+        },
+        "pullOnSync": {
+          "description": "When to pull the latest changes from the remote workspace.\n- `never`: Never pull changes from the remote workspace.\n- `always`: Always pull changes from the remote workspace.\n- `auto`: Pull changes from the remote workspace only if the workspace is not dirty.\n",
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "never",
+            "always",
+            "auto"
+          ]
+        },
+        "tag": {
+          "description": "The git tag to pin the remote workspace to.\nOnly one of `branch`, `commit`, or `tag` can be specified.\n",
+          "type": "string",
+          "default": ""
+        },
+        "url": {
+          "description": "The git URL of the remote workspace.",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "properties": {
+    "currentNamespace": {
+      "description": "The name of the current namespace.\n\nNamespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.\nIf the namespace is not set, only executables defined without a namespace will be discovered.\n",
+      "type": "string",
+      "default": ""
+    },
+    "currentWorkspace": {
+      "description": "The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.",
+      "type": "string",
+      "default": ""
+    },
+    "defaultLogMode": {
+      "description": "The default log mode to use when running executables.\nThis can either be `hidden`, `json`, `logfmt` or `text`\n\n`hidden` will not display any logs.\n`json` will display logs in JSON format.\n`logfmt` will display logs with a log level, timestamp, and message.\n`text` will just display the log message.\n",
+      "type": "string",
+      "default": "logfmt"
+    },
+    "interactive": {
+      "$ref": "#/definitions/Interactive"
+    },
+    "remoteWorkspaces": {
+      "description": "A map of remote workspace names to their git repository config.",
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "$ref": "#/definitions/RemoteWorkspace"
+      }
+    },
+    "templates": {
+      "description": "A map of flowfile template names to their paths.",
+      "type": "object",
+      "default": {},
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "workspaceMode": {
+      "description": "The mode of the workspace. This can be either `fixed` or `dynamic`.\nIn `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.\nIn `dynamic` mode, the current workspace used at runtime is determined by the current directory.\nIf the current directory is within a workspace, that workspace is used.\n",
+      "type": "string",
+      "default": "dynamic",
+      "enum": [
+        "fixed",
+        "dynamic"
+      ]
+    },
+    "workspaces": {
+      "description": "Map of workspace names to their paths. The path should be a valid absolute path to the workspace directory.\n",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

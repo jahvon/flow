@@ -7,7 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/types"
 
 	"github.com/jahvon/flow/types/executable"
 	"github.com/jahvon/flow/types/workspace"
@@ -19,7 +19,7 @@ func (l *Library) Init() tea.Cmd {
 		cmds,
 		tea.SetWindowTitle("flow library"),
 		tea.Tick(time.Millisecond*250, func(t time.Time) tea.Msg {
-			return components.TickMsg(t)
+			return types.Tick()
 		}),
 	)
 	cmds = append(
@@ -29,7 +29,7 @@ func (l *Library) Init() tea.Cmd {
 		l.paneTwoViewport.Init(),
 	)
 
-	if l.ctx.InteractiveContainer.Width() >= 150 {
+	if l.ctx.TUIContainer.Width() >= 150 {
 		l.splitView = true
 	}
 	l.setSize()
@@ -120,8 +120,8 @@ func (l *Library) setVisibleNamespaces() {
 	filterWs := l.visibleWorkspaces[l.currentWorkspace]
 	nsSet := make(map[string]struct{})
 	for _, ex := range l.allExecutables {
-		ns := ex.Ref().GetNamespace()
-		ws := ex.Ref().GetWorkspace()
+		ns := ex.Ref().Namespace()
+		ws := ex.Ref().Workspace()
 		if filter.Namespace != "*" && filter.Namespace != "" && ns != filter.Namespace {
 			continue
 		} else if filterWs != allWorkspacesLabel && filterWs != "" && ws != filterWs {

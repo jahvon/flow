@@ -3,11 +3,12 @@ package secret
 import (
 	"fmt"
 
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/types"
+	"github.com/jahvon/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/vault"
 )
 
@@ -15,44 +16,64 @@ func NewSecretView(
 	ctx *context.Context,
 	secret vault.Secret,
 	asPlainText bool,
-) components.TeaModel {
-	container := ctx.InteractiveContainer
+) tuikit.View {
+	container := ctx.TUIContainer
 	v := vault.NewVault(ctx.Logger)
-	var secretKeyCallbacks = []components.KeyCallback{
+	var secretKeyCallbacks = []types.KeyCallback{
 		{
 			Key: "r", Label: "rename",
 			Callback: func() error {
-				in := components.TextInput{Key: "value", Prompt: "Enter the new secret name"}
-				inputs, err := components.ProcessInputs(io.Theme(), &in)
+				form, err := views.NewFormView(
+					container.RenderState(),
+					&views.FormField{
+						Key:   "value",
+						Type:  views.PromptTypeText,
+						Title: "Enter the new secret name",
+					})
 				if err != nil {
-					ctx.Logger.FatalErr(err)
+					container.HandleError(fmt.Errorf("encountered error creating the form: %w", err))
+					return nil
 				}
-				newName := inputs.FindByKey("value").Value()
+				if err := ctx.SetView(form); err != nil {
+					container.HandleError(fmt.Errorf("unable to set view: %w", err))
+					return nil
+				}
+				newName := form.FindByKey("value").Value()
 				if err := v.RenameSecret(secret.Reference, newName); err != nil {
 					container.HandleError(fmt.Errorf("unable to rename secret: %w", err))
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret renamed", styles.NoticeLevelInfo)
+				container.SetNotice("secret renamed", styles.OutputLevelInfo)
 				return nil
 			},
 		},
 		{
 			Key: "e", Label: "edit",
 			Callback: func() error {
-				in := components.TextInput{Key: "value", Prompt: "Enter the new secret value"}
-				inputs, err := components.ProcessInputs(io.Theme(), &in)
+				form, err := views.NewFormView(
+					container.RenderState(),
+					&views.FormField{
+						Key:   "value",
+						Type:  views.PromptTypeMasked,
+						Title: "Enter the new secret value",
+					})
 				if err != nil {
-					ctx.Logger.FatalErr(err)
+					container.HandleError(fmt.Errorf("encountered error creating the form: %w", err))
+					return nil
 				}
-				newValue := inputs.FindByKey("value").Value()
+				if err := ctx.SetView(form); err != nil {
+					container.HandleError(fmt.Errorf("unable to set view: %w", err))
+					return nil
+				}
+				newValue := form.FindByKey("value").Value()
 				secretValue := vault.SecretValue(newValue)
 				if err := v.SetSecret(secret.Reference, secretValue); err != nil {
 					container.HandleError(fmt.Errorf("unable to edit secret: %w", err))
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret value updated", styles.NoticeLevelInfo)
+				container.SetNotice("secret value updated", styles.OutputLevelInfo)
 				return nil
 			},
 		},
@@ -64,26 +85,21 @@ func NewSecretView(
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret deleted", styles.NoticeLevelInfo)
+				container.SetNotice("secret deleted", styles.OutputLevelInfo)
 				return nil
 			},
 		},
 	}
 
-	state := &components.TerminalState{
-		Theme:  io.Theme(),
-		Height: container.Height(),
-		Width:  container.Width(),
-	}
-	return components.NewEntityView(state, &secret, components.FormatDocument, secretKeyCallbacks...)
+	return views.NewEntityView(container.RenderState(), &secret, types.EntityFormatDocument, secretKeyCallbacks...)
 }
 
 func NewSecretListView(
 	ctx *context.Context,
 	secrets vault.SecretList,
 	asPlainText bool,
-) components.TeaModel {
-	container := ctx.InteractiveContainer
+) tuikit.View {
+	container := ctx.TUIContainer
 	if len(secrets.Items()) == 0 {
 		container.HandleError(fmt.Errorf("no secrets found"))
 	}
@@ -102,23 +118,16 @@ func NewSecretListView(
 			return fmt.Errorf("secret not found")
 		}
 
-		container.SetView(NewSecretView(ctx, secret, asPlainText))
-		return nil
+		return container.SetView(NewSecretView(ctx, secret, asPlainText))
 	}
 
-	state := &components.TerminalState{
-		Theme:  io.Theme(),
-		Height: container.Height(),
-		Width:  container.Width(),
-	}
-	return components.NewCollectionView(state, secrets, components.FormatList, selectFunc)
+	return views.NewCollectionView(container.RenderState(), secrets, types.CollectionFormatList, selectFunc)
 }
 
 func LoadSecretListView(
 	ctx *context.Context,
 	asPlainText bool,
 ) {
-	container := ctx.InteractiveContainer
 	v := vault.NewVault(ctx.Logger)
 	secrets, err := v.GetAllSecrets()
 	if err != nil {
@@ -137,5 +146,7 @@ func LoadSecretListView(
 		secretList,
 		asPlainText,
 	)
-	container.SetView(view)
+	if err := ctx.SetView(view); err != nil {
+		ctx.Logger.FatalErr(err)
+	}
 }

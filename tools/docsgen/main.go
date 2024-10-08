@@ -18,8 +18,13 @@ const (
 	cliDir  = "cli"
 )
 
+var (
+	oldCliRoot = filepath.Join(DocsDir, cliDir, "flow.md")
+	newCliRoot = filepath.Join(DocsDir, cliDir, "README.md")
+)
+
 func main() {
-	fmt.Println("Generating CLI docs...")
+	fmt.Println("generating CLI docs...")
 	ctx := context.NewContext(stdCtx.Background(), os.Stdin, os.Stdout)
 	defer ctx.Finalize()
 
@@ -29,11 +34,14 @@ func main() {
 	if err := doc.GenMarkdownTree(rootCmd, filepath.Join(rootDir(), DocsDir, cliDir)); err != nil {
 		panic(err)
 	}
+	if err := os.Rename(oldCliRoot, newCliRoot); err != nil {
+		panic(err)
+	}
 
-	fmt.Println("Generating markdown docs...")
+	fmt.Println("generating markdown docs...")
 	generateMarkdownDocs()
 
-	fmt.Println("Generating schema files...")
+	fmt.Println("generating schema files...")
 	generateJSONSchemas()
 }
 

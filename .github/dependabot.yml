@@ -18,6 +18,9 @@ updates:
         patterns:
           - "github.com/onsi/ginkgo/v2"
           - "github.com/onsi/gomega"
+      charmbracelet-deps:
+          patterns:
+              - "github.com/charmbracelet/*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

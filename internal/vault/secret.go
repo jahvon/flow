@@ -97,10 +97,10 @@ func (l SecretList) FindByName(name string) *Secret {
 	return nil
 }
 
-func (l SecretList) Items() []*types.CollectionItem {
-	items := make([]*types.CollectionItem, 0)
+func (l SecretList) Items() []*types.EntityInfo {
+	items := make([]*types.EntityInfo, 0)
 	for _, secret := range l {
-		item := types.CollectionItem{
+		item := types.EntityInfo{
 			Header: secret.Reference,
 			ID:     secret.Reference,
 		}

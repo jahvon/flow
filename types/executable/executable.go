@@ -331,10 +331,10 @@ func (l ExecutableList) JSON() (string, error) {
 	return string(jsonBytes), nil
 }
 
-func (l ExecutableList) Items() []*types.CollectionItem {
-	items := make([]*types.CollectionItem, 0)
+func (l ExecutableList) Items() []*types.EntityInfo {
+	items := make([]*types.EntityInfo, 0)
 	for _, exec := range l {
-		item := &types.CollectionItem{
+		item := &types.EntityInfo{
 			Header: exec.Ref().String(),
 			Desc:   exec.Description,
 			ID:     exec.Ref().String(),
@@ -451,7 +451,7 @@ func (l ExecutableList) FilterByWorkspace(ws string) ExecutableList {
 }
 
 func (l ExecutableList) FilterByNamespace(ns string) ExecutableList {
-	if ns == "" || ns == "*" {
+	if ns == "*" {
 		return l
 	}
 

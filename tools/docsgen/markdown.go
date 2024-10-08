@@ -23,6 +23,9 @@ var (
 		schema.FlowfileDefinitionTitle,
 		schema.ConfigDefinitionTitle,
 		schema.WorkspaceDefinitionTitle,
+		// TODO: fix schema gem bug where the common executable definitions used by the flowfile
+		// and template schemas are non-deterministically generated
+		// schema.TemplateDefinitionTitle,
 	}
 )
 
@@ -51,7 +54,7 @@ func generateMarkdownDocs() {
 			}
 			var buf bytes.Buffer
 			tmpl, err := template.New(page.Filename).
-				Funcs(template.FuncMap{"TypeStr": typeStr, "OneLine": removeNewlines}).
+				Funcs(template.FuncMap{"TypeStr": typeStr, "OneLine": removeNewlines, "IsRequired": requiredStr}).
 				Parse(typeTemplate)
 			if err != nil {
 				panic(err)
@@ -141,6 +144,15 @@ func typeStr(s *schema.JSONSchema) string {
 	default:
 		return fmt.Sprintf("[%s](#%s)", name, name)
 	}
+}
+
+func requiredStr(list []string, key schema.FieldKey) string {
+	for _, k := range list {
+		if strings.ToLower(k) == key.Lower() {
+			return "✘"
+		}
+	}
+	return ""
 }
 
 func removeNewlines(s string) string {

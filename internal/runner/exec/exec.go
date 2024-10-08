@@ -1,7 +1,6 @@
 package exec
 
 import (
-	"github.com/jahvon/tuikit/io"
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/internal/context"
@@ -53,10 +52,7 @@ func (r *execRunner) Exec(ctx *context.Context, e *executable.Executable, inputE
 	}
 
 	logMode := execSpec.LogMode
-	var logFields map[string]interface{}
-	if logMode == io.JSON || logMode == io.Logfmt {
-		logFields = execSpec.GetLogFields()
-	}
+	logFields := execSpec.GetLogFields()
 
 	switch {
 	case execSpec.Cmd == "" && execSpec.File == "":

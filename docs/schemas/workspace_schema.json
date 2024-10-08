@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://flowexec.io/schemas/workspace_schema.json",
+  "description": "Configuration for a workspace in the Flow CLI.\nThis configuration is used to define the settings for a workspace.\nEvery workspace has a workspace config file named `flow.yaml` in the root of the workspace directory.\n",
+  "type": "object",
+  "definitions": {
+    "CommonTags": {
+      "description": "A list of tags.\nTags can be used with list commands to filter returned data.\n",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ExecutableFilter": {
+      "type": "object",
+      "properties": {
+        "excluded": {
+          "description": "A list of directories to exclude from the executable search.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "included": {
+          "description": "A list of directories to include in the executable search.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "description": {
+      "description": "A description of the workspace. This description is rendered as markdown in the interactive UI.",
+      "type": "string",
+      "default": ""
+    },
+    "descriptionFile": {
+      "description": "A path to a markdown file that contains the description of the workspace.",
+      "type": "string",
+      "default": ""
+    },
+    "displayName": {
+      "description": "The display name of the workspace. This is used in the interactive UI.",
+      "type": "string",
+      "default": ""
+    },
+    "executables": {
+      "$ref": "#/definitions/ExecutableFilter"
+    },
+    "tags": {
+      "$ref": "#/definitions/CommonTags",
+      "default": []
+    }
+  }
+}

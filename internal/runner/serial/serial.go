@@ -68,12 +68,10 @@ func handleExecRef(
 			return fmt.Errorf("unable to find e with reference %s", executableRef)
 		}
 
-		if exec.Exec != nil {
-			fields := map[string]interface{}{
-				"e": exec.ID(),
-			}
-			exec.Exec.SetLogFields(fields)
+		fields := map[string]interface{}{
+			"step": exec.ID(),
 		}
+		exec.Exec.SetLogFields(fields)
 
 		if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
 			if serialSpec.FailFast {
@@ -120,6 +118,11 @@ func handleExec(
 			}
 			maps.Copy(execPromptedEnv, a)
 		}
+
+		fields := map[string]interface{}{
+			"step": exec.ID(),
+		}
+		exec.Exec.SetLogFields(fields)
 
 		var attempts int
 	retryLoop:

@@ -2,6 +2,7 @@
 package library
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/atotto/clipboard"
@@ -117,17 +118,17 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			}
 		case "o":
 			if curWsCfg == nil {
-				l.SetNotice("no workspace selected", styles.NoticeLevelError)
+				l.SetNotice("no workspace selected", styles.OutputLevelError)
 				break
 			}
 
 			if err := open.Open(curWsCfg.Location(), false); err != nil {
 				l.ctx.Logger.Error(err, "unable to open workspace")
-				l.SetNotice("unable to open workspace", styles.NoticeLevelError)
+				l.SetNotice("unable to open workspace", styles.OutputLevelError)
 			}
 		case "e":
 			if curWsCfg == nil {
-				l.SetNotice("no workspace selected", styles.NoticeLevelError)
+				l.SetNotice("no workspace selected", styles.OutputLevelError)
 				break
 			}
 
@@ -136,18 +137,18 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				l.ctx.StdIn(), l.ctx.StdOut(),
 			); err != nil {
 				l.ctx.Logger.Error(err, "unable to open workspace in editor")
-				l.SetNotice("unable to open workspace in editor", styles.NoticeLevelError)
+				l.SetNotice("unable to open workspace in editor", styles.OutputLevelError)
 			}
 		case "s":
 			if curWsCfg == nil {
-				l.SetNotice("no workspace selected", styles.NoticeLevelError)
+				l.SetNotice("no workspace selected", styles.OutputLevelError)
 				break
 			}
 
 			curCfg, err := filesystem.LoadConfig()
 			if err != nil {
 				l.ctx.Logger.Error(err, "unable to load user config")
-				l.SetNotice("unable to load user config", styles.NoticeLevelError)
+				l.SetNotice("unable to load user config", styles.OutputLevelError)
 				break
 			}
 
@@ -155,14 +156,14 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			case l.showNamespaces && curNs == withoutNamespaceLabel:
 				curCfg.CurrentNamespace = ""
 			case l.showNamespaces && curNs == allNamespacesLabel:
-				l.SetNotice("no namespace selected", styles.NoticeLevelError)
+				l.SetNotice("no namespace selected", styles.OutputLevelError)
 			case l.showNamespaces && curNs != "":
 				curCfg.CurrentNamespace = curNs
 			case !l.showNamespaces && curWs == allWorkspacesLabel:
-				l.SetNotice("no workspace selected", styles.NoticeLevelError)
+				l.SetNotice("no workspace selected", styles.OutputLevelError)
 			case !l.showNamespaces && curWs != "":
 				if curWs != curWsCfg.AssignedName() {
-					l.SetNotice("current workspace out of sync", styles.NoticeLevelError)
+					l.SetNotice("current workspace out of sync", styles.OutputLevelError)
 					break
 				}
 				curCfg.CurrentWorkspace = curWsCfg.AssignedName()
@@ -170,13 +171,13 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 
 			if err := filesystem.WriteConfig(curCfg); err != nil {
 				l.ctx.Logger.Error(err, "unable to write user config")
-				l.SetNotice("unable to write user config", styles.NoticeLevelError)
+				l.SetNotice("unable to write user config", styles.OutputLevelError)
 				break
 			}
 
 			l.ctx.Config.CurrentWorkspace = curCfg.CurrentWorkspace
 			l.ctx.Config.CurrentNamespace = curCfg.CurrentNamespace
-			l.SetNotice("context updated", styles.NoticeLevelInfo)
+			l.SetNotice("context updated", styles.OutputLevelInfo)
 		}
 	}
 
@@ -219,38 +220,38 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 			}
 		case "e":
 			if curExec == nil {
-				l.SetNotice("no executable selected", styles.NoticeLevelError)
+				l.SetNotice("no executable selected", styles.OutputLevelError)
 				break
 			}
 
 			if err := common.OpenInEditor(curExec.FlowFilePath(), l.ctx.StdIn(), l.ctx.StdOut()); err != nil {
 				l.ctx.Logger.Error(err, "unable to open executable in editor")
-				l.SetNotice("unable to open executable in editor", styles.NoticeLevelError)
+				l.SetNotice("unable to open executable in editor", styles.OutputLevelError)
 			}
 		case "c":
 			if curExec == nil {
-				l.SetNotice("no executable selected", styles.NoticeLevelError)
+				l.SetNotice("no executable selected", styles.OutputLevelError)
 				break
 			}
 
 			if err := clipboard.WriteAll(curExec.Ref().String()); err != nil {
 				l.ctx.Logger.Error(err, "unable to copy reference to clipboard")
-				l.SetNotice("unable to copy reference to clipboard", styles.NoticeLevelError)
+				l.SetNotice("unable to copy reference to clipboard", styles.OutputLevelError)
 			} else {
-				l.SetNotice("copied reference to clipboard", styles.NoticeLevelInfo)
+				l.SetNotice("copied reference to clipboard", styles.OutputLevelInfo)
 			}
 		case "r":
 			if curExec == nil {
-				l.SetNotice("no executable selected", styles.NoticeLevelError)
+				l.SetNotice("no executable selected", styles.OutputLevelError)
 				break
 			}
 
-			go func() {
-				l.ctx.InteractiveContainer.Shutdown()
+			l.ctx.TUIContainer.Shutdown(func() {
 				if err := l.cmdRunFunc(curExec.Ref().String()); err != nil {
 					l.ctx.Logger.Fatalx("unable to execute command", "error", err)
 				}
-			}()
+			})
+			os.Exit(0) // This is necessary to prevent the app from hanging after the command is run
 		case "f":
 			if l.currentPane == 1 {
 				break

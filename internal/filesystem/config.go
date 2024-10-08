@@ -21,7 +21,7 @@ func ConfigDirPath() string {
 	if err != nil {
 		panic(errors.Wrap(err, "unable to get config directory"))
 	}
-	return filepath.Join(dirname, flowDirName)
+	return filepath.Join(dirname, dataDirName)
 }
 
 func UserConfigFilePath() string {

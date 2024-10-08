@@ -8,10 +8,9 @@ import (
 	"time"
 
 	"github.com/gen2brain/beeep"
-	"github.com/jahvon/tuikit/components"
+	"github.com/jahvon/tuikit/views"
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal/interactive"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
@@ -33,10 +32,11 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Aliases: executable.SortedValidVerbs(),
 		Short:   "Execute a flow by ID.",
 		Long: execDocumentation + fmt.Sprintf(
-			"\n\n%s\n\nSee %s for more information on executable verbs."+
-				"See %s for more information on executable IDs.",
-			execExamples, io.TypesDocsURL("flowfile", "ExecutableVerb"),
+			"\n\nSee %s for more information on executable verbs and "+
+				"%s for more information on executable IDs.\n\n%s",
+			io.TypesDocsURL("flowfile", "ExecutableVerb"),
 			io.TypesDocsURL("flowfile", "ExecutableRef"),
+			execExamples,
 		),
 		Args: cobra.MinimumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -62,14 +62,13 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	rootCmd.AddCommand(subCmd)
 }
 
-func execPreRun(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 	runner.RegisterRunner(exec.NewRunner())
 	runner.RegisterRunner(launch.NewRunner())
 	runner.RegisterRunner(request.NewRunner())
 	runner.RegisterRunner(render.NewRunner())
 	runner.RegisterRunner(serial.NewRunner())
 	runner.RegisterRunner(parallel.NewRunner())
-	interactive.InitInteractiveCommand(ctx, cmd)
 }
 
 //nolint:gocognit
@@ -114,15 +113,18 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		envMap = make(map[string]string)
 	}
 
-	setAuthEnv(ctx, e)
-	textInputs := pendingTextInputs(ctx, e)
+	setAuthEnv(ctx, cmd, e)
+	textInputs := pendingFormFields(ctx, e)
 	if len(textInputs) > 0 {
-		inputs, err := components.ProcessInputs(io.Theme(), textInputs...)
+		form, err := views.NewForm(io.Theme(), ctx.StdIn(), ctx.StdOut(), textInputs...)
 		if err != nil {
 			logger.FatalErr(err)
 		}
-		for _, input := range inputs {
-			envMap[input.Key] = input.Value()
+		if err := form.Run(ctx.Ctx); err != nil {
+			logger.FatalErr(err)
+		}
+		for key, val := range form.ValueMap() {
+			envMap[key] = fmt.Sprintf("%v", val)
 		}
 	}
 	startTime := time.Now()
@@ -131,7 +133,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	}
 	dur := time.Since(startTime)
 	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
-	if interactive.UIEnabled(ctx, cmd) {
+	if TUIEnabled(ctx, cmd) {
 		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
 			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 		}
@@ -172,19 +174,24 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 	return nil
 }
 
-func setAuthEnv(ctx *context.Context, executable *executable.Executable) {
+func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.Executable) {
 	if authRequired(ctx, executable) {
-		resp, err := components.ProcessInputs(
+		form, err := views.NewForm(
 			io.Theme(),
-			&components.TextInput{
-				Key:    vault.EncryptionKeyEnvVar,
-				Prompt: "Enter vault encryption key",
-				Hidden: true,
+			ctx.StdIn(),
+			ctx.StdOut(),
+			&views.FormField{
+				Key:   vault.EncryptionKeyEnvVar,
+				Title: "Enter vault encryption key",
+				Type:  views.PromptTypeMasked,
 			})
 		if err != nil {
 			ctx.Logger.FatalErr(err)
 		}
-		val := resp.ValueMap()[vault.EncryptionKeyEnvVar]
+		if err := form.Run(ctx.Ctx); err != nil {
+			ctx.Logger.FatalErr(err)
+		}
+		val := form.FindByKey(vault.EncryptionKeyEnvVar).Value()
 		if val == "" {
 			ctx.Logger.FatalErr(fmt.Errorf("vault encryption key required"))
 		}
@@ -194,7 +201,9 @@ func setAuthEnv(ctx *context.Context, executable *executable.Executable) {
 	}
 }
 
-//nolint:gocognit
+// TODO: refactor this function to simplify the logic
+//
+//nolint:all
 func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 	if os.Getenv(vault.EncryptionKeyEnvVar) != "" {
 		return false
@@ -239,6 +248,17 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 				return true
 			}
 		}
+		for _, e := range rootExec.Serial.Execs {
+			if e.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, e.Ref)
+				if err != nil {
+					continue
+				}
+				if authRequired(ctx, childExec) {
+					return true
+				}
+			}
+		}
 	case rootExec.Parallel != nil:
 		for _, param := range rootExec.Parallel.Params {
 			if param.SecretRef != "" {
@@ -254,42 +274,53 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 				return true
 			}
 		}
+		for _, e := range rootExec.Parallel.Execs {
+			if e.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, e.Ref)
+				if err != nil {
+					continue
+				}
+				if authRequired(ctx, childExec) {
+					return true
+				}
+			}
+		}
 	}
 	return false
 }
 
-//nolint:gocognit
-func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []*components.TextInput {
-	pending := make([]*components.TextInput, 0)
+//nolint:gocognit,funlen
+func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []*views.FormField {
+	pending := make([]*views.FormField, 0)
 	switch {
 	case rootExec.Exec != nil:
 		for _, param := range rootExec.Exec.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Launch != nil:
 		for _, param := range rootExec.Launch.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Request != nil:
 		for _, param := range rootExec.Request.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Render != nil:
 		for _, param := range rootExec.Render.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Serial != nil:
 		for _, param := range rootExec.Serial.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Serial.Refs {
@@ -297,13 +328,23 @@ func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []
 			if err != nil {
 				continue
 			}
-			childPending := pendingTextInputs(ctx, childExec)
+			childPending := pendingFormFields(ctx, childExec)
 			pending = append(pending, childPending...)
+		}
+		for _, child := range rootExec.Serial.Execs {
+			if child.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child.Ref)
+				if err != nil {
+					continue
+				}
+				childPending := pendingFormFields(ctx, childExec)
+				pending = append(pending, childPending...)
+			}
 		}
 	case rootExec.Parallel != nil:
 		for _, param := range rootExec.Parallel.Params {
 			if param.Prompt != "" {
-				pending = append(pending, &components.TextInput{Key: param.EnvKey, Prompt: param.Prompt})
+				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 		for _, child := range rootExec.Parallel.Refs {
@@ -311,8 +352,18 @@ func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []
 			if err != nil {
 				continue
 			}
-			childPending := pendingTextInputs(ctx, childExec)
+			childPending := pendingFormFields(ctx, childExec)
 			pending = append(pending, childPending...)
+		}
+		for _, child := range rootExec.Parallel.Execs {
+			if child.Ref != "" {
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child.Ref)
+				if err != nil {
+					continue
+				}
+				childPending := pendingFormFields(ctx, childExec)
+				pending = append(pending, childPending...)
+			}
 		}
 	}
 	return pending
@@ -321,24 +372,30 @@ func pendingTextInputs(ctx *context.Context, rootExec *executable.Executable) []
 var (
 	//nolint:lll
 	execDocumentation = `
-Execute a flow where <executable-id> is the target executable's ID in the form of 'ws/ns:name'.
+Execute an executable where EXECUTABLE_ID is the target executable's ID in the form of 'ws/ns:name'.
 The flow subcommand used should match the target executable's verb or one of its aliases.
 
 If the target executable accept arguments, they can be passed in the form of flag or positional arguments.
 Flag arguments are specified with the format 'flag=value' and positional arguments are specified as values without any prefix.
 `
 	execExamples = `
-# Execute the 'build' flow in the current workspace and namespace
-flow exec build
-flow run build # Equivalent to the above since 'run' is an alias for the 'exec' verb
+#### Examples
+**Execute the 'build' flow in the current workspace and namespace**
 
-# Execute the 'docs' flow with the 'show' verb in the current workspace and namespace
+flow exec build
+
+flow run build  (Equivalent to the above since 'run' is an alias for the 'exec' verb)
+
+**Execute the 'docs' flow with the 'show' verb in the current workspace and namespace**
+
 flow show docs
 
-# Execute the 'build' flow in the 'ws' workspace and 'ns' namespace
+**Execute the 'build' flow in the 'ws' workspace and 'ns' namespace**
+
 flow exec ws/ns:build
 
-# Execute the 'build' flow in the 'ws' workspace and 'ns' namespace with flag and positional arguments
+**Execute the 'build' flow in the 'ws' workspace and 'ns' namespace with flag and positional arguments**
+
 flow exec ws/ns:build flag1=value1 flag2=value2 value3 value4
 `
 )

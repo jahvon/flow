@@ -15,12 +15,19 @@ definitions:
       For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.
       This allows users to use the verb that best describes the action they are performing.
 
-      **Activation verbs**: `exec`, `run`, `start`, `install`, `setup`, `release`, `deploy`, `apply`
-      **Deactivation verbs**: `delete`, `uninstall`, `destroy`, `undeploy`
-      **Update verbs**: `update`, `upgrade`, `refresh`, `reload`
-      **Management verbs**: `manage`, `configure`, `monitor`, `edit`
-      **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
-      **Creation verbs**: `generate`, `add`, `new`, `build`, `transform`
+      - **Activation verbs**: `exec`, `run`, `start`, `activate`, `enable`, `watch`
+      - **Deactivation verbs**: `deactivate`, `disable`, `stop`, `kill`
+      - **Restart verbs**: `restart`, `reboot`, `reload`, `refresh`
+      - **Install verbs**: `install`, `setup`, `build`, `package`, `bundle`
+      - **Uninstall verbs**: `uninstall`, `teardown`, `undeploy`
+      - **Update verbs**: `update`, `upgrade`, `patch`, `edit`, `transform`, `manage`, `configure`
+      - **Publish verbs**: `publish`, `release`, `deploy`, `apply`, `push`, `send`
+      - **Management verbs**: `manage`, `configure`, `monitor`, `edit`
+      - **Test verbs**: `test`, `validate`, `check`, `verify`
+      - **Analyze verbs**: `analyze`, `scan`, `lint`, `audit`
+      - **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
+      - **Creation verbs**: `generate`, `add`, `new`, `create`, `init`, `set`
+      - **Destruction verbs**: `remove`, `delete`, `unset`, `destroy`, `clean`, `clear`, `purge`
 
       [Verb group + Name] must be unique within the namespace of the workspace.
     default: exec

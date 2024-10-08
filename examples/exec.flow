@@ -1,16 +1,18 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
 visibility: private
 namespace: examples
+description: This is a flow executable that demonstrates how to use exec executable types.
+tags: [exec]
+fromFile:
+  - generated.sh
 executables:
   - verb: run
-    name: output-exec
-    description: Print a simple message from an inline exec definition
+    name: with-output
     exec:
       cmd: echo "Hello from an inline definition!"
 
   - verb: run
-    name: input-exec
-    description: Accept user input from the shell
+    name: with-input
     exec:
       cmd: |
         echo "Enter your name:"
@@ -18,9 +20,8 @@ executables:
         echo "Hello, $name!"
 
   - verb: run
-    name: process-exec
-    aliases:
-      - np
+    name: with-vim
+    visibility: hidden # TODO: fix running of process like vim
     exec:
       cmd: |
         echo "Opening vim..."
@@ -28,18 +29,6 @@ executables:
         echo "Vim closed."
 
   - verb: run
-    name: file-exec
-    exec:
-      file: simple-script.sh
-
-  - verb: run
-    name: hidden-exec
-    visibility: hidden
-    exec:
-      file: simple-script.sh
-
-  - verb: run
-    name: internal-exec
-    visibility: internal
+    name: from-file
     exec:
       file: simple-script.sh

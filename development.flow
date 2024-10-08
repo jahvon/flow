@@ -1,22 +1,24 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
 visibility: private
 tags: [development]
 executables:
   - verb: run
-    name: validate
-    aliases: [precommit]
+    name: checks
+    aliases: [precommit, pc, ci]
     description: |
       Run the repository validation checks. This includes linting, tests, and code generation.
       Validate should be run before committing changes.
     serial:
       failFast: true
       refs:
-        - run generate
-        - run lint
+        - generate code
+        - generate docs
+        - run linters
         - run tests
 
-  - verb: run
-    name: build
+  - verb: build
+    name: binary
+    aliases: [bin, flow]
     description: |
         Build the flow binary. The binary is built at the path specified in the first positional argument.
         If not set, the binary is built at .bin/flow.
@@ -34,18 +36,26 @@ executables:
         go build -o ${BIN_PATH}/${BIN_NAME}
         echo "flow built at ${BIN_PATH}/${BIN_NAME}"
 
-  - verb: run
-    name: generate
-    description: Generate code and documentation
-    aliases: [docsgen, codegen, gen]
+  - verb: generate
+    name: docs
+    aliases: [documentation]
     exec:
       dir: //
       cmd: |
-        go generate ./...
+        echo "generating completions..."
+        ./scripts/completions.sh
+        
         go run ./tools/docsgen/.
 
+  - verb: generate
+    name: code
+    exec:
+      dir: //
+      cmd: echo "generating code..."; go generate ./...
+
   - verb: run
-    name: lint
+    name: linters
+    aliases: [formatters]
     description: Run linters and formatters
     exec:
       dir: //
@@ -56,6 +66,7 @@ executables:
 
   - verb: run
     name: tests
+    aliases: [test, unit, e2e]
     description: Run all project tests
     exec:
       dir: //
@@ -67,19 +78,125 @@ executables:
     description: Install the project to the GOPATH from local source
     exec:
       dir: //
-      cmd: go test ./... -race
+      cmd: go install ./...
 
   - verb: install
     name: deps
-    description: Install project dependencies
-    aliases: [local-deps]
+    description: Install project dependencies using go
+    tags: [go, development]
+    aliases: [tools, go-tools, go-deps]
     exec:
       dir: //
       cmd: |
-        go mod tidy
         echo "installing cobra-cli..."
         go install github.com/spf13/cobra-cli@v1.3.0
         echo "installing golangci-lint..."
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.3
         echo "installing ginkgo..."
-        go install github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
+        go install github.com/onsi/ginkgo/v2/ginkgo@v2.20.2
+        echo "installing goreleaser..."
+        go install github.com/goreleaser/goreleaser@v2.2.0
+
+  - verb: update
+    name: modules
+    description: Update project dependencies
+    tags: [go, development]
+    aliases: [gomod, go-mod, deps, go-deps]
+    exec:
+      dir: //
+      cmd: |
+        echo "updating go modules..."
+        go get -u ./...
+        go mod tidy
+
+  - verb: build
+    name: container
+    description: Build the flow container image
+    tags: [docker, development]
+    aliases: [docker, image]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "building go binary..."
+        GOOS=linux GOARCH=amd64 go build -o flow
+        echo "building container image..."
+        $BUILDER build -t $IMAGE_REPO:$IMAGE_TAG .
+
+  - verb: run
+    name: container
+    description: Run the flow container image
+    tags: [docker, development]
+    aliases: [image, docker]
+    exec:
+      dir: //
+      logMode: text
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+        - envKey: WORKSPACE
+          default: active
+          flag: workspace
+        - envKey: GIT_REPO
+          default: https://github.com/jahvon/flow.git
+          flag: repo
+        - envKey: BRANCH
+          default: main
+          flag: branch
+        - envKey: CONTAINER_CMD
+          default: "get workspace"
+          flag: cmd
+      cmd: |
+        echo "running container image..."
+        $BUILDER run -it -e GIT_REPO=$GIT_REPO \
+          -e BRANCH=$BRANCH \
+          -e WORKSPACE=$WORKSPACE \
+          -t $IMAGE_REPO:$IMAGE_TAG \
+          $CONTAINER_CMD
+
+  - verb: push
+    name: container
+    description: Push the flow container image to the registry
+    tags: [docker, development]
+    aliases: [image, docker]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "pushing container image..."
+        $BUILDER push $IMAGE_REPO:$IMAGE_TAG
+
+  - verb: create
+    name: snapshot
+    description: Create a snapshot release
+    aliases: [release, snap]
+    exec:
+      dir: //
+      cmd: |
+        echo "creating snapshot release..."
+        goreleaser release --snapshot --clean

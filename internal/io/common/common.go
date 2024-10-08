@@ -8,6 +8,8 @@ import (
 	"github.com/jahvon/flow/internal/services/open"
 )
 
+const HeaderContextKey = "ctx"
+
 var termEditors = []string{"vim", "nvim", "emacs", "nano"}
 
 func OpenInEditor(path string, stdIn, stdOut *os.File) error {

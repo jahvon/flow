@@ -32,10 +32,10 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 		ctx.Finalize()
 	})
 
-	When("creating a new vault (flow init vault)", func() {
+	When("creating a new vault (flow secret vault create)", func() {
 		It("should return the generated key", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "init", "vault", "--verbosity", "-1")).To(Succeed())
+			Expect(run.Run(ctx, "secret", "vault", "create", "--verbosity", "-1")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -48,41 +48,45 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 
 	When("setting a secret (flow set secret)", func() {
 		It("should save into the vault", func() {
-			Expect(run.Run(ctx, "set", "secret", "my-secret", "my-value")).To(Succeed())
+			Expect(run.Run(ctx, "secret", "set", "my-secret", "my-value")).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("Secret my-secret set in vault"))
 		})
 	})
 
-	When("getting a secret (flow get secret)", func() {
+	When("getting a secret (flow secret view)", func() {
 		It("should return the secret value", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "get", "secret", "my-secret", "--plainText")).To(Succeed())
+			Expect(run.Run(ctx, "secret", "view", "my-secret", "--plainText")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("my-value"))
 		})
 	})
 
-	When("listing secrets (flow list secrets)", func() {
+	When("listing secrets (flow secret list)", func() {
 		It("should return the list of secrets", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "list", "secrets")).To(Succeed())
+			Expect(run.Run(ctx, "secret", "list")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("my-secret"))
 		})
 	})
 
-	// TODO: Get e2e tests with stdin working - this will require some updates in tuikit to handle stdin overrides
-	// When("deleting a secret (flow remove secret)", func() {
-	// 	It("should remove the secret from the vault", func() {
-	// 		Eventually(run.Run(ctx, "remove", "secret", "my-secret")).WithTimeout(3 * time.Second).Should(Succeed())
-	// 		Expect(writeUserInput(ctx.StdIn(), "y\n")).To(Succeed())
-	// 		out, err := readFileContent(ctx.StdOut())
-	// 		Expect(err).NotTo(HaveOccurred())
-	// 		Expect(out).To(ContainSubstring("Secret my-secret removed from vault"))
-	// 	})
-	// })
+	When("deleting a secret (flow secret delete)", func() {
+		It("should remove the secret from the vault", func() {
+			reader, writer, err := os.Pipe()
+			Expect(err).NotTo(HaveOccurred())
+			_, err = writer.Write([]byte("yes\n"))
+			Expect(err).ToNot(HaveOccurred())
+
+			ctx.SetIO(reader, ctx.StdOut())
+			Expect(run.Run(ctx, "secret", "delete", "my-secret")).To(Succeed())
+			out, err := readFileContent(ctx.StdOut())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(out).To(ContainSubstring("Secret 'my-secret' deleted from vault"))
+		})
+	})
 })

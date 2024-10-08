@@ -44,22 +44,44 @@ func (e SchemaExt) IsExported() bool {
 	return e.Identifier == "" || (e.Identifier[0] >= 'A' && e.Identifier[0] <= 'Z')
 }
 
-//nolint:gocognit,nestif
+//nolint:all
 func MergeSchemas(dst, src *JSONSchema, dstFile FileName, schemaMap map[FileName]*JSONSchema) {
 	if src.Items != nil {
 		MergeSchemas(dst, src.Items, dstFile, schemaMap)
+	}
+	for _, value := range src.Definitions {
+		if value.Ref.IsRoot() {
+			continue
+		}
+		MergeSchemas(dst, value, dstFile, schemaMap)
+	}
+	for key, value := range src.Properties {
+		if !value.Ext.IsExported() {
+			delete(src.Properties, FieldKey(value.Ext.Identifier))
+			continue
+		}
+		MergeSchemas(dst, value, dstFile, schemaMap)
+		src.Properties[key].Ref = convertToLocalSchemaRef(value.Ref, dstFile)
 	}
 
 	var match *JSONSchema
 	switch {
 	case src.Ref.String() == "":
 		// the source is not a reference
+		if src.Items != nil {
+			MergeSchemas(dst, src.Items, dstFile, schemaMap)
+		}
 		for key, value := range src.Properties {
 			if !value.Ext.IsExported() {
 				delete(src.Properties, key)
 				continue
 			}
 			MergeSchemas(dst, value, dstFile, schemaMap)
+			src.Properties[key].Ref = convertToLocalSchemaRef(value.Ref, dstFile)
+		}
+		for i, value := range src.Definitions {
+			MergeSchemas(dst, value, dstFile, schemaMap)
+			src.Definitions[i].Ref = convertToLocalSchemaRef(value.Ref, dstFile)
 		}
 	case src.Ref.ExternalFile() == "" && dst.Definitions[src.Ref.Key()] == nil:
 		// the ref is a local definition but doesn't exist in the destination schema
@@ -116,15 +138,13 @@ func MergeSchemas(dst, src *JSONSchema, dstFile FileName, schemaMap map[FileName
 		return
 	}
 
-	if src.Ref.String() != "" {
-		src.Ref = convertToLocalSchemaRef(src.Ref, dstFile)
-	}
-	for key, value := range match.Definitions {
-		MergeSchemas(dst, value, dstFile, schemaMap)
-		delete(match.Definitions, key)
-	}
+	src.Ref = convertToLocalSchemaRef(src.Ref, dstFile)
 	if _, found := dst.Definitions[src.Ref.Key()]; !found {
-		dst.Definitions[src.Ref.Key()] = match
+		var d JSONSchema //nolint:gosimple
+		d = *match
+		d.Schema = ""
+		d.Definitions = nil
+		dst.Definitions[src.Ref.Key()] = &d
 	}
 	for key, value := range match.Properties {
 		if !value.Ext.IsExported() {
@@ -132,6 +152,9 @@ func MergeSchemas(dst, src *JSONSchema, dstFile FileName, schemaMap map[FileName
 			continue
 		}
 		MergeSchemas(dst, value, dstFile, schemaMap)
+	}
+	if match.Items != nil {
+		MergeSchemas(dst, match.Items, dstFile, schemaMap)
 	}
 	for _, value := range match.Definitions {
 		MergeSchemas(dst, value, dstFile, schemaMap)

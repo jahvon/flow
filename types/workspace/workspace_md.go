@@ -42,23 +42,23 @@ func workspaceMarkdown(w *Workspace) string {
 
 func workspaceDescription(w *Workspace) string {
 	var mkdwn string
-	const descSpacer = "| \n"
+	const descSpacer = "> \n"
 	if w.Description != "" {
 		mkdwn += descSpacer
 		lines := strings.Split(w.Description, "\n")
 		for _, line := range lines {
-			mkdwn += fmt.Sprintf("| %s\n", line)
+			mkdwn += fmt.Sprintf("> %s\n", line)
 		}
 		mkdwn += descSpacer
 	}
 	if w.DescriptionFile != "" {
 		mdBytes, err := os.ReadFile(filepath.Clean(w.DescriptionFile))
 		if err != nil {
-			mkdwn += fmt.Sprintf("| **error rendering description file**: %s\n", err)
+			mkdwn += fmt.Sprintf("> **error rendering description file**: %s\n", err)
 		} else {
 			lines := strings.Split(string(mdBytes), "\n")
 			for _, line := range lines {
-				mkdwn += fmt.Sprintf("| %s\n", line)
+				mkdwn += fmt.Sprintf("> %s\n", line)
 			}
 		}
 		mkdwn += descSpacer

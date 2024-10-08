@@ -142,6 +142,8 @@ func DefaultEnv(ctx *context.Context, executable *executable.Executable) map[str
 	envMap["FLOW_WORKSPACE_PATH"] = executable.WorkspacePath()
 	envMap["FLOW_CONFIG_PATH"] = filesystem.ConfigDirPath()
 	envMap["FLOW_CACHE_PATH"] = filesystem.CachedDataDirPath()
-	envMap["DISABLE_FLOW_INTERACTIVE"] = "true"
+	if os.Getenv("DISABLE_FLOW_INTERACTIVE") == "" {
+		envMap["DISABLE_FLOW_INTERACTIVE"] = "true"
+	}
 	return envMap
 }

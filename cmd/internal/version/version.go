@@ -1,5 +1,3 @@
-//go:generate bash get_build_info.sh
-
 package version
 
 import (
@@ -11,17 +9,18 @@ import (
 )
 
 var (
-	// GitCommit returns the git commit that was compiled.
-	//go:embed commit.txt
+	// gitCommit returns the git commit that was compiled.
 	gitCommit string
 
-	// Version returns the main version number that is being exec at the moment.
-	//go:embed version.txt
+	// version returns the main version number that is being exec at the moment.
 	version string
 
-	// BuildDate returns the date the binary was built
-	//go:embed build_date.txt
+	// buildDate returns the date the binary was built
 	buildDate string
+)
+
+const (
+	unknown = "unknown"
 )
 
 // GoVersion returns the version of the go runtime used to compile the binary.
@@ -32,6 +31,15 @@ var osArch = fmt.Sprintf("%s %s", runtime.GOOS, runtime.GOARCH)
 
 // generateOutput return the output of the version command.
 func generateOutput() string {
+	if gitCommit == "" {
+		gitCommit = unknown
+	}
+	if version == "" {
+		version = unknown
+	}
+	if buildDate == "" {
+		buildDate = unknown
+	}
 	return fmt.Sprintf(`
 
 Version: %s

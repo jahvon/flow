@@ -1,11 +1,13 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/jahvon/flow/HEAD/schemas/flowfile_schema.json
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
 visibility: private
 namespace: examples
+description: This is a flow executable that demonstrates how to use serial executable types.
+tags: [serial]
 executables:
   - verb: start
-    name: serial-exec
+    name: serial
     serial:
-      refs:
-        - run examples:output-exec
-        - run examples:input-exec
-        - run examples:internal-exec
+      execs:
+        - ref: run examples:with-output
+        - ref: run examples:with-input
+        - ref: run examples:from-file

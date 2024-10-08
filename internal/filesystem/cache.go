@@ -20,7 +20,7 @@ func CachedDataDirPath() string {
 	if err != nil {
 		panic(errors.Wrap(err, "unable to get cache directory"))
 	}
-	return filepath.Join(dirname, flowDirName)
+	return filepath.Join(dirname, dataDirName)
 }
 
 func LatestCachedDataDir() string {

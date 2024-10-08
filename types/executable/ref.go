@@ -11,44 +11,104 @@ import (
 const (
 	ActivateGroupID   = "activate"
 	DeactivateGroupID = "deactivate"
+	RestartGroupID    = "restart"
+	InstallGroup      = "install"
+	UninstallGroup    = "uninstall"
+	PublishGroupID    = "publish"
+	CreationGroupID   = "create"
+	DeleteGroupID     = "delete"
 	UpdateGroupID     = "update"
-	ManageGroupID     = "manage"
+	TestGroupID       = "test"
+	AnalyzeGroupID    = "analyze"
 	LaunchGroupID     = "launch"
-	CreationGroupID   = "creation"
 )
 
 var (
 	ValidVerbToGroupID = map[string]string{
-		"exec":      ActivateGroupID,
-		"run":       ActivateGroupID,
-		"start":     ActivateGroupID,
-		"install":   ActivateGroupID,
-		"setup":     ActivateGroupID,
-		"release":   ActivateGroupID,
-		"deploy":    ActivateGroupID,
-		"apply":     ActivateGroupID,
-		"delete":    DeactivateGroupID,
-		"uninstall": DeactivateGroupID,
-		"destroy":   DeactivateGroupID,
-		"undeploy":  DeactivateGroupID,
+		// Activation verbs
+		"exec":     ActivateGroupID,
+		"run":      ActivateGroupID,
+		"start":    ActivateGroupID,
+		"activate": ActivateGroupID,
+		"enable":   ActivateGroupID,
+		"watch":    ActivateGroupID,
+
+		// Deactivation verbs
+		"deactivate": DeactivateGroupID,
+		"disable":    DeactivateGroupID,
+		"stop":       DeactivateGroupID,
+		"kill":       DeactivateGroupID,
+
+		// Restart verbs
+		"restart": RestartGroupID,
+		"reboot":  RestartGroupID,
+		"reload":  RestartGroupID,
+		"refresh": RestartGroupID,
+
+		// Install verbs
+		"install": InstallGroup,
+		"setup":   InstallGroup,
+		"build":   InstallGroup,
+		"package": InstallGroup,
+		"bundle":  InstallGroup,
+
+		// Uninstall verbs
+		"uninstall": UninstallGroup,
+		"teardown":  UninstallGroup,
+		"undeploy":  UninstallGroup,
+
+		// Publish verbs
+		"publish": PublishGroupID,
+		"release": PublishGroupID,
+		"deploy":  PublishGroupID,
+		"apply":   PublishGroupID,
+		"push":    PublishGroupID,
+		"send":    PublishGroupID,
+
+		// Update verbs
 		"update":    UpdateGroupID,
 		"upgrade":   UpdateGroupID,
-		"refresh":   UpdateGroupID,
-		"reload":    UpdateGroupID,
-		"manage":    ManageGroupID,
-		"configure": ManageGroupID,
-		"monitor":   ManageGroupID,
-		"edit":      ManageGroupID,
-		"open":      LaunchGroupID,
-		"launch":    LaunchGroupID,
-		"show":      LaunchGroupID,
-		"view":      LaunchGroupID,
-		"render":    LaunchGroupID,
-		"generate":  CreationGroupID,
-		"add":       CreationGroupID,
-		"new":       CreationGroupID,
-		"transform": CreationGroupID,
-		"build":     CreationGroupID,
+		"patch":     UpdateGroupID,
+		"edit":      UpdateGroupID,
+		"transform": UpdateGroupID,
+		"manage":    UpdateGroupID,
+		"configure": UpdateGroupID,
+
+		// Test verbs
+		"test":     TestGroupID,
+		"validate": TestGroupID,
+		"check":    TestGroupID,
+		"verify":   TestGroupID,
+
+		// Analyze verbs
+		"analyze": AnalyzeGroupID,
+		"lint":    AnalyzeGroupID,
+		"audit":   AnalyzeGroupID,
+		"scan":    AnalyzeGroupID,
+
+		// Launch verbs
+		"open":   LaunchGroupID,
+		"launch": LaunchGroupID,
+		"show":   LaunchGroupID,
+		"view":   LaunchGroupID,
+		"render": LaunchGroupID,
+
+		// Creation verbs
+		"generate": CreationGroupID,
+		"add":      CreationGroupID,
+		"new":      CreationGroupID,
+		"create":   CreationGroupID,
+		"init":     CreationGroupID,
+		"set":      CreationGroupID,
+
+		// Deletion verbs
+		"remove":  DeleteGroupID,
+		"delete":  DeleteGroupID,
+		"unset":   DeleteGroupID,
+		"destroy": DeleteGroupID,
+		"clear":   DeleteGroupID,
+		"purge":   DeleteGroupID,
+		"clean":   DeleteGroupID,
 	}
 )
 
@@ -116,12 +176,12 @@ func (r Ref) Validate() error {
 	return nil
 }
 
-func (r Ref) GetVerb() Verb {
+func (r Ref) Verb() Verb {
 	refParts := strings.Split(string(r), " ")
 	return Verb(refParts[0])
 }
 
-func (r Ref) GetID() string {
+func (r Ref) ID() string {
 	refParts := strings.Split(string(r), " ")
 	if len(refParts) != 2 {
 		// TODO: return or log error
@@ -130,24 +190,24 @@ func (r Ref) GetID() string {
 	return refParts[1]
 }
 
-func (r Ref) GetNamespace() string {
-	id := r.GetID()
+func (r Ref) Namespace() string {
+	id := r.ID()
 	_, ns, _ := ParseExecutableID(id)
 	return ns
 }
 
-func (r Ref) GetWorkspace() string {
-	id := r.GetID()
+func (r Ref) Workspace() string {
+	id := r.ID()
 	ws, _, _ := ParseExecutableID(id)
 	return ws
 }
 
 func (r Ref) Equals(other Ref) bool {
-	rVerb := r.GetVerb()
-	oVerb := other.GetVerb()
+	rVerb := r.Verb()
+	oVerb := other.Verb()
 	if !rVerb.Equals(oVerb) {
 		return false
 	}
 
-	return r.GetID() == other.GetID()
+	return r.ID() == other.ID()
 }

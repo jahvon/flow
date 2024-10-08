@@ -52,7 +52,7 @@ var _ = Describe("ExecutableCacheImpl", func() {
 				{Verb: "run", Name: "exec"},
 			},
 		}
-		execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+filesystem.FlowFileExt))
+		execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+executable.FlowFileExt))
 		err = filesystem.WriteFlowFile(execCfg.ConfigPath(), execCfg)
 		Expect(err).NotTo(HaveOccurred())
 		execCacheData := &cache.ExecutableCacheData{
@@ -106,7 +106,7 @@ var _ = Describe("ExecutableCacheImpl", func() {
 					Visibility: &v,
 					FromFile:   []string{"from-file.sh"},
 				}
-				execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+filesystem.FlowFileExt))
+				execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "test"+executable.FlowFileExt))
 				err = filesystem.WriteFlowFile(execCfg.ConfigPath(), execCfg)
 				Expect(err).NotTo(HaveOccurred())
 
