@@ -68,6 +68,20 @@ properties:
     default: ""
   interactive:
     $ref: '#/definitions/Interactive'
+  theme:
+    type: string
+    enum: [default, dark, light, dracula, tokyo-night]
+    description: The theme of the interactive UI.
+    default: default
+  defaultTimeout:
+    type: string
+    description: |
+      The default timeout to use when running executables.
+      This should be a valid duration string.
+    default: "30m"
+    goJSONSchema:
+      type: time.Duration
+      imports: ["time"]
   templates:
     type: object
     additionalProperties:

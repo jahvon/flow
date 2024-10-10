@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
 	"github.com/jahvon/tuikit/types"
@@ -44,7 +45,7 @@ func registerConfigResetCmd(ctx *context.Context, configCmd *cobra.Command) {
 func resetConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	form, err := views.NewForm(
-		io.Theme(),
+		io.Theme(ctx.Config.Theme.String()),
 		ctx.StdIn(),
 		ctx.StdOut(),
 		&views.FormField{
@@ -80,6 +81,9 @@ func registerSetConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
 	registerSetWorkspaceModeCmd(ctx, setCmd)
 	registerSetLogModeCmd(ctx, setCmd)
 	registerSetTUICmd(ctx, setCmd)
+	registerSetNotificationsCmd(ctx, setCmd)
+	registerSetThemeCmd(ctx, setCmd)
+	registerSetTimeoutCmd(ctx, setCmd)
 	configCmd.AddCommand(setCmd)
 }
 
@@ -188,6 +192,102 @@ func setInteractiveFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		strVal = "enabled"
 	}
 	logger.PlainTextSuccess("Interactive UI " + strVal)
+}
+
+func registerSetNotificationsCmd(ctx *context.Context, setCmd *cobra.Command) {
+	notificationsCmd := &cobra.Command{
+		Use:       "notifications [true|false]",
+		Short:     "Enable or disable notifications.",
+		Args:      cobra.ExactArgs(1),
+		ValidArgs: []string{"true", "false"},
+		Run:       func(cmd *cobra.Command, args []string) { setNotificationsFunc(ctx, cmd, args) },
+	}
+	RegisterFlag(ctx, notificationsCmd, *flags.SetSoundNotificationFlag)
+	setCmd.AddCommand(notificationsCmd)
+}
+
+func setNotificationsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+	logger := ctx.Logger
+	enabled, err := strconv.ParseBool(args[0])
+	if err != nil {
+		logger.FatalErr(errors.Wrap(err, "invalid boolean value"))
+	}
+	sound := flags.ValueFor[bool](ctx, cmd, *flags.SetSoundNotificationFlag, false)
+
+	userConfig := ctx.Config
+	if userConfig.Interactive == nil {
+		userConfig.Interactive = &config.Interactive{}
+	}
+	userConfig.Interactive.NotifyOnCompletion = &enabled
+	if sound {
+		userConfig.Interactive.SoundOnCompletion = &enabled
+	}
+	if err := filesystem.WriteConfig(userConfig); err != nil {
+		logger.FatalErr(err)
+	}
+	strVal := "disabled"
+	if enabled {
+		strVal = "enabled"
+	}
+	logger.PlainTextSuccess("Notifications " + strVal)
+}
+
+func registerSetThemeCmd(ctx *context.Context, setCmd *cobra.Command) {
+	themeCmd := &cobra.Command{
+		Use:   "theme [default|dark|light|dracula|tokyo-night]",
+		Short: "Set the theme for the TUI views",
+		Args:  cobra.ExactArgs(1),
+		ValidArgs: []string{
+			string(config.ConfigThemeDefault),
+			string(config.ConfigThemeDark),
+			string(config.ConfigThemeLight),
+			string(config.ConfigThemeDracula),
+			string(config.ConfigThemeTokyoNight),
+		},
+		Run: func(cmd *cobra.Command, args []string) { setThemeFunc(ctx, cmd, args) },
+	}
+	setCmd.AddCommand(themeCmd)
+}
+
+func setThemeFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+	logger := ctx.Logger
+	themeName := args[0]
+
+	userConfig := ctx.Config
+	if userConfig.Interactive == nil {
+		userConfig.Interactive = &config.Interactive{}
+	}
+	userConfig.Theme = config.ConfigTheme(themeName)
+	if err := filesystem.WriteConfig(userConfig); err != nil {
+		logger.FatalErr(err)
+	}
+	logger.PlainTextSuccess("Theme set to " + themeName)
+}
+
+func registerSetTimeoutCmd(ctx *context.Context, setCmd *cobra.Command) {
+	timeoutCmd := &cobra.Command{
+		Use:   "timeout DURATION",
+		Short: "Set the default timeout for executables.",
+		Args:  cobra.ExactArgs(1),
+		Run:   func(cmd *cobra.Command, args []string) { setTimeoutFunc(ctx, cmd, args) },
+	}
+	setCmd.AddCommand(timeoutCmd)
+}
+
+func setTimeoutFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+	logger := ctx.Logger
+	timeoutStr := args[0]
+	timeout, err := time.ParseDuration(timeoutStr)
+	if err != nil {
+		logger.FatalErr(errors.Wrap(err, "invalid duration"))
+	}
+
+	userConfig := ctx.Config
+	userConfig.DefaultTimeout = timeout
+	if err := filesystem.WriteConfig(userConfig); err != nil {
+		logger.FatalErr(err)
+	}
+	logger.PlainTextSuccess("Default timeout set to " + timeoutStr)
 }
 
 func registerViewConfigCmd(ctx *context.Context, configCmd *cobra.Command) {

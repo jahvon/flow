@@ -169,7 +169,7 @@ func deleteWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	name := args[0]
 
 	form, err := views.NewForm(
-		io.Theme(),
+		io.Theme(ctx.Config.Theme.String()),
 		ctx.StdIn(),
 		ctx.StdOut(),
 		&views.FormField{

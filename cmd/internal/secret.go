@@ -47,7 +47,7 @@ func deleteSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	reference := args[0]
 
 	form, err := views.NewForm(
-		io.Theme(),
+		io.Theme(ctx.Config.Theme.String()),
 		ctx.StdIn(),
 		ctx.StdOut(),
 		&views.FormField{
@@ -138,7 +138,7 @@ func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	switch {
 	case len(args) == 1:
 		form, err := views.NewForm(
-			io.Theme(),
+			io.Theme(ctx.Config.Theme.String()),
 			ctx.StdIn(),
 			ctx.StdOut(),
 			&views.FormField{

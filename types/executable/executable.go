@@ -205,6 +205,8 @@ func (e *Executable) FlowFilePath() string {
 	return e.flowFilePath
 }
 
+const TimeoutOverrideEnv = "FLOW_DEFAULT_TIMEOUT"
+
 func (e *Executable) SetDefaults() {
 	if e.Verb == "" {
 		e.Verb = "exec"
@@ -215,6 +217,11 @@ func (e *Executable) SetDefaults() {
 	}
 	if e.Timeout == 0 {
 		e.Timeout = DefaultTimeout
+		if v, ok := os.LookupEnv(TimeoutOverrideEnv); ok {
+			if d, err := time.ParseDuration(v); err == nil {
+				e.Timeout = d
+			}
+		}
 	}
 }
 

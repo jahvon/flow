@@ -2,6 +2,11 @@ package io
 
 import "github.com/jahvon/tuikit/styles"
 
-func Theme() styles.Theme {
-	return styles.EverforestTheme()
+func Theme(name string) styles.Theme {
+	theme := styles.EverforestTheme()
+	themeFunc, ok := styles.AllThemes()[name]
+	if ok {
+		theme = themeFunc()
+	}
+	return theme
 }

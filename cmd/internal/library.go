@@ -83,7 +83,7 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 			Tags:      tagsFilter,
 			Substring: subStr,
 		},
-		io.Theme(),
+		io.Theme(ctx.Config.Theme.String()),
 		runFunc,
 	)
 	SetView(ctx, cmd, libraryModel)

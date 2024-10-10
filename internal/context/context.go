@@ -48,6 +48,11 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 	}
 
 	cfg.SetDefaults()
+	if cfg.DefaultTimeout != 0 && os.Getenv(executable.TimeoutOverrideEnv) == "" {
+		// HACK: Set the default timeout as an environment variable to be used by the exec runner
+		// This is a temporary solution until the config handling is refactored a bit
+		_ = os.Setenv(executable.TimeoutOverrideEnv, cfg.DefaultTimeout.String())
+	}
 	wsConfig, err := currentWorkspace(cfg)
 	if err != nil {
 		panic(errors.Wrap(err, "workspace config load error"))
@@ -73,7 +78,7 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  workspaceCache,
 		ExecutableCache:  executableCache,
-		Logger:           io.NewLogger(stdOut, flowIO.Theme(), logMode, filesystem.LogsDir()),
+		Logger:           io.NewLogger(stdOut, flowIO.Theme(cfg.Theme.String()), logMode, filesystem.LogsDir()),
 		stdOut:           stdOut,
 		stdIn:            stdIn,
 	}
@@ -83,11 +88,12 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		tuikit.WithState(HeaderCtxKey, c.String()),
 		tuikit.WithLoadingMsg("thinking..."),
 	)
+
 	c.TUIContainer, err = tuikit.NewContainer(
 		ctx, app,
 		tuikit.WithInput(stdIn),
 		tuikit.WithOutput(stdOut),
-		tuikit.WithTheme(flowIO.Theme()),
+		tuikit.WithTheme(flowIO.Theme(cfg.Theme.String())),
 	)
 	if err != nil {
 		panic(errors.Wrap(err, "TUI container initialization error"))
