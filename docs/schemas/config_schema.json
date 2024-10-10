@@ -45,6 +45,11 @@
       "type": "string",
       "default": "logfmt"
     },
+    "defaultTimeout": {
+      "description": "The default timeout to use when running executables.\nThis should be a valid duration string.\n",
+      "type": "string",
+      "default": "30m"
+    },
     "interactive": {
       "$ref": "#/definitions/Interactive"
     },
@@ -55,6 +60,18 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "theme": {
+      "description": "The theme of the interactive UI.",
+      "type": "string",
+      "default": "default",
+      "enum": [
+        "default",
+        "dark",
+        "light",
+        "dracula",
+        "tokyo-night"
+      ]
     },
     "workspaceMode": {
       "description": "The mode of the workspace. This can be either `fixed` or `dynamic`.\nIn `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.\nIn `dynamic` mode, the current workspace used at runtime is determined by the current directory.\nIf the current directory is within a workspace, that workspace is used.\n",

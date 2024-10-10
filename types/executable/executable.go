@@ -222,7 +222,6 @@ func (e *Executable) SetDefaults() {
 				e.Timeout = d
 			}
 		}
-
 	}
 }
 
