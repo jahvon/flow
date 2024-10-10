@@ -239,15 +239,6 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 				return true
 			}
 		}
-		for _, child := range rootExec.Serial.Refs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
-			if err != nil {
-				continue
-			}
-			if authRequired(ctx, childExec) {
-				return true
-			}
-		}
 		for _, e := range rootExec.Serial.Execs {
 			if e.Ref != "" {
 				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, e.Ref)
@@ -262,15 +253,6 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 	case rootExec.Parallel != nil:
 		for _, param := range rootExec.Parallel.Params {
 			if param.SecretRef != "" {
-				return true
-			}
-		}
-		for _, child := range rootExec.Parallel.Refs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
-			if err != nil {
-				continue
-			}
-			if authRequired(ctx, childExec) {
 				return true
 			}
 		}
@@ -289,7 +271,7 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 	return false
 }
 
-//nolint:gocognit,funlen
+//nolint:gocognit
 func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []*views.FormField {
 	pending := make([]*views.FormField, 0)
 	switch {
@@ -323,14 +305,6 @@ func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []
 				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
-		for _, child := range rootExec.Serial.Refs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
-			if err != nil {
-				continue
-			}
-			childPending := pendingFormFields(ctx, childExec)
-			pending = append(pending, childPending...)
-		}
 		for _, child := range rootExec.Serial.Execs {
 			if child.Ref != "" {
 				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child.Ref)
@@ -346,14 +320,6 @@ func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []
 			if param.Prompt != "" {
 				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
-		}
-		for _, child := range rootExec.Parallel.Refs {
-			childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child)
-			if err != nil {
-				continue
-			}
-			childPending := pendingFormFields(ctx, childExec)
-			pending = append(pending, childPending...)
 		}
 		for _, child := range rootExec.Parallel.Execs {
 			if child.Ref != "" {

@@ -206,7 +206,7 @@
     "ExecutableParallelExecutableType": {
       "type": "object",
       "required": [
-        "refs"
+        "execs"
       ],
       "properties": {
         "args": {
@@ -214,7 +214,7 @@
         },
         "execs": {
           "$ref": "#/definitions/ExecutableParallelRefConfigList",
-          "description": "A list of executables to run in parallel.\nEach executable can be a command or a reference to another executable.\nOne of `refs` or `execs` must be set.\n"
+          "description": "A list of executables to run in parallel.\nEach executable can be a command or a reference to another executable.\n"
         },
         "failFast": {
           "description": "If set to true, the parallel executable will fail if any of the sub-executables fail.",
@@ -228,10 +228,6 @@
         },
         "params": {
           "$ref": "#/definitions/ExecutableParameterList"
-        },
-        "refs": {
-          "$ref": "#/definitions/ExecutableRefList",
-          "description": "DEPRECATED: Use `execs` instead.\n\nA list of references to other executables to run in parallel.\nOne of `refs` or `execs` must be set.\n"
         }
       }
     },
@@ -309,12 +305,6 @@
     "ExecutableRef": {
       "description": "A reference to an executable.\nThe format is `\u003cverb\u003e \u003cworkspace\u003e/\u003cnamespace\u003e:\u003cexecutable name\u003e`.\nFor example, `exec ws/ns:my-workflow`.\n\nThe workspace and namespace are optional.\nIf the workspace is not specified, the current workspace will be used.\nIf the namespace is not specified, the current namespace will be used.\n",
       "type": "string"
-    },
-    "ExecutableRefList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/ExecutableRef"
-      }
     },
     "ExecutableRenderExecutableType": {
       "description": "Renders a markdown template file with data.",
@@ -450,7 +440,7 @@
       "description": "Executes a list of executables in serial.",
       "type": "object",
       "required": [
-        "refs"
+        "execs"
       ],
       "properties": {
         "args": {
@@ -458,7 +448,7 @@
         },
         "execs": {
           "$ref": "#/definitions/ExecutableSerialRefConfigList",
-          "description": "A list of executables to run in serial.\nEach executable can be a command or a reference to another executable.\nOne of `refs` or `execs` must be set.\n"
+          "description": "A list of executables to run in serial.\nEach executable can be a command or a reference to another executable.\n"
         },
         "failFast": {
           "description": "If set to true, the serial executable will fail if any of the sub-executables fail.",
@@ -467,10 +457,6 @@
         },
         "params": {
           "$ref": "#/definitions/ExecutableParameterList"
-        },
-        "refs": {
-          "$ref": "#/definitions/ExecutableRefList",
-          "description": "DEPRECATED: Use `execs` instead.\n\nA list of references to other executables to run in serial.\nOne of `refs` or `execs` must be set.\n"
         }
       }
     },
@@ -559,7 +545,8 @@
       "items": {
         "type": "string"
       }
-    }
+    },
+    "Ref": {}
   },
   "properties": {
     "description": {

@@ -191,9 +191,8 @@ type ParallelExecutableType struct {
 
 	// A list of executables to run in parallel.
 	// Each executable can be a command or a reference to another executable.
-	// One of `refs` or `execs` must be set.
 	//
-	Execs ParallelRefConfigList `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
+	Execs ParallelRefConfigList `json:"execs" yaml:"execs" mapstructure:"execs"`
 
 	// If set to true, the parallel executable will fail if any of the sub-executables
 	// fail.
@@ -204,13 +203,6 @@ type ParallelExecutableType struct {
 
 	// Params corresponds to the JSON schema field "params".
 	Params ParameterList `json:"params,omitempty" yaml:"params,omitempty" mapstructure:"params,omitempty"`
-
-	// DEPRECATED: Use `execs` instead.
-	//
-	// A list of references to other executables to run in parallel.
-	// One of `refs` or `execs` must be set.
-	//
-	Refs RefList `json:"refs" yaml:"refs" mapstructure:"refs"`
 }
 
 // Configuration for a parallel executable.
@@ -362,9 +354,8 @@ type SerialExecutableType struct {
 
 	// A list of executables to run in serial.
 	// Each executable can be a command or a reference to another executable.
-	// One of `refs` or `execs` must be set.
 	//
-	Execs SerialRefConfigList `json:"execs,omitempty" yaml:"execs,omitempty" mapstructure:"execs,omitempty"`
+	Execs SerialRefConfigList `json:"execs" yaml:"execs" mapstructure:"execs"`
 
 	// If set to true, the serial executable will fail if any of the sub-executables
 	// fail.
@@ -372,13 +363,6 @@ type SerialExecutableType struct {
 
 	// Params corresponds to the JSON schema field "params".
 	Params ParameterList `json:"params,omitempty" yaml:"params,omitempty" mapstructure:"params,omitempty"`
-
-	// DEPRECATED: Use `execs` instead.
-	//
-	// A list of references to other executables to run in serial.
-	// One of `refs` or `execs` must be set.
-	//
-	Refs RefList `json:"refs" yaml:"refs" mapstructure:"refs"`
 }
 
 // Configuration for a serial executable.
