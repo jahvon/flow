@@ -163,3 +163,9 @@ var TemplateFilePathFlag = &Metadata{
 	Default:   "",
 	Required:  false,
 }
+
+var SetSoundNotificationFlag = &Metadata{
+	Name:    "sound",
+	Usage:   "Update completion sound notification setting",
+	Default: false,
+}

@@ -3,6 +3,7 @@
 package config
 
 import "github.com/jahvon/tuikit/io"
+import "time"
 
 // User Configuration for the Flow CLI.
 // Includes configurations for workspaces, templates, I/O, and other settings for
@@ -39,11 +40,19 @@ type Config struct {
 	//
 	DefaultLogMode io.LogMode `json:"defaultLogMode,omitempty" yaml:"defaultLogMode,omitempty" mapstructure:"defaultLogMode,omitempty"`
 
+	// The default timeout to use when running executables.
+	// This should be a valid duration string.
+	//
+	DefaultTimeout time.Duration `json:"defaultTimeout,omitempty" yaml:"defaultTimeout,omitempty" mapstructure:"defaultTimeout,omitempty"`
+
 	// Interactive corresponds to the JSON schema field "interactive".
 	Interactive *Interactive `json:"interactive,omitempty" yaml:"interactive,omitempty" mapstructure:"interactive,omitempty"`
 
 	// A map of flowfile template names to their paths.
 	Templates ConfigTemplates `json:"templates,omitempty" yaml:"templates,omitempty" mapstructure:"templates,omitempty"`
+
+	// The theme of the interactive UI.
+	Theme ConfigTheme `json:"theme,omitempty" yaml:"theme,omitempty" mapstructure:"theme,omitempty"`
 
 	// The mode of the workspace. This can be either `fixed` or `dynamic`.
 	// In `fixed` mode, the current workspace used at runtime is always the one set in
@@ -62,6 +71,14 @@ type Config struct {
 
 // A map of flowfile template names to their paths.
 type ConfigTemplates map[string]string
+
+type ConfigTheme string
+
+const ConfigThemeDark ConfigTheme = "dark"
+const ConfigThemeDefault ConfigTheme = "default"
+const ConfigThemeDracula ConfigTheme = "dracula"
+const ConfigThemeLight ConfigTheme = "light"
+const ConfigThemeTokyoNight ConfigTheme = "tokyo-night"
 
 type ConfigWorkspaceMode string
 

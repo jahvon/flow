@@ -115,3 +115,7 @@ func (c *Config) Markdown() string {
 
 	return mkdwn
 }
+
+func (ct ConfigTheme) String() string {
+	return string(ct)
+}

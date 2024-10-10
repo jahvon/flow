@@ -36,7 +36,7 @@ const (
 // Test environment variables are set the config and cache directories override paths.
 func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *context.Context {
 	stdOut, stdIn := createTempIOFiles(t)
-	logger := tuikitIO.NewLogger(stdOut, io.Theme(), tuikitIO.Text, "")
+	logger := tuikitIO.NewLogger(stdOut, io.Theme(""), tuikitIO.Text, "")
 	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
 	return ctxx
 }
@@ -93,7 +93,7 @@ func ResetTestContext(ctx *context.Context, t ginkgo.FullGinkgoTInterface) {
 	ctx.Ctx = stdCtx.Background()
 	stdIn, stdOut := createTempIOFiles(t)
 	ctx.SetIO(stdIn, stdOut)
-	logger := tuikitIO.NewLogger(stdOut, io.Theme(), tuikitIO.Text, "")
+	logger := tuikitIO.NewLogger(stdOut, io.Theme(""), tuikitIO.Text, "")
 	ctx.Logger = logger
 }
 

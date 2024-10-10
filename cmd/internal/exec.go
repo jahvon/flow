@@ -116,7 +116,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	setAuthEnv(ctx, cmd, e)
 	textInputs := pendingFormFields(ctx, e)
 	if len(textInputs) > 0 {
-		form, err := views.NewForm(io.Theme(), ctx.StdIn(), ctx.StdOut(), textInputs...)
+		form, err := views.NewForm(io.Theme(ctx.Config.Theme.String()), ctx.StdIn(), ctx.StdOut(), textInputs...)
 		if err != nil {
 			logger.FatalErr(err)
 		}
@@ -177,7 +177,7 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.Executable) {
 	if authRequired(ctx, executable) {
 		form, err := views.NewForm(
-			io.Theme(),
+			io.Theme(ctx.Config.Theme.String()),
 			ctx.StdIn(),
 			ctx.StdOut(),
 			&views.FormField{

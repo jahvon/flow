@@ -33,7 +33,7 @@ func showForm(ctx *context.Context, fields executable.FormFields) error {
 			ValidationExpr: f.Validate,
 		})
 	}
-	form, err := views.NewForm(io.Theme(), in, out, ff...)
+	form, err := views.NewForm(io.Theme(ctx.Config.Theme.String()), in, out, ff...)
 	if err != nil {
 		return fmt.Errorf("encountered form init error: %w", err)
 	}
