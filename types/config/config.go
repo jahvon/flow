@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
 	"golang.org/x/exp/maps"
@@ -81,35 +82,59 @@ func (c *Config) JSON() (string, error) {
 
 func (c *Config) Markdown() string {
 	mkdwn := "# Global Configurations\n"
-	mkdwn += fmt.Sprintf("## Current workspace\n%s\n", c.CurrentWorkspace)
+	mkdwn += fmt.Sprintf("**Current workspace:** `%s`\n", c.CurrentWorkspace)
 	if c.WorkspaceMode == ConfigWorkspaceModeFixed {
-		mkdwn += "**Workspace mode is set to fixed. This means that your working directory will have no impact on the " +
-			"current workspace.**\n"
+		mkdwn += "*Workspace mode is set to fixed. This means that your working directory will have no impact on the " +
+			"current workspace.*\n\n"
 	} else if c.WorkspaceMode == ConfigWorkspaceModeDynamic {
-		mkdwn += "**Workspace mode is set to dynamic. This means that your current workspace is also determined by " +
-			"your working directory.**\n"
+		mkdwn += "*Workspace mode is set to dynamic. This means that your current workspace is also determined by " +
+			"your working directory.*\n\n"
 	}
 
 	if c.CurrentNamespace != "" {
-		mkdwn += fmt.Sprintf("## Current namespace\n%s\n", c.CurrentNamespace)
+		mkdwn += fmt.Sprintf("**Current namespace**: %s\n\n", c.CurrentNamespace)
+	} else {
+		mkdwn += "*No namespace is set*\n\n"
+	}
+	if c.DefaultTimeout != 0 {
+		mkdwn += fmt.Sprintf("**Default timeout**: %s\n", c.DefaultTimeout)
+	}
+	if c.Theme != "" {
+		mkdwn += fmt.Sprintf("**Theme**: %s\n", c.Theme)
 	}
 	if c.Interactive != nil {
-		interactiveConfig, err := yaml.Marshal(c.Interactive)
-		if err != nil {
-			mkdwn += "## Interactive UI config\nerror\n"
+		mkdwn += "## Interactivity Settings\n"
+		if c.Interactive.Enabled {
+			mkdwn += "**Interactive mode is enabled**\n"
+			if c.Interactive.NotifyOnCompletion != nil {
+				mkdwn += "*Notify on completion is enabled*\n"
+			}
+			if c.Interactive.SoundOnCompletion != nil {
+				mkdwn += "*Sound on completion is enabled*\n"
+			}
 		} else {
-			mkdwn += fmt.Sprintf("## Interactive UI config\n```yaml\n%s```\n", string(interactiveConfig))
+			mkdwn += "**Interactive mode is disabled**\n"
 		}
 	}
 	mkdwn += "## Registered Workspaces\n"
-	for name, path := range c.Workspaces {
-		mkdwn += fmt.Sprintf("- %s: %s\n", name, path)
+	allWs := make([]string, 0, len(c.Workspaces))
+	for name := range c.Workspaces {
+		allWs = append(allWs, name)
+	}
+	slices.Sort(allWs)
+	for _, name := range allWs {
+		mkdwn += fmt.Sprintf("- %s: %s\n", name, c.Workspaces[name])
 	}
 
 	if len(c.Templates) > 0 {
 		mkdwn += "## Registered Templates\n"
-		for name, path := range c.Templates {
-			mkdwn += fmt.Sprintf("- %s: %s\n", name, path)
+		allTmpl := make([]string, 0, len(c.Templates))
+		for name := range c.Templates {
+			allTmpl = append(allTmpl, name)
+		}
+		slices.Sort(allTmpl)
+		for _, name := range allTmpl {
+			mkdwn += fmt.Sprintf("- %s: %s\n", name, c.Templates[name])
 		}
 	}
 
