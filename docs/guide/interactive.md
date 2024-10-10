@@ -3,6 +3,12 @@
 The interactive TUI can be customized in the [flow config file](../types/config.md). Additionally,
 there are several [flow config commands](../cli/flow_config.md) that can be used to change the TUI settings.
 
+> [!TIP]
+> You can view your current settings with the config view command:
+> ```shell
+> flow config view
+> ```
+
 ### Changing the TUI theme
 
 There are several themes available in the TUI:
