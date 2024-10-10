@@ -1,4 +1,2 @@
-flow can be used to render templates using the [flow template](../cli/flow_template.md) command. 
-Templates are defined using the templating language. The `flow template` command can be used to render templates using the following syntax:
-
-```shell
+The templating guide is coming soon. In the meantime, you can check out the [templating reference](../types/template.md) for more 
+information on the YAML template config file and the [flow template](../cli/flow_template.md) command for managing templates.

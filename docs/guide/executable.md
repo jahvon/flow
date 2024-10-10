@@ -225,6 +225,10 @@ _This example used the `exec` type, but the `dir` field can be used with the `se
 
 ### Executable Type Examples
 
+> [!TIP]
+> Check out the [flowfile examples](https://github.com/jahvon/flow/tree/main/examples) found on GitHub for more examples 
+> of executable configurations.
+
 ##### exec
 
 ```yaml
