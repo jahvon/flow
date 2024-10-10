@@ -80,6 +80,7 @@ func (c *Config) JSON() (string, error) {
 	return string(jsonBytes), nil
 }
 
+//nolint:gocognit
 func (c *Config) Markdown() string {
 	mkdwn := "# Global Configurations\n"
 	mkdwn += fmt.Sprintf("**Current workspace:** `%s`\n", c.CurrentWorkspace)
@@ -102,7 +103,7 @@ func (c *Config) Markdown() string {
 	if c.Theme != "" {
 		mkdwn += fmt.Sprintf("**Theme**: %s\n", c.Theme)
 	}
-	if c.Interactive != nil {
+	if c.Interactive != nil { //nolint:nestif
 		mkdwn += "## Interactivity Settings\n"
 		if c.Interactive.Enabled {
 			mkdwn += "**Interactive mode is enabled**\n"
