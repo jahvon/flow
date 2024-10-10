@@ -33,9 +33,7 @@ func ExamplesMultiExecFlowFile(opts ...Option) *executable.FlowFile {
 		Visibility: privateFlowFileVisibility(),
 		Tags:       sharedExecTags(),
 		Executables: []*executable.Executable{
-			SerialExecByRef(opts...),
 			SerialExecWithExit(opts...),
-			ParallelExecByRef(opts...),
 			ParallelExecWithExit(opts...),
 			ParallelExecWithMaxThreads(opts...),
 		},

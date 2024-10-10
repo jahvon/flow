@@ -10,7 +10,6 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
-	"github.com/jahvon/flow/internal/utils"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	execUtils "github.com/jahvon/flow/internal/utils/executables"
 	"github.com/jahvon/flow/types/executable"
@@ -39,52 +38,10 @@ func (r *serialRunner) Exec(ctx *context.Context, e *executable.Executable, prom
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
-	if err := utils.ValidateOneOf("executable list", serialSpec.Refs, serialSpec.Execs); err != nil {
-		return err
-	}
-
-	if len(serialSpec.Refs) > 0 {
-		return handleExecRef(ctx, serialSpec, promptedEnv)
-	} else if len(serialSpec.Execs) > 0 {
+	if len(serialSpec.Execs) > 0 {
 		return handleExec(ctx, e, serialSpec, promptedEnv)
 	}
 	return fmt.Errorf("no serial executables to run")
-}
-
-func handleExecRef(
-	ctx *context.Context,
-	serialSpec *executable.SerialExecutableType,
-	promptedEnv map[string]string,
-) error {
-	order := serialSpec.Refs
-
-	var errs []error
-	for i, executableRef := range order {
-		ctx.Logger.Debugf("executing %s (%d/%d)", executableRef, i+1, len(order))
-		exec, err := execUtils.ExecutableForRef(ctx, executableRef)
-		if err != nil {
-			return err
-		} else if exec == nil {
-			return fmt.Errorf("unable to find e with reference %s", executableRef)
-		}
-
-		fields := map[string]interface{}{
-			"step": exec.ID(),
-		}
-		exec.Exec.SetLogFields(fields)
-
-		if err := runner.Exec(ctx, exec, promptedEnv); err != nil {
-			if serialSpec.FailFast {
-				return errors.Wrapf(err, "execution error ref='%s'", executableRef)
-			}
-			errs = append(errs, err)
-			ctx.Logger.Errorx("execution error", "err", err, "ref", exec.Ref())
-		}
-	}
-	if len(errs) > 0 {
-		return fmt.Errorf("%d execution errors - %v", len(errs), errs)
-	}
-	return nil
 }
 
 //nolint:gocognit

@@ -239,25 +239,17 @@ definitions:
 
   ParallelExecutableType:
     type: object
-    required: [refs]
+    required: [execs]
     properties:
       params:
         $ref: '#/definitions/ParameterList'
       args:
         $ref: '#/definitions/ArgumentList'
-      refs:
-        $ref: '#/definitions/RefList'
-        description: |
-          DEPRECATED: Use `execs` instead.
-          
-          A list of references to other executables to run in parallel.
-          One of `refs` or `execs` must be set.
       execs:
           $ref: '#/definitions/ParallelRefConfigList'
           description: |
               A list of executables to run in parallel.
               Each executable can be a command or a reference to another executable.
-              One of `refs` or `execs` must be set.
       maxThreads:
         type: integer
         description: The maximum number of threads to use when executing the parallel executables.
@@ -402,26 +394,18 @@ definitions:
 
   SerialExecutableType:
     type: object
-    required: [refs]
+    required: [execs]
     description: Executes a list of executables in serial.
     properties:
       params:
         $ref: '#/definitions/ParameterList'
       args:
         $ref: '#/definitions/ArgumentList'
-      refs:
-        $ref: '#/definitions/RefList'
-        description: |
-          DEPRECATED: Use `execs` instead.
-          
-          A list of references to other executables to run in serial.
-          One of `refs` or `execs` must be set.
       execs:
         $ref: '#/definitions/SerialRefConfigList'
         description: |
           A list of executables to run in serial.
           Each executable can be a command or a reference to another executable.
-          One of `refs` or `execs` must be set.
       failFast:
         type: boolean
         description: If set to true, the serial executable will fail if any of the sub-executables fail.

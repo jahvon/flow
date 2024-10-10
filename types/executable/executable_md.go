@@ -193,9 +193,6 @@ func serialExecMarkdown(e *ExecutableEnvironment, s *SerialExecutableType) strin
 		mkdwn += "**Fail Fast:** enabled\n"
 	}
 	mkdwn += "**Executables**\n"
-	for i, ref := range s.Refs {
-		mkdwn += fmt.Sprintf("%d. %s\n", i+1, ref)
-	}
 	for i, refCfg := range s.Execs {
 		if refCfg.Ref != "" {
 			mkdwn += fmt.Sprintf("%d. ref: %s\n", i+1, refCfg.Ref)
@@ -231,9 +228,6 @@ func parallelExecMarkdown(e *ExecutableEnvironment, p *ParallelExecutableType) s
 		mkdwn += "**Fail Fast:** enabled\n"
 	}
 	mkdwn += "**Executables**\n"
-	for _, ref := range p.Refs {
-		mkdwn += fmt.Sprintf("- %s\n", ref)
-	}
 	for i, refCfg := range p.Execs {
 		if refCfg.Ref != "" {
 			mkdwn += fmt.Sprintf("%d. ref: %s\n", i+1, refCfg.Ref)
