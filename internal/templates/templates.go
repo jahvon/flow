@@ -158,7 +158,7 @@ func runExecutables(
 				}
 				args = append(args, a.String())
 			}
-			a, err := argUtils.ProcessArgs(exec, args)
+			a, err := argUtils.ProcessArgs(exec, args, envMap)
 			if err != nil {
 				ctx.Logger.Error(err, "unable to process arguments")
 			}

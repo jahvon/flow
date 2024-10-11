@@ -1,6 +1,7 @@
 package args
 
 import (
+	"os"
 	"strings"
 
 	"github.com/jahvon/flow/types/executable"
@@ -20,7 +21,19 @@ func ParseArgs(args []string) (flagArgs map[string]string, posArgs []string) {
 	return
 }
 
-func ProcessArgs(executable *executable.Executable, execArgs []string) (map[string]string, error) {
+func ProcessArgs(
+	executable *executable.Executable,
+	execArgs []string,
+	env map[string]string,
+) (map[string]string, error) {
+	if env != nil {
+		// Expand environment variables in arguments
+		for i, a := range execArgs {
+			execArgs[i] = os.Expand(a, func(key string) string {
+				return env[key]
+			})
+		}
+	}
 	flagArgs, posArgs := ParseArgs(execArgs)
 	execEnv := executable.Env()
 	if execEnv == nil || execEnv.Args == nil {

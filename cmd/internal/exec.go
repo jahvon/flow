@@ -104,7 +104,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	}
 
 	execArgs := args[1:]
-	envMap, err := argUtils.ProcessArgs(e, execArgs)
+	envMap, err := argUtils.ProcessArgs(e, execArgs, nil)
 	if err != nil {
 		logger.FatalErr(err)
 	}

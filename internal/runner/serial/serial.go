@@ -69,7 +69,7 @@ func handleExec(
 		execPromptedEnv := make(map[string]string)
 		maps.Copy(promptedEnv, execPromptedEnv)
 		if len(refConfig.Args) > 0 {
-			a, err := argUtils.ProcessArgs(exec, refConfig.Args)
+			a, err := argUtils.ProcessArgs(exec, refConfig.Args, execPromptedEnv)
 			if err != nil {
 				ctx.Logger.Error(err, "unable to process arguments")
 			}
