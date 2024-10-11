@@ -45,42 +45,10 @@
         }
       }
     },
-    "ExecutableArgumentList": {},
-    "ExecutableDirectory": {
-      "default": ""
+    "ExecutableRef": {
+      "description": "A reference to an executable.\nThe format is `\u003cverb\u003e \u003cworkspace\u003e/\u003cnamespace\u003e:\u003cexecutable name\u003e`.\nFor example, `exec ws/ns:my-workflow`.\n\nThe workspace and namespace are optional.\nIf the workspace is not specified, the current workspace will be used.\nIf the namespace is not specified, the current namespace will be used.\n",
+      "type": "string"
     },
-    "ExecutableExecExecutableType": {
-      "description": "Standard executable type. Runs a command/file in a subprocess.",
-      "type": "object",
-      "properties": {
-        "args": {
-          "$ref": "#/definitions/ExecutableArgumentList"
-        },
-        "cmd": {
-          "description": "The command to execute.\nOnly one of `cmd` or `file` must be set.\n",
-          "type": "string",
-          "default": ""
-        },
-        "dir": {
-          "$ref": "#/definitions/ExecutableDirectory",
-          "default": ""
-        },
-        "file": {
-          "description": "The file to execute.\nOnly one of `cmd` or `file` must be set.\n",
-          "type": "string",
-          "default": ""
-        },
-        "logMode": {
-          "description": "The log mode to use when running the executable.\nThis can either be `hidden`, `json`, `logfmt` or `text`\n",
-          "type": "string",
-          "default": "logfmt"
-        },
-        "params": {
-          "$ref": "#/definitions/ExecutableParameterList"
-        }
-      }
-    },
-    "ExecutableParameterList": {},
     "Field": {
       "description": "A field to be displayed to the user when generating a flow file from a template.",
       "type": "object",
@@ -117,9 +85,49 @@
           "type": "boolean",
           "default": false
         },
+        "type": {
+          "description": "The type of input field to display.",
+          "type": "string",
+          "default": "text",
+          "enum": [
+            "text",
+            "masked",
+            "multiline",
+            "confirm"
+          ]
+        },
         "validate": {
           "description": "A regular expression to validate the input value against.",
           "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "TemplateRefConfig": {
+      "description": "Configuration for a template executable.",
+      "type": "object",
+      "properties": {
+        "args": {
+          "description": "Arguments to pass to the executable.",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "cmd": {
+          "description": "The command to execute.\nOne of `cmd` or `ref` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "if": {
+          "description": "A condition to determine if the executable should be run. The condition is evaluated using Go templating \nfrom the form data. If the condition is not met, the executable run will be skipped.\n[Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.\n\nFor example, to run a command only if the `name` field is set:\n```\n{{ if .name }}true{{ end }}\n```\n",
+          "type": "string",
+          "default": ""
+        },
+        "ref": {
+          "$ref": "#/definitions/ExecutableRef",
+          "description": "A reference to another executable to run in serial.\nOne of `cmd` or `ref` must be set.\n",
           "default": ""
         }
       }
@@ -145,14 +153,14 @@
       "description": "A list of exec executables to run after generating the flow file.",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/ExecutableExecExecutableType"
+        "$ref": "#/definitions/TemplateRefConfig"
       }
     },
     "preRun": {
       "description": "A list of exec executables to run before generating the flow file.",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/ExecutableExecExecutableType"
+        "$ref": "#/definitions/TemplateRefConfig"
       }
     },
     "template": {
