@@ -28,7 +28,7 @@ jobs:
         run: |
           go run ./tools/docsgen/.
       - name: Setup Pages
-        uses: actions/configure-pages@v1
+        uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
