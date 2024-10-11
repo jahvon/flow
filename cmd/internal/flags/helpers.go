@@ -10,7 +10,6 @@ import (
 	"github.com/jahvon/flow/internal/context"
 )
 
-//nolint:gocognit
 func ToPflag(cmd *cobra.Command, metadata Metadata, persistent bool) (*pflag.FlagSet, error) {
 	flagSet := cmd.Flags()
 	if persistent {

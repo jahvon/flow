@@ -30,7 +30,6 @@ const (
 
 var multiLineDescriptionTag = fmt.Sprintf("<%s%s>", multiLineKeyPrefix, DescriptionConfigurationKey)
 
-//nolint:gocognit
 func ExecConfigMapFromFile(logger io.Logger, file string) (map[string]string, error) {
 	if err := validateFile(file); err != nil {
 		return nil, err

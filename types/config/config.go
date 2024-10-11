@@ -80,7 +80,6 @@ func (c *Config) JSON() (string, error) {
 	return string(jsonBytes), nil
 }
 
-//nolint:gocognit
 func (c *Config) Markdown() string {
 	mkdwn := "# Global Configurations\n"
 	mkdwn += fmt.Sprintf("**Current workspace:** `%s`\n", c.CurrentWorkspace)

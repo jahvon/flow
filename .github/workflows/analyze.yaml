@@ -1,0 +1,74 @@
+name: Analyze
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read # for actions/checkout to fetch code
+  security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.23"
+      - name: Install Go Tools
+        run: |
+          go install go.uber.org/mock/mockgen@v0.4.0
+      - name: Init project and generate code
+        run: |
+          go mod tidy
+          go fmt ./...
+          go generate ./...
+          go run ./tools/docsgen/.
+      - name: Verify clean state
+        run: |
+          if [[ `git status . --porcelain` ]]; then
+            echo "Uncommitted changes found"
+            git diff --color --compact-summary
+            exit 1
+          else
+            echo "No uncommitted changes"
+          fi
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.23"
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60.3
+          args: --out-format=sarif:results.sarif,colored-line-number,github-actions
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: golangci-lint
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+          check-latest: true
+      - run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - run: govulncheck ./...
