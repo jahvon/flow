@@ -68,12 +68,22 @@ type Field struct {
 	// value is not set.
 	Required bool `json:"required,omitempty" yaml:"required,omitempty" mapstructure:"required,omitempty"`
 
+	// The type of input field to display.
+	Type FieldType `json:"type,omitempty" yaml:"type,omitempty" mapstructure:"type,omitempty"`
+
 	// A regular expression to validate the input value against.
 	Validate string `json:"validate,omitempty" yaml:"validate,omitempty" mapstructure:"validate,omitempty"`
 
 	// value corresponds to the JSON schema field "value".
 	value *string `json:"value,omitempty" yaml:"value,omitempty" mapstructure:"value,omitempty"`
 }
+
+type FieldType string
+
+const FieldTypeConfirm FieldType = "confirm"
+const FieldTypeMasked FieldType = "masked"
+const FieldTypeMultiline FieldType = "multiline"
+const FieldTypeText FieldType = "text"
 
 // Configuration for a flowfile template; templates can be used to generate flow
 // files.
@@ -97,16 +107,46 @@ type Template struct {
 	location *string `json:"location,omitempty" yaml:"location,omitempty" mapstructure:"location,omitempty"`
 
 	// A list of exec executables to run after generating the flow file.
-	PostRun []TemplatePostRunElem `json:"postRun,omitempty" yaml:"postRun,omitempty" mapstructure:"postRun,omitempty"`
+	PostRun []TemplateRefConfig `json:"postRun,omitempty" yaml:"postRun,omitempty" mapstructure:"postRun,omitempty"`
 
 	// A list of exec executables to run before generating the flow file.
-	PreRun []TemplatePreRunElem `json:"preRun,omitempty" yaml:"preRun,omitempty" mapstructure:"preRun,omitempty"`
+	PreRun []TemplateRefConfig `json:"preRun,omitempty" yaml:"preRun,omitempty" mapstructure:"preRun,omitempty"`
 
 	// The flow file template to generate. The template must be a valid flow file
 	// after rendering.
 	Template string `json:"template" yaml:"template" mapstructure:"template"`
 }
 
-type TemplatePostRunElem ExecExecutableType
+// Configuration for a template executable.
+type TemplateRefConfig struct {
+	// Arguments to pass to the executable.
+	Args []string `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
 
-type TemplatePreRunElem ExecExecutableType
+	// The command to execute.
+	// One of `cmd` or `ref` must be set.
+	//
+	Cmd string `json:"cmd,omitempty" yaml:"cmd,omitempty" mapstructure:"cmd,omitempty"`
+
+	// A condition to determine if the executable should be run. The condition is
+	// evaluated using Go templating
+	// from the form data. If the condition is not met, the executable run will be
+	// skipped.
+	// [Sprig functions](https://masterminds.github.io/sprig/) are available for use
+	// in the condition.
+	//
+	// For example, to run a command only if the `name` field is set:
+	// ```
+	// {{ if .name }}true{{ end }}
+	// ```
+	//
+	If string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
+
+	// A reference to another executable to run in serial.
+	// One of `cmd` or `ref` must be set.
+	//
+	Ref TemplateRefConfigRef `json:"ref,omitempty" yaml:"ref,omitempty" mapstructure:"ref,omitempty"`
+}
+
+// A reference to another executable to run in serial.
+// One of `cmd` or `ref` must be set.
+type TemplateRefConfigRef Ref

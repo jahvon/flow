@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,6 +20,8 @@ import (
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/utils"
+	argUtils "github.com/jahvon/flow/internal/utils/args"
+	execUtils "github.com/jahvon/flow/internal/utils/executables"
 	"github.com/jahvon/flow/types/executable"
 	"github.com/jahvon/flow/types/workspace"
 )
@@ -64,14 +67,11 @@ func ProcessTemplate(
 	data["FlowFileName"] = flowfileName
 	data["FlowFilePath"] = fullPath
 
-	var preRun []executable.ExecExecutableType
-	for _, e := range template.PreRun {
-		preRun = append(preRun, executable.ExecExecutableType(e))
-	}
-	if err := runExecutables(ctx, "pre-run", flowfileDir, preRun, envMap); err != nil {
+	if err := runExecutables(
+		ctx, ws, "pre-run", filepath.Dir(template.Location()), template.PreRun, envMap, data,
+	); err != nil {
 		return err
 	}
-
 	if err := copyAllArtifacts(
 		logger,
 		template.Artifacts,
@@ -98,41 +98,77 @@ func ProcessTemplate(
 			return errors.Wrap(err, fmt.Sprintf("unable to write flowfile %s from template", flowfileName))
 		}
 	}
-
-	var postRun []executable.ExecExecutableType
-	for _, e := range template.PostRun {
-		postRun = append(postRun, executable.ExecExecutableType(e))
-	}
-	if err := runExecutables(ctx, "post-run", flowfileDir, postRun, envMap); err != nil {
+	if err := runExecutables(ctx, ws, "post-run", flowfileDir, template.PostRun, envMap, data); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+//nolint:gocognit
 func runExecutables(
 	ctx *context.Context,
+	ws *workspace.Workspace,
 	stage, flowfileDir string,
-	execs []executable.ExecExecutableType,
+	execs []executable.TemplateRefConfig,
 	envMap map[string]string,
+	templateData map[string]string,
 ) error {
 	ctx.Logger.Debugf("running %d %s executables", len(execs), stage)
-	for i, exec := range execs {
-		exec.SetLogFields(map[string]interface{}{
+	for i, e := range execs {
+		if e.If != "" {
+			eval, err := goTemplateEvaluatedTrue(flowfileDir, e.If, templateData)
+			if err != nil {
+				return errors.Wrap(err, "unable to evaluate if condition")
+			}
+			if !eval {
+				ctx.Logger.Debugf("skipping %s executable %d", stage, i)
+				return nil
+			}
+		}
+		var exec *executable.Executable
+		switch {
+		case e.Ref != "":
+			var err error
+			ref, err := processAsGoTemplate(flowfileDir, string(e.Ref), templateData)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("unable to process %s executable %d", stage, i))
+			}
+			exec, err = execUtils.ExecutableForRef(ctx, executable.Ref(ref.String()))
+			if err != nil {
+				return err
+			}
+		case e.Cmd != "":
+			cmd, err := processAsGoTemplate(flowfileDir, e.Cmd, templateData)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("unable to process %s executable %d", stage, i))
+			}
+			exec = execUtils.ExecutableForCmd(templateParent(ws.AssignedName(), ws.Location(), flowfileDir), cmd.String(), i)
+		default:
+			return errors.New("post-run executable must have a ref or cmd")
+		}
+		execEnv := make(map[string]string)
+		maps.Copy(execEnv, envMap)
+		if len(e.Args) > 0 {
+			args := make([]string, 0)
+			for _, arg := range e.Args {
+				a, err := processAsGoTemplate(flowfileDir, arg, templateData)
+				if err != nil {
+					return errors.Wrap(err, fmt.Sprintf("unable to process %s executable %d", stage, i))
+				}
+				args = append(args, a.String())
+			}
+			a, err := argUtils.ProcessArgs(exec, args)
+			if err != nil {
+				ctx.Logger.Error(err, "unable to process arguments")
+			}
+			maps.Copy(execEnv, a)
+		}
+		exec.Exec.SetLogFields(map[string]interface{}{
 			"stage": stage,
 			"step":  i + 1,
 		})
-		eCopy := exec
-		e := executable.Executable{
-			Verb: "exec",
-			Name: fmt.Sprintf("%s-exec-%d", stage, i),
-			Exec: &eCopy,
-		}
-		e.SetContext(
-			ctx.CurrentWorkspace.AssignedName(), ctx.CurrentWorkspace.Location(),
-			"flow-internal", flowfileDir,
-		)
-		if err := runner.Exec(ctx, &e, envMap); err != nil {
+		if err := runner.Exec(ctx, exec, execEnv); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("unable to execute %s executable %d", stage, i))
 		}
 	}
@@ -218,4 +254,12 @@ func goTemplateEvaluatedTrue(fileName, txt string, data map[string]string) (bool
 		return false, errors.Wrap(err, "unable to evaluate template")
 	}
 	return strconv.ParseBool(buf.String())
+}
+
+// templateParent returns a pseudo-executable that can be used as a parent for other executables. It simply includes
+// the executable context that is derived from the rendered template.
+func templateParent(ws, wsPath, flowfilePath string) *executable.Executable {
+	e := &executable.Executable{}
+	e.SetContext(ws, wsPath, "flow-internal", flowfilePath)
+	return e
 }
