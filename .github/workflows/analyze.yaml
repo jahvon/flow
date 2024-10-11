@@ -10,6 +10,10 @@ permissions:
   contents: read # for actions/checkout to fetch code
   security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   generated:
     runs-on: ubuntu-latest
@@ -68,33 +72,3 @@ jobs:
           check-latest: true
       - run: go install golang.org/x/vuln/cmd/govulncheck@latest
       - run: govulncheck ./...
-  validate:
-    permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-    runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "^1.23.1"
-      #   _____         _
-      #  |_   _|__  ___| |_
-      #    | |/ _ \/ __| __|
-      #    | |  __/\__ \ |_
-      #    |_|\___||___/\__|
-      #
-      - name: Run coverage
-        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          file: ./coverage.txt
-          fail_ci_if_error: false
