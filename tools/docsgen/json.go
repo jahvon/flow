@@ -15,7 +15,6 @@ const (
 	idBase    = "https://flowexec.io/schemas"
 )
 
-//nolint:gocognit
 func generateJSONSchemas() {
 	sm := schema.RegisteredSchemaMap()
 	for fn, s := range sm {

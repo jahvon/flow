@@ -16,23 +16,18 @@ jobs:
       contents: read
       security-events: write
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.22.5"
-
+          go-version: "^1.23"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: go
-
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

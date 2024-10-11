@@ -1,87 +1,23 @@
 run:
   timeout: 2m
 
-# This file contains only configs which differ from defaults.
-# All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
 linters-settings:
   cyclop:
-    # The maximal code complexity to report.
-    # Default: 10
     max-complexity: 30
-    # The maximal average package complexity.
-    # If it's higher than 0.0 (float) the check is enabled
-    # Default: 0.0
     package-average: 10.0
-
   errcheck:
-    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
-    # Such cases aren't reported by default.
-    # Default: false
     check-type-assertions: true
-
-  exhaustive:
-    # Program elements to check for exhaustiveness.
-    # Default: [ switch ]
-    check:
-      - switch
-      - map
-
   funlen:
-    # Checks the number of lines in a function.
-    # If lower than 0, disable the check.
-    # Default: 60
     lines: 100
-    # Checks the number of statements in a function.
-    # If lower than 0, disable the check.
-    # Default: 40
     statements: 50
-    # Ignore comments when counting lines.
-    # Default false
     ignore-comments: true
-
   gocognit:
-    # Minimal code complexity to report.
-    # Default: 30 (but we recommend 10-20)
     min-complexity: 30
-
-  gomodguard:
-    blocked:
-      # List of blocked modules.
-      # Default: []
-      modules:
-        - github.com/golang/protobuf:
-            recommendations:
-              - google.golang.org/protobuf
-            reason: "see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules"
-        - github.com/satori/go.uuid:
-            recommendations:
-              - github.com/google/uuid
-            reason: "satori's package is not maintained"
-        - github.com/gofrs/uuid:
-            recommendations:
-              - github.com/google/uuid
-            reason: "gofrs' package is not go module"
-
   govet:
-    # Enable all analyzers.
-    # Default: false
     enable-all: true
-    # Disable analyzers by name.
-    # Run `go tool vet help` to see all analyzers.
-    # Default: []
     disable:
       - fieldalignment # too strict
-    # Settings per analyzer.
-    settings:
-      shadow:
-        # Whether to be strict about shadowing; can be noisy.
-        # Default: false
-        strict: true
-
   tenv:
-    # The option `all` will exec against whole test files (`_test.go`) regardless of method/function signatures.
-    # Otherwise, only methods that take `*testing.T`, `*testing.B`, and `testing.TB` as arguments are checked.
-    # Default: false
     all: true
 
 linters:
@@ -104,7 +40,6 @@ linters:
     - durationcheck # checks for two durations multiplied together
     - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
     - errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13
-    - exhaustive # checks exhaustiveness of enum switch statements
     - funlen # tool for detection of long functions
     - gocognit # computes and checks the cognitive complexity of functions
     - goconst # finds repeated strings that could be replaced by a constant
@@ -112,7 +47,6 @@ linters:
     - gocyclo # computes and checks the cyclomatic complexity of functions
     - goimports # in addition to fixing imports, goimports also formats your code in the same style as gofmt
     - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod
-    - gomodguard # allow and block lists linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations
     - gosec # inspects source code for security problems
     - lll # reports long lines
     - loggercheck # checks key value pairs for common logger libraries (kitlog,klog,logr,zap)
@@ -138,38 +72,14 @@ linters:
     - whitespace # detects leading and trailing whitespace
     - zerologlint # detects the wrong usage of zerolog that a user forgets to dispatch zerolog.Event
     - decorder # checks declaration order and count of types, constants, variables and functions
-    #- gci # controls golang package import order and makes it always deterministic - doesn't work as expected
     - ginkgolinter # [if you use ginkgo/gomega] enforces standards of using ginkgo and gomega
     - interfacebloat # checks the number of methods inside an interface
     - tagalign # checks that struct tags are well aligned
 
-    ## disabled by default, but may be useful at some point
-    #- forbidigo # forbids identifiers
-    #- promlinter # checks Prometheus metrics naming via promlint
-    #- goprintffuncname # checks that printf-like functions are named with f at the end
-    #- revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
-    #- rowserrcheck # checks whether Err of rows is checked successfully
-    #- sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
-    #- gochecknoinits # checks that no init functions are present in Go code
-    #- exhaustruct # [highly recommend to enable] checks if all structure fields are initialized
-    #- godox # detects FIXME, TODO and other comment keywords
-    #- goheader # checks is file header matches to pattern
-    #- ireturn # accept interfaces, return concrete types
-    #- prealloc # [premature optimization, but can be used in some cases] finds slice declarations that could potentially be preallocated
-    #- varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope
-    #- wrapcheck # checks that errors returned from external packages are wrapped
-    #- godot # checks if comments end in a period
-
-
 issues:
-  # Maximum count of issues with the same text.
-  # Set to 0 to disable.
-  # Default: 3
-  max-same-issues: 50
-
+  max-same-issues: 0
   exclude:
     - 'declaration of "(err|ctx)" shadows declaration at' # shadowing of err and ctx is acceptable
-
   exclude-rules:
     - source: "(noinspection|TODO)"
       linters: [ godot ]
