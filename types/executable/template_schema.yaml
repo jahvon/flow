@@ -84,10 +84,56 @@ definitions:
         type: string
         default: ""
         description: A regular expression to validate the input value against.
+      type:
+        type: string
+        enum:
+          - text
+          - masked
+          - multiline
+          - confirm
+        default: text
+        description: The type of input field to display.
       value:
         type: string
         goJSONSchema:
           identifier: value
+
+  TemplateRefConfig:
+    type: object
+    description: Configuration for a template executable.
+    properties:
+      cmd:
+        type: string
+        description: |
+          The command to execute.
+          One of `cmd` or `ref` must be set.
+        default: ""
+      ref:
+        $ref: '../executable/executable_schema.yaml#/definitions/Ref'
+        description: |
+          A reference to another executable to run in serial.
+          One of `cmd` or `ref` must be set.
+        default: ""
+        goJSONSchema:
+          type: "Ref"
+      args:
+        type: array
+        items:
+          type: string
+        description: Arguments to pass to the executable.
+        default: []
+      if:
+        type: string
+        description: |
+          A condition to determine if the executable should be run. The condition is evaluated using Go templating 
+          from the form data. If the condition is not met, the executable run will be skipped.
+          [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.
+
+          For example, to run a command only if the `name` field is set:
+          ```
+          {{ if .name }}true{{ end }}
+          ```
+        default: ""
 
 type: object
 required:
@@ -102,16 +148,12 @@ properties:
     type: array
     description: A list of exec executables to run before generating the flow file.
     items:
-      $ref: '../executable/executable_schema.yaml#/definitions/ExecExecutableType'
-      goJSONSchema:
-        type: "ExecExecutableType"
+      $ref: '#/definitions/TemplateRefConfig'
   postRun:
     type: array
     description: A list of exec executables to run after generating the flow file.
     items:
-      $ref: '../executable/executable_schema.yaml#/definitions/ExecExecutableType'
-      goJSONSchema:
-        type: "ExecExecutableType"
+      $ref: '#/definitions/TemplateRefConfig'
   form:
     type: array
     default: []

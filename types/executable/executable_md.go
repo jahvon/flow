@@ -1,3 +1,4 @@
+//nolint:goconst
 package executable
 
 import (
@@ -299,16 +300,34 @@ func templateMarkdown(t *Template) string {
 	mkdwn += templateArtifactsMarkdown(t)
 	if len(t.PreRun) > 0 {
 		mkdwn += "## Pre-Run\n"
-		for _, e := range t.PreRun {
-			exec := ExecExecutableType(e)
-			mkdwn += shellExecMarkdown(nil, &exec)
+		for i, e := range t.PreRun {
+			if e.Ref != "" {
+				mkdwn += fmt.Sprintf("%d. ref: %s\n", i+1, e.Ref)
+			} else if e.Cmd != "" {
+				mkdwn += fmt.Sprintf("%d. cmd: \n```sh\n%s\n```\n", i+1, e.Cmd)
+			}
+			if len(e.Args) > 0 {
+				mkdwn += "  - **Arguments**\n"
+				for _, arg := range e.Args {
+					mkdwn += fmt.Sprintf("    - %s\n", arg)
+				}
+			}
 		}
 	}
 	if len(t.PostRun) > 0 {
 		mkdwn += "## Post-Run\n"
-		for _, e := range t.PostRun {
-			exec := ExecExecutableType(e)
-			mkdwn += shellExecMarkdown(nil, &exec)
+		for i, e := range t.PostRun {
+			if e.Ref != "" {
+				mkdwn += fmt.Sprintf("%d. ref: %s\n", i+1, e.Ref)
+			} else if e.Cmd != "" {
+				mkdwn += fmt.Sprintf("%d. cmd: \n```sh\n%s\n```\n", i+1, e.Cmd)
+			}
+			if len(e.Args) > 0 {
+				mkdwn += "  - **Arguments**\n"
+				for _, arg := range e.Args {
+					mkdwn += fmt.Sprintf("    - %s\n", arg)
+				}
+			}
 		}
 	}
 	mkdwn += fmt.Sprintf("## Flow File\n```yaml\n%s\n```\n", t.Template)

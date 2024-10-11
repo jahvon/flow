@@ -58,7 +58,7 @@ var _ = Describe("flowfile template commands e2e", Ordered, func() {
 				{SrcName: "artifact1"},
 				{SrcName: "artifact2", DstName: "artifact2-renamed"},
 			},
-			PostRun: []executable.TemplatePostRunElem{
+			PostRun: []executable.TemplateRefConfig{
 				{
 					Cmd: "touch {{ .Name }}",
 				},

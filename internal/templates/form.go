@@ -22,8 +22,22 @@ func showForm(ctx *context.Context, fields executable.FormFields) error {
 	}
 	var ff []*views.FormField
 	for _, f := range fields {
+		var t views.FormFieldType
+		switch f.Type {
+		case executable.FieldTypeMasked:
+			t = views.PromptTypeMasked
+		case executable.FieldTypeMultiline:
+			t = views.PromptTypeMultiline
+		case executable.FieldTypeConfirm:
+			t = views.PromptTypeConfirm
+		case executable.FieldTypeText:
+			fallthrough
+		default:
+			t = views.PromptTypeText
+		}
 		ff = append(ff, &views.FormField{
 			Key:            f.Key,
+			Type:           t,
 			Group:          uint(f.Group),
 			Description:    f.Description,
 			Default:        f.Default,
