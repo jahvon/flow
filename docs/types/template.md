@@ -15,8 +15,8 @@ Configuration for a flowfile template; templates can be used to generate flow fi
 | ----- | ----------- | ---- | ------- | :--------: |
 | `artifacts` | A list of artifacts to be copied after generating the flow file. | `array` ([Artifact](#Artifact)) | <no value> |  |
 | `form` | Form fields to be displayed to the user when generating a flow file from a template.  The form will be rendered first, and the user's input can be used to render the template. For example, a form field with the key `name` can be used in the template as `{{.name}}`.  | `array` ([Field](#Field)) | [] |  |
-| `postRun` | A list of exec executables to run after generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> |  |
-| `preRun` | A list of exec executables to run before generating the flow file. | `array` ([ExecutableExecExecutableType](#ExecutableExecExecutableType)) | <no value> |  |
+| `postRun` | A list of exec executables to run after generating the flow file. | `array` ([TemplateRefConfig](#TemplateRefConfig)) | <no value> |  |
+| `preRun` | A list of exec executables to run before generating the flow file. | `array` ([TemplateRefConfig](#TemplateRefConfig)) | <no value> |  |
 | `template` | The flow file template to generate. The template must be a valid flow file after rendering. | `string` | <no value> |  |
 
 
@@ -43,48 +43,18 @@ Go templating from form data is supported in all fields.
 | `srcDir` | The directory to copy the file from.  If not set, the file will be copied from the directory of the template file.  | `string` |  |  |
 | `srcName` | The name of the file to copy. | `string` | <no value> |  |
 
-### ExecutableArgumentList
+### ExecutableRef
+
+A reference to an executable.
+The format is `<verb> <workspace>/<namespace>:<executable name>`.
+For example, `exec ws/ns:my-workflow`.
+
+The workspace and namespace are optional.
+If the workspace is not specified, the current workspace will be used.
+If the namespace is not specified, the current namespace will be used.
 
 
-
-
-
-
-
-
-### ExecutableDirectory
-
-
-
-
-
-
-
-
-### ExecutableExecExecutableType
-
-Standard executable type. Runs a command/file in a subprocess.
-
-**Type:** `object`
-
-
-
-**Properties:**
-
-| Field | Description | Type | Default | Required |
-| ----- | ----------- | ---- | ------- | :--------: |
-| `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
-| `cmd` | The command to execute. Only one of `cmd` or `file` must be set.  | `string` |  |  |
-| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  |  |
-| `file` | The file to execute. Only one of `cmd` or `file` must be set.  | `string` |  |  |
-| `logMode` | The log mode to use when running the executable. This can either be `hidden`, `json`, `logfmt` or `text`  | `string` | logfmt |  |
-| `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
-
-### ExecutableParameterList
-
-
-
-
+**Type:** `string`
 
 
 
@@ -107,6 +77,24 @@ A field to be displayed to the user when generating a flow file from a template.
 | `key` | The key to associate the data with. This is used as the key in the template data map. | `string` | <no value> | ✘ |
 | `prompt` | A prompt to be displayed to the user when collecting an input value. | `string` | <no value> | ✘ |
 | `required` | If true, a value must be set. If false, the default value will be used if a value is not set. | `boolean` | false |  |
+| `type` | The type of input field to display. | `string` | text |  |
 | `validate` | A regular expression to validate the input value against. | `string` |  |  |
+
+### TemplateRefConfig
+
+Configuration for a template executable.
+
+**Type:** `object`
+
+
+
+**Properties:**
+
+| Field | Description | Type | Default | Required |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `args` | Arguments to pass to the executable. | `array` (`string`) | [] |  |
+| `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  |  |
+| `if` | A condition to determine if the executable should be run. The condition is evaluated using Go templating  from the form data. If the condition is not met, the executable run will be skipped. [Sprig functions](https://masterminds.github.io/sprig/) are available for use in the condition.  For example, to run a command only if the `name` field is set: ``` {{ if .name }}true{{ end }} ```  | `string` |  |  |
+| `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  |  |
 
 

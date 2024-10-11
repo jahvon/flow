@@ -23,9 +23,7 @@ var (
 		schema.FlowfileDefinitionTitle,
 		schema.ConfigDefinitionTitle,
 		schema.WorkspaceDefinitionTitle,
-		// TODO: fix schema gem bug where the common executable definitions used by the flowfile
-		// and template schemas are non-deterministically generated
-		// schema.TemplateDefinitionTitle,
+		schema.TemplateDefinitionTitle,
 	}
 )
 
