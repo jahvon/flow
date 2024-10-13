@@ -368,61 +368,133 @@ A list of executables to run in serial. The executables can be defined by it's e
 
 ### ExecutableVerb
 
-Keywords that describe the action an executable performs.
-While executables are configured with a single verb, the verb can be aliased to related verbs.
-For example, the `exec` verb can replaced with "run" or "start" when referencing an executable.
-This allows users to use the verb that best describes the action they are performing.
+Keywords that describe the action an executable performs. While executables are configured with a single verb, 
+the verb can be aliased to related verbs within its group. For example, the `activate` verb can be replaced 
+with "enable" or "start" when referencing an executable. This allows users to use the verb that best describes 
+the action they are performing.
 
-- **Activation verbs**: `exec`, `run`, `start`, `activate`, `enable`, `watch`
-- **Deactivation verbs**: `deactivate`, `disable`, `stop`, `kill`
-- **Restart verbs**: `restart`, `reboot`, `reload`, `refresh`
-- **Install verbs**: `install`, `setup`, `build`, `package`, `bundle`
-- **Uninstall verbs**: `uninstall`, `teardown`, `undeploy`
-- **Update verbs**: `update`, `upgrade`, `patch`, `edit`, `transform`, `manage`, `configure`
-- **Publish verbs**: `publish`, `release`, `deploy`, `apply`, `push`, `send`
-- **Management verbs**: `manage`, `configure`, `monitor`, `edit`
-- **Test verbs**: `test`, `validate`, `check`, `verify`
-- **Analyze verbs**: `analyze`, `scan`, `lint`, `audit`
-- **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
-- **Creation verbs**: `generate`, `add`, `new`, `create`, `init`, `set`
-- **Destruction verbs**: `remove`, `delete`, `unset`, `destroy`, `clean`, `clear`, `purge`
+### Verb Groups
 
-[Verb group + Name] must be unique within the namespace of the workspace.
+- **Activation Group**: `activate`, `enable`, `start`, `trigger`
+- **Execution Group**: `exec`, `run`, `execute`
+- **Deactivation Group**: `deactivate`, `disable`, `stop`, `pause`
+- **Termination Group**: `kill`, `terminate`, `abort`
+- **Monitoring Group**: `watch`, `monitor`, `track`
+- **Restart Group**: `restart`, `reboot`, `reload`, `refresh`
+- **Installation Group**: `install`, `setup`, `deploy`
+- **Build Group**: `build`, `package`, `bundle`, `compile`
+- **Uninstallation Group**: `uninstall`, `teardown`, `undeploy`
+- **Update Group**: `update`, `upgrade`, `patch`
+- **Configuration Group**: `configure`, `manage`
+- **Edit Group**: `edit`, `transform`, `modify`
+- **Publish Group**: `publish`, `release`
+- **Distribution Group**: `push`, `send`, `apply`
+- **Test Group**: `test`, `validate`, `check`, `verify`
+- **Analysis Group**: `analyze`, `scan`, `lint`, `inspect`
+- **Launch Group**: `open`, `launch`, `show`, `view`
+- **Creation Group**: `create`, `generate`, `add`, `new`, `init`
+- **Set Group**: `set`
+- **Destruction Group**: `remove`, `delete`, `destroy`, `erase`
+- **Unset Group**: `unset`, `reset`
+- **Cleanup Group**: `clean`, `clear`, `purge`, `tidy`
+- **Retrieval Group**: `retrieve`, `fetch`, `get`, `request`
+
+### Usage Notes
+
+1. [Verb group + Name] must be unique within the namespace of the workspace.
+2. When referencing an executable, users can use any verb from the appropriate group.
+3. Choose the verb that most accurately describes the action being performed.
+4. Be consistent in verb usage within projects or teams to maintain clarity.
+
+### Examples
+
+- An executable configured with the `activate` verb could also be referenced using "enable" or "start".
+- A build process might use `build` as its primary verb, but could also be invoked with "package" or "assemble".
+- A cleanup routine configured with `clean` could be called using "purge" or "sanitize" for more specific connotations.
+  
+By organizing verbs into these groups, flow provides flexibility in how actions are described while maintaining a 
+clear structure for executable operations.
 
 
 **Type:** `string`
 **Default:** `exec`
 **Valid values:**
+- `activate`
+- `enable`
+- `start`
+- `trigger`
 - `exec`
 - `run`
-- `start`
+- `execute`
+- `deactivate`
+- `disable`
+- `stop`
+- `pause`
+- `kill`
+- `terminate`
+- `abort`
+- `watch`
+- `monitor`
+- `track`
+- `restart`
+- `reboot`
+- `reload`
+- `refresh`
 - `install`
 - `setup`
-- `release`
 - `deploy`
-- `apply`
-- `delete`
+- `build`
+- `package`
+- `bundle`
+- `compile`
 - `uninstall`
-- `destroy`
+- `teardown`
 - `undeploy`
 - `update`
 - `upgrade`
-- `refresh`
-- `reload`
-- `manage`
+- `patch`
 - `configure`
-- `monitor`
+- `manage`
 - `edit`
+- `transform`
+- `modify`
+- `publish`
+- `release`
+- `push`
+- `send`
+- `apply`
+- `test`
+- `validate`
+- `check`
+- `verify`
+- `analyze`
+- `scan`
+- `lint`
+- `inspect`
 - `open`
 - `launch`
 - `show`
 - `view`
-- `render`
+- `create`
 - `generate`
 - `add`
 - `new`
-- `build`
-- `transform`
+- `init`
+- `set`
+- `remove`
+- `delete`
+- `destroy`
+- `erase`
+- `unset`
+- `reset`
+- `clean`
+- `clear`
+- `purge`
+- `tidy`
+- `retrieve`
+- `fetch`
+- `get`
+- `request`
 
 
 
