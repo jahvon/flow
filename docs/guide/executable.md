@@ -36,24 +36,17 @@ The "verb" is a single word that describes the operation being executed. It can 
 each executable.
 
 When running in the CLI, the configured verb can be replaced with any synonym/alias that describes the operation.
-Below is the list of all available verbs and their aliases:
-
-- **Activation verbs**: `exec`, `run`, `start`, `activate`, `enable`, `watch`
-- **Deactivation verbs**: `deactivate`, `disable`, `stop`, `kill`
-- **Restart verbs**: `restart`, `reboot`, `reload`, `refresh`
-- **Install verbs**: `install`, `setup`, `build`, `package`, `bundle`
-- **Uninstall verbs**: `uninstall`, `teardown`, `undeploy`
-- **Update verbs**: `update`, `upgrade`, `patch`, `edit`, `transform`, `manage`, `configure`
-- **Publish verbs**: `publish`, `release`, `deploy`, `apply`, `push`, `send`
-- **Management verbs**: `manage`, `configure`, `monitor`, `edit`
-- **Test verbs**: `test`, `validate`, `check`, `verify`
-- **Analyze verbs**: `analyze`, `scan`, `lint`, `audit`
-- **Launch verbs**: `open`, `launch`, `show`, `view`, `render`
-- **Creation verbs**: `generate`, `add`, `new`, `create`, `init`, `set`
-- **Destruction verbs**: `remove`, `delete`, `unset`, `destroy`, `clean`, `clear`, `purge`
 
 For instance, `flow test my-app` is equivalent to `flow validate my-app`. This allows for a more natural language-like 
-interaction with the CLI, making it easier to remember and use.
+interaction with the CLI, making it easier to remember and use. 
+*See the [verb reference](../types/flowfile.md#verb-groups) for a list all verbs and their synonyms.*
+
+> [!TIP]
+> Create shell aliases for commonly used verbs to make running executables easier. For example:
+> ```shell
+> alias build="flow build"
+> ```
+> This allows you to run `build my-app` instead of `flow build my-app` or the synonym `flow package my-app`.
 
 **Executable IDs**
 
