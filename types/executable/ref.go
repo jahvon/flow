@@ -9,116 +9,150 @@ import (
 )
 
 const (
-	ActivateGroupID   = "activate"
-	DeactivateGroupID = "deactivate"
-	RestartGroupID    = "restart"
-	InstallGroup      = "install"
-	UninstallGroup    = "uninstall"
-	PublishGroupID    = "publish"
-	CreationGroupID   = "create"
-	DeleteGroupID     = "delete"
-	UpdateGroupID     = "update"
-	TestGroupID       = "test"
-	AnalyzeGroupID    = "analyze"
-	LaunchGroupID     = "launch"
+	ActivateGroupID     = "activate"
+	DeactivateGroupID   = "deactivate"
+	ExecutionGroupID    = "execute"
+	TerminationGroupID  = "terminate"
+	MonitoringGroupID   = "monitor"
+	RestartGroupID      = "restart"
+	InstallGroupID      = "install"
+	BuildGroupID        = "build"
+	UninstallGroupID    = "uninstall"
+	PublishGroupID      = "publish"
+	DistributionGroupID = "distribute"
+	TestGroupID         = "test"
+	AnalyzeGroupID      = "analyze"
+	LaunchGroupID       = "launch"
+	CreationGroupID     = "create"
+	SetGroupID          = "set"
+	DestructionGroupID  = "destroy"
+	UnsetGroupID        = "unset"
+	CleanupGroupID      = "cleanup"
+	RetrievalGroupID    = "retrieve"
 )
 
 var (
-	ValidVerbToGroupID = map[string]string{
+	ValidVerbToGroupID = map[Verb]string{
 		// Activation verbs
-		"exec":     ActivateGroupID,
-		"run":      ActivateGroupID,
-		"start":    ActivateGroupID,
-		"activate": ActivateGroupID,
-		"enable":   ActivateGroupID,
-		"watch":    ActivateGroupID,
+		VerbActivate: ActivateGroupID,
+		VerbEnable:   ActivateGroupID,
+		VerbStart:    ActivateGroupID,
+		VerbTrigger:  ActivateGroupID,
+
+		// Execution verbs
+		VerbExec:    ExecutionGroupID,
+		VerbRun:     ExecutionGroupID,
+		VerbExecute: ExecutionGroupID,
 
 		// Deactivation verbs
-		"deactivate": DeactivateGroupID,
-		"disable":    DeactivateGroupID,
-		"stop":       DeactivateGroupID,
-		"kill":       DeactivateGroupID,
+		VerbDeactivate: DeactivateGroupID,
+		VerbDisable:    DeactivateGroupID,
+		VerbStop:       DeactivateGroupID,
+		VerbPause:      DeactivateGroupID,
+
+		// Termination verbs
+		VerbKill:      TerminationGroupID,
+		VerbTerminate: TerminationGroupID,
+		VerbAbort:     TerminationGroupID,
+
+		// Monitoring verbs
+		VerbWatch:   MonitoringGroupID,
+		VerbMonitor: MonitoringGroupID,
+		VerbTrack:   MonitoringGroupID,
 
 		// Restart verbs
-		"restart": RestartGroupID,
-		"reboot":  RestartGroupID,
-		"reload":  RestartGroupID,
-		"refresh": RestartGroupID,
+		VerbRestart: RestartGroupID,
+		VerbReboot:  RestartGroupID,
+		VerbReload:  RestartGroupID,
+		VerbRefresh: RestartGroupID,
 
-		// Install verbs
-		"install": InstallGroup,
-		"setup":   InstallGroup,
-		"build":   InstallGroup,
-		"package": InstallGroup,
-		"bundle":  InstallGroup,
+		// Installation verbs
+		VerbInstall: InstallGroupID,
+		VerbSetup:   InstallGroupID,
+		VerbDeploy:  InstallGroupID,
 
-		// Uninstall verbs
-		"uninstall": UninstallGroup,
-		"teardown":  UninstallGroup,
-		"undeploy":  UninstallGroup,
+		// Build verbs
+		VerbBuild:   BuildGroupID,
+		VerbPackage: BuildGroupID,
+		VerbBundle:  BuildGroupID,
+		VerbCompile: BuildGroupID,
+
+		// Uninstallation verbs
+		VerbUninstall: UninstallGroupID,
+		VerbTeardown:  UninstallGroupID,
+		VerbUndeploy:  UninstallGroupID,
 
 		// Publish verbs
-		"publish": PublishGroupID,
-		"release": PublishGroupID,
-		"deploy":  PublishGroupID,
-		"apply":   PublishGroupID,
-		"push":    PublishGroupID,
-		"send":    PublishGroupID,
+		VerbPublish: PublishGroupID,
+		VerbRelease: PublishGroupID,
 
-		// Update verbs
-		"update":    UpdateGroupID,
-		"upgrade":   UpdateGroupID,
-		"patch":     UpdateGroupID,
-		"edit":      UpdateGroupID,
-		"transform": UpdateGroupID,
-		"manage":    UpdateGroupID,
-		"configure": UpdateGroupID,
+		// Distribution verbs
+		VerbPush:  DistributionGroupID,
+		VerbSend:  DistributionGroupID,
+		VerbApply: DistributionGroupID,
 
 		// Test verbs
-		"test":     TestGroupID,
-		"validate": TestGroupID,
-		"check":    TestGroupID,
-		"verify":   TestGroupID,
+		VerbTest:     TestGroupID,
+		VerbValidate: TestGroupID,
+		VerbCheck:    TestGroupID,
+		VerbVerify:   TestGroupID,
 
-		// Analyze verbs
-		"analyze": AnalyzeGroupID,
-		"lint":    AnalyzeGroupID,
-		"audit":   AnalyzeGroupID,
-		"scan":    AnalyzeGroupID,
+		// Analysis verbs
+		VerbAnalyze: AnalyzeGroupID,
+		VerbScan:    AnalyzeGroupID,
+		VerbLint:    AnalyzeGroupID,
+		VerbInspect: AnalyzeGroupID,
 
 		// Launch verbs
-		"open":   LaunchGroupID,
-		"launch": LaunchGroupID,
-		"show":   LaunchGroupID,
-		"view":   LaunchGroupID,
-		"render": LaunchGroupID,
+		VerbOpen:   LaunchGroupID,
+		VerbLaunch: LaunchGroupID,
+		VerbShow:   LaunchGroupID,
+		VerbView:   LaunchGroupID,
 
 		// Creation verbs
-		"generate": CreationGroupID,
-		"add":      CreationGroupID,
-		"new":      CreationGroupID,
-		"create":   CreationGroupID,
-		"init":     CreationGroupID,
-		"set":      CreationGroupID,
+		VerbCreate:   CreationGroupID,
+		VerbGenerate: CreationGroupID,
+		VerbAdd:      CreationGroupID,
+		VerbNew:      CreationGroupID,
+		VerbInit:     CreationGroupID,
 
-		// Deletion verbs
-		"remove":  DeleteGroupID,
-		"delete":  DeleteGroupID,
-		"unset":   DeleteGroupID,
-		"destroy": DeleteGroupID,
-		"clear":   DeleteGroupID,
-		"purge":   DeleteGroupID,
-		"clean":   DeleteGroupID,
+		// Set verbs
+		VerbSet: SetGroupID,
+
+		// Destruction verbs
+		VerbRemove:  DestructionGroupID,
+		VerbDelete:  DestructionGroupID,
+		VerbDestroy: DestructionGroupID,
+		VerbErase:   DestructionGroupID,
+
+		// Unset verbs
+		VerbUnset: UnsetGroupID,
+		VerbReset: UnsetGroupID,
+
+		// Cleanup verbs
+		VerbClean: CleanupGroupID,
+		VerbClear: CleanupGroupID,
+		VerbPurge: CleanupGroupID,
+		VerbTidy:  CleanupGroupID,
+
+		// Retrieval verbs
+		VerbRetrieve: RetrievalGroupID,
+		VerbFetch:    RetrievalGroupID,
+		VerbGet:      RetrievalGroupID,
+		VerbRequest:  RetrievalGroupID,
 	}
 )
 
-func ValidVerbs() []string {
+func ValidVerbs() []Verb {
 	return maps.Keys(ValidVerbToGroupID)
 }
 
 func SortedValidVerbs() []string {
-	verbs := ValidVerbs()
-	slices.SortFunc(verbs, strings.Compare)
+	verbs := make([]string, 0)
+	for _, v := range ValidVerbs() {
+		verbs = append(verbs, v.String())
+	}
+	slices.Sort(verbs)
 	return verbs
 }
 
@@ -127,21 +161,21 @@ func (v Verb) String() string {
 }
 
 func (v Verb) Validate() error {
-	if !slices.Contains(ValidVerbs(), v.String()) {
+	if !slices.Contains(ValidVerbs(), v) {
 		return fmt.Errorf("invalid executable verb %s", v)
 	}
 	return nil
 }
 
 func (v Verb) Equals(other Verb) bool {
-	return ValidVerbToGroupID[v.String()] == ValidVerbToGroupID[other.String()]
+	return ValidVerbToGroupID[v] == ValidVerbToGroupID[other]
 }
 
 func RelatedVerbs(verb Verb) []Verb {
 	verbs := make([]Verb, 0)
 	for _, v := range ValidVerbs() {
-		if ValidVerbToGroupID[v] == ValidVerbToGroupID[verb.String()] {
-			verbs = append(verbs, Verb(v))
+		if ValidVerbToGroupID[v] == ValidVerbToGroupID[verb] {
+			verbs = append(verbs, v)
 		}
 	}
 	return slices.Compact(verbs)
