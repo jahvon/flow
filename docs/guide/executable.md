@@ -224,18 +224,20 @@ _This example used the `exec` type, but the `dir` field can be used with the `se
 
 ##### exec
 
+The `exec` type is used to run a command directly in the shell. The command can be a single command or a script file.
+
 ```yaml
 fromFile:
   - "generated.sh"
 executables:
-  - verb: "send"
-    name: "ping"
+  - verb: "init"
+    name: "chezmoi"
     exec:
-      cmd: "ping -c 3 google.com"
-  - verb: "run"
-    name: "file"
+      file: "init-chezmoi.sh"
+  - verb: "apply"
+    name: "dotfiles"
     exec:
-      file: "run.sh"
+      cmd: "chezmoi apply"
 ```
 
 **Generated Executable**
@@ -273,69 +275,104 @@ echo "Hello from a generated executable!"
 
 ##### serial
 
+The `serial` type is used to run a list of executables sequentially. For each `exec` in the list, you must define
+either a `ref` to another executable or a `cmd` to run directly in the shell.
+
+The [executable environment variables](#environment-variables) and [executable directory](#changing-directories)
+of the parent executable are inherited by the child executables.
+
 ```yaml
 executables:
-  - verb: "start"
-    name: "env-setup"
+  - verb: "setup"
+    name: "flow-system"
     serial:
-      failFast: true
+      failFast: true # Setting `failFast` will stop the execution if any of the executables fail
       execs:
-        - ref: "build checkout/backend"
-        - ref: "build checkout/frontend"
-          retries: 2
-        - ref: "build users:server"
-        - ref: "deploy all"
-        - cmd: "echo 'All done!'"
-          reviewRequired: true
+        - ref: "upgrade flow:cli"
+        - ref: "install flow:workspaces"
+          args: ["all"] # When referring to another executable that requires arguments, you can pass them in the `args` field
+          retries: 2 # retry the executable up to 2 times if it fails
+        - ref: "apply flow:config"
+          reviewRequired: true # serial execution will pause here for review (user input)
+        - cmd: "flow sync"
 ```
 
 ##### parallel
 
+The `parallel` type is used to run a list of executables concurrently. For each `exec` in the list, you must define
+either a `ref` to another executable or a `cmd` to run directly in the shell.
+
+The [executable environment variables](#environment-variables) and [executable directory](#changing-directories)
+of the parent executable are inherited by the child executables.
+
 ```yaml
 executables:
-  - verb: "watch"
-    name: "logs"
+  - verb: "deploy"
+    name: "apps"
     parallel:
-      maxThreads: 2
-      timeout: "2h"
+      failFast: true # Setting `failFast` will stop the execution if any of the executables fail
+      maxThreads: 2 # Setting `maxThreads` will limit the number of concurrent threads that can be run at once
       execs:
-        - ref: "tail logs/backend.log"
-        - ref: "tail logs/frontend.log"
-        - ref: "tail logs/users.log"  
+        - ref: "deploy helm-app"
+          args: ["tailscale"] # When referring to another executable that requires arguments, you can pass them in the `args` field
+        - ref: "deploy helm-app"
+          args: ["metallb"]
+        - ref: "setup gloo-gateway"
+          retries: 1 # retry the executable up to 1 time if it fails
+        - cmd: "kubectl apply -f external-services.yaml"
 ```
 
 ##### launch
 
+The `launch` type is used to open a service or application. The `uri` field is required and can include environment variables
+(including those resolved from params and args)
+
 ```yaml
 executables:
   - verb: "open"
-    name: "ws-config"
+    name: "workspace"
     launch:
       uri: "$FLOW_WORKSPACE_PATH"
-      wait: true
+      app: "Visual Studio Code" # optional application to open the URI with
+      wait: true # wait for the application to close before continuing
 ```
 
 ##### request
 
+The `request` type is used to make HTTP requests to APIs. The `url` field is required, and the `method` field defaults 
+to `GET`.
+
+Additionally, you can define the `body` field to include a request body and the `headers` field to include custom headers.
+
 ```yaml
 executables:
-  - verb: "transform"
-    name: "greeting"
+  - verb: "pause"
+    name: "pihole"
     request:
       method: "POST"
-      url: "https://httpbin.org/post"
-      body: '{"hello": "world"}'
-      logResponse: true
-      transformResponse: ".args.hello = 'universe' | .args"
+      url: "http://pi.hole/admin/api.php?disable=$DURATION&auth=$PWHASH"
+      logResponse: true # log the response body
+      validStatusCodes: [200] # only consider the execution successful if the status code is 200
+      # transform the response body with jq
+      transformResponse: |
+        if .status == "disabled" then .status = "pause" else . end
 ```
 
 ##### render
 
+The `render` type is used to generate and view markdown created dynamically with templates or configurations. 
+The `templateFile` field is required and can include environment variables (including those resolved from params and args).
+
+The markdown template can include [Go template](https://pkg.go.dev/text/template) syntax to dynamically generate content.
+[Sprig functions](https://masterminds.github.io/sprig/) are also available for use in the template.
+
 ```yaml
 executables:
-  - verb: "render"
-    name: "documentation"
+  - verb: "show"
+    name: "cluster-summary"
     render:
-      templateFile: "template.md"
-      templateDataFile: "template-data.yaml"
+      templateFile: "cluster-template.md"
+      # Optionally, you can define a data file to use with the template
+      # It can be a JSON or YAML file.
+      templateDataFile: "kubectl-out.json"
 ```

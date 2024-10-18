@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
@@ -70,15 +71,7 @@ func (r *renderRunner) Exec(ctx *context.Context, e *executable.Executable, inpu
 		}
 	}
 
-	tmpl, err := template.New(filepath.Base(renderSpec.TemplateFile)).
-		Funcs(template.FuncMap{
-			"env": func(key string) string {
-				if val, ok := envMap[key]; ok {
-					return val
-				}
-				return os.Getenv(key)
-			},
-		}).ParseFiles(contentFile)
+	tmpl, err := template.New(filepath.Base(renderSpec.TemplateFile)).Funcs(sprig.TxtFuncMap()).ParseFiles(contentFile)
 	if err != nil {
 		return errors.Wrapf(err, "unable to parse template file %s", contentFile)
 	}
