@@ -4,17 +4,18 @@ tags: [development]
 executables:
   - verb: run
     name: checks
-    aliases: [precommit, pc, ci]
+    aliases: [precommit, pc, ci, validate]
     description: |
       Run the repository validation checks. This includes linting, tests, and code generation.
       Validate should be run before committing changes.
-    serial:
+    parallel:
       failFast: true
-      refs:
-        - generate code
-        - generate docs
-        - run linters
-        - run tests
+      maxThreads: 2
+      execs:
+        - ref: generate code
+        - ref: generate docs
+        - ref: run linters
+        - ref: run tests
 
   - verb: build
     name: binary
