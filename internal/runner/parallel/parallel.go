@@ -70,6 +70,8 @@ func handleExec(
 			}
 		case refConfig.Cmd != "":
 			exec = execUtils.ExecutableForCmd(parent, refConfig.Cmd, i)
+		default:
+			return errors.New("parallel executable must have a ref or cmd")
 		}
 
 		execPromptedEnv := make(map[string]string)

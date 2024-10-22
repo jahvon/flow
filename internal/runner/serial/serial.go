@@ -63,6 +63,8 @@ func handleExec(
 			}
 		case refConfig.Cmd != "":
 			exec = execUtils.ExecutableForCmd(parent, refConfig.Cmd, i)
+		default:
+			return errors.New("serial executable must have a ref or cmd")
 		}
 		ctx.Logger.Debugf("executing %s (%d/%d)", exec.Ref(), i+1, len(serialSpec.Execs))
 
