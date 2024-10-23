@@ -20,6 +20,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
+	go.etcd.io/bbolt v1.3.11
 	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.28.0
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e

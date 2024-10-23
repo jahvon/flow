@@ -71,5 +71,6 @@ func RegisterSubCommands(ctx *context.Context, rootCmd *cobra.Command) {
 	internal.RegisterWorkspaceCmd(ctx, rootCmd)
 	internal.RegisterTemplateCmd(ctx, rootCmd)
 	internal.RegisterLogsCmd(ctx, rootCmd)
+	internal.RegisterStoreCmd(ctx, rootCmd)
 	internal.RegisterSyncCmd(ctx, rootCmd)
 }
