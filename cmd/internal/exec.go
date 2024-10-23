@@ -95,6 +95,11 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	if err := e.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
+	replacer := strings.NewReplacer(":", "_", "/", "_", " ", "_")
+	bucketID := replacer.Replace(ref.String())
+	if err := os.Setenv(store.BucketEnv, bucketID); err != nil {
+		logger.Warnf("unable to switch to process bucket %s", bucketID)
+	}
 
 	if !e.IsExecutableFromWorkspace(ctx.CurrentWorkspace.AssignedName()) {
 		logger.FatalErr(fmt.Errorf(
