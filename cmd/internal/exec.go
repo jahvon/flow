@@ -21,6 +21,7 @@ import (
 	"github.com/jahvon/flow/internal/runner/render"
 	"github.com/jahvon/flow/internal/runner/request"
 	"github.com/jahvon/flow/internal/runner/serial"
+	"github.com/jahvon/flow/internal/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	"github.com/jahvon/flow/internal/vault"
 	"github.com/jahvon/flow/types/executable"
@@ -131,6 +132,16 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.FatalErr(err)
 	}
 	dur := time.Since(startTime)
+	processStore, err := store.NewStore()
+	if err != nil {
+		logger.Errorf("failed clearing process store\n%v", err)
+	}
+	if processStore != nil {
+		if err = processStore.DeleteBucket(); err != nil {
+			logger.Errorf("failed clearing process store\n%v", err)
+		}
+		_ = processStore.Close()
+	}
 	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
 	if TUIEnabled(ctx, cmd) {
 		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
