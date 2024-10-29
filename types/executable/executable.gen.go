@@ -215,6 +215,9 @@ type ParallelRefConfig struct {
 	//
 	Cmd string `json:"cmd,omitempty" yaml:"cmd,omitempty" mapstructure:"cmd,omitempty"`
 
+	// A condition to determine if the executable should be run.
+	If string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
+
 	// A reference to another executable to run in serial.
 	// One of `cmd` or `ref` must be set.
 	//
@@ -374,6 +377,9 @@ type SerialRefConfig struct {
 	// One of `cmd` or `ref` must be set.
 	//
 	Cmd string `json:"cmd,omitempty" yaml:"cmd,omitempty" mapstructure:"cmd,omitempty"`
+
+	// A condition to determine if the executable should be run.
+	If string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
 
 	// A reference to another executable to run in serial.
 	// One of `cmd` or `ref` must be set.

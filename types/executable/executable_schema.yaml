@@ -343,6 +343,10 @@ definitions:
           A reference to another executable to run in serial.
           One of `cmd` or `ref` must be set.
         default: ""
+      if:
+        type: string
+        description: A condition to determine if the executable should be run.
+        default: ""
       args:
         type: array
         items:
@@ -493,6 +497,10 @@ definitions:
         description: |
           A reference to another executable to run in serial.
           One of `cmd` or `ref` must be set.
+        default: ""
+      if:
+        type: string
+        description: A condition to determine if the executable should be run.
         default: ""
       args:
         type: array
