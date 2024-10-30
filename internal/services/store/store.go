@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -13,10 +14,10 @@ import (
 )
 
 const (
-	BucketEnv = "FLOW_PROCESS_BUCKET"
+	BucketEnv  = "FLOW_PROCESS_BUCKET"
+	RootBucket = "root"
 
 	storeFileName = "store.db"
-	rootBucket    = "root"
 )
 
 type Store struct {
@@ -85,7 +86,7 @@ func (s *Store) Get(key string) (string, error) {
 		}
 		value = bucket.Get([]byte(key))
 		if value == nil {
-			rBucket := tx.Bucket([]byte(rootBucket))
+			rBucket := tx.Bucket([]byte(RootBucket))
 			if rBucket != nil {
 				value = rBucket.Get([]byte(key))
 			}
@@ -123,10 +124,20 @@ func Path() string {
 	return filepath.Join(cacheDir, storeFileName)
 }
 
+func SetProcessBucketID(id string, force bool) error {
+	if _, set := os.LookupEnv(BucketEnv); set && !force {
+		return nil
+	}
+
+	replacer := strings.NewReplacer(":", "_", "/", "_", " ", "_")
+	id = replacer.Replace(id)
+	return os.Setenv(BucketEnv, id)
+}
+
 func bucketID() []byte {
-	processBucket := os.Getenv(BucketEnv)
-	if processBucket == "" {
-		return []byte(rootBucket)
+	processBucket, set := os.LookupEnv(BucketEnv)
+	if !set {
+		return []byte(RootBucket)
 	}
 	return []byte(processBucket)
 }

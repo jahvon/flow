@@ -1,10 +1,14 @@
 package internal
 
 import (
+	"strings"
+
+	"github.com/jahvon/tuikit/views"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/store"
+	"github.com/jahvon/flow/internal/io"
+	"github.com/jahvon/flow/internal/services/store"
 )
 
 func RegisterStoreCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -24,7 +28,7 @@ func registerStoreSetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Use:   "set",
 		Short: "Set a key-value pair in the data store.",
 		Long:  dataStoreDescription + "This will overwrite any existing value for the key.",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			storeSetFunc(ctx, cmd, args)
 		},
@@ -34,7 +38,32 @@ func registerStoreSetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 
 func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	key := args[0]
-	value := args[1]
+
+	var value string
+	switch {
+	case len(args) == 1:
+		form, err := views.NewForm(
+			io.Theme(ctx.Config.Theme.String()),
+			ctx.StdIn(),
+			ctx.StdOut(),
+			&views.FormField{
+				Key:   "value",
+				Type:  views.PromptTypeMultiline,
+				Title: "Enter the value to store",
+			})
+		if err != nil {
+			ctx.Logger.FatalErr(err)
+		}
+		if err = form.Run(ctx.Ctx); err != nil {
+			ctx.Logger.FatalErr(err)
+		}
+		value = form.FindByKey("value").Value()
+	case len(args) == 2:
+		value = args[1]
+	default:
+		ctx.Logger.Warnx("merging multiple arguments into a single value", "count", len(args))
+		value = strings.Join(args[1:], " ")
+	}
 
 	s, err := store.NewStore()
 	if err != nil {
@@ -51,15 +80,16 @@ func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if err = s.Set(key, value); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	ctx.Logger.Infof("key %q set in the flow store", key)
+	ctx.Logger.Infof("Key %q set in the store", key)
 }
 
 func registerStoreGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
-		Use:   "get",
-		Short: "Get a value from the data store.",
-		Long:  dataStoreDescription + "This will retrieve the value for the given key.",
-		Args:  cobra.ExactArgs(1),
+		Use:     "get",
+		Aliases: []string{"view"},
+		Short:   "Get a value from the data store.",
+		Long:    dataStoreDescription + "This will retrieve the value for the given key.",
+		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			storeGetFunc(ctx, cmd, args)
 		},
@@ -111,7 +141,7 @@ func storeClearFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 	if err := s.DeleteBucket(); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	ctx.Logger.PlainTextSuccess("data store cleared")
+	ctx.Logger.PlainTextSuccess("Data store cleared")
 }
 
 var dataStoreDescription = "The data store is a key-value store that can be used to persist data across executions. " +

@@ -21,7 +21,7 @@ import (
 	"github.com/jahvon/flow/internal/runner/render"
 	"github.com/jahvon/flow/internal/runner/request"
 	"github.com/jahvon/flow/internal/runner/serial"
-	"github.com/jahvon/flow/internal/store"
+	"github.com/jahvon/flow/internal/services/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	"github.com/jahvon/flow/internal/vault"
 	"github.com/jahvon/flow/types/executable"
@@ -72,6 +72,7 @@ func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 	runner.RegisterRunner(parallel.NewRunner())
 }
 
+//nolint:funlen
 func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, args []string) {
 	logger := ctx.Logger
 	if err := verb.Validate(); err != nil {
@@ -109,13 +110,13 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	if err != nil {
 		logger.FatalErr(err)
 	}
+	if err = store.SetProcessBucketID(ref.String(), false); err != nil {
+		logger.FatalErr(err)
+	}
 	if envMap == nil {
 		envMap = make(map[string]string)
 	}
 
-	replacer := strings.NewReplacer(":", "_", "/", "_", " ", "_")
-	bucketID := replacer.Replace(ref.String())
-	envMap[store.BucketEnv] = bucketID
 	setAuthEnv(ctx, cmd, e)
 	textInputs := pendingFormFields(ctx, e)
 	if len(textInputs) > 0 {
