@@ -21,6 +21,7 @@ import (
 	"github.com/jahvon/flow/internal/runner/render"
 	"github.com/jahvon/flow/internal/runner/request"
 	"github.com/jahvon/flow/internal/runner/serial"
+	"github.com/jahvon/flow/internal/services/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	"github.com/jahvon/flow/internal/vault"
 	"github.com/jahvon/flow/types/executable"
@@ -71,6 +72,7 @@ func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 	runner.RegisterRunner(parallel.NewRunner())
 }
 
+//nolint:funlen
 func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, args []string) {
 	logger := ctx.Logger
 	if err := verb.Validate(); err != nil {
@@ -108,6 +110,9 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	if err != nil {
 		logger.FatalErr(err)
 	}
+	if err = store.SetProcessBucketID(ref.String(), false); err != nil {
+		logger.FatalErr(err)
+	}
 	if envMap == nil {
 		envMap = make(map[string]string)
 	}
@@ -131,6 +136,16 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.FatalErr(err)
 	}
 	dur := time.Since(startTime)
+	processStore, err := store.NewStore()
+	if err != nil {
+		logger.Errorf("failed clearing process store\n%v", err)
+	}
+	if processStore != nil {
+		if err = processStore.DeleteBucket(); err != nil {
+			logger.Errorf("failed clearing process store\n%v", err)
+		}
+		_ = processStore.Close()
+	}
 	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
 	if TUIEnabled(ctx, cmd) {
 		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
