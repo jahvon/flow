@@ -24,6 +24,7 @@ See github.com/jahvon/flow for more information.
 * [flow library](flow_library.md)	 - View and manage your library of workspaces and executables.
 * [flow logs](flow_logs.md)	 - List and view logs for previous flow executions.
 * [flow secret](flow_secret.md)	 - Manage flow secrets.
+* [flow store](flow_store.md)	 - Manage the data store.
 * [flow sync](flow_sync.md)	 - Scan workspaces and update flow cache.
 * [flow template](flow_template.md)	 - Manage flowfile templates.
 * [flow workspace](flow_workspace.md)	 - Manage flow workspaces.
