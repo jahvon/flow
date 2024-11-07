@@ -71,10 +71,6 @@ func handleExec(
 	if err := str.CreateBucket(); err != nil {
 		return err
 	}
-	str, err := store.NewStore()
-	if err != nil {
-		return err
-	}
 	dm, err := str.GetAll()
 	if err != nil {
 		return err

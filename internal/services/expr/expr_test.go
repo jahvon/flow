@@ -54,6 +54,7 @@ var _ = Describe("Expr", func() {
 			for _, test := range tests {
 				result, err := expr.Evaluate(test.expr, test.env)
 				Expect(err).NotTo(HaveOccurred())
+				By("testing expression: " + test.expr)
 				Expect(result).To(Equal(test.expected))
 			}
 		})
@@ -73,6 +74,7 @@ var _ = Describe("Expr", func() {
 			for _, test := range tests {
 				result, err := expr.EvaluateString(test.expr, test.env)
 				Expect(err).NotTo(HaveOccurred())
+				By("testing expression: " + test.expr)
 				Expect(result).To(Equal(test.expected))
 			}
 		})

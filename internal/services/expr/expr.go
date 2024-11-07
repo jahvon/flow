@@ -34,7 +34,7 @@ func IsTruthy(ex string, env *ExpressionData) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		return truthy || v != "", nil
+		return truthy, nil
 	default:
 		return false, nil
 	}
