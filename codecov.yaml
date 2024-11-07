@@ -20,3 +20,6 @@ coverage:
 ignore:
   - "**/*.gen.go" # ignore generated code
   - "tools/**" # ignore tools directory
+  - "tests/utils/**" # ignore test utilities
+  - "**/testdata/**" # ignore test data
+  - "**/mocks/**" # ignore mocks
