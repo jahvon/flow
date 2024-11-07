@@ -206,6 +206,7 @@ Configuration for a parallel executable.
 | ----- | ----------- | ---- | ------- | :--------: |
 | `args` | Arguments to pass to the executable. | `array` (`string`) | [] |  |
 | `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  |  |
+| `if` | A condition to determine if the executable should be run. | `string` |  |  |
 | `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  |  |
 | `retries` | The number of times to retry the executable if it fails. | `integer` | 0 |  |
 
@@ -352,6 +353,7 @@ Configuration for a serial executable.
 | ----- | ----------- | ---- | ------- | :--------: |
 | `args` | Arguments to pass to the executable. | `array` (`string`) | [] |  |
 | `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  |  |
+| `if` | A condition to determine if the executable should be run. | `string` |  |  |
 | `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  |  |
 | `retries` | The number of times to retry the executable if it fails. | `integer` | 0 |  |
 | `reviewRequired` | If set to true, the user will be prompted to review the output of the executable before continuing. | `boolean` | false |  |

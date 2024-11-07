@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.1.2
 	github.com/charmbracelet/lipgloss v1.0.0
+	github.com/expr-lang/expr v1.16.9
 	github.com/gen2brain/beeep v0.0.0-20240516210008-9c006672e7f4
 	github.com/itchyny/gojq v0.12.16
 	github.com/jahvon/glamour v0.8.1-patch3
@@ -46,7 +47,6 @@ require (
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
-	github.com/expr-lang/expr v1.16.9 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect

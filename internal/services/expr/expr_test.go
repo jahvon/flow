@@ -19,7 +19,7 @@ var _ = Describe("Expr", func() {
 		It("should evaluate truthy expressions correctly", func() {
 			tests := []struct {
 				expr     string
-				env      map[string]interface{}
+				env      *expr.ExpressionData
 				expected bool
 			}{
 				{"true", nil, true},
@@ -33,6 +33,7 @@ var _ = Describe("Expr", func() {
 			for _, test := range tests {
 				result, err := expr.IsTruthy(test.expr, test.env)
 				Expect(err).NotTo(HaveOccurred())
+				By("testing expression: " + test.expr)
 				Expect(result).To(Equal(test.expected))
 			}
 		})
@@ -42,7 +43,7 @@ var _ = Describe("Expr", func() {
 		It("should evaluate expressions correctly", func() {
 			tests := []struct {
 				expr     string
-				env      map[string]interface{}
+				env      *expr.ExpressionData
 				expected interface{}
 			}{
 				{"1 + 1", nil, 2},
@@ -62,7 +63,7 @@ var _ = Describe("Expr", func() {
 		It("should evaluate string expressions correctly", func() {
 			tests := []struct {
 				expr     string
-				env      map[string]interface{}
+				env      *expr.ExpressionData
 				expected string
 			}{
 				{`"hello"`, nil, "hello"},

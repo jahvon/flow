@@ -20,6 +20,17 @@ const (
 	storeFileName = "store.db"
 )
 
+//go:generate mockgen -destination=mocks/mock_store.go -package=mocks github.com/jahvon/flow/internal/services/store BoltStore
+type BoltStore interface {
+	CreateBucket() error
+	DeleteBucket() error
+	Set(key, value string) error
+	Get(key string) (string, error)
+	GetAll() (map[string]string, error)
+	Delete(key string) error
+	Close() error
+}
+
 type Store struct {
 	db *bolt.DB
 }
@@ -97,6 +108,24 @@ func (s *Store) Get(key string) (string, error) {
 		return nil
 	})
 	return string(value), err
+}
+
+// GetAll retrieves all key-value pairs from the process bucket
+func (s *Store) GetAll() (map[string]string, error) {
+	data := make(map[string]string)
+	err := s.db.View(func(tx *bolt.Tx) error {
+		id := bucketID()
+		bucket := tx.Bucket(id)
+		if bucket == nil {
+			return fmt.Errorf("bucket %s not found", id)
+		}
+		err := bucket.ForEach(func(k, v []byte) error {
+			data[string(k)] = string(v)
+			return nil
+		})
+		return err
+	})
+	return data, err
 }
 
 // Delete removes a key from the process bucket

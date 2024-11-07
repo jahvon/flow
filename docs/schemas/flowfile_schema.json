@@ -248,6 +248,11 @@
           "type": "string",
           "default": ""
         },
+        "if": {
+          "description": "A condition to determine if the executable should be run.",
+          "type": "string",
+          "default": ""
+        },
         "ref": {
           "$ref": "#/definitions/ExecutableRef",
           "description": "A reference to another executable to run in serial.\nOne of `cmd` or `ref` must be set.\n",
@@ -474,6 +479,11 @@
         },
         "cmd": {
           "description": "The command to execute.\nOne of `cmd` or `ref` must be set.\n",
+          "type": "string",
+          "default": ""
+        },
+        "if": {
+          "description": "A condition to determine if the executable should be run.",
           "type": "string",
           "default": ""
         },

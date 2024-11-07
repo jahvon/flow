@@ -10,6 +10,8 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/services/expr"
+	"github.com/jahvon/flow/internal/services/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	execUtils "github.com/jahvon/flow/internal/utils/executables"
 	"github.com/jahvon/flow/types/executable"
@@ -39,16 +41,23 @@ func (r *parallelRunner) Exec(ctx *context.Context, e *executable.Executable, pr
 	}
 
 	if len(parallelSpec.Execs) > 0 {
-		return handleExec(ctx, e, parallelSpec, promptedEnv)
+		str, err := store.NewStore()
+		if err != nil {
+			return err
+		}
+		return handleExec(ctx, e, parallelSpec, promptedEnv, str)
 	}
 
 	return fmt.Errorf("no parallel executables to run")
 }
 
-//nolint:gocognit
+// TODO: refactor this function to reduce complexity
+//
+//nolint:gocognit,funlen,cyclop
 func handleExec(
 	ctx *context.Context, parent *executable.Executable,
 	parallelSpec *executable.ParallelExecutableType, promptedEnv map[string]string,
+	str store.BoltStore,
 ) error {
 	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
 	defer cancel()
@@ -58,8 +67,30 @@ func handleExec(
 		limit = len(parallelSpec.Execs)
 	}
 	group.SetLimit(limit)
+
+	if err := str.CreateBucket(); err != nil {
+		return err
+	}
+	str, err := store.NewStore()
+	if err != nil {
+		return err
+	}
+	dm, err := str.GetAll()
+	if err != nil {
+		return err
+	}
+	dataMap := expr.ExpressionEnv(ctx, parent, dm, promptedEnv)
+
 	var errs []error
 	for i, refConfig := range parallelSpec.Execs {
+		if refConfig.If != "" {
+			if truthy, err := expr.IsTruthy(refConfig.If, &dataMap); err != nil {
+				return err
+			} else if !truthy {
+				ctx.Logger.Debugf("skipping execution %d/%d", i+1, len(parallelSpec.Execs))
+				continue
+			}
+		}
 		var exec *executable.Executable
 		switch {
 		case len(refConfig.Ref) > 0:

@@ -120,4 +120,25 @@ var _ = Describe("Store", func() {
 			Expect(err).To(HaveOccurred())
 		})
 	})
+
+	Describe("GetAll", func() {
+		It("should get all key-value pairs from the bucket", func() {
+			err = store.SetProcessBucketID("process3", true)
+			err := s.CreateBucket()
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.Set("key1", "value1")
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.Set("key2", "value2")
+			Expect(err).NotTo(HaveOccurred())
+
+			data, err := s.GetAll()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(data).To(Equal(map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+			}))
+		})
+	})
 })
