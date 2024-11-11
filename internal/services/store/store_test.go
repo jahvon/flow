@@ -19,7 +19,7 @@ var _ = Describe("Store", func() {
 	var err error
 
 	BeforeEach(func() {
-		s, err = store.NewStore()
+		s, err = store.NewStore(true)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(s).NotTo(BeNil())
 	})

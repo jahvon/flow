@@ -6,6 +6,7 @@ import (
 	"github.com/jahvon/tuikit/views"
 	"github.com/spf13/cobra"
 
+	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/services/store"
@@ -25,7 +26,7 @@ func RegisterStoreCmd(ctx *context.Context, rootCmd *cobra.Command) {
 
 func registerStoreSetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
-		Use:   "set",
+		Use:   "set KEY [VALUE]",
 		Short: "Set a key-value pair in the data store.",
 		Long:  dataStoreDescription + "This will overwrite any existing value for the key.",
 		Args:  cobra.MinimumNArgs(1),
@@ -65,7 +66,7 @@ func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		value = strings.Join(args[1:], " ")
 	}
 
-	s, err := store.NewStore()
+	s, err := store.NewStore(true)
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
@@ -85,7 +86,7 @@ func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 
 func registerStoreGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
-		Use:     "get",
+		Use:     "get KEY",
 		Aliases: []string{"view"},
 		Short:   "Get a value from the data store.",
 		Long:    dataStoreDescription + "This will retrieve the value for the given key.",
@@ -100,7 +101,7 @@ func registerStoreGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 func storeGetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	key := args[0]
 
-	s, err := store.NewStore()
+	s, err := store.NewStore(false)
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
@@ -130,14 +131,28 @@ func registerStoreClearCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			storeClearFunc(ctx, cmd, args)
 		},
 	}
+	RegisterFlag(ctx, subCmd, *flags.StoreFullFlag)
 	rootCmd.AddCommand(subCmd)
 }
 
-func storeClearFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
-	s, err := store.NewStore()
+func storeClearFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+	full := flags.ValueFor[bool](ctx, cmd, *flags.StoreFullFlag, false)
+	if full {
+		if err := store.DeleteStore(); err != nil {
+			ctx.Logger.FatalErr(err)
+		}
+		ctx.Logger.PlainTextSuccess("Data store cleared")
+		return
+	}
+	s, err := store.NewStore(true)
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
+	defer func() {
+		if err := s.Close(); err != nil {
+			ctx.Logger.Error(err, "cleanup failure")
+		}
+	}()
 	if err := s.DeleteBucket(); err != nil {
 		ctx.Logger.FatalErr(err)
 	}

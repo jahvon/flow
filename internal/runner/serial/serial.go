@@ -41,10 +41,11 @@ func (r *serialRunner) Exec(ctx *context.Context, e *executable.Executable, prom
 	}
 
 	if len(serialSpec.Execs) > 0 {
-		str, err := store.NewStore()
+		str, err := store.NewStore(false)
 		if err != nil {
 			return err
 		}
+		defer str.Close()
 		return handleExec(ctx, e, serialSpec, promptedEnv, str)
 	}
 	return fmt.Errorf("no serial executables to run")
@@ -72,12 +73,15 @@ func handleExec(
 	var errs []error
 	for i, refConfig := range serialSpec.Execs {
 		if refConfig.If != "" {
-			if truthy, err := expr.IsTruthy(refConfig.If, &dataMap); err != nil {
+			truthy, err := expr.IsTruthy(refConfig.If, &dataMap)
+			if err != nil {
 				return err
-			} else if !truthy {
+			}
+			if !truthy {
 				ctx.Logger.Debugf("skipping execution %d/%d", i+1, len(serialSpec.Execs))
 				continue
 			}
+			ctx.Logger.Debugf("condition %s is true", refConfig.If)
 		}
 		var exec *executable.Executable
 		switch {

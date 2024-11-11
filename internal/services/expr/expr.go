@@ -14,12 +14,7 @@ import (
 )
 
 func IsTruthy(ex string, env *ExpressionData) (bool, error) {
-	program, err := expr.Compile(ex, expr.Env(env))
-	if err != nil {
-		return false, err
-	}
-
-	output, err := expr.Run(program, env)
+	output, err := Evaluate(ex, env)
 	if err != nil {
 		return false, err
 	}

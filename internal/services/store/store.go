@@ -32,11 +32,18 @@ type BoltStore interface {
 }
 
 type Store struct {
-	db *bolt.DB
+	db       *bolt.DB
+	writable bool
 }
 
-func NewStore() (*Store, error) {
-	db, err := bolt.Open(Path(), 0666, &bolt.Options{Timeout: 5 * time.Second})
+func NewStore(writable bool) (*Store, error) {
+	var db *bolt.DB
+	var err error
+	if writable {
+		db, err = bolt.Open(Path(), 0666, &bolt.Options{Timeout: 5 * time.Second})
+	} else {
+		db, err = bolt.Open(Path(), 0666, &bolt.Options{Timeout: 5 * time.Second, ReadOnly: true})
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
@@ -146,6 +153,14 @@ func (s *Store) Delete(key string) error {
 
 func (s *Store) Close() error {
 	return s.db.Close()
+}
+
+func DeleteStore() error {
+	err := os.Remove(Path())
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("failed to delete store: %w", err)
+	}
+	return nil
 }
 
 func Path() string {

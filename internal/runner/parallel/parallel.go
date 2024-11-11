@@ -41,10 +41,11 @@ func (r *parallelRunner) Exec(ctx *context.Context, e *executable.Executable, pr
 	}
 
 	if len(parallelSpec.Execs) > 0 {
-		str, err := store.NewStore()
+		str, err := store.NewStore(false)
 		if err != nil {
 			return err
 		}
+		defer str.Close()
 		return handleExec(ctx, e, parallelSpec, promptedEnv, str)
 	}
 

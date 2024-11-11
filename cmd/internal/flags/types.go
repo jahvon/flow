@@ -169,3 +169,9 @@ var SetSoundNotificationFlag = &Metadata{
 	Usage:   "Update completion sound notification setting",
 	Default: false,
 }
+
+var StoreFullFlag = &Metadata{
+	Name:    "full",
+	Usage:   "Force clear all stored data",
+	Default: false,
+}
