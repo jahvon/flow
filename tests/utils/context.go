@@ -4,6 +4,7 @@ import (
 	stdCtx "context"
 	"os"
 	"path/filepath"
+	"strings"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
 	tuikitIOMocks "github.com/jahvon/tuikit/io/mocks"
@@ -148,7 +149,8 @@ func newTestContext(
 }
 
 func initTestDirectories(t ginkgo.FullGinkgoTInterface) (string, string, string) {
-	tmpDir, err := os.MkdirTemp("", "flow-test")
+	replacer := strings.NewReplacer("-", "", "'", "-", "/", "-", " ", "_")
+	tmpDir, err := os.MkdirTemp("", replacer.Replace(strings.ToLower(t.Name())))
 	if err != nil {
 		t.Fatalf("unable to create temp dir: %v", err)
 	}

@@ -382,8 +382,9 @@ definitions:
         minimum: 1
       failFast:
         type: boolean
-        description: If set to true, the parallel executable will fail if any of the sub-executables fail.
-        default: false
+        description: |
+            End the parallel execution as soon as an exec exits with a non-zero status. This is the default behavior.
+            When set to false, all execs will be run regardless of the exit status of parallel execs.
 
   RenderExecutableType:
     type: object
@@ -533,8 +534,9 @@ definitions:
           Each executable can be a command or a reference to another executable.
       failFast:
         type: boolean
-        description: If set to true, the serial executable will fail if any of the sub-executables fail.
-        default: false
+        description: |
+          End the serial execution as soon as an exec exits with a non-zero status. This is the default behavior.
+          When set to false, all execs will be run regardless of the exit status of the previous exec.
 
 type: object
 required: [name, verb]

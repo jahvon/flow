@@ -190,8 +190,10 @@ func serialExecMarkdown(e *ExecutableEnvironment, s *SerialExecutableType) strin
 		return ""
 	}
 	mkdwn := "## Serial Configuration\n"
-	if s.FailFast {
+	if s.FailFast != nil && *s.FailFast {
 		mkdwn += "**Fail Fast:** enabled\n"
+	} else if s.FailFast != nil && !*s.FailFast {
+		mkdwn += "**Fail Fast:** disabled\n"
 	}
 	mkdwn += "**Executables**\n"
 	for i, refCfg := range s.Execs {
@@ -225,8 +227,10 @@ func parallelExecMarkdown(e *ExecutableEnvironment, p *ParallelExecutableType) s
 	if p.MaxThreads > 0 {
 		mkdwn += fmt.Sprintf("**Max Threads:** %d\n", p.MaxThreads)
 	}
-	if p.FailFast {
+	if p.FailFast != nil && *p.FailFast {
 		mkdwn += "**Fail Fast:** enabled\n"
+	} else if p.FailFast != nil && !*p.FailFast {
+		mkdwn += "**Fail Fast:** disabled\n"
 	}
 	mkdwn += "**Executables**\n"
 	for i, refCfg := range p.Execs {

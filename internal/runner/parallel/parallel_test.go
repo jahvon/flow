@@ -10,6 +10,8 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
+	"github.com/jahvon/flow/internal/runner/engine/mocks"
 	"github.com/jahvon/flow/internal/runner/parallel"
 	testUtils "github.com/jahvon/flow/tests/utils"
 	"github.com/jahvon/flow/tools/builder"
@@ -25,12 +27,15 @@ var _ = Describe("ParallelRunner", func() {
 	var (
 		ctx         *testUtils.ContextWithMocks
 		parallelRnr runner.Runner
+		mockEngine  *mocks.MockEngine
 	)
 
 	BeforeEach(func() {
 		ctx = testUtils.NewContextWithMocks(stdCtx.Background(), GinkgoT())
 		runner.RegisterRunner(ctx.RunnerMock)
 		parallelRnr = parallel.NewRunner()
+		engCtl := gomock.NewController(GinkgoT())
+		mockEngine = mocks.NewMockEngine(engCtl)
 	})
 
 	AfterEach(func() {
@@ -86,189 +91,44 @@ var _ = Describe("ParallelRunner", func() {
 			ctx.RunnerMock.EXPECT().IsCompatible(rootExec).Return(false).AnyTimes()
 		})
 
-		It("should execute all sub execs", func() {
+		It("complete successfully when there are no engine errors", func() {
 			promptedEnv := make(map[string]string)
-			mockRunner := ctx.RunnerMock
 			mockCache := ctx.ExecutableCache
 
 			for i, e := range subExecs {
 				switch i {
 				case 0:
-					isParallelExec := testUtils.ExecWithRef(e.Ref())
 					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
-					mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).Times(1)
-					mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, promptedEnv).Return(nil).Times(1)
 				case 1:
-					isParallelExec := testUtils.ExecWithRef(e.Ref())
-					parallelPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
 					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
-					mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).Times(1)
-					mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, parallelPrompt).Return(nil).Times(1)
-				case 2:
-					isParallelExec := testUtils.ExecWithCmd(e.Exec.Cmd)
-					mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).Times(1)
-					mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, promptedEnv).Return(nil).Times(1)
 				}
 			}
-			Expect(parallelRnr.Exec(ctx.Ctx, rootExec, promptedEnv)).To(Succeed())
+
+			results := engine.ResultSummary{Results: []engine.Result{{}}}
+			mockEngine.EXPECT().
+				Execute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(results).Times(1)
+			Expect(parallelRnr.Exec(ctx.Ctx, rootExec, mockEngine, promptedEnv)).To(Succeed())
 		})
 
-		Context("when retries are set on a failed ref config", func() {
-			BeforeEach(func() {
-				rootExec.Parallel.Execs[1].Retries = 2
-			})
+		It("fail when there is an engine error", func() {
+			promptedEnv := make(map[string]string)
+			mockCache := ctx.ExecutableCache
 
-			When("fail fast is disabled", func() {
-				It("should be retried until attempted max times", func() {
-					mockRunner := ctx.RunnerMock
-					mockCache := ctx.ExecutableCache
-					mockLogger := ctx.Logger
-					promptedEnv := make(map[string]string)
+			for i, e := range subExecs {
+				switch i {
+				case 0:
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+				case 1:
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+				}
+			}
 
-					for i, e := range subExecs {
-						switch i {
-						case 0:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).MaxTimes(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().
-								Exec(ctx.Ctx, isParallelExec, promptedEnv).Return(nil).MaxTimes(1)
-						case 1:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							parallelPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).Times(3)
-							mockRunner.EXPECT().
-								Exec(ctx.Ctx, isParallelExec, parallelPrompt).
-								Return(errors.New("error")).Times(3)
-							mockLogger.EXPECT().Warnx("retrying", "ref", e.Ref()).Times(2)
-							mockLogger.EXPECT().
-								Errorx("retries exceeded", "err", gomock.Any(), "ref", e.Ref(), "max", 2).
-								Times(1)
-						case 2:
-							isParallelExec := testUtils.ExecWithCmd(e.Exec.Cmd)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().
-								Exec(ctx.Ctx, isParallelExec, promptedEnv).Return(nil).MaxTimes(1)
-						}
-					}
-
-					rootExec.Parallel.FailFast = false
-					Expect(parallelRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
-				})
-			})
-
-			When("fail fast is enabled", func() {
-				It("should fail fast after max attempts when enabled", func() {
-					mockRunner := ctx.RunnerMock
-					mockCache := ctx.ExecutableCache
-					mockLogger := ctx.Logger
-					promptedEnv := make(map[string]string)
-
-					for i, e := range subExecs {
-						switch i {
-						case 0:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).MaxTimes(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().
-								Exec(ctx.Ctx, isParallelExec, promptedEnv).Return(nil).MaxTimes(1)
-						case 1:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							parallelPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).Times(3)
-							mockRunner.EXPECT().
-								Exec(ctx.Ctx, isParallelExec, parallelPrompt).
-								Return(errors.New("error")).Times(3)
-							mockLogger.EXPECT().Warnx("retrying", "ref", e.Ref()).Times(2)
-						case 2:
-							isParallelExec := testUtils.ExecWithCmd(e.Exec.Cmd)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().
-								Exec(ctx.Ctx, isParallelExec, promptedEnv).Return(nil).MaxTimes(1)
-						}
-					}
-
-					rootExec.Parallel.FailFast = true
-					Expect(parallelRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
-				})
-			})
-		})
-
-		Context("when retries are not enabled on a failed ref config", func() {
-			When("fail fast is disabled", func() {
-				It("should be retried until attempted max times", func() {
-					mockRunner := ctx.RunnerMock
-					mockCache := ctx.ExecutableCache
-					mockLogger := ctx.Logger
-					promptedEnv := make(map[string]string)
-
-					for i, e := range subExecs {
-						switch i {
-						case 0:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).MaxTimes(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, promptedEnv).
-								Return(nil).MaxTimes(1)
-						case 1:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							parallelPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).Times(1)
-							mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, parallelPrompt).
-								Return(errors.New("error")).Times(1)
-							mockLogger.EXPECT().Errorx("execution error", "err", gomock.Any(), "ref", e.Ref()).
-								Times(1)
-						case 2:
-							isParallelExec := testUtils.ExecWithCmd(e.Exec.Cmd)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, promptedEnv).
-								Return(nil).MaxTimes(1)
-						}
-					}
-
-					Expect(parallelRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
-				})
-			})
-
-			When("fail fast is enabled", func() {
-				BeforeEach(func() {
-					rootExec.Parallel.FailFast = true
-				})
-
-				It("should fail fast after max attempts when enabled", func() {
-					mockRunner := ctx.RunnerMock
-					mockCache := ctx.ExecutableCache
-					promptedEnv := make(map[string]string)
-
-					for i, e := range subExecs {
-						switch i {
-						case 0:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).MaxTimes(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, promptedEnv).
-								Return(nil).MaxTimes(1)
-						case 1:
-							isParallelExec := testUtils.ExecWithRef(e.Ref())
-							parallelPrompt := map[string]string{"ARG1": "hello", "ARG2": "123"}
-							mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).Times(1)
-							mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, parallelPrompt).
-								Return(errors.New("error")).Times(1)
-						case 2:
-							isParallelExec := testUtils.ExecWithCmd(e.Exec.Cmd)
-							mockRunner.EXPECT().IsCompatible(isParallelExec).Return(true).MaxTimes(1)
-							mockRunner.EXPECT().Exec(ctx.Ctx, isParallelExec, promptedEnv).
-								Return(nil).MaxTimes(1)
-						}
-					}
-
-					Expect(parallelRnr.Exec(ctx.Ctx, rootExec, make(map[string]string))).ToNot(Succeed())
-				})
-			})
+			results := engine.ResultSummary{Results: []engine.Result{{Error: errors.New("error")}}}
+			mockEngine.EXPECT().
+				Execute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(results).Times(1)
+			Expect(parallelRnr.Exec(ctx.Ctx, rootExec, mockEngine, promptedEnv)).ToNot(Succeed())
 		})
 	})
 })

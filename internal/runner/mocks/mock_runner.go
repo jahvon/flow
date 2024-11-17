@@ -13,6 +13,7 @@ import (
 	reflect "reflect"
 
 	context "github.com/jahvon/flow/internal/context"
+	engine "github.com/jahvon/flow/internal/runner/engine"
 	executable "github.com/jahvon/flow/types/executable"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -41,17 +42,17 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 }
 
 // Exec mocks base method.
-func (m *MockRunner) Exec(arg0 *context.Context, arg1 *executable.Executable, arg2 map[string]string) error {
+func (m *MockRunner) Exec(arg0 *context.Context, arg1 *executable.Executable, arg2 engine.Engine, arg3 map[string]string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Exec", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Exec", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Exec indicates an expected call of Exec.
-func (mr *MockRunnerMockRecorder) Exec(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockRunnerMockRecorder) Exec(arg0, arg1, arg2, arg3 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRunner)(nil).Exec), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRunner)(nil).Exec), arg0, arg1, arg2, arg3)
 }
 
 // IsCompatible mocks base method.

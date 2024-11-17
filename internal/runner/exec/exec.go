@@ -5,6 +5,7 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
 	"github.com/jahvon/flow/internal/services/run"
 	"github.com/jahvon/flow/types/executable"
 )
@@ -26,7 +27,12 @@ func (r *execRunner) IsCompatible(executable *executable.Executable) bool {
 	return true
 }
 
-func (r *execRunner) Exec(ctx *context.Context, e *executable.Executable, inputEnv map[string]string) error {
+func (r *execRunner) Exec(
+	ctx *context.Context,
+	e *executable.Executable,
+	_ engine.Engine,
+	inputEnv map[string]string,
+) error {
 	execSpec := e.Exec
 	defaultEnv := runner.DefaultEnv(ctx, e)
 	envMap, err := runner.BuildEnvMap(ctx.Logger, e.Env(), inputEnv, defaultEnv)
