@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/jahvon/tuikit/views"
 	"github.com/spf13/cobra"
 
+	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/services/store"
@@ -25,7 +27,7 @@ func RegisterStoreCmd(ctx *context.Context, rootCmd *cobra.Command) {
 
 func registerStoreSetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
-		Use:   "set",
+		Use:   "set KEY [VALUE]",
 		Short: "Set a key-value pair in the data store.",
 		Long:  dataStoreDescription + "This will overwrite any existing value for the key.",
 		Args:  cobra.MinimumNArgs(1),
@@ -61,7 +63,7 @@ func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	case len(args) == 2:
 		value = args[1]
 	default:
-		ctx.Logger.Warnx("merging multiple arguments into a single value", "count", len(args))
+		ctx.Logger.PlainTextWarn(fmt.Sprintf("merging multiple (%d) arguments into a single value", len(args)-1))
 		value = strings.Join(args[1:], " ")
 	}
 
@@ -69,7 +71,7 @@ func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	if err = s.CreateBucket(); err != nil {
+	if err = s.CreateBucket(store.EnvironmentBucket()); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
 	defer func() {
@@ -80,12 +82,12 @@ func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if err = s.Set(key, value); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	ctx.Logger.Infof("Key %q set in the store", key)
+	ctx.Logger.PlainTextInfo(fmt.Sprintf("Key %q set in the store", key))
 }
 
 func registerStoreGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
-		Use:     "get",
+		Use:     "get KEY",
 		Aliases: []string{"view"},
 		Short:   "Get a value from the data store.",
 		Long:    dataStoreDescription + "This will retrieve the value for the given key.",
@@ -104,7 +106,7 @@ func storeGetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	if err = s.CreateBucket(); err != nil {
+	if _, err = s.CreateAndSetBucket(store.EnvironmentBucket()); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
 	defer func() {
@@ -130,15 +132,29 @@ func registerStoreClearCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			storeClearFunc(ctx, cmd, args)
 		},
 	}
+	RegisterFlag(ctx, subCmd, *flags.StoreFullFlag)
 	rootCmd.AddCommand(subCmd)
 }
 
-func storeClearFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
+func storeClearFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+	full := flags.ValueFor[bool](ctx, cmd, *flags.StoreFullFlag, false)
+	if full {
+		if err := store.DestroyStore(); err != nil {
+			ctx.Logger.FatalErr(err)
+		}
+		ctx.Logger.PlainTextSuccess("Data store cleared")
+		return
+	}
 	s, err := store.NewStore()
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	if err := s.DeleteBucket(); err != nil {
+	defer func() {
+		if err := s.Close(); err != nil {
+			ctx.Logger.Error(err, "cleanup failure")
+		}
+	}()
+	if err := s.DeleteBucket(store.EnvironmentBucket()); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
 	ctx.Logger.PlainTextSuccess("Data store cleared")

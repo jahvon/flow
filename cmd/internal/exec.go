@@ -73,7 +73,9 @@ func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 	runner.RegisterRunner(parallel.NewRunner())
 }
 
-//nolint:funlen
+// TODO: refactor this function to simplify the logic
+//
+//nolint:funlen,gocognit
 func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, args []string) {
 	logger := ctx.Logger
 	if err := verb.Validate(); err != nil {
@@ -111,9 +113,14 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	if err != nil {
 		logger.FatalErr(err)
 	}
-	if err = store.SetProcessBucketID(ref.String(), false); err != nil {
+	s, err := store.NewStore()
+	if err != nil {
 		logger.FatalErr(err)
 	}
+	if _, err = s.CreateAndSetBucket(ref.String()); err != nil {
+		logger.FatalErr(err)
+	}
+	_ = s.Close()
 	if envMap == nil {
 		envMap = make(map[string]string)
 	}
@@ -143,7 +150,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.Errorf("failed clearing process store\n%v", err)
 	}
 	if processStore != nil {
-		if err = processStore.DeleteBucket(); err != nil {
+		if err = processStore.DeleteBucket(store.EnvironmentBucket()); err != nil {
 			logger.Errorf("failed clearing process store\n%v", err)
 		}
 		_ = processStore.Close()
