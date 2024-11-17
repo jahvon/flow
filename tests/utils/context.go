@@ -149,7 +149,7 @@ func newTestContext(
 }
 
 func initTestDirectories(t ginkgo.FullGinkgoTInterface) (string, string, string) {
-	replacer := strings.NewReplacer("_", " ", "-", " ", "'", "+", "/", " ")
+	replacer := strings.NewReplacer("-", "", "'", "-", "/", "-", " ", "_")
 	tmpDir, err := os.MkdirTemp("", replacer.Replace(strings.ToLower(t.Name())))
 	if err != nil {
 		t.Fatalf("unable to create temp dir: %v", err)

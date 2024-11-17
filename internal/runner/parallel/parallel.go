@@ -93,7 +93,7 @@ func handleExec(
 			return nil
 		}
 
-		execs = append(execs, engine.Exec{ID: exec.Ref().ID(), Function: runExec, MaxRetries: refConfig.Retries})
+		execs = append(execs, engine.Exec{ID: exec.Ref().String(), Function: runExec, MaxRetries: refConfig.Retries})
 	}
 	results := eng.Execute(
 		ctx.Ctx, execs,
