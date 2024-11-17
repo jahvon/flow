@@ -15,6 +15,7 @@ import (
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
 	"github.com/jahvon/flow/internal/runner/exec"
 	"github.com/jahvon/flow/internal/runner/launch"
 	"github.com/jahvon/flow/internal/runner/parallel"
@@ -132,7 +133,8 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		}
 	}
 	startTime := time.Now()
-	if err := runner.Exec(ctx, e, envMap); err != nil {
+	eng := engine.NewExecEngine()
+	if err := runner.Exec(ctx, e, eng, envMap); err != nil {
 		logger.FatalErr(err)
 	}
 	dur := time.Since(startTime)

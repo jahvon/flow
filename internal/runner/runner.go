@@ -5,13 +5,14 @@ import (
 	"time"
 
 	"github.com/jahvon/flow/internal/context"
+	"github.com/jahvon/flow/internal/runner/engine"
 	"github.com/jahvon/flow/types/executable"
 )
 
 //go:generate mockgen -destination=mocks/mock_runner.go -package=mocks github.com/jahvon/flow/internal/runner Runner
 type Runner interface {
 	Name() string
-	Exec(ctx *context.Context, executable *executable.Executable, promptedEnv map[string]string) error
+	Exec(ctx *context.Context, e *executable.Executable, eng engine.Engine, inputEnv map[string]string) error
 	IsCompatible(executable *executable.Executable) bool
 }
 
@@ -25,7 +26,12 @@ func RegisterRunner(runner Runner) {
 	registeredRunners = append(registeredRunners, runner)
 }
 
-func Exec(ctx *context.Context, executable *executable.Executable, promptedEnv map[string]string) error {
+func Exec(
+	ctx *context.Context,
+	executable *executable.Executable,
+	eng engine.Engine,
+	inputEnv map[string]string,
+) error {
 	var assignedRunner Runner
 	for _, runner := range registeredRunners {
 		if runner.IsCompatible(executable) {
@@ -38,12 +44,12 @@ func Exec(ctx *context.Context, executable *executable.Executable, promptedEnv m
 	}
 
 	if executable.Timeout == 0 {
-		return assignedRunner.Exec(ctx, executable, promptedEnv)
+		return assignedRunner.Exec(ctx, executable, eng, inputEnv)
 	}
 
 	done := make(chan error, 1)
 	go func() {
-		done <- assignedRunner.Exec(ctx, executable, promptedEnv)
+		done <- assignedRunner.Exec(ctx, executable, eng, inputEnv)
 	}()
 
 	select {

@@ -10,6 +10,8 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
+	engMocks "github.com/jahvon/flow/internal/runner/engine/mocks"
 	"github.com/jahvon/flow/internal/runner/mocks"
 	"github.com/jahvon/flow/types/executable"
 )
@@ -23,12 +25,15 @@ var _ = Describe("Runner", func() {
 	var (
 		ctrl       *gomock.Controller
 		mockRunner *mocks.MockRunner
+		mockEngine *engMocks.MockEngine
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		mockRunner = mocks.NewMockRunner(ctrl)
 		runner.RegisterRunner(mockRunner)
+		engCtrl := gomock.NewController(GinkgoT())
+		mockEngine = engMocks.NewMockEngine(engCtrl)
 	})
 
 	AfterEach(func() {
@@ -42,11 +47,11 @@ var _ = Describe("Runner", func() {
 			executable := &executable.Executable{
 				Name: "test-executable",
 			}
-			promptedEnv := make(map[string]string)
+			inputEnv := make(map[string]string)
 
 			mockRunner.EXPECT().IsCompatible(executable).Return(true)
-			mockRunner.EXPECT().Exec(ctx, executable, promptedEnv).Return(nil)
-			Expect(runner.Exec(ctx, executable, promptedEnv)).To(Succeed())
+			mockRunner.EXPECT().Exec(ctx, executable, mockEngine, inputEnv).Return(nil)
+			Expect(runner.Exec(ctx, executable, mockEngine, inputEnv)).To(Succeed())
 		})
 
 		It("should return error when no compatible runner is found", func() {
@@ -58,7 +63,7 @@ var _ = Describe("Runner", func() {
 
 			mockRunner.EXPECT().IsCompatible(exec).Return(false)
 
-			err := runner.Exec(ctx, exec, promptedEnv)
+			err := runner.Exec(ctx, exec, mockEngine, promptedEnv)
 			Expect(err.Error()).To(ContainSubstring("compatible runner not found"))
 		})
 
@@ -71,13 +76,15 @@ var _ = Describe("Runner", func() {
 			promptedEnv := make(map[string]string)
 
 			mockRunner.EXPECT().IsCompatible(exec).Return(true)
-			mockRunner.EXPECT().Exec(ctx, exec, promptedEnv).DoAndReturn(
-				func(ctx *context.Context, executable *executable.Executable, promptedEnv map[string]string) error {
+			mockRunner.EXPECT().Exec(ctx, exec, mockEngine, promptedEnv).DoAndReturn(
+				func(
+					_ *context.Context, _ *executable.Executable, _ engine.Engine, _ map[string]string,
+				) error {
 					time.Sleep(2 * time.Second)
 					return nil
 				})
 
-			err := runner.Exec(ctx, exec, promptedEnv)
+			err := runner.Exec(ctx, exec, mockEngine, promptedEnv)
 			Expect(err.Error()).To(ContainSubstring("timeout"))
 		})
 	})

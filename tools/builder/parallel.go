@@ -39,6 +39,7 @@ func ParallelExecWithExit(opts ...Option) *executable.Executable {
 	e1 := ExecWithPauses(opts...)
 	e2 := ExecWithExit(opts...)
 	e3 := ExecWithPauses(opts...)
+	ff := true
 	e := &executable.Executable{
 		Verb:       "start",
 		Name:       name,
@@ -47,7 +48,7 @@ func ParallelExecWithExit(opts ...Option) *executable.Executable {
 		Description: parallelBaseDesc +
 			"The `failFast` option can be set to `true` to stop the flow if a sub-executable fails.",
 		Parallel: &executable.ParallelExecutableType{
-			FailFast: true,
+			FailFast: &ff,
 			Execs:    executable.ParallelRefConfigList{{Ref: e1.Ref()}, {Ref: e2.Ref()}, {Ref: e3.Ref()}},
 		},
 	}

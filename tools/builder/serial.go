@@ -39,6 +39,7 @@ func SerialExecWithExit(opts ...Option) *executable.Executable {
 	e1 := SimpleExec(opts...)
 	e2 := ExecWithExit(opts...)
 	e3 := SimpleExec(opts...)
+	ff := true
 	e := &executable.Executable{
 		Verb:       "start",
 		Name:       name,
@@ -47,7 +48,7 @@ func SerialExecWithExit(opts ...Option) *executable.Executable {
 		Description: serialBaseDesc +
 			"The `failFast` option can be set to `true` to stop the executable if a sub-executable fails.",
 		Serial: &executable.SerialExecutableType{
-			FailFast: true,
+			FailFast: &ff,
 			Execs:    []executable.SerialRefConfig{{Ref: e1.Ref()}, {Ref: e2.Ref()}, {Ref: e3.Ref()}},
 		},
 	}

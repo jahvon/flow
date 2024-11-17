@@ -194,9 +194,13 @@ type ParallelExecutableType struct {
 	//
 	Execs ParallelRefConfigList `json:"execs" yaml:"execs" mapstructure:"execs"`
 
-	// If set to true, the parallel executable will fail if any of the sub-executables
-	// fail.
-	FailFast bool `json:"failFast,omitempty" yaml:"failFast,omitempty" mapstructure:"failFast,omitempty"`
+	// End the parallel execution as soon as an exec exits with a non-zero status.
+	// This is the default behavior.
+	// When set to false, all execs will be run regardless of the exit status of
+	// parallel execs.
+	//
+	//
+	FailFast *bool `json:"failFast,omitempty" yaml:"failFast,omitempty" mapstructure:"failFast,omitempty"`
 
 	// The maximum number of threads to use when executing the parallel executables.
 	MaxThreads int `json:"maxThreads,omitempty" yaml:"maxThreads,omitempty" mapstructure:"maxThreads,omitempty"`
@@ -357,9 +361,13 @@ type SerialExecutableType struct {
 	//
 	Execs SerialRefConfigList `json:"execs" yaml:"execs" mapstructure:"execs"`
 
-	// If set to true, the serial executable will fail if any of the sub-executables
-	// fail.
-	FailFast bool `json:"failFast,omitempty" yaml:"failFast,omitempty" mapstructure:"failFast,omitempty"`
+	// End the serial execution as soon as an exec exits with a non-zero status. This
+	// is the default behavior.
+	// When set to false, all execs will be run regardless of the exit status of the
+	// previous exec.
+	//
+	//
+	FailFast *bool `json:"failFast,omitempty" yaml:"failFast,omitempty" mapstructure:"failFast,omitempty"`
 
 	// Params corresponds to the JSON schema field "params".
 	Params ParameterList `json:"params,omitempty" yaml:"params,omitempty" mapstructure:"params,omitempty"`

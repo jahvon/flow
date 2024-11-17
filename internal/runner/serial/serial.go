@@ -10,6 +10,7 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	execUtils "github.com/jahvon/flow/internal/utils/executables"
 	"github.com/jahvon/flow/types/executable"
@@ -32,26 +33,31 @@ func (r *serialRunner) IsCompatible(executable *executable.Executable) bool {
 	return true
 }
 
-func (r *serialRunner) Exec(ctx *context.Context, e *executable.Executable, promptedEnv map[string]string) error {
+func (r *serialRunner) Exec(
+	ctx *context.Context,
+	e *executable.Executable,
+	eng engine.Engine,
+	inputEnv map[string]string,
+) error {
 	serialSpec := e.Serial
-	if err := runner.SetEnv(ctx.Logger, e.Env(), promptedEnv); err != nil {
+	if err := runner.SetEnv(ctx.Logger, e.Env(), inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
 	if len(serialSpec.Execs) > 0 {
-		return handleExec(ctx, e, serialSpec, promptedEnv)
+		return handleExec(ctx, e, eng, serialSpec, inputEnv)
 	}
 	return fmt.Errorf("no serial executables to run")
 }
 
-//nolint:gocognit
 func handleExec(
 	ctx *context.Context,
 	parent *executable.Executable,
+	eng engine.Engine,
 	serialSpec *executable.SerialExecutableType,
 	promptedEnv map[string]string,
 ) error {
-	var errs []error
+	var execs []engine.Exec
 	for i, refConfig := range serialSpec.Execs {
 		var exec *executable.Executable
 		switch {
@@ -77,51 +83,28 @@ func handleExec(
 			}
 			maps.Copy(execPromptedEnv, a)
 		}
-
-		fields := map[string]interface{}{
-			"step": exec.ID(),
-		}
+		fields := map[string]interface{}{"step": exec.ID()}
 		exec.Exec.SetLogFields(fields)
 
-		var attempts int
-	retryLoop:
-		for {
-			attempts++
-			if err := runner.Exec(ctx, exec, execPromptedEnv); err != nil {
-				switch {
-				case refConfig.Retries == 0 && serialSpec.FailFast:
-					return errors.Wrapf(err, "execution error ref='%s'", exec.Ref())
-				case refConfig.Retries == 0 && !serialSpec.FailFast:
-					errs = append(errs, err)
-					ctx.Logger.Errorx("execution error", "err", err, "ref", exec.Ref())
-					break retryLoop
-				case refConfig.Retries != 0 && attempts-1 >= refConfig.Retries && serialSpec.FailFast:
-					return fmt.Errorf("retries exceeded ref='%s' max=%d", exec.Ref(), refConfig.Retries)
-				case refConfig.Retries != 0 && attempts-1 >= refConfig.Retries && !serialSpec.FailFast:
-					errs = append(errs, err)
-					ctx.Logger.Errorx(
-						"retries exceeded", "err", err, "ref", exec.Ref(), "max", refConfig.Retries,
-					)
-					break retryLoop
-				case refConfig.Retries != 0 && attempts-1 < refConfig.Retries:
-					ctx.Logger.Warnx("retrying", "ref", exec.Ref())
-				default:
-					return errors.Wrapf(err, "unexpected error handling ref='%s'", exec.Ref())
-				}
-			} else {
-				break retryLoop
+		runExec := func() error {
+			err := runner.Exec(ctx, exec, eng, execPromptedEnv)
+			if err != nil {
+				return err
 			}
+			if i < len(serialSpec.Execs) && refConfig.ReviewRequired {
+				ctx.Logger.Println("Do you want to proceed with the next execution? (y/n)")
+				if !inputConfirmed(os.Stdin) {
+					return fmt.Errorf("stopping runner early (%d/%d)", i+1, len(serialSpec.Execs))
+				}
+			}
+			return nil
 		}
 
-		if i < len(serialSpec.Execs) && refConfig.ReviewRequired {
-			ctx.Logger.Println("Do you want to proceed with the next execution? (y/n)")
-			if !inputConfirmed(os.Stdin) {
-				return fmt.Errorf("stopping runner early (%d/%d)", i+1, len(serialSpec.Execs))
-			}
-		}
+		execs = append(execs, engine.Exec{ID: exec.Ref().String(), Function: runExec, MaxRetries: refConfig.Retries})
 	}
-	if len(errs) > 0 {
-		return fmt.Errorf("%d execution errors - %v", len(errs), errs)
+	results := eng.Execute(ctx.Ctx, execs, engine.WithMode(engine.Serial), engine.WithFailFast(parent.Serial.FailFast))
+	if results.HasErrors() {
+		return errors.New(results.String())
 	}
 	return nil
 }

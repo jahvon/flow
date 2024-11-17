@@ -217,9 +217,8 @@
           "description": "A list of executables to run in parallel.\nEach executable can be a command or a reference to another executable.\n"
         },
         "failFast": {
-          "description": "If set to true, the parallel executable will fail if any of the sub-executables fail.",
-          "type": "boolean",
-          "default": false
+          "description": "End the parallel execution as soon as an exec exits with a non-zero status. This is the default behavior.\nWhen set to false, all execs will be run regardless of the exit status of parallel execs.\n",
+          "type": "boolean"
         },
         "maxThreads": {
           "description": "The maximum number of threads to use when executing the parallel executables.",
@@ -451,9 +450,8 @@
           "description": "A list of executables to run in serial.\nEach executable can be a command or a reference to another executable.\n"
         },
         "failFast": {
-          "description": "If set to true, the serial executable will fail if any of the sub-executables fail.",
-          "type": "boolean",
-          "default": false
+          "description": "End the serial execution as soon as an exec exits with a non-zero status. This is the default behavior.\nWhen set to false, all execs will be run regardless of the exit status of the previous exec.\n",
+          "type": "boolean"
         },
         "params": {
           "$ref": "#/definitions/ExecutableParameterList"
