@@ -52,6 +52,9 @@ func (r *serialRunner) Exec(
 			return err
 		}
 		defer str.Close()
+		if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
+			return err
+		}
 		return handleExec(ctx, e, eng, serialSpec, inputEnv, str)
 	}
 	return fmt.Errorf("no serial executables to run")
@@ -65,9 +68,6 @@ func handleExec(
 	promptedEnv map[string]string,
 	str store.Store,
 ) error {
-	if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
-		return err
-	}
 	dm, err := str.GetAll()
 	if err != nil {
 		return err

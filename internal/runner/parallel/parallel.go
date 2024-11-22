@@ -52,6 +52,9 @@ func (r *parallelRunner) Exec(
 			return err
 		}
 		defer str.Close()
+		if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
+			return err
+		}
 		return handleExec(ctx, e, eng, parallelSpec, inputEnv, str)
 	}
 
@@ -73,9 +76,6 @@ func handleExec(
 	}
 	group.SetLimit(limit)
 
-	if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
-		return err
-	}
 	dm, err := str.GetAll()
 	if err != nil {
 		return err

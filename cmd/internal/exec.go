@@ -145,7 +145,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.FatalErr(err)
 	}
 	dur := time.Since(startTime)
-	processStore, err := store.NewStore(true)
+	processStore, err := store.NewStore()
 	if err != nil {
 		logger.Errorf("failed clearing process store\n%v", err)
 	}
