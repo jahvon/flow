@@ -19,4 +19,8 @@ coverage:
           only_pulls: true
 ignore:
   - "**/*.gen.go" # ignore generated code
+  - "**/*_md.go" # ignore markdown generators
   - "tools/**" # ignore tools directory
+  - "tests/utils/**" # ignore test utilities
+  - "**/testdata/**" # ignore test data
+  - "**/mocks/**" # ignore mocks

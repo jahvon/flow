@@ -15,6 +15,7 @@ flow store clear [flags]
 ### Options
 
 ```
+      --full   Force clear all stored data
   -h, --help   help for clear
 ```
 

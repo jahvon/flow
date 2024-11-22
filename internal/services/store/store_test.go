@@ -11,11 +11,11 @@ import (
 
 func TestStore(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Store Suite")
+	RunSpecs(t, "BoltStore Suite")
 }
 
-var _ = Describe("Store", func() {
-	var s *store.Store
+var _ = Describe("BoltStore", func() {
+	var s store.Store
 	var err error
 
 	BeforeEach(func() {
@@ -31,26 +31,23 @@ var _ = Describe("Store", func() {
 
 	Describe("CreateBucket", func() {
 		It("should create a new bucket", func() {
-			err := s.CreateBucket()
+			err := s.CreateBucket(store.RootBucket)
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
 	Describe("DeleteBucket", func() {
 		It("should delete an existing bucket", func() {
-			err := s.CreateBucket()
+			err := s.CreateBucket("test")
 			Expect(err).NotTo(HaveOccurred())
 
-			err = s.DeleteBucket()
+			err = s.DeleteBucket("test")
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
 	Describe("Set and Get", func() {
 		It("should set and get a key-value pair", func() {
-			err := s.CreateBucket()
-			Expect(err).NotTo(HaveOccurred())
-
 			err = s.Set("key", "value")
 			Expect(err).NotTo(HaveOccurred())
 
@@ -61,9 +58,6 @@ var _ = Describe("Store", func() {
 
 		It("should set and get key-value pairs across multiple buckets", func() {
 			By("setting a key-value pair in the root bucket")
-			err := s.CreateBucket()
-			Expect(err).NotTo(HaveOccurred())
-
 			err = s.Set("key", "value")
 			Expect(err).NotTo(HaveOccurred())
 
@@ -71,17 +65,15 @@ var _ = Describe("Store", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			By("setting a key-value pair in a process bucket")
-			err = store.SetProcessBucketID("process2", true)
-			Expect(err).NotTo(HaveOccurred())
-
-			err = s.CreateBucket()
+			id, err := s.CreateAndSetBucket("process2")
+			Expect(id).To(Equal("process2"))
 			Expect(err).NotTo(HaveOccurred())
 
 			err = s.Set("key", "value3")
 			Expect(err).NotTo(HaveOccurred())
 
 			By("getting key-value pairs from a process bucket")
-			err = store.SetProcessBucketID("process2", true)
+			_, err = s.CreateAndSetBucket(store.EnvironmentBucket())
 			Expect(err).NotTo(HaveOccurred())
 
 			value, err := s.Get("key")
@@ -96,7 +88,8 @@ var _ = Describe("Store", func() {
 			Expect(value).To(Equal("value2"))
 
 			By("getting key-value pairs from the root bucket")
-			err = store.SetProcessBucketID(store.RootBucket, true)
+			id, err = s.CreateAndSetBucket(store.RootBucket)
+			Expect(id).To(Equal(store.RootBucket))
 			Expect(err).NotTo(HaveOccurred())
 
 			value, err = s.Get("key")
@@ -105,9 +98,57 @@ var _ = Describe("Store", func() {
 		})
 	})
 
+	Describe("GetAll", func() {
+		It("should get all key-value pairs from the bucket", func() {
+			err := store.DestroyStore()
+			Expect(err).NotTo(HaveOccurred())
+			s, err = store.NewStore()
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.CreateBucket("test")
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.Set("key1", "value1")
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.Set("key2", "value2")
+			Expect(err).NotTo(HaveOccurred())
+
+			pairs, err := s.GetAll()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(pairs).To(HaveLen(2))
+			Expect(pairs["key1"]).To(Equal("value1"))
+			Expect(pairs["key2"]).To(Equal("value2"))
+		})
+	})
+
+	Describe("GetKeys", func() {
+		It("should get all keys from the bucket", func() {
+			err := store.DestroyStore()
+			Expect(err).NotTo(HaveOccurred())
+			s, err = store.NewStore()
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.CreateBucket("test")
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.Set("key1", "value1")
+			Expect(err).NotTo(HaveOccurred())
+
+			err = s.Set("key2", "value2")
+			Expect(err).NotTo(HaveOccurred())
+
+			keys, err := s.GetKeys()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(keys).To(HaveLen(2))
+			Expect(keys).To(ContainElement("key1"))
+			Expect(keys).To(ContainElement("key2"))
+		})
+	})
+
 	Describe("Delete", func() {
 		It("should delete a key from the bucket", func() {
-			err := s.CreateBucket()
+			err := s.CreateBucket("test")
 			Expect(err).NotTo(HaveOccurred())
 
 			err = s.Set("key", "value")

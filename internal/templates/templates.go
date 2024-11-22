@@ -19,6 +19,7 @@ import (
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
 	"github.com/jahvon/flow/internal/utils"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	execUtils "github.com/jahvon/flow/internal/utils/executables"
@@ -168,7 +169,7 @@ func runExecutables(
 			"stage": stage,
 			"step":  i + 1,
 		})
-		if err := runner.Exec(ctx, exec, execEnv); err != nil {
+		if err := runner.Exec(ctx, exec, engine.NewExecEngine(), execEnv); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("unable to execute %s executable %d", stage, i))
 		}
 	}

@@ -9,7 +9,7 @@ The data store is a key-value store that can be used to persist data across exec
 This will overwrite any existing value for the key.
 
 ```
-flow store set [flags]
+flow store set KEY [VALUE] [flags]
 ```
 
 ### Options

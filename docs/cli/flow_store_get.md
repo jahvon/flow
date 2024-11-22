@@ -9,7 +9,7 @@ The data store is a key-value store that can be used to persist data across exec
 This will retrieve the value for the given key.
 
 ```
-flow store get [flags]
+flow store get KEY [flags]
 ```
 
 ### Options

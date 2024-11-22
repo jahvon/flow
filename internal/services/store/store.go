@@ -20,41 +20,38 @@ const (
 	storeFileName = "store.db"
 )
 
-//go:generate mockgen -destination=mocks/mock_store.go -package=mocks github.com/jahvon/flow/internal/services/store BoltStore
-type BoltStore interface {
-	CreateBucket() error
-	DeleteBucket() error
+//go:generate mockgen -destination=mocks/mock_store.go -package=mocks github.com/jahvon/flow/internal/services/store Store
+type Store interface {
+	CreateBucket(id string) error
+	CreateAndSetBucket(id string) (string, error)
+	DeleteBucket(id string) error
+
 	Set(key, value string) error
 	Get(key string) (string, error)
 	GetAll() (map[string]string, error)
+	GetKeys() ([]string, error)
 	Delete(key string) error
+
 	Close() error
 }
 
-type Store struct {
-	db       *bolt.DB
-	writable bool
+type BoltStore struct {
+	db            *bolt.DB
+	processBucket string
 }
 
-func NewStore(writable bool) (*Store, error) {
-	var db *bolt.DB
-	var err error
-	if writable {
-		db, err = bolt.Open(Path(), 0666, &bolt.Options{Timeout: 5 * time.Second})
-	} else {
-		db, err = bolt.Open(Path(), 0666, &bolt.Options{Timeout: 5 * time.Second, ReadOnly: true})
-	}
+func NewStore() (Store, error) {
+	db, err := bolt.Open(Path(), 0666, &bolt.Options{Timeout: 5 * time.Second})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
-	return &Store{db: db}, nil
+	return &BoltStore{db: db}, nil
 }
 
-// CreateBucket creates the current process bucket if it doesn't exist
-func (s *Store) CreateBucket() error {
+// CreateBucket creates a bucket with a given id if it doesn't exist
+func (s *BoltStore) CreateBucket(id string) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
-		id := bucketID()
-		_, err := tx.CreateBucketIfNotExists(id)
+		_, err := tx.CreateBucketIfNotExists([]byte(id))
 		if err != nil {
 			return fmt.Errorf("failed to create bucket %s: %w", id, err)
 		}
@@ -62,11 +59,10 @@ func (s *Store) CreateBucket() error {
 	})
 }
 
-// DeleteBucket deletes the current process bucket
-func (s *Store) DeleteBucket() error {
+// DeleteBucket deletes a bucket by its id
+func (s *BoltStore) DeleteBucket(id string) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
-		id := bucketID()
-		err := tx.DeleteBucket(id)
+		err := tx.DeleteBucket([]byte(id))
 		if err != nil {
 			if errors.Is(err, bolt.ErrBucketNotFound) {
 				return nil
@@ -77,88 +73,149 @@ func (s *Store) DeleteBucket() error {
 	})
 }
 
+// CreateAndSetBucket creates a temporary bucket for the process and returns the bucket's name
+func (s *BoltStore) CreateAndSetBucket(id string) (string, error) {
+	if err := s.CreateBucket(id); err != nil {
+		return "", fmt.Errorf("failed to create bucket %s: %w", id, err)
+	}
+	s.processBucket = id
+	if id != RootBucket {
+		_ = os.Setenv(BucketEnv, id)
+	}
+	return id, nil
+}
+
+func EnvironmentBucket() string {
+	id := RootBucket
+	if val, set := os.LookupEnv(BucketEnv); set {
+		id = val
+	}
+	replacer := strings.NewReplacer(":", "_", "/", "_", " ", "_")
+	id = replacer.Replace(id)
+	return id
+}
+
 // Set stores a key-value pair in the process bucket
-func (s *Store) Set(key, value string) error {
+func (s *BoltStore) Set(key, value string) error {
+	if s.processBucket == "" {
+		if _, err := s.CreateAndSetBucket(RootBucket); err != nil {
+			return fmt.Errorf("failed to create process bucket: %w", err)
+		}
+	}
 	return s.db.Update(func(tx *bolt.Tx) error {
-		id := bucketID()
-		bucket := tx.Bucket(id)
+		bucket := tx.Bucket([]byte(s.processBucket))
 		if bucket == nil {
-			return fmt.Errorf("bucket %s not found", id)
+			return fmt.Errorf("bucket %s not found", s.processBucket)
 		}
 		err := bucket.Put([]byte(key), []byte(value))
 		if err != nil {
-			return fmt.Errorf("failed to put key-value pair for key %s in bucket %s: %w", key, id, err)
+			return fmt.Errorf("failed to put key-value pair for key %s in bucket %s: %w", key, s.processBucket, err)
 		}
 		return nil
 	})
 }
 
 // Get retrieves a value for a key from the process bucket
-func (s *Store) Get(key string) (string, error) {
+func (s *BoltStore) Get(key string) (string, error) {
+	if s.processBucket == "" {
+		if _, err := s.CreateAndSetBucket(RootBucket); err != nil {
+			return "", fmt.Errorf("failed to create process bucket: %w", err)
+		}
+	}
 	var value []byte
 	err := s.db.View(func(tx *bolt.Tx) error {
-		id := bucketID()
-		bucket := tx.Bucket(id)
+		bucket := tx.Bucket([]byte(s.processBucket))
 		if bucket == nil {
-			return fmt.Errorf("bucket %s not found", id)
+			return fmt.Errorf("bucket %s not found", s.processBucket)
 		}
 		value = bucket.Get([]byte(key))
-		if value == nil {
+		if value == nil && s.processBucket != RootBucket {
 			rBucket := tx.Bucket([]byte(RootBucket))
 			if rBucket != nil {
 				value = rBucket.Get([]byte(key))
 			}
 		}
 		if value == nil {
-			return fmt.Errorf("key %s not found in bucket %s", key, id)
+			return fmt.Errorf("key %s not found in bucket %s", key, s.processBucket)
 		}
 		return nil
 	})
 	return string(value), err
 }
 
-// GetAll retrieves all key-value pairs from the process bucket
-func (s *Store) GetAll() (map[string]string, error) {
-	data := make(map[string]string)
-	err := s.db.View(func(tx *bolt.Tx) error {
-		id := bucketID()
-		bucket := tx.Bucket(id)
-		if bucket == nil {
-			return fmt.Errorf("bucket %s not found", id)
+// Keys returns all keys in the process bucket
+func (s *BoltStore) GetKeys() ([]string, error) {
+	if s.processBucket == "" {
+		if _, err := s.CreateAndSetBucket(RootBucket); err != nil {
+			return nil, fmt.Errorf("failed to create process bucket: %w", err)
 		}
-		err := bucket.ForEach(func(k, v []byte) error {
-			data[string(k)] = string(v)
+	}
+
+	var keys []string
+	err := s.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(s.processBucket))
+		if bucket == nil {
+			return fmt.Errorf("bucket %s not found", s.processBucket)
+		}
+		bucket.Stats()
+		return bucket.ForEach(func(k, _ []byte) error {
+			keys = append(keys, string(k))
 			return nil
 		})
-		return err
 	})
-	return data, err
+	return keys, err
+}
+
+// BucketMap returns a map of all keys and values in the process bucket
+func (s *BoltStore) GetAll() (map[string]string, error) {
+	if s.processBucket == "" {
+		if _, err := s.CreateAndSetBucket(RootBucket); err != nil {
+			return nil, fmt.Errorf("failed to create process bucket: %w", err)
+		}
+	}
+
+	m := make(map[string]string)
+	err := s.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(s.processBucket))
+		if bucket == nil {
+			return fmt.Errorf("bucket %s not found", s.processBucket)
+		}
+		return bucket.ForEach(func(k, v []byte) error {
+			m[string(k)] = string(v)
+			return nil
+		})
+	})
+	return m, err
 }
 
 // Delete removes a key from the process bucket
-func (s *Store) Delete(key string) error {
+func (s *BoltStore) Delete(key string) error {
+	if s.processBucket == "" {
+		if _, err := s.CreateAndSetBucket(RootBucket); err != nil {
+			return fmt.Errorf("failed to create process bucket: %w", err)
+		}
+	}
 	return s.db.Update(func(tx *bolt.Tx) error {
-		id := bucketID()
-		bucket := tx.Bucket(id)
+		bucket := tx.Bucket([]byte(s.processBucket))
 		if bucket == nil {
-			return fmt.Errorf("bucket %s not found", id)
+			return fmt.Errorf("bucket %s not found", s.processBucket)
 		}
 		err := bucket.Delete([]byte(key))
 		if err != nil {
-			return fmt.Errorf("failed to delete key %s from bucket %s: %w", key, id, err)
+			return fmt.Errorf("failed to delete key %s from bucket %s: %w", key, s.processBucket, err)
 		}
 		return nil
 	})
 }
 
-func (s *Store) Close() error {
+func (s *BoltStore) Close() error {
 	return s.db.Close()
 }
 
-func DeleteStore() error {
+func DestroyStore() error {
 	err := os.Remove(Path())
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("failed to delete store: %w", err)
+		return fmt.Errorf("failed to destroy store: %w", err)
 	}
 	return nil
 }
@@ -166,22 +223,4 @@ func DeleteStore() error {
 func Path() string {
 	cacheDir := filesystem.CachedDataDirPath()
 	return filepath.Join(cacheDir, storeFileName)
-}
-
-func SetProcessBucketID(id string, force bool) error {
-	if _, set := os.LookupEnv(BucketEnv); set && !force {
-		return nil
-	}
-
-	replacer := strings.NewReplacer(":", "_", "/", "_", " ", "_")
-	id = replacer.Replace(id)
-	return os.Setenv(BucketEnv, id)
-}
-
-func bucketID() []byte {
-	processBucket, set := os.LookupEnv(BucketEnv)
-	if !set {
-		return []byte(RootBucket)
-	}
-	return []byte(processBucket)
 }

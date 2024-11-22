@@ -16,6 +16,7 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
 	"github.com/jahvon/flow/types/executable"
 )
 
@@ -36,7 +37,12 @@ func (r *renderRunner) IsCompatible(executable *executable.Executable) bool {
 	return true
 }
 
-func (r *renderRunner) Exec(ctx *context.Context, e *executable.Executable, inputEnv map[string]string) error {
+func (r *renderRunner) Exec(
+	ctx *context.Context,
+	e *executable.Executable,
+	_ engine.Engine,
+	inputEnv map[string]string,
+) error {
 	if !ctx.Config.ShowTUI() {
 		return fmt.Errorf("unable to render when interactive mode is disabled")
 	}

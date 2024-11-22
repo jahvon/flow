@@ -12,6 +12,7 @@ import (
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
+	"github.com/jahvon/flow/internal/runner/engine"
 	"github.com/jahvon/flow/internal/services/rest"
 	"github.com/jahvon/flow/types/executable"
 )
@@ -33,7 +34,12 @@ func (r *requestRunner) IsCompatible(executable *executable.Executable) bool {
 	return true
 }
 
-func (r *requestRunner) Exec(ctx *context.Context, e *executable.Executable, inputEnv map[string]string) error {
+func (r *requestRunner) Exec(
+	ctx *context.Context,
+	e *executable.Executable,
+	_ engine.Engine,
+	inputEnv map[string]string,
+) error {
 	requestSpec := e.Request
 	envMap, err := runner.BuildEnvMap(ctx.Logger, e.Env(), inputEnv, runner.DefaultEnv(ctx, e))
 	if err != nil {
