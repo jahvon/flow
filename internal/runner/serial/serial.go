@@ -11,6 +11,8 @@ import (
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/engine"
+	"github.com/jahvon/flow/internal/services/expr"
+	"github.com/jahvon/flow/internal/services/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	execUtils "github.com/jahvon/flow/internal/utils/executables"
 	"github.com/jahvon/flow/types/executable"
@@ -45,7 +47,15 @@ func (r *serialRunner) Exec(
 	}
 
 	if len(serialSpec.Execs) > 0 {
-		return handleExec(ctx, e, eng, serialSpec, inputEnv)
+		str, err := store.NewStore()
+		if err != nil {
+			return err
+		}
+		defer str.Close()
+		if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
+			return err
+		}
+		return handleExec(ctx, e, eng, serialSpec, inputEnv, str)
 	}
 	return fmt.Errorf("no serial executables to run")
 }
@@ -56,9 +66,27 @@ func handleExec(
 	eng engine.Engine,
 	serialSpec *executable.SerialExecutableType,
 	promptedEnv map[string]string,
+	str store.Store,
 ) error {
+	dm, err := str.GetAll()
+	if err != nil {
+		return err
+	}
+	dataMap := expr.ExpressionEnv(ctx, parent, dm, promptedEnv)
+
 	var execs []engine.Exec
 	for i, refConfig := range serialSpec.Execs {
+		if refConfig.If != "" {
+			truthy, err := expr.IsTruthy(refConfig.If, &dataMap)
+			if err != nil {
+				return err
+			}
+			if !truthy {
+				ctx.Logger.Debugf("skipping execution %d/%d", i+1, len(serialSpec.Execs))
+				continue
+			}
+			ctx.Logger.Debugf("condition %s is true", refConfig.If)
+		}
 		var exec *executable.Executable
 		switch {
 		case refConfig.Ref != "":
