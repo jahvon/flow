@@ -122,5 +122,21 @@ var _ = Describe("SerialRunner", func() {
 			mockEngine.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(results).Times(1)
 			Expect(serialRnr.Exec(ctx.Ctx, rootExec, mockEngine, make(map[string]string))).ToNot(Succeed())
 		})
+
+		It("should skip execution when condition is false", func() {
+			serialSpec := rootExec.Serial
+			serialSpec.Execs[0].If = "false"
+			serialSpec.Execs[1].If = "true"
+			mockCache := ctx.ExecutableCache
+			for i, e := range subExecs {
+				if i == 1 {
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+				}
+			}
+			results := engine.ResultSummary{Results: []engine.Result{{}}}
+			mockEngine.EXPECT().Execute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(results).Times(1)
+			Expect(serialRnr.Exec(ctx.Ctx, rootExec, mockEngine, make(map[string]string))).To(Succeed())
+		})
 	})
 })

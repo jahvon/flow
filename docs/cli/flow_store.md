@@ -1,6 +1,10 @@
 ## flow store
 
-Manage the data store.
+Manage the data store for persisting key-value data.
+
+### Synopsis
+
+Manage the flow data store - a key-value store that persists data within and across executable runs. Values set outside executables persist globally, while values set within executables persist only for that execution scope.
 
 ### Options
 
@@ -19,7 +23,7 @@ Manage the data store.
 ### SEE ALSO
 
 * [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
-* [flow store clear](flow_store_clear.md)	 - Clear the data store.
-* [flow store get](flow_store_get.md)	 - Get a value from the data store.
-* [flow store set](flow_store_set.md)	 - Set a key-value pair in the data store.
+* [flow store clear](flow_store_clear.md)	 - Clear data from the store. Use --full to remove all stored data.
+* [flow store get](flow_store_get.md)	 - Get a value from the store by its key.
+* [flow store set](flow_store_set.md)	 - Set a key-value pair in the store.
 

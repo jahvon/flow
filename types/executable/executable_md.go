@@ -179,7 +179,7 @@ func renderExecMarkdown(e *ExecutableEnvironment, r *RenderExecutableType) strin
 		mkdwn += fmt.Sprintf("**Template File:** `%s`\n", r.TemplateFile)
 	}
 	if r.TemplateDataFile != "" {
-		mkdwn += fmt.Sprintf("**Template Data File:** `%s`\n", r.TemplateDataFile)
+		mkdwn += fmt.Sprintf("**Template Store File:** `%s`\n", r.TemplateDataFile)
 	}
 	mkdwn += execEnvTable(e)
 	return mkdwn

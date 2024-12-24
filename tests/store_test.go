@@ -54,7 +54,7 @@ var _ = Describe("store e2e", Ordered, func() {
 			Expect(run.Run(ctx, "store", "clear")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(out).To(ContainSubstring("Data store cleared"))
+			Expect(out).To(ContainSubstring("Store store cleared"))
 		})
 	})
 })

@@ -16,8 +16,11 @@ import (
 func RegisterStoreCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:   "store",
-		Short: "Manage the data store.",
-		Args:  cobra.NoArgs,
+		Short: "Manage the data store for persisting key-value data.",
+		Long: "Manage the flow data store - a key-value store that persists data within and across executable runs. " +
+			"Values set outside executables persist globally, while values set within executables persist only for " +
+			"that execution scope.",
+		Args: cobra.NoArgs,
 	}
 	registerStoreSetCmd(ctx, subCmd)
 	registerStoreGetCmd(ctx, subCmd)
@@ -28,7 +31,7 @@ func RegisterStoreCmd(ctx *context.Context, rootCmd *cobra.Command) {
 func registerStoreSetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:   "set KEY [VALUE]",
-		Short: "Set a key-value pair in the data store.",
+		Short: "Set a key-value pair in the store.",
 		Long:  dataStoreDescription + "This will overwrite any existing value for the key.",
 		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -89,7 +92,7 @@ func registerStoreGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:     "get KEY",
 		Aliases: []string{"view"},
-		Short:   "Get a value from the data store.",
+		Short:   "Get a value from the store by its key.",
 		Long:    dataStoreDescription + "This will retrieve the value for the given key.",
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -125,7 +128,7 @@ func registerStoreClearCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:     "clear",
 		Aliases: []string{"reset"},
-		Short:   "Clear the data store.",
+		Short:   "Clear data from the store. Use --full to remove all stored data.",
 		Long:    dataStoreDescription + "This will remove all keys and values from the data store.",
 		Args:    cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -142,7 +145,7 @@ func storeClearFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		if err := store.DestroyStore(); err != nil {
 			ctx.Logger.FatalErr(err)
 		}
-		ctx.Logger.PlainTextSuccess("Data store cleared")
+		ctx.Logger.PlainTextSuccess("Store store cleared")
 		return
 	}
 	s, err := store.NewStore()
@@ -157,7 +160,7 @@ func storeClearFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	if err := s.DeleteBucket(store.EnvironmentBucket()); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	ctx.Logger.PlainTextSuccess("Data store cleared")
+	ctx.Logger.PlainTextSuccess("Store store cleared")
 }
 
 var dataStoreDescription = "The data store is a key-value store that can be used to persist data across executions. " +

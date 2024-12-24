@@ -1,14 +1,18 @@
 package parallel
 
 import (
+	stdCtx "context"
 	"fmt"
 	"maps"
 
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/runner"
 	"github.com/jahvon/flow/internal/runner/engine"
+	"github.com/jahvon/flow/internal/services/expr"
+	"github.com/jahvon/flow/internal/services/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	execUtils "github.com/jahvon/flow/internal/utils/executables"
 	"github.com/jahvon/flow/types/executable"
@@ -43,7 +47,15 @@ func (r *parallelRunner) Exec(
 	}
 
 	if len(parallelSpec.Execs) > 0 {
-		return handleExec(ctx, e, eng, parallelSpec, inputEnv)
+		str, err := store.NewStore()
+		if err != nil {
+			return err
+		}
+		defer str.Close()
+		if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
+			return err
+		}
+		return handleExec(ctx, e, eng, parallelSpec, inputEnv, str)
 	}
 
 	return fmt.Errorf("no parallel executables to run")
@@ -53,9 +65,33 @@ func handleExec(
 	ctx *context.Context, parent *executable.Executable,
 	eng engine.Engine,
 	parallelSpec *executable.ParallelExecutableType, promptedEnv map[string]string,
+	str store.Store,
 ) error {
+	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
+	defer cancel()
+	group, _ := errgroup.WithContext(groupCtx)
+	limit := parallelSpec.MaxThreads
+	if limit == 0 {
+		limit = len(parallelSpec.Execs)
+	}
+	group.SetLimit(limit)
+
+	dm, err := str.GetAll()
+	if err != nil {
+		return err
+	}
+	dataMap := expr.ExpressionEnv(ctx, parent, dm, promptedEnv)
+
 	var execs []engine.Exec
 	for i, refConfig := range parallelSpec.Execs {
+		if refConfig.If != "" {
+			if truthy, err := expr.IsTruthy(refConfig.If, &dataMap); err != nil {
+				return err
+			} else if !truthy {
+				ctx.Logger.Debugf("skipping execution %d/%d", i+1, len(parallelSpec.Execs))
+				continue
+			}
+		}
 		var exec *executable.Executable
 		switch {
 		case len(refConfig.Ref) > 0:

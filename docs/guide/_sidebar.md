@@ -8,3 +8,6 @@
     - [Workspaces](workspace.md "Managing workspaces")
     - [Executables](executable.md "Managing executables")
     - [Templating](templating.md "Using flowfile templates")
+    - [Managing state](guide/state.md "Managing executable state")
+    - [Conditional execution](guide/conditional.md "Conditional execution")
+
