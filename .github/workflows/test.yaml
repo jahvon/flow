@@ -32,10 +32,10 @@ jobs:
           max_attempts: 3
           command: go test ./... -race -coverprofile=coverage.txt -covermode=atomic -timeout 5m
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: matrix.os == 'ubuntu-latest' # Only upload coverage from one OS
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          file: ./coverage.txt
+          files: ./coverage.txt
           fail_ci_if_error: false
