@@ -130,5 +130,22 @@ var _ = Describe("ParallelRunner", func() {
 				Return(results).Times(1)
 			Expect(parallelRnr.Exec(ctx.Ctx, rootExec, mockEngine, promptedEnv)).ToNot(Succeed())
 		})
+
+		It("should skip execution when condition is false", func() {
+			parallelSpec := rootExec.Parallel
+			parallelSpec.Execs[0].If = "false"
+			parallelSpec.Execs[1].If = "true"
+			mockCache := ctx.ExecutableCache
+			for i, e := range subExecs {
+				if i == 1 {
+					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+				}
+			}
+			results := engine.ResultSummary{Results: []engine.Result{{}}}
+			mockEngine.EXPECT().
+				Execute(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(results).Times(1)
+			Expect(parallelRnr.Exec(ctx.Ctx, rootExec, mockEngine, make(map[string]string))).To(Succeed())
+		})
 	})
 })
