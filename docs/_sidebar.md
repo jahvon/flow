@@ -9,6 +9,7 @@
     - [Workspaces](guide/workspace.md "Managing workspaces")
     - [Executables](guide/executable.md "Managing executables")
     - [Templating](guide/templating.md "Using flowfile templates")
+    - [Managing state](guide/state.md "Managing executable state")
 
 - Reference
 

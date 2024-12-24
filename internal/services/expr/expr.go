@@ -61,19 +61,19 @@ func EvaluateString(ex string, env *ExpressionData) (string, error) {
 }
 
 type CtxData struct {
-	Workspace     string
-	Namespace     string
-	WorkspacePath string
-	FlowFilePath  string
-	FlowFileDir   string
+	Workspace     string `expr:"workspace"`
+	Namespace     string `expr:"namespace"`
+	WorkspacePath string `expr:"workspacePath"`
+	FlowFilePath  string `expr:"flowFilePath"`
+	FlowFileDir   string `expr:"flowFileDir"`
 }
 
 type ExpressionData struct {
-	OS   string
-	Arch string
-	Ctx  *CtxData
-	Data map[string]string
-	Env  map[string]string
+	OS    string            `expr:"os"`
+	Arch  string            `expr:"arch"`
+	Ctx   *CtxData          `expr:"ctx"`
+	Store map[string]string `expr:"store"`
+	Env   map[string]string `expr:"env"`
 }
 
 func ExpressionEnv(
@@ -91,7 +91,7 @@ func ExpressionEnv(
 			FlowFilePath:  executable.FlowFilePath(),
 			FlowFileDir:   filepath.Dir(executable.FlowFilePath()),
 		},
-		Data: dataMap,
-		Env:  envMap,
+		Store: dataMap,
+		Env:   envMap,
 	}
 }

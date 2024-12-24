@@ -115,17 +115,7 @@ func handleExec(
 		exec.Exec.SetLogFields(fields)
 
 		runExec := func() error {
-			err := runner.Exec(ctx, exec, eng, execPromptedEnv)
-			if err != nil {
-				return err
-			}
-			if i < len(serialSpec.Execs) && refConfig.ReviewRequired {
-				ctx.Logger.Println("Do you want to proceed with the next execution? (y/n)")
-				if !inputConfirmed(os.Stdin) {
-					return fmt.Errorf("stopping runner early (%d/%d)", i+1, len(serialSpec.Execs))
-				}
-			}
-			return nil
+			return runSerialExecFunc(ctx, i, refConfig, exec, eng, execPromptedEnv, serialSpec)
 		}
 
 		execs = append(execs, engine.Exec{ID: exec.Ref().String(), Function: runExec, MaxRetries: refConfig.Retries})
@@ -133,6 +123,28 @@ func handleExec(
 	results := eng.Execute(ctx.Ctx, execs, engine.WithMode(engine.Serial), engine.WithFailFast(parent.Serial.FailFast))
 	if results.HasErrors() {
 		return errors.New(results.String())
+	}
+	return nil
+}
+
+func runSerialExecFunc(
+	ctx *context.Context,
+	step int,
+	refConfig executable.SerialRefConfig,
+	exec *executable.Executable,
+	eng engine.Engine,
+	execPromptedEnv map[string]string,
+	serialSpec *executable.SerialExecutableType,
+) error {
+	err := runner.Exec(ctx, exec, eng, execPromptedEnv)
+	if err != nil {
+		return err
+	}
+	if step < len(serialSpec.Execs) && refConfig.ReviewRequired {
+		ctx.Logger.Println("Do you want to proceed with the next execution? (y/n)")
+		if !inputConfirmed(os.Stdin) {
+			return fmt.Errorf("stopping runner early (%d/%d)", step+1, len(serialSpec.Execs))
+		}
 	}
 	return nil
 }

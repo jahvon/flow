@@ -142,7 +142,7 @@ func storeClearFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		if err := store.DestroyStore(); err != nil {
 			ctx.Logger.FatalErr(err)
 		}
-		ctx.Logger.PlainTextSuccess("Data store cleared")
+		ctx.Logger.PlainTextSuccess("Store store cleared")
 		return
 	}
 	s, err := store.NewStore()
@@ -157,7 +157,7 @@ func storeClearFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	if err := s.DeleteBucket(store.EnvironmentBucket()); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	ctx.Logger.PlainTextSuccess("Data store cleared")
+	ctx.Logger.PlainTextSuccess("Store store cleared")
 }
 
 var dataStoreDescription = "The data store is a key-value store that can be used to persist data across executions. " +

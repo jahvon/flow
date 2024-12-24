@@ -79,4 +79,57 @@ var _ = Describe("Expr", func() {
 			}
 		})
 	})
+
+	var _ = Describe("ExpressionData", func() {
+		var (
+			data *expr.ExpressionData
+		)
+
+		BeforeEach(func() {
+			data = &expr.ExpressionData{
+				OS:   "linux",
+				Arch: "amd64",
+				Ctx: &expr.CtxData{
+					Workspace:     "test_workspace",
+					Namespace:     "test_namespace",
+					WorkspacePath: "/path/to/workspace",
+					FlowFilePath:  "/path/to/flowfile",
+					FlowFileDir:   "/path/to",
+				},
+				Store: map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				},
+				Env: map[string]string{
+					"ENV_VAR1": "env_value1",
+					"ENV_VAR2": "env_value2",
+				},
+			}
+		})
+
+		Describe("Evaluate complex expressions", func() {
+			It("should evaluate various expressions correctly", func() {
+				tests := []struct {
+					expr     string
+					expected interface{}
+				}{
+					{"1 + 1", 2},
+					{"true && false", false},
+					{`"hello" + " " + "world"`, "hello world"},
+					{`store["key1"]`, "value1"},
+					{`env["ENV_VAR1"]`, "env_value1"},
+					{`os == "linux"`, true},
+					{`arch == "amd64"`, true},
+					{`ctx.workspace == "test_workspace"`, true},
+				}
+
+				for _, test := range tests {
+					result, err := expr.Evaluate(test.expr, data)
+					Expect(err).NotTo(HaveOccurred())
+					By("testing expression: " + test.expr)
+					Expect(result).To(Equal(test.expected))
+				}
+			})
+		})
+	})
 })

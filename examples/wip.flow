@@ -39,7 +39,7 @@ executables:
           cmd: echo "Hello from Linux"
         - if: os == "darwin"
           cmd: echo "Hello from macOS"
-        - if: len(data.wip-test1) > 0
+        - if: len(store.wip-test1) > 0
           cmd: echo "test1 value is set"
-        - if: len(data.wip-test4) > 0
+        - if: len(store.wip-test4) > 0
           cmd: echo "test4 value is set"
