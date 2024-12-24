@@ -219,7 +219,20 @@ type ParallelRefConfig struct {
 	//
 	Cmd string `json:"cmd,omitempty" yaml:"cmd,omitempty" mapstructure:"cmd,omitempty"`
 
-	// A condition to determine if the executable should be run.
+	// An expression that determines whether the executable should run, using the Expr
+	// language syntax.
+	// The expression is evaluated at runtime and must resolve to a boolean value.
+	//
+	// The expression has access to OS/architecture information (os, arch),
+	// environment variables (env), stored data
+	// (store), and context information (ctx) like workspace and paths.
+	//
+	// For example, `os == "darwin"` will only run on macOS, `len(store["feature"]) >
+	// 0` will run if a value exists
+	// in the store, and `env["CI"] == "true"` will run in CI environments.
+	// See the [Expr documentation](https://expr-lang.org/docs/language-definition)
+	// for more information.
+	//
 	If string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
 
 	// A reference to another executable to run in serial.
@@ -386,7 +399,20 @@ type SerialRefConfig struct {
 	//
 	Cmd string `json:"cmd,omitempty" yaml:"cmd,omitempty" mapstructure:"cmd,omitempty"`
 
-	// A condition to determine if the executable should be run.
+	// An expression that determines whether the executable should run, using the Expr
+	// language syntax.
+	// The expression is evaluated at runtime and must resolve to a boolean value.
+	//
+	// The expression has access to OS/architecture information (os, arch),
+	// environment variables (env), stored data
+	// (store), and context information (ctx) like workspace and paths.
+	//
+	// For example, `os == "darwin"` will only run on macOS, `len(store["feature"]) >
+	// 0` will run if a value exists
+	// in the store, and `env["CI"] == "true"` will run in CI environments.
+	// See the [Expr documentation](https://expr-lang.org/docs/language-definition)
+	// for more information.
+	//
 	If string `json:"if,omitempty" yaml:"if,omitempty" mapstructure:"if,omitempty"`
 
 	// A reference to another executable to run in serial.

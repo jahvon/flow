@@ -1,6 +1,6 @@
 ## flow store clear
 
-Clear the data store.
+Clear data from the store. Use --full to remove all stored data.
 
 ### Synopsis
 
@@ -29,5 +29,5 @@ flow store clear [flags]
 
 ### SEE ALSO
 
-* [flow store](flow_store.md)	 - Manage the data store.
+* [flow store](flow_store.md)	 - Manage the data store for persisting key-value data.
 

@@ -1,6 +1,6 @@
 ## flow store set
 
-Set a key-value pair in the data store.
+Set a key-value pair in the store.
 
 ### Synopsis
 
@@ -28,5 +28,5 @@ flow store set KEY [VALUE] [flags]
 
 ### SEE ALSO
 
-* [flow store](flow_store.md)	 - Manage the data store.
+* [flow store](flow_store.md)	 - Manage the data store for persisting key-value data.
 

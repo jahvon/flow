@@ -1,6 +1,6 @@
 ## flow store get
 
-Get a value from the data store.
+Get a value from the store by its key.
 
 ### Synopsis
 
@@ -28,5 +28,5 @@ flow store get KEY [flags]
 
 ### SEE ALSO
 
-* [flow store](flow_store.md)	 - Manage the data store.
+* [flow store](flow_store.md)	 - Manage the data store for persisting key-value data.
 
