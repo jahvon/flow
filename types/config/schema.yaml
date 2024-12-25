@@ -28,6 +28,45 @@ definitions:
         description: Whether to play a sound when a command completes.
     required: [ enabled ]
 
+  ColorPalette:
+    type: object
+    description: |
+      The color palette for the interactive UI.
+      The colors can be either an ANSI 16, ANSI 256, or TrueColor (hex) value.
+      If unset, the default color for the current theme will be used.
+    properties:
+      primary:
+        type: string
+      secondary:
+        type: string
+      tertiary:
+        type: string
+      success:
+        type: string
+      warning:
+        type: string
+      error:
+        type: string
+      info:
+        type: string
+      body:
+        type: string
+      emphasis:
+        type: string
+      border:
+        type: string
+      white:
+        type: string
+      black:
+        type: string
+      gray:
+        type: string
+      codeStyle:
+        type: string
+        description: |
+          The style of the code block. For example, `monokai`, `dracula`, `github`, etc.
+          See [chroma styles](https://github.com/alecthomas/chroma/tree/master/styles) for available style names.
+
 type: object
 properties:
   workspaces:
@@ -73,6 +112,11 @@ properties:
     enum: [default, dark, light, dracula, tokyo-night]
     description: The theme of the interactive UI.
     default: default
+  colorOverride:
+    $ref: '#/definitions/ColorPalette'
+    description: |
+      Override the default color palette for the interactive UI.
+      This can be used to customize the colors of the UI.
   defaultTimeout:
     type: string
     description: |

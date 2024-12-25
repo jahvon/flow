@@ -8,6 +8,55 @@
     "currentWorkspace"
   ],
   "definitions": {
+    "ColorPalette": {
+      "description": "The color palette for the interactive UI.\nThe colors can be either an ANSI 16, ANSI 256, or TrueColor (hex) value.\nIf unset, the default color for the current theme will be used.\n",
+      "type": "object",
+      "properties": {
+        "black": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "border": {
+          "type": "string"
+        },
+        "codeStyle": {
+          "description": "The style of the code block. For example, `monokai`, `dracula`, `github`, etc.\nSee [chroma styles](https://github.com/alecthomas/chroma/tree/master/styles) for available style names.\n",
+          "type": "string"
+        },
+        "emphasis": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "gray": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        },
+        "primary": {
+          "type": "string"
+        },
+        "secondary": {
+          "type": "string"
+        },
+        "success": {
+          "type": "string"
+        },
+        "tertiary": {
+          "type": "string"
+        },
+        "warning": {
+          "type": "string"
+        },
+        "white": {
+          "type": "string"
+        }
+      }
+    },
     "Interactive": {
       "description": "Configurations for the interactive UI.",
       "type": "object",
@@ -30,6 +79,10 @@
     }
   },
   "properties": {
+    "colorOverride": {
+      "$ref": "#/definitions/ColorPalette",
+      "description": "Override the default color palette for the interactive UI.\nThis can be used to customize the colors of the UI.\n"
+    },
     "currentNamespace": {
       "description": "The name of the current namespace.\n\nNamespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.\nIf the namespace is not set, only executables defined without a namespace will be discovered.\n",
       "type": "string",

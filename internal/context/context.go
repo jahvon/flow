@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/io"
+	"github.com/jahvon/tuikit/styles"
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/internal/cache"
@@ -89,11 +92,15 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		tuikit.WithLoadingMsg("thinking..."),
 	)
 
+	theme := flowIO.Theme(cfg.Theme.String())
+	if cfg.ColorOverride != nil {
+		theme = overrideThemeColor(theme, cfg.ColorOverride)
+	}
 	c.TUIContainer, err = tuikit.NewContainer(
 		ctx, app,
 		tuikit.WithInput(stdIn),
 		tuikit.WithOutput(stdOut),
-		tuikit.WithTheme(flowIO.Theme(cfg.Theme.String())),
+		tuikit.WithTheme(theme),
 	)
 	if err != nil {
 		panic(errors.Wrap(err, "TUI container initialization error"))
@@ -183,6 +190,14 @@ func currentWorkspace(cfg *config.Config) (*workspace.Workspace, error) {
 		if err != nil {
 			return nil, err
 		}
+		if runtime.GOOS == "darwin" {
+			// On macOS, paths that start with /tmp (and some other system directories)
+			// are actually symbolic links to paths under /private. The OS may return
+			// either form of the path - e.g., both "/tmp/file" and "/private/tmp/file"
+			// refer to the same location. We strip the "/private" prefix for consistent
+			// path comparison, while preserving the original paths for filesystem operations.
+			wd = strings.TrimPrefix(wd, "/private")
+		}
 
 		for wsName, path := range cfg.Workspaces {
 			rel, err := filepath.Rel(filepath.Clean(path), filepath.Clean(wd))
@@ -208,4 +223,50 @@ func currentWorkspace(cfg *config.Config) (*workspace.Workspace, error) {
 	}
 
 	return filesystem.LoadWorkspaceConfig(ws, wsPath)
+}
+
+func overrideThemeColor(theme styles.Theme, palette *config.ColorPalette) styles.Theme {
+	if palette == nil {
+		return theme
+	}
+	if palette.Primary != nil {
+		theme.PrimaryColor = lipgloss.Color(*palette.Primary)
+	}
+	if palette.Secondary != nil {
+		theme.SecondaryColor = lipgloss.Color(*palette.Secondary)
+	}
+	if palette.Tertiary != nil {
+		theme.TertiaryColor = lipgloss.Color(*palette.Tertiary)
+	}
+	if palette.Success != nil {
+		theme.SuccessColor = lipgloss.Color(*palette.Success)
+	}
+	if palette.Warning != nil {
+		theme.WarningColor = lipgloss.Color(*palette.Warning)
+	}
+	if palette.Error != nil {
+		theme.ErrorColor = lipgloss.Color(*palette.Error)
+	}
+	if palette.Info != nil {
+		theme.InfoColor = lipgloss.Color(*palette.Info)
+	}
+	if palette.Body != nil {
+		theme.BodyColor = lipgloss.Color(*palette.Body)
+	}
+	if palette.Emphasis != nil {
+		theme.EmphasisColor = lipgloss.Color(*palette.Emphasis)
+	}
+	if palette.White != nil {
+		theme.White = lipgloss.Color(*palette.White)
+	}
+	if palette.Black != nil {
+		theme.Black = lipgloss.Color(*palette.Black)
+	}
+	if palette.Gray != nil {
+		theme.Gray = lipgloss.Color(*palette.Gray)
+	}
+	if palette.CodeStyle != nil {
+		theme.ChromaCodeStyle = *palette.CodeStyle
+	}
+	return theme
 }
