@@ -24,6 +24,14 @@ Use the following command to change the theme:
 flow config set theme (default|light|dark|dracula|tokyo-night)
 ```
 
+**Overriding the theme's colors**
+
+Additionally, you can override the theme colors by setting the `colorOverride` field in the config file. Any color not 
+set in the `colorOverride` field will use the default color for the set theme.
+See the [config file reference](../types/config.md#ColorPalette) for more information.
+
+```yaml
+
 ### Changing desktop notification settings
 
 Desktop notifications can be sent when executables are completed. Use the following command to enable or disable desktop notifications:

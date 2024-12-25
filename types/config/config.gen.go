@@ -5,6 +5,57 @@ package config
 import "github.com/jahvon/tuikit/io"
 import "time"
 
+// The color palette for the interactive UI.
+// The colors can be either an ANSI 16, ANSI 256, or TrueColor (hex) value.
+// If unset, the default color for the current theme will be used.
+type ColorPalette struct {
+	// Black corresponds to the JSON schema field "black".
+	Black *string `json:"black,omitempty" yaml:"black,omitempty" mapstructure:"black,omitempty"`
+
+	// Body corresponds to the JSON schema field "body".
+	Body *string `json:"body,omitempty" yaml:"body,omitempty" mapstructure:"body,omitempty"`
+
+	// Border corresponds to the JSON schema field "border".
+	Border *string `json:"border,omitempty" yaml:"border,omitempty" mapstructure:"border,omitempty"`
+
+	// The style of the code block. For example, `monokai`, `dracula`, `github`, etc.
+	// See [chroma styles](https://github.com/alecthomas/chroma/tree/master/styles)
+	// for available style names.
+	//
+	//
+	CodeStyle *string `json:"codeStyle,omitempty" yaml:"codeStyle,omitempty" mapstructure:"codeStyle,omitempty"`
+
+	// Emphasis corresponds to the JSON schema field "emphasis".
+	Emphasis *string `json:"emphasis,omitempty" yaml:"emphasis,omitempty" mapstructure:"emphasis,omitempty"`
+
+	// Error corresponds to the JSON schema field "error".
+	Error *string `json:"error,omitempty" yaml:"error,omitempty" mapstructure:"error,omitempty"`
+
+	// Gray corresponds to the JSON schema field "gray".
+	Gray *string `json:"gray,omitempty" yaml:"gray,omitempty" mapstructure:"gray,omitempty"`
+
+	// Info corresponds to the JSON schema field "info".
+	Info *string `json:"info,omitempty" yaml:"info,omitempty" mapstructure:"info,omitempty"`
+
+	// Primary corresponds to the JSON schema field "primary".
+	Primary *string `json:"primary,omitempty" yaml:"primary,omitempty" mapstructure:"primary,omitempty"`
+
+	// Secondary corresponds to the JSON schema field "secondary".
+	Secondary *string `json:"secondary,omitempty" yaml:"secondary,omitempty" mapstructure:"secondary,omitempty"`
+
+	// Success corresponds to the JSON schema field "success".
+	Success *string `json:"success,omitempty" yaml:"success,omitempty" mapstructure:"success,omitempty"`
+
+	// Tertiary corresponds to the JSON schema field "tertiary".
+	Tertiary *string `json:"tertiary,omitempty" yaml:"tertiary,omitempty" mapstructure:"tertiary,omitempty"`
+
+	// Warning corresponds to the JSON schema field "warning".
+	Warning *string `json:"warning,omitempty" yaml:"warning,omitempty" mapstructure:"warning,omitempty"`
+
+	// White corresponds to the JSON schema field "white".
+	White *string `json:"white,omitempty" yaml:"white,omitempty" mapstructure:"white,omitempty"`
+}
+
 // User Configuration for the Flow CLI.
 // Includes configurations for workspaces, templates, I/O, and other settings for
 // the CLI.
@@ -17,6 +68,11 @@ import "time"
 // Alternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment
 // variable.
 type Config struct {
+	// Override the default color palette for the interactive UI.
+	// This can be used to customize the colors of the UI.
+	//
+	ColorOverride *ColorPalette `json:"colorOverride,omitempty" yaml:"colorOverride,omitempty" mapstructure:"colorOverride,omitempty"`
+
 	// The name of the current namespace.
 	//
 	// Namespaces are used to reference executables in the CLI using the format

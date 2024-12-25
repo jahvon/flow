@@ -23,6 +23,7 @@ Alternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment
 
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | :--------: |
+| `colorOverride` | Override the default color palette for the interactive UI. This can be used to customize the colors of the UI.  | [ColorPalette](#ColorPalette) | <no value> |  |
 | `currentNamespace` | The name of the current namespace.  Namespaces are used to reference executables in the CLI using the format `workspace:namespace/name`. If the namespace is not set, only executables defined without a namespace will be discovered.  | `string` |  |  |
 | `currentWorkspace` | The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map. | `string` |  |  |
 | `defaultLogMode` | The default log mode to use when running executables. This can either be `hidden`, `json`, `logfmt` or `text`  `hidden` will not display any logs. `json` will display logs in JSON format. `logfmt` will display logs with a log level, timestamp, and message. `text` will just display the log message.  | `string` | logfmt |  |
@@ -35,6 +36,36 @@ Alternatively, a custom path can be set using the `FLOW_CONFIG_PATH` environment
 
 
 ## Definitions
+
+### ColorPalette
+
+The color palette for the interactive UI.
+The colors can be either an ANSI 16, ANSI 256, or TrueColor (hex) value.
+If unset, the default color for the current theme will be used.
+
+
+**Type:** `object`
+
+
+
+**Properties:**
+
+| Field | Description | Type | Default | Required |
+| ----- | ----------- | ---- | ------- | :--------: |
+| `black` |  | `string` | <no value> |  |
+| `body` |  | `string` | <no value> |  |
+| `border` |  | `string` | <no value> |  |
+| `codeStyle` | The style of the code block. For example, `monokai`, `dracula`, `github`, etc. See [chroma styles](https://github.com/alecthomas/chroma/tree/master/styles) for available style names.  | `string` | <no value> |  |
+| `emphasis` |  | `string` | <no value> |  |
+| `error` |  | `string` | <no value> |  |
+| `gray` |  | `string` | <no value> |  |
+| `info` |  | `string` | <no value> |  |
+| `primary` |  | `string` | <no value> |  |
+| `secondary` |  | `string` | <no value> |  |
+| `success` |  | `string` | <no value> |  |
+| `tertiary` |  | `string` | <no value> |  |
+| `warning` |  | `string` | <no value> |  |
+| `white` |  | `string` | <no value> |  |
 
 ### Interactive
 
