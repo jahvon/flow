@@ -3,11 +3,11 @@
 - [Quick start](../quickstart.md "Quick start guide")
 
 - User guides
-    - [Customizing the TUI](interactive.md "Customizing the interactive UI")
     - [Secrets vault](secret.md "Using the secrets vault")
     - [Workspaces](workspace.md "Managing workspaces")
     - [Executables](executable.md "Managing executables")
     - [Templating](templating.md "Using flowfile templates")
-    - [Managing state](guide/state.md "Managing executable state")
-    - [Conditional execution](guide/conditional.md "Conditional execution")
+    - [Managing state](state.md "Managing executable state")
+    - [Conditional execution](conditional.md "Conditional execution")
+    - [Customizing the TUI](interactive.md "Customizing the interactive UI")
 

@@ -1,9 +1,9 @@
-# Conditional Expressions
+## Conditional Expressions
 
 flow CLI uses conditional expressions to control [executable](executable.md) behavior based on runtime conditions. These expressions are written
 using a simple expression language that provides access to system information, environment variables, and stored data.
 
-## Expression Language
+### Expression Language
 
 Flow uses the [Expr](https://expr-lang.org) language for evaluating conditions. The language supports common
 operators and functions while providing access to flow executable-specific context data.
@@ -11,7 +11,7 @@ operators and functions while providing access to flow executable-specific conte
 **See the [Expr language documentation](https://expr-lang.org/docs/language-definition) for more information on the
 expression syntax.**
 
-### Basic Operators
+#### Basic Operators
 
 The expression language supports standard comparison and logical operators:
 
@@ -20,7 +20,7 @@ The expression language supports standard comparison and logical operators:
 - String: `+` (concatenation), `matches` (regex matching)
 - Length: `len()`
 
-### Available Context
+#### Available Context
 
 When writing conditions, you have access to several context variables:
 
@@ -35,12 +35,12 @@ When writing conditions, you have access to several context variables:
 - `store`: Key-value map of data store contents
 - `env`: Map of environment variables
 
-## Writing Conditions
+### Writing Conditions
 
 Conditions can be used in various places within flow, most commonly in the `if` field of executable configurations. Here are
 some examples of common conditional patterns:
 
-### Operating System and Architecture Checks
+#### Operating System and Architecture Checks
 
 Check for specific operating systems or architectures:
 
@@ -60,7 +60,7 @@ executables:
           cmd: make build-arm64
 ```
 
-### Environment Variable Checks
+#### Environment Variable Checks
 
 Make decisions based on environment variables:
 
@@ -76,7 +76,7 @@ executables:
           cmd: echo "Debug mode enabled"
 ```
 
-### Data Store Conditions
+#### Data Store Conditions
 
 Use stored data to control execution:
 
@@ -93,7 +93,7 @@ executables:
           cmd: echo "Optional key exists"
 ```
 
-### Complex Conditions
+#### Complex Conditions
 
 Combine multiple conditions using logical operators:
 
@@ -109,7 +109,7 @@ executables:
           cmd: echo "Valid build on Unix-like system"
 ```
 
-### Path and Location Checks
+#### Path and Location Checks
 
 Use context information to make path-based decisions:
 

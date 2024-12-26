@@ -1,14 +1,14 @@
-# State Management
+## State Management
 
 flow provides several mechanisms for managing state across [executable](executable.md) runs. This guide explores how to use the data store
 and temporary directories to maintain state, as well as how to make execution decisions based on that state.
 
-## Data Store
+### Data Store
 
 The data store is a key-value store that persists data across executions. It provides a simple way to share information
 between executables and maintain state between runs.
 
-### Store Persistence Scope
+#### Store Persistence Scope
 
 Values in the data store have different persistence scopes depending on where they are set:
 
@@ -16,7 +16,7 @@ Values in the data store have different persistence scopes depending on where th
 - Values set within an executable persist only across that executable's sub-executables (both serial and parallel)
 - All values set within an executable are automatically cleared when the parent executable completes
 
-### Managing Store Data
+#### Managing Store Data
 
 The data store can be managed at a global level in the CLI and within an executable's script. Here are the key operations:
 
@@ -51,7 +51,7 @@ flow store clear
 flow store clear --full
 ```
 
-### Using the Store in Executables
+#### Using the Store in Executables
 
 Here's an example of how to use the data store within an executable:
 
@@ -73,7 +73,7 @@ executables:
             echo "Last run: $(flow store get last-run)"
 ```
 
-### Store-Based Conditional Execution
+#### Store-Based Conditional Execution
 
 The data store's contents can be accessed in executable `if` conditions using the `data` context variable. This allows for
 dynamic execution paths based on stored values:
@@ -95,12 +95,12 @@ executables:
 
 See the [Conditional Execution](conditional.md) guide for more examples of using conditions in Flow.
 
-## Temporary Directories
+### Temporary Directories
 
 Flow provides a special directory reference `f:tmp` that creates an isolated temporary directory for an executable. This
 directory is automatically cleaned up when the executable completes.
 
-### Using Temporary Directories
+#### Using Temporary Directories
 
 To use a temporary directory, set the `dir` field in your executable configuration:
 
@@ -116,7 +116,7 @@ executables:
         make build
 ```
 
-### Sharing Temporary Files
+#### Sharing Temporary Files
 
 While temporary directories are isolated, you can share files between steps in a serial or parallel executable by using
 the same temporary directory:
@@ -133,7 +133,7 @@ executables:
         - cmd: cat output.txt
 ```
 
-## Combining State Management Approaches
+### Combining State Management Approaches
 
 The data store and temporary directories can be used together for more complex state management:
 
@@ -157,17 +157,3 @@ executables:
         - if: data["cleanup-enabled"] == "true"
           cmd: make clean
 ```
-
-### Best Practices
-
-When managing state in Flow, consider the following:
-
-1. Use the data store for:
-    - Sharing simple key-value data between executables
-    - Storing configuration that needs to persist between runs
-    - Managing feature flags and conditional execution
-
-2. Use temporary directories for:
-    - Build and compilation workspaces
-    - Processing temporary files
-    - Isolating file operations between different executions
