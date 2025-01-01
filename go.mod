@@ -10,7 +10,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/expr-lang/expr v1.16.9
 	github.com/gen2brain/beeep v0.0.0-20240516210008-9c006672e7f4
-	github.com/itchyny/gojq v0.12.16
+	github.com/itchyny/gojq v0.12.17
 	github.com/jahvon/glamour v0.8.1-patch3
 	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
 	github.com/jahvon/tuikit v0.0.27
