@@ -70,7 +70,7 @@ func storeSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		value = strings.Join(args[1:], " ")
 	}
 
-	s, err := store.NewStore()
+	s, err := store.NewStore(store.Path())
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
@@ -105,7 +105,7 @@ func registerStoreGetCmd(ctx *context.Context, rootCmd *cobra.Command) {
 func storeGetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	key := args[0]
 
-	s, err := store.NewStore()
+	s, err := store.NewStore(store.Path())
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
@@ -148,7 +148,7 @@ func storeClearFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		ctx.Logger.PlainTextSuccess("Store store cleared")
 		return
 	}
-	s, err := store.NewStore()
+	s, err := store.NewStore(store.Path())
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}

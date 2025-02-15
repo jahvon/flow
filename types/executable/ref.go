@@ -29,6 +29,9 @@ const (
 	UnsetGroupID        = "unset"
 	CleanupGroupID      = "cleanup"
 	RetrievalGroupID    = "retrieve"
+	UpdateGroupID       = "update"
+	EditGroupID         = "edit"
+	DebugGroupID        = "debug"
 )
 
 var (
@@ -82,6 +85,11 @@ var (
 		VerbTeardown:  UninstallGroupID,
 		VerbUndeploy:  UninstallGroupID,
 
+		// Update verbs
+		VerbUpdate:  UpdateGroupID,
+		VerbUpgrade: UpdateGroupID,
+		VerbPatch:   UpdateGroupID,
+
 		// Publish verbs
 		VerbPublish: PublishGroupID,
 		VerbRelease: PublishGroupID,
@@ -116,6 +124,12 @@ var (
 		VerbNew:      CreationGroupID,
 		VerbInit:     CreationGroupID,
 
+		// Edit verbs
+		VerbEdit:      EditGroupID,
+		VerbModify:    EditGroupID,
+		VerbFix:       EditGroupID,
+		VerbTransform: EditGroupID,
+
 		// Set verbs
 		VerbSet: SetGroupID,
 
@@ -140,6 +154,11 @@ var (
 		VerbFetch:    RetrievalGroupID,
 		VerbGet:      RetrievalGroupID,
 		VerbRequest:  RetrievalGroupID,
+
+		// Debug verbs
+		VerbDebug:   DebugGroupID,
+		VerbTrace:   DebugGroupID,
+		VerbProfile: DebugGroupID,
 	}
 )
 

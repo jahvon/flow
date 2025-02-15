@@ -87,9 +87,9 @@ executables:
     serial:
       execs:
         - cmd: flow store set feature-flag enabled
-        - if: data["feature-flag"] == "enabled"
+        - if: store["feature-flag"] == "enabled"
           cmd: echo "Feature is enabled"
-        - if: len(data["optional-key"]) > 0
+        - if: len(store["optional-key"]) > 0
           cmd: echo "Optional key exists"
 ```
 
@@ -105,7 +105,7 @@ executables:
       execs:
         - if: os == "linux" and env["CI"] == "true"
           cmd: echo "Running in Linux CI environment"
-        - if: len(data["build-id"]) > 0 and (os == "darwin" or os == "linux")
+        - if: len(store["build-id"]) > 0 and (os == "darwin" or os == "linux")
           cmd: echo "Valid build on Unix-like system"
 ```
 
