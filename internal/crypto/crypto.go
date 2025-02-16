@@ -78,7 +78,7 @@ func EncryptValue(encryptionKey string, text string) (string, error) {
 		return "", fmt.Errorf("error reading random bytes: %w", err)
 	}
 
-	cfb := cipher.NewCTR(block, iv)
+	cfb := cipher.NewCFBEncrypter(block, iv)
 	cfb.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
 	return string(ciphertext), nil
 }
@@ -103,7 +103,7 @@ func DecryptValue(encryptionKey string, text string) (string, error) {
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 
-	cfb := cipher.NewCTR(block, iv)
+	cfb := cipher.NewCFBDecrypter(block, iv)
 	cfb.XORKeyStream(plainText, ciphertext)
 	return string(plainText), nil
 }

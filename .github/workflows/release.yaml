@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.24"
+          go-version: "^1.23"
       - name: Generate docs
         run: |
           go run ./tools/docsgen/.
@@ -52,7 +52,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.24"
+          go-version: "^1.23"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Login to GitHub Container Registry

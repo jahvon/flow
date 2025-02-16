@@ -10,7 +10,6 @@ import (
 	"github.com/jahvon/flow/internal/context"
 )
 
-//nolint:errcheck
 func ToPflag(cmd *cobra.Command, metadata Metadata, persistent bool) (*pflag.FlagSet, error) {
 	flagSet := cmd.Flags()
 	if persistent {
@@ -67,7 +66,6 @@ func ToPflag(cmd *cobra.Command, metadata Metadata, persistent bool) (*pflag.Fla
 	return flagSet, nil
 }
 
-//nolint:errcheck
 func ValueFor[T any](ctx *context.Context, cmd *cobra.Command, metadata Metadata, persistent bool) T {
 	logger := ctx.Logger
 	flagName := metadata.Name
