@@ -1,6 +1,19 @@
 package vault
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/jahvon/flow/internal/services/vault/providers"
+)
+
+func init() {
+	Providers.Register(providers.DefaultProviderName, &providers.DefaultProvider{})
+	Providers.Register(providers.CLIProviderName, &providers.CLIProvider{})
+}
+
+var Providers = &Registry{
+	providers: make(map[string]Provider),
+}
 
 type Registry struct {
 	providers map[string]Provider

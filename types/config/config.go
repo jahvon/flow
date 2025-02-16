@@ -11,6 +11,7 @@ import (
 )
 
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p config -o config.gen.go schema.yaml
+//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models --tags koanf -p config -o vault.gen.go vault_schema.yaml
 
 func (c *Config) Validate() error {
 	if c.CurrentWorkspace == "" {

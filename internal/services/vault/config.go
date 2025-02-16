@@ -13,6 +13,8 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+
+	"github.com/jahvon/flow/types/config"
 )
 
 const (
@@ -21,20 +23,6 @@ const (
 	vaultConfigFileExt  = ".yaml"
 )
 
-type VaultConfig struct {
-	// Provider specifies the provider's type
-	Provider string `koanf:"provider"`
-	// Config specifies the provider-specific configuration
-	Config map[string]interface{} `koanf:"config"`
-}
-
-type Config struct {
-	// Current specifies the name of thr current vault to use
-	Current string `koanf:"current"`
-	// Vaults specifies a map of vault names to their configurations
-	Vaults map[string]VaultConfig `koanf:"vaults"`
-}
-
 type LoadOptions struct {
 	ConfigPath        string
 	AutoDiscoveryPath string
@@ -42,8 +30,7 @@ type LoadOptions struct {
 	RequireConfig     bool
 }
 
-// LoadCOnfig loads the vault configuration from the specified sources
-func LoadConfig(opts LoadOptions) (*Config, error) {
+func LoadConfig(opts LoadOptions) (*config.Vault, error) {
 	k := koanf.New(".")
 
 	if opts.AutoDiscoveryPath != "" {
@@ -68,7 +55,7 @@ func LoadConfig(opts LoadOptions) (*Config, error) {
 		}
 	}
 
-	var cfg Config
+	var cfg config.Vault
 	if err := k.Unmarshal("", &cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
@@ -76,7 +63,6 @@ func LoadConfig(opts LoadOptions) (*Config, error) {
 	return &cfg, nil
 }
 
-// loadFromFile loads configuration from a file, supporting multiple formats
 func loadFromFile(k *koanf.Koanf, path string) error {
 	var parser koanf.Parser
 
@@ -131,7 +117,6 @@ func loadFromDir(k *koanf.Koanf, path string) error {
 	return fmt.Errorf("no config file found with name %s: %w", vaultConfigFileName, os.ErrNotExist)
 }
 
-// loadFromEnv loads configuration from environment variables
 func loadFromEnv(k *koanf.Koanf) error {
 	return k.Load(env.Provider(envPrefix, ".", func(s string) string {
 		return strings.Replace(strings.ToLower(

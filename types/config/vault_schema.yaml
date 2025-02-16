@@ -1,0 +1,31 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/config/vault_schema.yaml"
+
+title: Vault
+description: User Configuration for the flow CLI vaults.
+
+definitions:
+  Entry:
+    type: object
+    properties:
+      provider:
+        type: string
+        enum: [default, cli]
+      config:
+        type: object
+        additionalProperties: true
+    required: [provider, config]
+
+type: object
+properties:
+  current:
+    type: string
+    description: The name of the active vault. This should match a key in the `vaults` map.
+    default: ""
+  vaults:
+    type: object
+    description: A list of vaults that can be used to store secrets.
+    additionalProperties: true
+    items:
+      $ref: "#/definitions/Entry"
+required: [current, vaults]

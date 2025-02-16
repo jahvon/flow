@@ -1,7 +1,5 @@
 package providers
 
-import "github.com/jahvon/flow/internal/services/run"
-
 const CLIProviderName = "cli"
 
 type CLIProvider struct{}
@@ -18,5 +16,17 @@ type CLIAdapter struct {
 }
 
 func (a *CLIAdapter) Get(key string) (string, error) {
-	run.RunCmd()
+	return "", nil
+}
+
+func (a *CLIAdapter) Set(key string, value string) error {
+	return nil
+}
+
+func (a *CLIAdapter) Delete(key string) error {
+	return nil
+}
+
+func (a *CLIAdapter) List() (map[string]string, error) {
+	return nil, nil
 }
