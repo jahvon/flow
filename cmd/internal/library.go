@@ -46,6 +46,8 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
 		wsFilter = ctx.Config.CurrentWorkspace
+	} else if wsFilter == executable.WildcardWorkspace {
+		wsFilter = ""
 	}
 
 	nsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterNamespaceFlag, false)
@@ -55,7 +57,7 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.PlainTextWarn("cannot use both --all and --namespace flags, ignoring --namespace")
 		fallthrough
 	case allNs:
-		nsFilter = "*"
+		nsFilter = executable.WildcardNamespace
 	case nsFilter == ".":
 		nsFilter = ctx.Config.CurrentNamespace
 	}
@@ -122,7 +124,7 @@ func glanceLibraryCmd(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		logger.PlainTextWarn("cannot use both --all and --namespace flags, ignoring --namespace")
 		fallthrough
 	case allNs:
-		nsFilter = "*"
+		nsFilter = executable.WildcardNamespace
 	case nsFilter == ".":
 		nsFilter = ctx.Config.CurrentNamespace
 	}
@@ -188,7 +190,7 @@ func viewLibraryFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		logger.FatalErr(err)
 	}
 	id := args[1]
-	ws, ns, name := executable.ParseExecutableID(id)
+	ws, ns, name := executable.MustParseExecutableID(id)
 	if ws == "" {
 		ws = ctx.CurrentWorkspace.AssignedName()
 	}

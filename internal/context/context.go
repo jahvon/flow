@@ -115,7 +115,7 @@ func (ctx *Context) String() string {
 		ws = "unk"
 	}
 	if ns == "" {
-		ns = "*"
+		ns = executable.WildcardNamespace
 	}
 	return fmt.Sprintf("%s/%s", ws, ns)
 }
@@ -170,8 +170,8 @@ func (ctx *Context) Finalize() {
 
 func ExpandRef(ctx *Context, ref executable.Ref) executable.Ref {
 	id := ref.ID()
-	ws, ns, name := executable.ParseExecutableID(id)
-	if ws == "" {
+	ws, ns, name := executable.MustParseExecutableID(id)
+	if ws == "" || ws == executable.WildcardWorkspace {
 		ws = ctx.CurrentWorkspace.AssignedName()
 	}
 	if ns == "" {

@@ -126,11 +126,11 @@ func (e *Executable) Ref() Ref {
 }
 
 func (e *Executable) ID() string {
-	if e.workspace == "" {
+	if e.Workspace() == "" {
 		return "unk"
 	}
 
-	return NewExecutableID(e.workspace, e.namespace, e.Name)
+	return NewExecutableID(e.Workspace(), e.Namespace(), e.Name)
 }
 
 func (e *Executable) Env() *ExecutableEnvironment {
@@ -179,12 +179,12 @@ func (e *Executable) AliasesIDs() []string {
 		return nil
 	}
 
-	if e.workspace == "" {
+	if e.Workspace() == "" {
 		return nil
 	}
 	aliases := make([]string, 0)
 	for _, alias := range e.Aliases {
-		aliases = append(aliases, NewExecutableID(e.workspace, e.namespace, alias))
+		aliases = append(aliases, NewExecutableID(e.Workspace(), e.Namespace(), alias))
 	}
 	return aliases
 }
@@ -213,8 +213,13 @@ func (e *Executable) SetDefaults() {
 	}
 	if e.Visibility == nil || *e.Visibility == "" {
 		v := ExecutableVisibility(common.VisibilityPrivate)
+		if e.Name == "" && e.Namespace() == "" {
+			// Unnamed, workspace root executables are public by default
+			v = ExecutableVisibility(common.VisibilityPublic)
+		}
 		e.Visibility = &v
 	}
+
 	if e.Timeout == 0 {
 		e.Timeout = DefaultTimeout
 		if v, ok := os.LookupEnv(TimeoutOverrideEnv); ok {
@@ -235,8 +240,8 @@ func (e *Executable) Validate() error {
 	} else if err := e.Verb.Validate(); err != nil {
 		return err
 	}
-	if e.Name == "" {
-		return fmt.Errorf("name cannot be empty")
+	if e.Name == "" && e.Namespace() != "" {
+		return fmt.Errorf("name cannot be empty when namespace is set")
 	} else if strings.Contains(e.Name, " ") {
 		return fmt.Errorf("name cannot contain spaces")
 	}
@@ -254,7 +259,7 @@ func (e *Executable) Validate() error {
 		return err
 	}
 
-	if e.workspace == "" {
+	if e.Workspace() == "" {
 		return fmt.Errorf("workspace was not set")
 	}
 	if e.flowFilePath == "" {
@@ -274,7 +279,7 @@ func (e *Executable) MergeTags(tags common.Tags) {
 
 // IsVisibleFromWorkspace returns true if the executable should be shown in terminal output for the given workspace.
 func (e *Executable) IsVisibleFromWorkspace(workspaceFilter string) bool {
-	matchesWsFiler := e.workspace == workspaceFilter || workspaceFilter == "" || workspaceFilter == "*"
+	matchesWsFiler := e.Workspace() == workspaceFilter || workspaceFilter == "" || workspaceFilter == WildcardWorkspace
 	if e.Visibility == nil {
 		return matchesWsFiler
 	}
@@ -292,7 +297,7 @@ func (e *Executable) IsVisibleFromWorkspace(workspaceFilter string) bool {
 
 // IsExecutableFromWorkspace returns true if the executable can be executed from the given workspace.
 func (e *Executable) IsExecutableFromWorkspace(workspaceFilter string) bool {
-	matchesWsFiler := e.workspace == workspaceFilter || workspaceFilter == "" || workspaceFilter == "*"
+	matchesWsFiler := e.Workspace() == workspaceFilter || workspaceFilter == "" || workspaceFilter == WildcardWorkspace
 	if e.Visibility == nil {
 		return matchesWsFiler
 	}
@@ -363,10 +368,7 @@ func (l ExecutableList) Plural() string {
 }
 
 func (l ExecutableList) FindByVerbAndID(verb Verb, id string) (*Executable, error) {
-	_, _, name := ParseExecutableID(id) // Assumes that ws and ns has already been filtered down
-	if name == "" {
-		return nil, errors.ExecutableNotFoundError{Verb: string(verb), Name: name}
-	}
+	_, _, name := MustParseExecutableID(id) // Assumes that ws and ns has already been filtered down
 	filteredList := l.FilterByVerb(verb)
 	var exec *Executable
 	for _, e := range filteredList {
@@ -444,13 +446,13 @@ func (l ExecutableList) FilterByWorkspace(ws string) ExecutableList {
 		}
 	}
 
-	if ws == "" || ws == "*" {
+	if ws == "" || ws == WildcardWorkspace {
 		return executables
 	}
 
 	filteredExecs := make(ExecutableList, 0)
 	for _, exec := range executables {
-		if exec.workspace == ws {
+		if exec.Workspace() == ws {
 			filteredExecs = append(filteredExecs, exec)
 		}
 	}
@@ -458,39 +460,55 @@ func (l ExecutableList) FilterByWorkspace(ws string) ExecutableList {
 }
 
 func (l ExecutableList) FilterByNamespace(ns string) ExecutableList {
-	if ns == "*" {
+	if ns == WildcardNamespace {
 		return l
 	}
 
 	filteredExecs := make(ExecutableList, 0)
 	for _, exec := range l {
-		if exec.namespace == ns {
+		if exec.Namespace() == ns {
 			filteredExecs = append(filteredExecs, exec)
 		}
 	}
 	return filteredExecs
 }
 
-func ParseExecutableID(id string) (workspace, namespace, name string) {
+const (
+	WildcardNamespace = "*"
+	WildcardWorkspace = "*"
+)
+
+func MustParseExecutableID(id string) (workspace, namespace, name string) {
+	if id == "" {
+		return WildcardWorkspace, "", ""
+	}
+
 	parts := strings.Split(id, "/")
 	switch len(parts) {
-	case 1:
-		return "", "", parts[0]
-	case 2:
+	case 1: // no workspace
+		subparts := strings.Split(parts[0], ":")
+		if len(subparts) == 1 { // no namespace
+			return WildcardWorkspace, WildcardNamespace, subparts[0]
+		} else if len(subparts) == 2 { // namespace AND name
+			return WildcardWorkspace, subparts[0], subparts[1]
+		}
+	case 2: // workspace
 		subparts := strings.Split(parts[1], ":")
-		if len(subparts) == 1 {
-			return parts[0], "*", subparts[0]
+		if len(subparts) == 1 { // no namespace
+			return parts[0], WildcardNamespace, subparts[0]
 		} else if len(subparts) == 2 {
 			return parts[0], subparts[0], subparts[1]
 		}
 	}
-
-	return "", "", ""
+	panic(fmt.Sprintf("invalid executable ID: %s", id))
 }
 
 func NewExecutableID(workspace, namespace, name string) string {
-	if namespace == "" || namespace == "*" {
+	if namespace == "" || namespace == WildcardNamespace {
 		return fmt.Sprintf("%s/%s", workspace, name)
+	}
+	if workspace == "" || workspace == WildcardWorkspace {
+		return fmt.Sprintf("%s:%s", namespace, name)
 	}
 	return fmt.Sprintf("%s/%s:%s", workspace, namespace, name)
 }

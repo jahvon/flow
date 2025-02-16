@@ -1,6 +1,6 @@
 module github.com/jahvon/flow
 
-go 1.23
+go 1.24
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0

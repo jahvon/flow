@@ -49,9 +49,9 @@ A reference to an executable.
 The format is `<verb> <workspace>/<namespace>:<executable name>`.
 For example, `exec ws/ns:my-workflow`.
 
-The workspace and namespace are optional.
-If the workspace is not specified, the current workspace will be used.
-If the namespace is not specified, the current namespace will be used.
+- If the workspace is not specified, the current workspace will be used.
+- If the namespace is not specified, the current namespace will be used.
+- Excluding the name will reference the executable with a matching verb but an unspecified name and namespace (e.g. `exec ws` or simply `exec`).
 
 
 **Type:** `string`

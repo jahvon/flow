@@ -33,7 +33,6 @@
       "description": "The executable schema defines the structure of an executable in the Flow CLI.\nExecutables are the building blocks of workflows and are used to define the actions that can be performed in a workspace.\n",
       "type": "object",
       "required": [
-        "name",
         "verb"
       ],
       "properties": {
@@ -53,7 +52,7 @@
           "$ref": "#/definitions/ExecutableLaunchExecutableType"
         },
         "name": {
-          "description": "The name of the executable. \n\nName is used to reference the executable in the CLI using the format `workspace:namespace/name`.\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
+          "description": "The name of the executable. \n\nName is used to reference the executable in the CLI using the format `workspace/namespace:name`.\n[Verb group + Name] must be unique within the namespace of the workspace. \nName is required if the executable is defined within a namespace.\n",
           "type": "string",
           "default": ""
         },
@@ -307,7 +306,7 @@
       }
     },
     "ExecutableRef": {
-      "description": "A reference to an executable.\nThe format is `\u003cverb\u003e \u003cworkspace\u003e/\u003cnamespace\u003e:\u003cexecutable name\u003e`.\nFor example, `exec ws/ns:my-workflow`.\n\nThe workspace and namespace are optional.\nIf the workspace is not specified, the current workspace will be used.\nIf the namespace is not specified, the current namespace will be used.\n",
+      "description": "A reference to an executable.\nThe format is `\u003cverb\u003e \u003cworkspace\u003e/\u003cnamespace\u003e:\u003cexecutable name\u003e`.\nFor example, `exec ws/ns:my-workflow`.\n\n- If the workspace is not specified, the current workspace will be used.\n- If the namespace is not specified, the current namespace will be used.\n- Excluding the name will reference the executable with a matching verb but an unspecified name and namespace (e.g. `exec ws` or simply `exec`).\n",
       "type": "string"
     },
     "ExecutableRenderExecutableType": {
