@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	bolt "go.etcd.io/bbolt"
+	boltErrors "go.etcd.io/bbolt/errors"
 
 	"github.com/jahvon/flow/internal/filesystem"
 )
@@ -69,7 +70,7 @@ func (s *BoltStore) DeleteBucket(id string) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(id))
 		if err != nil {
-			if errors.Is(err, bolt.ErrBucketNotFound) {
+			if errors.Is(err, boltErrors.ErrBucketNotFound) {
 				return nil
 			}
 			return fmt.Errorf("failed to delete bucket %s: %w", id, err)

@@ -10,6 +10,7 @@ import (
 	"github.com/jahvon/flow/internal/context"
 )
 
+//nolint:errcheck
 func ToPflag(cmd *cobra.Command, metadata Metadata, persistent bool) (*pflag.FlagSet, error) {
 	flagSet := cmd.Flags()
 	if persistent {
@@ -108,5 +109,6 @@ func ValueFor[T any](ctx *context.Context, cmd *cobra.Command, metadata Metadata
 		logger.Fatalf("unexpected flag default type (%v)", reflect.TypeOf(metadata.Default).Kind())
 	}
 
+	//nolint:errcheck
 	return val.(T)
 }

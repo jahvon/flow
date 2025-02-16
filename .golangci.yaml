@@ -17,8 +17,6 @@ linters-settings:
     enable-all: true
     disable:
       - fieldalignment # too strict
-  tenv:
-    all: true
 
 linters:
   disable-all: true
@@ -61,7 +59,7 @@ linters:
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - reassign # checks that package variables are not reassigned
     - stylecheck # is a replacement for golint
-    - tenv # detects using os.Setenv instead of t.Setenv since Go1.17
+    - usetesting # detects when some calls can be replaced by methods from the testing package
     - testableexamples # checks if examples are testable (have an expected output)
     - testpackage # makes you use a separate _test package
     - tparallel # detects inappropriate usage of t.Parallel() method in your Go test codes
@@ -94,6 +92,8 @@ issues:
         - gosec
         - noctx
         - wrapcheck
+    - linters: [gosec]
+      text: "G115"
     - linters:
         - staticcheck
       text: "SA5011" # SA5011: Should not use unsafe.Pointer - this throws false positives when a nil check does not result in a return
