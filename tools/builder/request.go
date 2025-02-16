@@ -60,7 +60,7 @@ func RequestExecWithBody(opts ...Option) *executable.Executable {
 func RequestExecWithTransform(opts ...Option) *executable.Executable {
 	name := "request-with-transform"
 	docstring := requestBaseDesc +
-		"The `transformResponse` field is optional and can be used to transform the response using a jq query."
+		"The `transformResponse` field is optional and can be used to transform the response using an Expr expression."
 	e := &executable.Executable{
 		Verb:        "run",
 		Name:        name,
