@@ -5,7 +5,6 @@
 <p align="center">
     <a href="https://img.shields.io/github/v/release/jahvon/flow"><img src="https://img.shields.io/github/v/release/jahvon/flow" alt="GitHub release"></a>
     <a href="https://pkg.go.dev/github.com/jahvon/flow"><img src="https://pkg.go.dev/badge/github.com/jahvon/flow.svg" alt="Go Reference"></a>
-    <a href="https://goreportcard.com/report/github.com/jahvon/flow"><img src="https://goreportcard.com/badge/github.com/jahvon/flow" alt="Go Report Card"></a>
 </p>
 
 <p align="center">
