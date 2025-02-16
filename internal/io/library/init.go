@@ -60,7 +60,7 @@ func (l *Library) setVisibleExecs() {
 			if label == withoutNamespaceLabel {
 				curNs = ""
 			} else if label == allNamespacesLabel {
-				curNs = "*"
+				curNs = executable.WildcardNamespace
 			} else {
 				curNs = label
 			}
@@ -89,8 +89,13 @@ func (l *Library) setVisibleWorkspaces() {
 
 	filter := l.filter
 	filteredWs := l.allWorkspaces
-	if filter.Workspace != "" {
-		for _, ws := range l.allWorkspaces {
+	switch {
+	case filter.Workspace == "":
+		// do nothing
+	case filter.Workspace == allWorkspacesLabel || filter.Workspace == executable.WildcardWorkspace:
+		// do nothing
+	default:
+		for _, ws := range filteredWs {
 			if ws.AssignedName() == filter.Workspace {
 				filteredWs = workspace.WorkspaceList{ws}
 				break
@@ -122,11 +127,11 @@ func (l *Library) setVisibleNamespaces() {
 	for _, ex := range l.allExecutables {
 		ns := ex.Ref().Namespace()
 		ws := ex.Ref().Workspace()
-		if filter.Namespace != "*" && filter.Namespace != "" && ns != filter.Namespace {
+		if filter.Namespace != executable.WildcardNamespace && filter.Namespace != "" && ns != filter.Namespace {
 			continue
 		} else if filterWs != allWorkspacesLabel && filterWs != "" && ws != filterWs {
 			continue
-		} else if ns == "" || ns == "*" {
+		} else if ns == "" || ns == executable.WildcardNamespace {
 			someWithoutNs = true
 			continue
 		}

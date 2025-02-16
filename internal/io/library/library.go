@@ -90,7 +90,7 @@ func ctxVal(ws, ns string) string {
 		ws = "unk"
 	}
 	if ns == "" {
-		ns = "*"
+		ns = executable.WildcardNamespace
 	}
 	return fmt.Sprintf("%s/%s", ws, ns)
 }

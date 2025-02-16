@@ -31,5 +31,6 @@ var _ = Describe("exec e2e", func() {
 	},
 		Entry("print example", "examples:simple-print"),
 		Entry("tmp dir example", "examples:with-tmp-dir"),
+		Entry("nameless example", ""),
 	)
 })

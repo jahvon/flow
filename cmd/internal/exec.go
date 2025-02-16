@@ -40,7 +40,7 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			io.TypesDocsURL("flowfile", "ExecutableRef"),
 			execExamples,
 		),
-		Args: cobra.MinimumNArgs(1),
+		Args: cobra.ArbitraryArgs,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
 			if err != nil {
@@ -82,8 +82,14 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.FatalErr(err)
 	}
 
-	idArg := args[0]
-	ref := context.ExpandRef(ctx, executable.NewRef(idArg, verb))
+	var ref executable.Ref
+	if len(args) == 0 {
+		ref = context.ExpandRef(ctx, executable.NewRef("", verb))
+	} else {
+		idArg := args[0]
+		ref = context.ExpandRef(ctx, executable.NewRef(idArg, verb))
+	}
+
 	e, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
 	if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
 		logger.Debugf("Executable %s not found in cache, syncing cache", ref)
@@ -108,7 +114,10 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		))
 	}
 
-	execArgs := args[1:]
+	execArgs := make([]string, 0)
+	if len(args) >= 2 {
+		execArgs = args[1:]
+	}
 	envMap, err := argUtils.ProcessArgs(e, execArgs, nil)
 	if err != nil {
 		logger.FatalErr(err)
@@ -369,6 +378,14 @@ Flag arguments are specified with the format 'flag=value' and positional argumen
 `
 	execExamples = `
 #### Examples
+**Execute a nameless flow in the current workspace with the 'install' verb**
+
+flow install
+
+**Execute a nameless flow in the 'ws' workspace with the 'test' verb**
+
+flow test ws
+
 **Execute the 'build' flow in the current workspace and namespace**
 
 flow exec build

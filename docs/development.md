@@ -34,9 +34,9 @@ flow install deps
 flow build binary <output-path>
 
 # Validate code changes (runs tests, linters, codegen, etc)
-flow run checks
+flow validate
 
-# Run tests
+# Run only tests
 flow run tests
 ```
 

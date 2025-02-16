@@ -2,9 +2,7 @@
 visibility: private
 tags: [development]
 executables:
-  - verb: run
-    name: checks
-    aliases: [precommit, pc, ci, validate]
+  - verb: validate
     description: |
       Run the repository validation checks. This includes linting, tests, and code generation.
       Validate should be run before committing changes.
