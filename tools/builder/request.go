@@ -68,7 +68,7 @@ func RequestExecWithTransform(opts ...Option) *executable.Executable {
 		Description: docstring,
 		Request: &executable.RequestExecutableType{
 			URL:               "https://httpbin.org/get",
-			TransformResponse: ".headers",
+			TransformResponse: "status",
 		},
 	}
 	if len(opts) > 0 {
