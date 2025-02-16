@@ -4,6 +4,21 @@ import (
 	"github.com/jahvon/flow/types/executable"
 )
 
+func RootExecFlowFile(opts ...Option) *executable.FlowFile {
+	d := &executable.FlowFile{
+		Visibility: privateFlowFileVisibility(),
+		Tags:       sharedExecTags(),
+		Executables: []*executable.Executable{
+			NamelessExec(opts...),
+		},
+	}
+	if len(opts) > 0 {
+		vals := NewOptionValues(opts...)
+		d.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.FlowFilePath)
+	}
+	return d
+}
+
 func ExamplesExecFlowFile(opts ...Option) *executable.FlowFile {
 	d := &executable.FlowFile{
 		Namespace:  "examples",

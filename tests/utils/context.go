@@ -160,14 +160,23 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface) (string, string, string)
 		t.Fatalf("unable to create workspace directory: %v", err)
 	}
 
-	testData := builder.ExamplesExecFlowFile()
-	execDef, err := yaml.Marshal(testData)
+	examplesFile := builder.ExamplesExecFlowFile()
+	execDef, err := yaml.Marshal(examplesFile)
 	if err != nil {
 		t.Fatalf("unable to marshal test data: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(tmpWsDir, "testdata.flow"), execDef, 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpWsDir, "examples.flow"), execDef, 0600); err != nil {
 		t.Fatalf("unable to write test data: %v", err)
 	}
+	rootFile := builder.RootExecFlowFile()
+	rootDef, err := yaml.Marshal(rootFile)
+	if err != nil {
+		t.Fatalf("unable to marshal test data: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmpWsDir, "root.flow"), rootDef, 0600); err != nil {
+		t.Fatalf("unable to write test data: %v", err)
+	}
+
 	tmpConfigDir := filepath.Join(tmpDir, userConfigSubdir)
 	tmpCacheDir := filepath.Join(tmpDir, cacheSubdir)
 
