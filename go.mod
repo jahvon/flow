@@ -33,18 +33,18 @@ require (
 require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.3.0 // indirect
-	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
+	github.com/Masterminds/semver/v3 v3.3.1 // indirect
+	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/catppuccin/go v0.2.0 // indirect
+	github.com/catppuccin/go v0.3.0 // indirect
 	github.com/charmbracelet/huh v0.6.0 // indirect
 	github.com/charmbracelet/log v0.4.0 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
-	github.com/charmbracelet/x/exp/strings v0.0.0-20240722160745-212f7b056ed0 // indirect
+	github.com/charmbracelet/x/exp/strings v0.0.0-20250213125511-a0c32e22e4fc // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
-	github.com/dlclark/regexp2 v1.11.0 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
@@ -53,7 +53,7 @@ require (
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad // indirect
+	github.com/google/pprof v0.0.0-20250208200701-d0013a598941 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
@@ -76,10 +76,10 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
-	github.com/spf13/cast v1.7.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
-	github.com/yuin/goldmark v1.7.4 // indirect
-	github.com/yuin/goldmark-emoji v1.0.3 // indirect
+	github.com/yuin/goldmark v1.7.8 // indirect
+	github.com/yuin/goldmark-emoji v1.0.4 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/term v0.29.0 // indirect
