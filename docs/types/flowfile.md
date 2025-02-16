@@ -84,7 +84,7 @@ Executables are the building blocks of workflows and are used to define the acti
 | `description` | A description of the executable. This description is rendered as markdown in the interactive UI.  | `string` |  |  |
 | `exec` |  | [ExecutableExecExecutableType](#ExecutableExecExecutableType) | <no value> |  |
 | `launch` |  | [ExecutableLaunchExecutableType](#ExecutableLaunchExecutableType) | <no value> |  |
-| `name` | The name of the executable.   Name is used to reference the executable in the CLI using the format `workspace:namespace/name`. [Verb group + Name] must be unique within the namespace of the workspace.  | `string` |  | ✘ |
+| `name` | The name of the executable.   Name is used to reference the executable in the CLI using the format `workspace/namespace:name`. [Verb group + Name] must be unique within the namespace of the workspace.  Name is required if the executable is defined within a namespace.  | `string` |  |  |
 | `parallel` |  | [ExecutableParallelExecutableType](#ExecutableParallelExecutableType) | <no value> |  |
 | `render` |  | [ExecutableRenderExecutableType](#ExecutableRenderExecutableType) | <no value> |  |
 | `request` |  | [ExecutableRequestExecutableType](#ExecutableRequestExecutableType) | <no value> |  |
@@ -254,9 +254,9 @@ A reference to an executable.
 The format is `<verb> <workspace>/<namespace>:<executable name>`.
 For example, `exec ws/ns:my-workflow`.
 
-The workspace and namespace are optional.
-If the workspace is not specified, the current workspace will be used.
-If the namespace is not specified, the current namespace will be used.
+- If the workspace is not specified, the current workspace will be used.
+- If the namespace is not specified, the current namespace will be used.
+- Excluding the name will reference the executable with a matching verb but an unspecified name and namespace (e.g. `exec ws` or simply `exec`).
 
 
 **Type:** `string`
@@ -388,7 +388,7 @@ the action they are performing.
 - **Uninstallation Group**: `uninstall`, `teardown`, `undeploy`
 - **Update Group**: `update`, `upgrade`, `patch`
 - **Configuration Group**: `configure`, `manage`
-- **Edit Group**: `edit`, `transform`, `modify`
+- **Edit Group**: `edit`, `transform`, `modify`, `fix`
 - **Publish Group**: `publish`, `release`
 - **Distribution Group**: `push`, `send`, `apply`
 - **Test Group**: `test`, `validate`, `check`, `verify`
@@ -400,6 +400,7 @@ the action they are performing.
 - **Unset Group**: `unset`, `reset`
 - **Cleanup Group**: `clean`, `clear`, `purge`, `tidy`
 - **Retrieval Group**: `retrieve`, `fetch`, `get`, `request`
+- **Debug Group**: `debug`, `trace`, `profile`
 
 ### Usage Notes
 
@@ -460,6 +461,7 @@ clear structure for executable operations.
 - `edit`
 - `transform`
 - `modify`
+- `fix`
 - `publish`
 - `release`
 - `push`
@@ -497,6 +499,9 @@ clear structure for executable operations.
 - `fetch`
 - `get`
 - `request`
+- `debug`
+- `trace`
+- `profile`
 
 
 

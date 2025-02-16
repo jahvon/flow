@@ -28,6 +28,21 @@ func SimpleExec(opts ...Option) *executable.Executable {
 	return e
 }
 
+func NamelessExec(opts ...Option) *executable.Executable {
+	e := &executable.Executable{
+		Verb:       "run",
+		Visibility: privateExecVisibility(),
+		Exec: &executable.ExecExecutableType{
+			Cmd: "echo 'hello from nameless'",
+		},
+	}
+	if len(opts) > 0 {
+		vals := NewOptionValues(opts...)
+		e.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.NamespaceName, vals.FlowFilePath)
+	}
+	return e
+}
+
 func ExecWithPauses(opts ...Option) *executable.Executable {
 	name := "with-pauses"
 	e := &executable.Executable{

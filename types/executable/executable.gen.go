@@ -118,10 +118,11 @@ type Executable struct {
 	// The name of the executable.
 	//
 	// Name is used to reference the executable in the CLI using the format
-	// `workspace:namespace/name`.
+	// `workspace/namespace:name`.
 	// [Verb group + Name] must be unique within the namespace of the workspace.
+	// Name is required if the executable is defined within a namespace.
 	//
-	Name string `json:"name" yaml:"name" mapstructure:"name"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty" mapstructure:"name,omitempty"`
 
 	// namespace corresponds to the JSON schema field "namespace".
 	namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty" mapstructure:"namespace,omitempty"`
@@ -272,9 +273,10 @@ type ParameterList []Parameter
 // The format is `<verb> <workspace>/<namespace>:<executable name>`.
 // For example, `exec ws/ns:my-workflow`.
 //
-// The workspace and namespace are optional.
-// If the workspace is not specified, the current workspace will be used.
-// If the namespace is not specified, the current namespace will be used.
+// - If the workspace is not specified, the current workspace will be used.
+// - If the namespace is not specified, the current namespace will be used.
+// - Excluding the name will reference the executable with a matching verb but an
+// unspecified name and namespace (e.g. `exec ws` or simply `exec`).
 type Ref string
 
 type RefList []Ref
@@ -448,6 +450,7 @@ const VerbCompile Verb = "compile"
 const VerbConfigure Verb = "configure"
 const VerbCreate Verb = "create"
 const VerbDeactivate Verb = "deactivate"
+const VerbDebug Verb = "debug"
 const VerbDelete Verb = "delete"
 const VerbDeploy Verb = "deploy"
 const VerbDestroy Verb = "destroy"
@@ -458,6 +461,7 @@ const VerbErase Verb = "erase"
 const VerbExec Verb = "exec"
 const VerbExecute Verb = "execute"
 const VerbFetch Verb = "fetch"
+const VerbFix Verb = "fix"
 const VerbGenerate Verb = "generate"
 const VerbGet Verb = "get"
 const VerbInit Verb = "init"
@@ -474,6 +478,7 @@ const VerbOpen Verb = "open"
 const VerbPackage Verb = "package"
 const VerbPatch Verb = "patch"
 const VerbPause Verb = "pause"
+const VerbProfile Verb = "profile"
 const VerbPublish Verb = "publish"
 const VerbPurge Verb = "purge"
 const VerbPush Verb = "push"
@@ -498,6 +503,7 @@ const VerbTeardown Verb = "teardown"
 const VerbTerminate Verb = "terminate"
 const VerbTest Verb = "test"
 const VerbTidy Verb = "tidy"
+const VerbTrace Verb = "trace"
 const VerbTrack Verb = "track"
 const VerbTransform Verb = "transform"
 const VerbTrigger Verb = "trigger"

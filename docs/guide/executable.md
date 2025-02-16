@@ -56,6 +56,18 @@ the current workspace and namespace are assumed. See the [workspace guide](works
 
 The name of an executable can also be replaced with an alias if one is defined in the flowfile.
 
+**Nameless Executables**
+
+If an executable is defined without a namespace and name, it is considered "nameless" and can be run by its verb alone.
+Nameless executables cannot exist within a namespace.
+
+```shell
+# run the current workspaces nameless executable with the verb 'validate'
+flow validate
+# run the (non-current) 'my-project' workspaces nameless executable with the verb 'build'
+flow build my-project/
+```
+
 ## Flowfile
 
 The flowfile is the primary configuration file that defines what an executable should do. The file is written in YAML but
@@ -89,7 +101,7 @@ executables:
 
 ### Executables
 
-The only required field in an executable's configuration is the `name`.
+The only required field in an executable's configuration is the `name` (if the `namespace` is unset).
 
 Additionally, you can define the following fields:
 

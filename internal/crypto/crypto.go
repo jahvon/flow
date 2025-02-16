@@ -78,6 +78,8 @@ func EncryptValue(encryptionKey string, text string) (string, error) {
 		return "", fmt.Errorf("error reading random bytes: %w", err)
 	}
 
+	// TODO: replace deprecated NewCFBDecrypter with NewCTR -- this can break vaults
+	//nolint:staticcheck
 	cfb := cipher.NewCFBEncrypter(block, iv)
 	cfb.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
 	return string(ciphertext), nil
@@ -103,6 +105,8 @@ func DecryptValue(encryptionKey string, text string) (string, error) {
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 
+	// TODO: replace deprecated NewCFBDecrypter with NewCTR -- this can break vaults
+	//nolint:staticcheck
 	cfb := cipher.NewCFBDecrypter(block, iv)
 	cfb.XORKeyStream(plainText, ciphertext)
 	return string(plainText), nil

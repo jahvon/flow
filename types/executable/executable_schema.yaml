@@ -28,7 +28,7 @@ definitions:
       - **Uninstallation Group**: `uninstall`, `teardown`, `undeploy`
       - **Update Group**: `update`, `upgrade`, `patch`
       - **Configuration Group**: `configure`, `manage`
-      - **Edit Group**: `edit`, `transform`, `modify`
+      - **Edit Group**: `edit`, `transform`, `modify`, `fix`
       - **Publish Group**: `publish`, `release`
       - **Distribution Group**: `push`, `send`, `apply`
       - **Test Group**: `test`, `validate`, `check`, `verify`
@@ -40,6 +40,7 @@ definitions:
       - **Unset Group**: `unset`, `reset`
       - **Cleanup Group**: `clean`, `clear`, `purge`, `tidy`
       - **Retrieval Group**: `retrieve`, `fetch`, `get`, `request`
+      - **Debug Group**: `debug`, `trace`, `profile`
       
       ### Usage Notes
       
@@ -109,6 +110,7 @@ definitions:
       - edit
       - transform
       - modify
+      - fix
       # Publish Group
       - publish
       - release
@@ -157,6 +159,10 @@ definitions:
       - fetch
       - get
       - request
+      # Debug Group
+      - debug
+      - trace
+      - profile
   Ref:
     type: string
     description: |
@@ -164,10 +170,10 @@ definitions:
       The format is `<verb> <workspace>/<namespace>:<executable name>`.
       For example, `exec ws/ns:my-workflow`.
       
-      The workspace and namespace are optional.
-      If the workspace is not specified, the current workspace will be used.
-      If the namespace is not specified, the current namespace will be used.
-    pattern: "^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+$"
+      - If the workspace is not specified, the current workspace will be used.
+      - If the namespace is not specified, the current namespace will be used.
+      - Excluding the name will reference the executable with a matching verb but an unspecified name and namespace (e.g. `exec ws` or simply `exec`).
+    pattern: "^[a-zA-Z0-9_-]+( [a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?:[a-zA-Z0-9_-]*)?$"
   RefList:
     type: array
     items:
@@ -565,7 +571,7 @@ definitions:
           When set to false, all execs will be run regardless of the exit status of the previous exec.
 
 type: object
-required: [name, verb]
+required: [verb]
 properties:
   visibility:
     $ref: '../common/schema.yaml#/definitions/Visibility'
@@ -590,8 +596,9 @@ properties:
     description: |
       The name of the executable. 
 
-      Name is used to reference the executable in the CLI using the format `workspace:namespace/name`.
-      [Verb group + Name] must be unique within the namespace of the workspace.
+      Name is used to reference the executable in the CLI using the format `workspace/namespace:name`.
+      [Verb group + Name] must be unique within the namespace of the workspace. 
+      Name is required if the executable is defined within a namespace.
     default: ""
   description:
     type: string

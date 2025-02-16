@@ -16,6 +16,14 @@ See https://flowexec.io/#/types/flowfile#ExecutableVerb for more information on 
 
 
 #### Examples
+**Execute a nameless flow in the current workspace with the 'install' verb**
+
+flow install
+
+**Execute a nameless flow in the 'ws' workspace with the 'test' verb**
+
+flow test ws
+
 **Execute the 'build' flow in the current workspace and namespace**
 
 flow exec build

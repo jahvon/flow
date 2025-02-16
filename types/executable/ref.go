@@ -29,6 +29,9 @@ const (
 	UnsetGroupID        = "unset"
 	CleanupGroupID      = "cleanup"
 	RetrievalGroupID    = "retrieve"
+	UpdateGroupID       = "update"
+	EditGroupID         = "edit"
+	DebugGroupID        = "debug"
 )
 
 var (
@@ -82,6 +85,11 @@ var (
 		VerbTeardown:  UninstallGroupID,
 		VerbUndeploy:  UninstallGroupID,
 
+		// Update verbs
+		VerbUpdate:  UpdateGroupID,
+		VerbUpgrade: UpdateGroupID,
+		VerbPatch:   UpdateGroupID,
+
 		// Publish verbs
 		VerbPublish: PublishGroupID,
 		VerbRelease: PublishGroupID,
@@ -116,6 +124,12 @@ var (
 		VerbNew:      CreationGroupID,
 		VerbInit:     CreationGroupID,
 
+		// Edit verbs
+		VerbEdit:      EditGroupID,
+		VerbModify:    EditGroupID,
+		VerbFix:       EditGroupID,
+		VerbTransform: EditGroupID,
+
 		// Set verbs
 		VerbSet: SetGroupID,
 
@@ -140,6 +154,11 @@ var (
 		VerbFetch:    RetrievalGroupID,
 		VerbGet:      RetrievalGroupID,
 		VerbRequest:  RetrievalGroupID,
+
+		// Debug verbs
+		VerbDebug:   DebugGroupID,
+		VerbTrace:   DebugGroupID,
+		VerbProfile: DebugGroupID,
 	}
 )
 
@@ -182,32 +201,17 @@ func RelatedVerbs(verb Verb) []Verb {
 }
 
 func NewRef(id string, verb Verb) Ref {
-	if id == "" || verb == "" {
+	if verb == "" {
 		return ""
+	}
+	if id == "" {
+		return Ref(verb.String())
 	}
 	return Ref(fmt.Sprintf("%s %s", verb, id))
 }
 
 func (r Ref) String() string {
 	return string(r)
-}
-
-func (r Ref) Validate() error {
-	str := strings.TrimSpace(string(r))
-	refParts := strings.Split(str, " ")
-	if len(refParts) != 2 {
-		return fmt.Errorf("invalid executable ref %s", str)
-	}
-	verb := Verb(refParts[0])
-	if err := verb.Validate(); err != nil {
-		return err
-	}
-	id := refParts[1]
-	ws, _, name := ParseExecutableID(id)
-	if ws == "" || name == "" {
-		return fmt.Errorf("invalid executable id %s", id)
-	}
-	return nil
 }
 
 func (r Ref) Verb() Verb {
@@ -217,22 +221,21 @@ func (r Ref) Verb() Verb {
 
 func (r Ref) ID() string {
 	refParts := strings.Split(string(r), " ")
-	if len(refParts) != 2 {
-		// TODO: return or log error
-		return ""
+	if len(refParts) == 2 {
+		return refParts[1]
 	}
-	return refParts[1]
+	return ""
 }
 
 func (r Ref) Namespace() string {
 	id := r.ID()
-	_, ns, _ := ParseExecutableID(id)
+	_, ns, _ := MustParseExecutableID(id)
 	return ns
 }
 
 func (r Ref) Workspace() string {
 	id := r.ID()
-	ws, _, _ := ParseExecutableID(id)
+	ws, _, _ := MustParseExecutableID(id)
 	return ws
 }
 

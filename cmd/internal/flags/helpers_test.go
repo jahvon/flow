@@ -71,6 +71,7 @@ var _ = Describe("ValueFor", func() {
 			Expect(err).NotTo(HaveOccurred())
 			cmd.Flags().AddFlagSet(flagset)
 			if reflect.TypeOf(expectedValue).Kind() == reflect.Slice {
+				//nolint:errcheck
 				err = cmd.ParseFlags([]string{"--test", expectedValue.([]string)[0]})
 			} else {
 				err = cmd.ParseFlags([]string{"--test=" + fmt.Sprintf("%v", expectedValue)})

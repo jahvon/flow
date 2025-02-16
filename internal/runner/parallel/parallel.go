@@ -47,7 +47,7 @@ func (r *parallelRunner) Exec(
 	}
 
 	if len(parallelSpec.Execs) > 0 {
-		str, err := store.NewStore()
+		str, err := store.NewStore(store.Path())
 		if err != nil {
 			return err
 		}

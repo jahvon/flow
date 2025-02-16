@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	bolt "go.etcd.io/bbolt"
+	boltErrors "go.etcd.io/bbolt/errors"
 
 	"github.com/jahvon/flow/internal/filesystem"
 )
@@ -40,8 +41,13 @@ type BoltStore struct {
 	processBucket string
 }
 
-func NewStore() (Store, error) {
-	db, err := bolt.Open(Path(), 0666, &bolt.Options{Timeout: 5 * time.Second})
+// NewStore creates a new store with a given db path
+// If dbPath is empty, it will use the default path
+func NewStore(dbPath string) (Store, error) {
+	if dbPath == "" {
+		dbPath = Path()
+	}
+	db, err := bolt.Open(dbPath, 0666, &bolt.Options{Timeout: 5 * time.Second})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
@@ -64,7 +70,7 @@ func (s *BoltStore) DeleteBucket(id string) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(id))
 		if err != nil {
-			if errors.Is(err, bolt.ErrBucketNotFound) {
+			if errors.Is(err, boltErrors.ErrBucketNotFound) {
 				return nil
 			}
 			return fmt.Errorf("failed to delete bucket %s: %w", id, err)

@@ -23,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.23"
+          go-version: "^1.24"
       - name: Install Go Tools
         run: |
           go install go.uber.org/mock/mockgen@v0.4.0
@@ -50,11 +50,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "^1.23"
+          go-version: "^1.24"
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.60.3
+          version: v1.64.5
           args: --out-format=sarif:results.sarif,colored-line-number,github-actions
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3

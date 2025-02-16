@@ -1,6 +1,8 @@
 package store_test
 
 import (
+	"fmt"
+	"path/filepath"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -19,7 +21,8 @@ var _ = Describe("BoltStore", func() {
 	var err error
 
 	BeforeEach(func() {
-		s, err = store.NewStore()
+		path := filepath.Join(GinkgoT().TempDir(), fmt.Sprintf("test_%s.db", GinkgoT().Name()))
+		s, err = store.NewStore(path)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(s).NotTo(BeNil())
 	})
@@ -100,11 +103,6 @@ var _ = Describe("BoltStore", func() {
 
 	Describe("GetAll", func() {
 		It("should get all key-value pairs from the bucket", func() {
-			err := store.DestroyStore()
-			Expect(err).NotTo(HaveOccurred())
-			s, err = store.NewStore()
-			Expect(err).NotTo(HaveOccurred())
-
 			err = s.CreateBucket("test")
 			Expect(err).NotTo(HaveOccurred())
 
@@ -124,11 +122,6 @@ var _ = Describe("BoltStore", func() {
 
 	Describe("GetKeys", func() {
 		It("should get all keys from the bucket", func() {
-			err := store.DestroyStore()
-			Expect(err).NotTo(HaveOccurred())
-			s, err = store.NewStore()
-			Expect(err).NotTo(HaveOccurred())
-
 			err = s.CreateBucket("test")
 			Expect(err).NotTo(HaveOccurred())
 

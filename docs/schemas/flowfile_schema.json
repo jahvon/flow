@@ -33,7 +33,6 @@
       "description": "The executable schema defines the structure of an executable in the Flow CLI.\nExecutables are the building blocks of workflows and are used to define the actions that can be performed in a workspace.\n",
       "type": "object",
       "required": [
-        "name",
         "verb"
       ],
       "properties": {
@@ -53,7 +52,7 @@
           "$ref": "#/definitions/ExecutableLaunchExecutableType"
         },
         "name": {
-          "description": "The name of the executable. \n\nName is used to reference the executable in the CLI using the format `workspace:namespace/name`.\n[Verb group + Name] must be unique within the namespace of the workspace.\n",
+          "description": "The name of the executable. \n\nName is used to reference the executable in the CLI using the format `workspace/namespace:name`.\n[Verb group + Name] must be unique within the namespace of the workspace. \nName is required if the executable is defined within a namespace.\n",
           "type": "string",
           "default": ""
         },
@@ -307,7 +306,7 @@
       }
     },
     "ExecutableRef": {
-      "description": "A reference to an executable.\nThe format is `\u003cverb\u003e \u003cworkspace\u003e/\u003cnamespace\u003e:\u003cexecutable name\u003e`.\nFor example, `exec ws/ns:my-workflow`.\n\nThe workspace and namespace are optional.\nIf the workspace is not specified, the current workspace will be used.\nIf the namespace is not specified, the current namespace will be used.\n",
+      "description": "A reference to an executable.\nThe format is `\u003cverb\u003e \u003cworkspace\u003e/\u003cnamespace\u003e:\u003cexecutable name\u003e`.\nFor example, `exec ws/ns:my-workflow`.\n\n- If the workspace is not specified, the current workspace will be used.\n- If the namespace is not specified, the current namespace will be used.\n- Excluding the name will reference the executable with a matching verb but an unspecified name and namespace (e.g. `exec ws` or simply `exec`).\n",
       "type": "string"
     },
     "ExecutableRenderExecutableType": {
@@ -510,7 +509,7 @@
       }
     },
     "ExecutableVerb": {
-      "description": "Keywords that describe the action an executable performs. While executables are configured with a single verb, \nthe verb can be aliased to related verbs within its group. For example, the `activate` verb can be replaced \nwith \"enable\" or \"start\" when referencing an executable. This allows users to use the verb that best describes \nthe action they are performing.\n\n### Verb Groups\n\n- **Activation Group**: `activate`, `enable`, `start`, `trigger`\n- **Execution Group**: `exec`, `run`, `execute`\n- **Deactivation Group**: `deactivate`, `disable`, `stop`, `pause`\n- **Termination Group**: `kill`, `terminate`, `abort`\n- **Monitoring Group**: `watch`, `monitor`, `track`\n- **Restart Group**: `restart`, `reboot`, `reload`, `refresh`\n- **Installation Group**: `install`, `setup`, `deploy`\n- **Build Group**: `build`, `package`, `bundle`, `compile`\n- **Uninstallation Group**: `uninstall`, `teardown`, `undeploy`\n- **Update Group**: `update`, `upgrade`, `patch`\n- **Configuration Group**: `configure`, `manage`\n- **Edit Group**: `edit`, `transform`, `modify`\n- **Publish Group**: `publish`, `release`\n- **Distribution Group**: `push`, `send`, `apply`\n- **Test Group**: `test`, `validate`, `check`, `verify`\n- **Analysis Group**: `analyze`, `scan`, `lint`, `inspect`\n- **Launch Group**: `open`, `launch`, `show`, `view`\n- **Creation Group**: `create`, `generate`, `add`, `new`, `init`\n- **Set Group**: `set`\n- **Destruction Group**: `remove`, `delete`, `destroy`, `erase`\n- **Unset Group**: `unset`, `reset`\n- **Cleanup Group**: `clean`, `clear`, `purge`, `tidy`\n- **Retrieval Group**: `retrieve`, `fetch`, `get`, `request`\n\n### Usage Notes\n\n1. [Verb group + Name] must be unique within the namespace of the workspace.\n2. When referencing an executable, users can use any verb from the appropriate group.\n3. Choose the verb that most accurately describes the action being performed.\n4. Be consistent in verb usage within projects or teams to maintain clarity.\n\n### Examples\n\n- An executable configured with the `activate` verb could also be referenced using \"enable\" or \"start\".\n- A build process might use `build` as its primary verb, but could also be invoked with \"package\" or \"assemble\".\n- A cleanup routine configured with `clean` could be called using \"purge\" or \"sanitize\" for more specific connotations.\n  \nBy organizing verbs into these groups, flow provides flexibility in how actions are described while maintaining a \nclear structure for executable operations.\n",
+      "description": "Keywords that describe the action an executable performs. While executables are configured with a single verb, \nthe verb can be aliased to related verbs within its group. For example, the `activate` verb can be replaced \nwith \"enable\" or \"start\" when referencing an executable. This allows users to use the verb that best describes \nthe action they are performing.\n\n### Verb Groups\n\n- **Activation Group**: `activate`, `enable`, `start`, `trigger`\n- **Execution Group**: `exec`, `run`, `execute`\n- **Deactivation Group**: `deactivate`, `disable`, `stop`, `pause`\n- **Termination Group**: `kill`, `terminate`, `abort`\n- **Monitoring Group**: `watch`, `monitor`, `track`\n- **Restart Group**: `restart`, `reboot`, `reload`, `refresh`\n- **Installation Group**: `install`, `setup`, `deploy`\n- **Build Group**: `build`, `package`, `bundle`, `compile`\n- **Uninstallation Group**: `uninstall`, `teardown`, `undeploy`\n- **Update Group**: `update`, `upgrade`, `patch`\n- **Configuration Group**: `configure`, `manage`\n- **Edit Group**: `edit`, `transform`, `modify`, `fix`\n- **Publish Group**: `publish`, `release`\n- **Distribution Group**: `push`, `send`, `apply`\n- **Test Group**: `test`, `validate`, `check`, `verify`\n- **Analysis Group**: `analyze`, `scan`, `lint`, `inspect`\n- **Launch Group**: `open`, `launch`, `show`, `view`\n- **Creation Group**: `create`, `generate`, `add`, `new`, `init`\n- **Set Group**: `set`\n- **Destruction Group**: `remove`, `delete`, `destroy`, `erase`\n- **Unset Group**: `unset`, `reset`\n- **Cleanup Group**: `clean`, `clear`, `purge`, `tidy`\n- **Retrieval Group**: `retrieve`, `fetch`, `get`, `request`\n- **Debug Group**: `debug`, `trace`, `profile`\n\n### Usage Notes\n\n1. [Verb group + Name] must be unique within the namespace of the workspace.\n2. When referencing an executable, users can use any verb from the appropriate group.\n3. Choose the verb that most accurately describes the action being performed.\n4. Be consistent in verb usage within projects or teams to maintain clarity.\n\n### Examples\n\n- An executable configured with the `activate` verb could also be referenced using \"enable\" or \"start\".\n- A build process might use `build` as its primary verb, but could also be invoked with \"package\" or \"assemble\".\n- A cleanup routine configured with `clean` could be called using \"purge\" or \"sanitize\" for more specific connotations.\n  \nBy organizing verbs into these groups, flow provides flexibility in how actions are described while maintaining a \nclear structure for executable operations.\n",
       "type": "string",
       "default": "exec",
       "enum": [
@@ -553,6 +552,7 @@
         "edit",
         "transform",
         "modify",
+        "fix",
         "publish",
         "release",
         "push",
@@ -589,7 +589,10 @@
         "retrieve",
         "fetch",
         "get",
-        "request"
+        "request",
+        "debug",
+        "trace",
+        "profile"
       ]
     },
     "FromFile": {

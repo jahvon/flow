@@ -47,7 +47,7 @@ func (r *serialRunner) Exec(
 	}
 
 	if len(serialSpec.Execs) > 0 {
-		str, err := store.NewStore()
+		str, err := store.NewStore(store.Path())
 		if err != nil {
 			return err
 		}
