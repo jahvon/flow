@@ -3,9 +3,10 @@ package crypto_test
 import (
 	"testing"
 
-	"github.com/jahvon/flow/internal/crypto"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/jahvon/flow/internal/crypto"
 )
 
 func TestCrypto(t *testing.T) {

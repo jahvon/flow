@@ -92,6 +92,8 @@ issues:
         - gosec
         - noctx
         - wrapcheck
+    - linters: [gosec]
+      text: "G115"
     - linters:
         - staticcheck
       text: "SA5011" # SA5011: Should not use unsafe.Pointer - this throws false positives when a nil check does not result in a return

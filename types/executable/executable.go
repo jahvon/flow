@@ -504,11 +504,23 @@ func MustParseExecutableID(id string) (workspace, namespace, name string) {
 }
 
 func NewExecutableID(workspace, namespace, name string) string {
-	if namespace == "" || namespace == WildcardNamespace {
-		return fmt.Sprintf("%s/%s", workspace, name)
+	var ws, ns string
+	if namespace != "" && namespace != WildcardNamespace {
+		ns = namespace
 	}
-	if workspace == "" || workspace == WildcardWorkspace {
-		return fmt.Sprintf("%s:%s", namespace, name)
+	if workspace != "" && workspace != WildcardWorkspace {
+		ws = workspace
 	}
-	return fmt.Sprintf("%s/%s:%s", workspace, namespace, name)
+
+	switch {
+	case ws == "", ns != "" && name == "":
+		return "" // TODO: return error or log warning
+	case ns != "":
+		return fmt.Sprintf("%s/%s:%s", ws, ns, name)
+	case name != "":
+		return fmt.Sprintf("%s/%s", ws, name)
+	default: // ws != "" && ns == "" && name == ""
+		// for now, exclude the workspace from the string (until we can indicate that it's root / not named in the tui)
+		return ""
+	}
 }
