@@ -168,6 +168,14 @@ func initTestDirectories(t ginkgo.FullGinkgoTInterface) (string, string, string)
 	if err := os.WriteFile(filepath.Join(tmpWsDir, "examples.flow"), execDef, 0600); err != nil {
 		t.Fatalf("unable to write test data: %v", err)
 	}
+	requestsFile := builder.ExamplesRequestExecFlowFile()
+	reqDef, err := yaml.Marshal(requestsFile)
+	if err != nil {
+		t.Fatalf("unable to marshal test data: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmpWsDir, "requests.flow"), reqDef, 0600); err != nil {
+		t.Fatalf("unable to write test data: %v", err)
+	}
 	rootFile := builder.RootExecFlowFile()
 	rootDef, err := yaml.Marshal(rootFile)
 	if err != nil {

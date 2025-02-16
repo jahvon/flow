@@ -41,7 +41,8 @@ executables:
       url: https://httpbin.org/post
       body: '{"hello": "world"}'
       logResponse: true
-      transformResponse: .args.hello = "universe" | .args
+      transformResponse: |
+        "Hello, " + upper(fromJSON(body)["json"]["hello"])
 
   - verb: send
     name: param-request

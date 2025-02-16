@@ -483,7 +483,17 @@ definitions:
         $ref: '#/definitions/RequestResponseFile'
       transformResponse:
         type: string
-        description: JQ query to transform the response before saving it to a file or outputting it.
+        description: |
+          [Expr](https://expr-lang.org/docs/language-definition) expression used to transform the response before 
+          saving it to a file or outputting it.
+          
+          The following variables are available in the expression:
+            - `status`: The response status string.
+            - `code`: The response status code.
+            - `body`: The response body.
+            - `headers`: The response headers.
+          
+          For example, to capitalize a JSON body field's value, you can use `upper(fromJSON(body)["field"])`.
         default: ""
       logResponse:
         type: boolean

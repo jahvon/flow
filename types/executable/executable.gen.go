@@ -325,7 +325,19 @@ type RequestExecutableType struct {
 	// The timeout for the request in Go duration format (e.g. 30s, 5m, 1h).
 	Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty" mapstructure:"timeout,omitempty"`
 
-	// JQ query to transform the response before saving it to a file or outputting it.
+	// [Expr](https://expr-lang.org/docs/language-definition) expression used to
+	// transform the response before
+	// saving it to a file or outputting it.
+	//
+	// The following variables are available in the expression:
+	//   - `status`: The response status string.
+	//   - `code`: The response status code.
+	//   - `body`: The response body.
+	//   - `headers`: The response headers.
+	//
+	// For example, to capitalize a JSON body field's value, you can use
+	// `upper(fromJSON(body)["field"])`.
+	//
 	TransformResponse string `json:"transformResponse,omitempty" yaml:"transformResponse,omitempty" mapstructure:"transformResponse,omitempty"`
 
 	// The URL to make the request to.

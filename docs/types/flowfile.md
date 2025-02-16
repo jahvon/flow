@@ -302,7 +302,7 @@ Makes an HTTP request.
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
 | `responseFile` |  | [ExecutableRequestResponseFile](#ExecutableRequestResponseFile) | <no value> |  |
 | `timeout` | The timeout for the request in Go duration format (e.g. 30s, 5m, 1h). | `string` | 30m0s |  |
-| `transformResponse` | JQ query to transform the response before saving it to a file or outputting it. | `string` |  |  |
+| `transformResponse` | [Expr](https://expr-lang.org/docs/language-definition) expression used to transform the response before  saving it to a file or outputting it.  The following variables are available in the expression:   - `status`: The response status string.   - `code`: The response status code.   - `body`: The response body.   - `headers`: The response headers.  For example, to capitalize a JSON body field's value, you can use `upper(fromJSON(body)["field"])`.  | `string` |  |  |
 | `url` | The URL to make the request to. | `string` |  | ✘ |
 | `validStatusCodes` | A list of valid status codes. If the response status code is not in this list, the executable will fail. If not set, the response status code will not be checked.  | `array` (`integer`) | [] |  |
 

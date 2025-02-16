@@ -390,7 +390,7 @@
           "default": "30m0s"
         },
         "transformResponse": {
-          "description": "JQ query to transform the response before saving it to a file or outputting it.",
+          "description": "[Expr](https://expr-lang.org/docs/language-definition) expression used to transform the response before \nsaving it to a file or outputting it.\n\nThe following variables are available in the expression:\n  - `status`: The response status string.\n  - `code`: The response status code.\n  - `body`: The response body.\n  - `headers`: The response headers.\n\nFor example, to capitalize a JSON body field's value, you can use `upper(fromJSON(body)[\"field\"])`.\n",
           "type": "string",
           "default": ""
         },

@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
+	"os/exec"
 
 	"github.com/jahvon/flow/cmd"
 	"github.com/jahvon/flow/internal/context"
@@ -24,6 +26,10 @@ func (r *CommandRunner) Run(ctx *context.Context, args ...string) (err error) {
 	rootCmd.SetIn(ctx.StdIn())
 	rootCmd.SetOut(ctx.StdOut())
 	if err = cmd.Execute(ctx, rootCmd); err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			err = fmt.Errorf("exit code: %d", exitErr.ExitCode())
+		}
 		return err
 	}
 	return

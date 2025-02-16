@@ -365,9 +365,9 @@ executables:
       url: "http://pi.hole/admin/api.php?disable=$DURATION&auth=$PWHASH"
       logResponse: true # log the response body
       validStatusCodes: [200] # only consider the execution successful if the status code is 200
-      # transform the response body with jq
+      # transform the response body with a Expr expression
       transformResponse: |
-        if .status == "disabled" then .status = "pause" else . end
+        "paused: " + string(fromJSON(body)["status"] == "disabled")
 ```
 
 ##### render
