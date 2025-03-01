@@ -22,7 +22,7 @@ require (
 	github.com/spf13/pflag v1.0.6
 	go.etcd.io/bbolt v1.4.0
 	go.uber.org/mock v0.5.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/exp v0.0.0-20250215185904-eff6e970281f
 	golang.org/x/sync v0.11.0
 	gopkg.in/yaml.v3 v3.0.1
