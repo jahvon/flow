@@ -22,6 +22,7 @@ import (
 type MockRunner struct {
 	ctrl     *gomock.Controller
 	recorder *MockRunnerMockRecorder
+	isgomock struct{}
 }
 
 // MockRunnerMockRecorder is the mock recorder for MockRunner.
@@ -42,31 +43,31 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 }
 
 // Exec mocks base method.
-func (m *MockRunner) Exec(arg0 *context.Context, arg1 *executable.Executable, arg2 engine.Engine, arg3 map[string]string) error {
+func (m *MockRunner) Exec(ctx *context.Context, e *executable.Executable, eng engine.Engine, inputEnv map[string]string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Exec", arg0, arg1, arg2, arg3)
+	ret := m.ctrl.Call(m, "Exec", ctx, e, eng, inputEnv)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Exec indicates an expected call of Exec.
-func (mr *MockRunnerMockRecorder) Exec(arg0, arg1, arg2, arg3 any) *gomock.Call {
+func (mr *MockRunnerMockRecorder) Exec(ctx, e, eng, inputEnv any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRunner)(nil).Exec), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockRunner)(nil).Exec), ctx, e, eng, inputEnv)
 }
 
 // IsCompatible mocks base method.
-func (m *MockRunner) IsCompatible(arg0 *executable.Executable) bool {
+func (m *MockRunner) IsCompatible(executable *executable.Executable) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsCompatible", arg0)
+	ret := m.ctrl.Call(m, "IsCompatible", executable)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
 // IsCompatible indicates an expected call of IsCompatible.
-func (mr *MockRunnerMockRecorder) IsCompatible(arg0 any) *gomock.Call {
+func (mr *MockRunnerMockRecorder) IsCompatible(executable any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsCompatible", reflect.TypeOf((*MockRunner)(nil).IsCompatible), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsCompatible", reflect.TypeOf((*MockRunner)(nil).IsCompatible), executable)
 }
 
 // Name mocks base method.

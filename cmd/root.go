@@ -64,6 +64,7 @@ func RegisterSubCommands(ctx *context.Context, rootCmd *cobra.Command) {
 		panic("root command is not initialized")
 	}
 
+	internal.RegisterAgentCmd(ctx, rootCmd)
 	internal.RegisterExecCmd(ctx, rootCmd)
 	internal.RegisterLibraryCmd(ctx, rootCmd)
 	internal.RegisterConfigCmd(ctx, rootCmd)

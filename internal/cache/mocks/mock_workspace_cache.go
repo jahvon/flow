@@ -22,6 +22,7 @@ import (
 type MockWorkspaceCache struct {
 	ctrl     *gomock.Controller
 	recorder *MockWorkspaceCacheMockRecorder
+	isgomock struct{}
 }
 
 // MockWorkspaceCacheMockRecorder is the mock recorder for MockWorkspaceCache.
@@ -56,45 +57,45 @@ func (mr *MockWorkspaceCacheMockRecorder) GetData() *gomock.Call {
 }
 
 // GetLatestData mocks base method.
-func (m *MockWorkspaceCache) GetLatestData(arg0 io.Logger) (*cache.WorkspaceCacheData, error) {
+func (m *MockWorkspaceCache) GetLatestData(logger io.Logger) (*cache.WorkspaceCacheData, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetLatestData", arg0)
+	ret := m.ctrl.Call(m, "GetLatestData", logger)
 	ret0, _ := ret[0].(*cache.WorkspaceCacheData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetLatestData indicates an expected call of GetLatestData.
-func (mr *MockWorkspaceCacheMockRecorder) GetLatestData(arg0 any) *gomock.Call {
+func (mr *MockWorkspaceCacheMockRecorder) GetLatestData(logger any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatestData", reflect.TypeOf((*MockWorkspaceCache)(nil).GetLatestData), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatestData", reflect.TypeOf((*MockWorkspaceCache)(nil).GetLatestData), logger)
 }
 
 // GetWorkspaceConfigList mocks base method.
-func (m *MockWorkspaceCache) GetWorkspaceConfigList(arg0 io.Logger) (workspace.WorkspaceList, error) {
+func (m *MockWorkspaceCache) GetWorkspaceConfigList(logger io.Logger) (workspace.WorkspaceList, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWorkspaceConfigList", arg0)
+	ret := m.ctrl.Call(m, "GetWorkspaceConfigList", logger)
 	ret0, _ := ret[0].(workspace.WorkspaceList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetWorkspaceConfigList indicates an expected call of GetWorkspaceConfigList.
-func (mr *MockWorkspaceCacheMockRecorder) GetWorkspaceConfigList(arg0 any) *gomock.Call {
+func (mr *MockWorkspaceCacheMockRecorder) GetWorkspaceConfigList(logger any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkspaceConfigList", reflect.TypeOf((*MockWorkspaceCache)(nil).GetWorkspaceConfigList), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkspaceConfigList", reflect.TypeOf((*MockWorkspaceCache)(nil).GetWorkspaceConfigList), logger)
 }
 
 // Update mocks base method.
-func (m *MockWorkspaceCache) Update(arg0 io.Logger) error {
+func (m *MockWorkspaceCache) Update(logger io.Logger) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0)
+	ret := m.ctrl.Call(m, "Update", logger)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockWorkspaceCacheMockRecorder) Update(arg0 any) *gomock.Call {
+func (mr *MockWorkspaceCacheMockRecorder) Update(logger any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockWorkspaceCache)(nil).Update), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockWorkspaceCache)(nil).Update), logger)
 }

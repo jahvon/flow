@@ -21,6 +21,7 @@ import (
 type MockExecutableCache struct {
 	ctrl     *gomock.Controller
 	recorder *MockExecutableCacheMockRecorder
+	isgomock struct{}
 }
 
 // MockExecutableCacheMockRecorder is the mock recorder for MockExecutableCache.
@@ -41,45 +42,45 @@ func (m *MockExecutableCache) EXPECT() *MockExecutableCacheMockRecorder {
 }
 
 // GetExecutableByRef mocks base method.
-func (m *MockExecutableCache) GetExecutableByRef(arg0 io.Logger, arg1 executable.Ref) (*executable.Executable, error) {
+func (m *MockExecutableCache) GetExecutableByRef(logger io.Logger, ref executable.Ref) (*executable.Executable, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetExecutableByRef", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetExecutableByRef", logger, ref)
 	ret0, _ := ret[0].(*executable.Executable)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetExecutableByRef indicates an expected call of GetExecutableByRef.
-func (mr *MockExecutableCacheMockRecorder) GetExecutableByRef(arg0, arg1 any) *gomock.Call {
+func (mr *MockExecutableCacheMockRecorder) GetExecutableByRef(logger, ref any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExecutableByRef", reflect.TypeOf((*MockExecutableCache)(nil).GetExecutableByRef), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExecutableByRef", reflect.TypeOf((*MockExecutableCache)(nil).GetExecutableByRef), logger, ref)
 }
 
 // GetExecutableList mocks base method.
-func (m *MockExecutableCache) GetExecutableList(arg0 io.Logger) (executable.ExecutableList, error) {
+func (m *MockExecutableCache) GetExecutableList(logger io.Logger) (executable.ExecutableList, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetExecutableList", arg0)
+	ret := m.ctrl.Call(m, "GetExecutableList", logger)
 	ret0, _ := ret[0].(executable.ExecutableList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetExecutableList indicates an expected call of GetExecutableList.
-func (mr *MockExecutableCacheMockRecorder) GetExecutableList(arg0 any) *gomock.Call {
+func (mr *MockExecutableCacheMockRecorder) GetExecutableList(logger any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExecutableList", reflect.TypeOf((*MockExecutableCache)(nil).GetExecutableList), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExecutableList", reflect.TypeOf((*MockExecutableCache)(nil).GetExecutableList), logger)
 }
 
 // Update mocks base method.
-func (m *MockExecutableCache) Update(arg0 io.Logger) error {
+func (m *MockExecutableCache) Update(logger io.Logger) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", arg0)
+	ret := m.ctrl.Call(m, "Update", logger)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockExecutableCacheMockRecorder) Update(arg0 any) *gomock.Call {
+func (mr *MockExecutableCacheMockRecorder) Update(logger any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockExecutableCache)(nil).Update), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockExecutableCache)(nil).Update), logger)
 }

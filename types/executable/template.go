@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o template.gen.go template_schema.yaml
+//go:generate go tool go-jsonschema -et --only-models -p executable -o template.gen.go template_schema.yaml
 
 const FlowFileTemplateExt = ".flow.tmpl"
 

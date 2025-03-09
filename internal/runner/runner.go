@@ -9,7 +9,7 @@ import (
 	"github.com/jahvon/flow/types/executable"
 )
 
-//go:generate mockgen -destination=mocks/mock_runner.go -package=mocks github.com/jahvon/flow/internal/runner Runner
+//go:generate go tool mockgen -destination=mocks/mock_runner.go -package=mocks github.com/jahvon/flow/internal/runner Runner
 type Runner interface {
 	Name() string
 	Exec(ctx *context.Context, e *executable.Executable, eng engine.Engine, inputEnv map[string]string) error

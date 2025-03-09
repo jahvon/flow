@@ -18,7 +18,7 @@ import (
 	"github.com/jahvon/flow/types/common"
 )
 
-//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o executable.gen.go --capitalization URI --capitalization URL executable_schema.yaml
+//go:generate go tool go-jsonschema -et --only-models -p executable -o executable.gen.go --capitalization URI --capitalization URL executable_schema.yaml
 
 const (
 	TmpDirLabel    = "f:tmp"

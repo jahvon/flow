@@ -14,7 +14,7 @@ import (
 
 const execCacheKey = "executables"
 
-//go:generate mockgen -destination=mocks/mock_executable_cache.go -package=mocks github.com/jahvon/flow/internal/cache ExecutableCache
+//go:generate go tool mockgen -destination=mocks/mock_executable_cache.go -package=mocks github.com/jahvon/flow/internal/cache ExecutableCache
 type ExecutableCache interface {
 	Update(logger io.Logger) error
 	GetExecutableByRef(logger io.Logger, ref executable.Ref) (*executable.Executable, error)

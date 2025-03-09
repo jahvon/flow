@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p common -o common.gen.go schema.yaml
+//go:generate go tool go-jsonschema -et --only-models -p common -o common.gen.go schema.yaml
 
 func (a Aliases) HasAlias(alias string) bool {
 	if alias == "" {

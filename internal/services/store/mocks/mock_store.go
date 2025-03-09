@@ -19,6 +19,7 @@ import (
 type MockStore struct {
 	ctrl     *gomock.Controller
 	recorder *MockStoreMockRecorder
+	isgomock struct{}
 }
 
 // MockStoreMockRecorder is the mock recorder for MockStore.
@@ -53,75 +54,75 @@ func (mr *MockStoreMockRecorder) Close() *gomock.Call {
 }
 
 // CreateAndSetBucket mocks base method.
-func (m *MockStore) CreateAndSetBucket(arg0 string) (string, error) {
+func (m *MockStore) CreateAndSetBucket(id string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAndSetBucket", arg0)
+	ret := m.ctrl.Call(m, "CreateAndSetBucket", id)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateAndSetBucket indicates an expected call of CreateAndSetBucket.
-func (mr *MockStoreMockRecorder) CreateAndSetBucket(arg0 any) *gomock.Call {
+func (mr *MockStoreMockRecorder) CreateAndSetBucket(id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAndSetBucket", reflect.TypeOf((*MockStore)(nil).CreateAndSetBucket), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAndSetBucket", reflect.TypeOf((*MockStore)(nil).CreateAndSetBucket), id)
 }
 
 // CreateBucket mocks base method.
-func (m *MockStore) CreateBucket(arg0 string) error {
+func (m *MockStore) CreateBucket(id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateBucket", arg0)
+	ret := m.ctrl.Call(m, "CreateBucket", id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateBucket indicates an expected call of CreateBucket.
-func (mr *MockStoreMockRecorder) CreateBucket(arg0 any) *gomock.Call {
+func (mr *MockStoreMockRecorder) CreateBucket(id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBucket", reflect.TypeOf((*MockStore)(nil).CreateBucket), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBucket", reflect.TypeOf((*MockStore)(nil).CreateBucket), id)
 }
 
 // Delete mocks base method.
-func (m *MockStore) Delete(arg0 string) error {
+func (m *MockStore) Delete(key string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", arg0)
+	ret := m.ctrl.Call(m, "Delete", key)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockStoreMockRecorder) Delete(arg0 any) *gomock.Call {
+func (mr *MockStoreMockRecorder) Delete(key any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStore)(nil).Delete), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStore)(nil).Delete), key)
 }
 
 // DeleteBucket mocks base method.
-func (m *MockStore) DeleteBucket(arg0 string) error {
+func (m *MockStore) DeleteBucket(id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteBucket", arg0)
+	ret := m.ctrl.Call(m, "DeleteBucket", id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteBucket indicates an expected call of DeleteBucket.
-func (mr *MockStoreMockRecorder) DeleteBucket(arg0 any) *gomock.Call {
+func (mr *MockStoreMockRecorder) DeleteBucket(id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBucket", reflect.TypeOf((*MockStore)(nil).DeleteBucket), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteBucket", reflect.TypeOf((*MockStore)(nil).DeleteBucket), id)
 }
 
 // Get mocks base method.
-func (m *MockStore) Get(arg0 string) (string, error) {
+func (m *MockStore) Get(key string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", arg0)
+	ret := m.ctrl.Call(m, "Get", key)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockStoreMockRecorder) Get(arg0 any) *gomock.Call {
+func (mr *MockStoreMockRecorder) Get(key any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), key)
 }
 
 // GetAll mocks base method.
@@ -155,15 +156,15 @@ func (mr *MockStoreMockRecorder) GetKeys() *gomock.Call {
 }
 
 // Set mocks base method.
-func (m *MockStore) Set(arg0, arg1 string) error {
+func (m *MockStore) Set(key, value string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Set", arg0, arg1)
+	ret := m.ctrl.Call(m, "Set", key, value)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Set indicates an expected call of Set.
-func (mr *MockStoreMockRecorder) Set(arg0, arg1 any) *gomock.Call {
+func (mr *MockStoreMockRecorder) Set(key, value any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockStore)(nil).Set), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockStore)(nil).Set), key, value)
 }

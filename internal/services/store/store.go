@@ -21,7 +21,7 @@ const (
 	storeFileName = "store.db"
 )
 
-//go:generate mockgen -destination=mocks/mock_store.go -package=mocks github.com/jahvon/flow/internal/services/store Store
+//go:generate go tool mockgen -destination=mocks/mock_store.go -package=mocks github.com/jahvon/flow/internal/services/store Store
 type Store interface {
 	CreateBucket(id string) error
 	CreateAndSetBucket(id string) (string, error)

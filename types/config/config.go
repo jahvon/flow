@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p config -o config.gen.go schema.yaml
+//go:generate go tool go-jsonschema -et --only-models -p config -o config.gen.go schema.yaml
 
 func (c *Config) Validate() error {
 	if c.CurrentWorkspace == "" {
