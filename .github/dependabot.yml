@@ -21,6 +21,9 @@ updates:
       charmbracelet-deps:
           patterns:
               - "github.com/charmbracelet/*"
+      koanf-deps:
+          patterns:
+              - "github.com/knadh/koanf/*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
