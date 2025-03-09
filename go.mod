@@ -18,7 +18,7 @@ require (
 	github.com/onsi/gomega v1.36.2
 	github.com/otiai10/copy v1.14.1
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.9.0
+	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	go.etcd.io/bbolt v1.4.0
 	go.uber.org/mock v0.5.0
