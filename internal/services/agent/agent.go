@@ -1,6 +1,8 @@
 package agent
 
 import (
+	"sync"
+
 	"github.com/jahvon/tuikit/io"
 	"github.com/kardianos/service"
 
@@ -8,6 +10,7 @@ import (
 )
 
 type Agent interface {
+	Run()
 	Start(s service.Service) error
 	Stop(s service.Service) error
 	Status() (State, error)
@@ -24,17 +27,45 @@ type agent struct {
 	service   service.Service
 	options   *Options
 	logger    io.Logger
-	execCache *cache.ExecutableCache
+	execCache cache.ExecutableCache
+
+	queue chan string
+	mu    sync.RWMutex
 }
 
-func NewAgent(logger io.Logger, execCache *cache.ExecutableCache, options *Options) (Agent, error) {
-	return nil, nil
+func NewAgent(logger io.Logger, execCache cache.ExecutableCache, options *Options) (Agent, error) {
+	svcCfg := &service.Config{Name: "flow"}
+	a := &agent{
+		options:   options,
+		logger:    logger,
+		execCache: execCache,
+		queue:     make(chan string),
+		mu:        sync.RWMutex{},
+	}
+	svc, err := service.New(a, svcCfg)
+	if err != nil {
+		return nil, err
+	}
+	a.service = svc
+	return a, nil
 }
 
 func (a *agent) Start(s service.Service) error {
 	// This is called by kardianos/service when the agent is started
 	// Implement the initialization logic here
+	go func() {
+		for {
+			select {
+			case task := <-a.queue:
+				a.logger.Infof("Hello task %s", task)
+			}
+		}
+	}()
 	return nil
+}
+
+func (a *agent) Run() {
+	_ = a.Start(a.service)
 }
 
 func (a *agent) Stop(s service.Service) error {
@@ -50,6 +81,7 @@ func (a *agent) Status() (State, error) {
 
 func (a *agent) Enqueue(task ExecutableTask) error {
 	// Implement task queuing logic
+
 	return nil
 }
 

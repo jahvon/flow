@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/internal/context"
+	agent2 "github.com/jahvon/flow/internal/services/agent"
 )
 
 func RegisterAgentCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -36,6 +37,11 @@ func registerAgentInstallCmd(ctx *context.Context, agentCmd *cobra.Command) {
 
 func agentInstallFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	// Implement agent installation command
+	agent, err := agent2.NewAgent(ctx.Logger, ctx.ExecutableCache, nil)
+	if err != nil {
+		panic(err)
+	}
+	agent.Run()
 }
 
 func registerAgentUninstallCmd(ctx *context.Context, agentCmd *cobra.Command) {
