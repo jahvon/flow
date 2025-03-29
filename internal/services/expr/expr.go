@@ -36,7 +36,7 @@ func IsTruthy(ex string, env any) (bool, error) {
 }
 
 func Evaluate(ex string, env any) (interface{}, error) {
-	program, err := expr.Compile(ex, expr.Env(env))
+	program, err := expr.Compile(ex)
 	if err != nil {
 		return nil, err
 	}
