@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 	"strings"
 	"text/template"
@@ -63,7 +64,13 @@ func (t *Template) compileExpr(expression string) (*vm.Program, error) {
 		return node, nil
 	}
 
-	compiled, err := expr.Compile(expression, expr.Env(t.data))
+	var compiled *vm.Program
+	var err error
+	if t.data == nil || reflect.ValueOf(t.data).IsNil() {
+		compiled, err = expr.Compile(expression)
+	} else {
+		compiled, err = expr.Compile(expression, expr.Env(t.data))
+	}
 	if err != nil {
 		return nil, err
 	}

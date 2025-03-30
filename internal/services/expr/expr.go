@@ -3,11 +3,13 @@ package expr
 import (
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
 
 	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/types/executable"
@@ -36,7 +38,13 @@ func IsTruthy(ex string, env any) (bool, error) {
 }
 
 func Evaluate(ex string, env any) (interface{}, error) {
-	program, err := expr.Compile(ex)
+	var program *vm.Program
+	var err error
+	if env == nil || reflect.ValueOf(env).IsNil() {
+		program, err = expr.Compile(ex)
+	} else {
+		program, err = expr.Compile(ex, expr.Env(env))
+	}
 	if err != nil {
 		return nil, err
 	}

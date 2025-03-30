@@ -2,7 +2,7 @@ package templates
 
 import "runtime"
 
-type expressionData map[string]interface{}
+type expressionData = map[string]interface{}
 
 func newExpressionData(
 	ws, wsPath, flowfileName, flowfileDir, flowfilePath, templatePath string,
