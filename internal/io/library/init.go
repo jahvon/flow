@@ -55,13 +55,14 @@ func (l *Library) setVisibleExecs() {
 	}
 
 	curNs := l.filter.Namespace
-	if l.showNamespaces && len(l.visibleNamespaces) > 0 { //nolint:nestif
+	if l.showNamespaces && len(l.visibleNamespaces) > 0 {
 		if label := l.visibleNamespaces[l.currentNamespace]; label != "" {
-			if label == withoutNamespaceLabel {
+			switch label {
+			case withoutNamespaceLabel:
 				curNs = ""
-			} else if label == allNamespacesLabel {
+			case allNamespacesLabel:
 				curNs = executable.WildcardNamespace
-			} else {
+			default:
 				curNs = label
 			}
 		}
@@ -89,10 +90,10 @@ func (l *Library) setVisibleWorkspaces() {
 
 	filter := l.filter
 	filteredWs := l.allWorkspaces
-	switch {
-	case filter.Workspace == "":
+	switch filter.Workspace {
+	case "":
 		// do nothing
-	case filter.Workspace == allWorkspacesLabel || filter.Workspace == executable.WildcardWorkspace:
+	case allWorkspacesLabel, executable.WildcardWorkspace:
 		// do nothing
 	default:
 		for _, ws := range filteredWs {

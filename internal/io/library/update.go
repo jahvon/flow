@@ -57,9 +57,10 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	wsPane, wsCmd := l.updateWsPane(msg)
 	l.paneZeroViewport = wsPane
 	execPane, execCmd := l.updateExecPanes(msg)
-	if l.currentPane == 1 {
+	switch l.currentPane {
+	case 1:
 		l.paneOneViewport = execPane
-	} else if l.currentPane == 2 {
+	case 2:
 		l.paneTwoViewport = execPane
 	}
 
@@ -190,9 +191,10 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 	}
 
 	var pane viewport.Model
-	if l.currentPane == 1 {
+	switch l.currentPane {
+	case 1:
 		pane = l.paneOneViewport
-	} else if l.currentPane == 2 {
+	case 2:
 		pane = l.paneTwoViewport
 	}
 
