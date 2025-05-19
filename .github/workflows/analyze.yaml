@@ -54,7 +54,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.64.5
+          version: v2.1.6
           args: --out-format=sarif:results.sarif,colored-line-number,github-actions
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3

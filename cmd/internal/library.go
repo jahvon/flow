@@ -44,9 +44,10 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
-	if wsFilter == "." {
+	switch wsFilter {
+	case ".":
 		wsFilter = ctx.Config.CurrentWorkspace
-	} else if wsFilter == executable.WildcardWorkspace {
+	case executable.WildcardWorkspace:
 		wsFilter = ""
 	}
 

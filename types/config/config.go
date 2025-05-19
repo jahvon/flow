@@ -83,10 +83,11 @@ func (c *Config) JSON() (string, error) {
 func (c *Config) Markdown() string {
 	mkdwn := "# Global Configurations\n"
 	mkdwn += fmt.Sprintf("**Current workspace:** `%s`\n", c.CurrentWorkspace)
-	if c.WorkspaceMode == ConfigWorkspaceModeFixed {
+	switch c.WorkspaceMode {
+	case ConfigWorkspaceModeFixed:
 		mkdwn += "*Workspace mode is set to fixed. This means that your working directory will have no impact on the " +
 			"current workspace.*\n\n"
-	} else if c.WorkspaceMode == ConfigWorkspaceModeDynamic {
+	case ConfigWorkspaceModeDynamic:
 		mkdwn += "*Workspace mode is set to dynamic. This means that your current workspace is also determined by " +
 			"your working directory.*\n\n"
 	}

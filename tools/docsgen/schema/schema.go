@@ -140,7 +140,7 @@ func MergeSchemas(dst, src *JSONSchema, dstFile FileName, schemaMap map[FileName
 
 	src.Ref = convertToLocalSchemaRef(src.Ref, dstFile)
 	if _, found := dst.Definitions[src.Ref.Key()]; !found {
-		var d JSONSchema //nolint:gosimple
+		var d JSONSchema
 		d = *match
 		d.Schema = ""
 		d.Definitions = nil
