@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 	"github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -69,14 +69,14 @@ var _ = ginkgo.Describe("Context", func() {
 	})
 
 	ginkgo.Describe("overrideThemeColor", func() {
-		var theme styles.Theme
+		var theme themes.Theme
 		var palette *config.ColorPalette
 
 		ginkgo.BeforeEach(func() {
-			theme = styles.Theme{
-				PrimaryColor:   "#000000",
-				SecondaryColor: "#FFFFFF",
-			}
+			theme = themes.NewTheme("theme", themes.ColorPalette{
+				Primary:   "#000000",
+				Secondary: "#FFFFFF",
+			})
 			palette = &config.ColorPalette{
 				Primary:   strPtr("#FF0000"),
 				Secondary: strPtr("#00FF00"),
@@ -85,8 +85,8 @@ var _ = ginkgo.Describe("Context", func() {
 
 		ginkgo.It("should override the theme colors with the palette colors", func() {
 			newTheme := overrideThemeColor(theme, palette)
-			Expect(newTheme.PrimaryColor).To(Equal(lipgloss.Color("#FF0000")))
-			Expect(newTheme.SecondaryColor).To(Equal(lipgloss.Color("#00FF00")))
+			Expect(newTheme.ColorPalette().PrimaryColor()).To(Equal(lipgloss.Color("#FF0000")))
+			Expect(newTheme.ColorPalette().SecondaryColor()).To(Equal(lipgloss.Color("#00FF00")))
 		})
 
 		ginkgo.It("should not change the theme if the palette is nil", func() {

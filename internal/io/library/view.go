@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/v2"
 	"github.com/jahvon/glamour"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 
 	"github.com/jahvon/flow/types/common"
 	"github.com/jahvon/flow/types/workspace"
@@ -35,7 +35,7 @@ const (
 var (
 	// heightPadding is used when determining the height of the panes.
 	// It is used to account for the header and footer
-	heightPadding = styles.HeaderHeight + styles.FooterHeight
+	heightPadding = themes.HeaderHeight + themes.FooterHeight
 )
 
 func (l *Library) View() string {
@@ -76,9 +76,9 @@ func (l *Library) View() string {
 	return lipgloss.JoinVertical(lipgloss.Top, header, panes, footer)
 }
 
-func (l *Library) SetNotice(notice string, level styles.OutputLevel) {
+func (l *Library) SetNotice(notice string, level themes.OutputLevel) {
 	if level == "" {
-		level = styles.OutputLevelInfo
+		level = themes.OutputLevelInfo
 	}
 	l.noticeText = l.theme.RenderLevel(notice, level)
 }
@@ -87,12 +87,12 @@ func (l *Library) setSize() {
 	l.termWidth = l.ctx.TUIContainer.Width()
 	l.termHeight = l.ctx.TUIContainer.Height()
 	p0, p1, p2 := calculateViewportWidths(l.termWidth-widthPadding, l.splitView)
-	l.paneZeroViewport.Width = p0
-	l.paneOneViewport.Width = p1
-	l.paneTwoViewport.Width = p2
-	l.paneZeroViewport.Height = l.termHeight - heightPadding
-	l.paneOneViewport.Height = l.termHeight - heightPadding
-	l.paneTwoViewport.Height = l.termHeight - heightPadding
+	l.paneZeroViewport.SetWidth(p0)
+	l.paneOneViewport.SetWidth(p1)
+	l.paneTwoViewport.SetWidth(p2)
+	l.paneZeroViewport.SetHeight(l.termHeight - heightPadding)
+	l.paneOneViewport.SetHeight(l.termHeight - heightPadding)
+	l.paneTwoViewport.SetHeight(l.termHeight - heightPadding)
 }
 
 func (l *Library) paneZeroContent() string {
@@ -190,7 +190,7 @@ func (l *Library) paneTwoContent() string {
 
 	_, _, maxWidth := calculateViewportWidths(l.termWidth, l.splitView)
 	paneTwoMaxWidth := math.Floor(float64(maxWidth) * 0.95)
-	mdStyles, err := l.theme.MarkdownStyleJSON()
+	mdStyles, err := l.theme.GlamourMarkdownStyleJSON()
 	if err != nil {
 		return l.theme.RenderError(fmt.Sprintf("unable to render markdown: %s", err.Error()))
 	}
