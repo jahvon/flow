@@ -6,7 +6,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 
@@ -41,7 +41,7 @@ func NewExecutableView(
 				if err := clipboard.WriteAll(exec.Ref().String()); err != nil {
 					container.HandleError(fmt.Errorf("unable to copy reference to clipboard: %w", err))
 				} else {
-					container.SetNotice("copied reference to clipboard", styles.OutputLevelInfo)
+					container.SetNotice("copied reference to clipboard", themes.OutputLevelInfo)
 				}
 				return nil
 			},
@@ -112,7 +112,7 @@ func NewTemplateView(
 				if err := clipboard.WriteAll(template.Location()); err != nil {
 					container.HandleError(fmt.Errorf("unable to copy location to clipboard: %w", err))
 				} else {
-					container.SetNotice("copied location to clipboard", styles.OutputLevelInfo)
+					container.SetNotice("copied location to clipboard", themes.OutputLevelInfo)
 				}
 				return nil
 			},

@@ -3,9 +3,9 @@ package library
 import (
 	"fmt"
 
-	"github.com/charmbracelet/bubbles/viewport"
+	"github.com/charmbracelet/bubbles/v2/viewport"
 	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 	"github.com/jahvon/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
@@ -30,7 +30,7 @@ type Library struct {
 	allWorkspaces      workspace.WorkspaceList
 	allExecutables     executable.ExecutableList
 	filter             Filter
-	theme              styles.Theme
+	theme              themes.Theme
 
 	currentPane, currentWorkspace, currentNamespace, currentExecutable uint
 	currentFormat, currentHelpPage                                     uint
@@ -51,12 +51,12 @@ func NewLibrary(
 	workspaces workspace.WorkspaceList,
 	execs executable.ExecutableList,
 	filter Filter,
-	theme styles.Theme,
+	theme themes.Theme,
 	runFunc func(string) error,
 ) *Library {
-	p1 := viewport.New(0, 0)
-	p2 := viewport.New(0, 0)
-	p3 := viewport.New(0, 0)
+	p1 := viewport.New()
+	p2 := viewport.New()
+	p3 := viewport.New()
 	return &Library{
 		ctx:                ctx,
 		allWorkspaces:      workspaces,
@@ -78,7 +78,7 @@ func NewLibraryView(
 	workspaces workspace.WorkspaceList,
 	execs executable.ExecutableList,
 	filter Filter,
-	theme styles.Theme,
+	theme themes.Theme,
 	runFunc func(string) error,
 ) tuikit.View {
 	l := NewLibrary(ctx, workspaces, execs, filter, theme, runFunc)

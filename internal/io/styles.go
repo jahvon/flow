@@ -1,10 +1,10 @@
 package io
 
-import "github.com/jahvon/tuikit/styles"
+import "github.com/jahvon/tuikit/themes"
 
-func Theme(name string) styles.Theme {
-	theme := styles.EverforestTheme()
-	themeFunc, ok := styles.AllThemes()[name]
+func Theme(name string) themes.Theme {
+	theme := themes.EverforestTheme()
+	themeFunc, ok := themes.AllThemes()[name]
 	if ok {
 		theme = themeFunc()
 	}

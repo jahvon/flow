@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 
@@ -44,7 +44,7 @@ func NewSecretView(
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret renamed", styles.OutputLevelInfo)
+				container.SetNotice("secret renamed", themes.OutputLevelInfo)
 				return nil
 			},
 		},
@@ -73,7 +73,7 @@ func NewSecretView(
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret value updated", styles.OutputLevelInfo)
+				container.SetNotice("secret value updated", themes.OutputLevelInfo)
 				return nil
 			},
 		},
@@ -85,7 +85,7 @@ func NewSecretView(
 					return nil
 				}
 				LoadSecretListView(ctx, asPlainText)
-				container.SetNotice("secret deleted", styles.OutputLevelInfo)
+				container.SetNotice("secret deleted", themes.OutputLevelInfo)
 				return nil
 			},
 		},
