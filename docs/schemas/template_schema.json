@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Template",
   "$id": "https://flowexec.io/schemas/template_schema.json",
   "description": "Configuration for a flowfile template; templates can be used to generate flow files.",
   "type": "object",

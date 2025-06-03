@@ -22,6 +22,7 @@ func (f FieldKey) Title() string {
 type JSONSchema struct {
 	Schema               string                   `json:"$schema,omitempty"              yaml:"$schema,omitempty"`
 	Ref                  Ref                      `json:"$ref,omitempty"                 yaml:"$ref,omitempty"`
+	Title                string                   `json:"title,omitempty"                yaml:"title,omitempty"`
 	ID                   string                   `json:"$id,omitempty"                  yaml:"$id,omitempty"`
 	Description          string                   `json:"description,omitempty"          yaml:"description,omitempty"`
 	Type                 string                   `json:"type,omitempty"                 yaml:"type,omitempty"`

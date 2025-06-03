@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FlowFile",
   "$id": "https://flowexec.io/schemas/flowfile_schema.json",
   "description": "Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered \nby the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).\nA workspace can have multiple flow files located anywhere in the workspace directory\n",
   "type": "object",
@@ -30,6 +31,7 @@
       ]
     },
     "Executable": {
+      "title": "Executable",
       "description": "The executable schema defines the structure of an executable in the Flow CLI.\nExecutables are the building blocks of workflows and are used to define the actions that can be performed in a workspace.\n",
       "type": "object",
       "required": [
