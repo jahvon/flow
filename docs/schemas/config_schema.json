@@ -121,6 +121,7 @@
       "default": "default",
       "enum": [
         "default",
+        "everforest",
         "dark",
         "light",
         "dracula",

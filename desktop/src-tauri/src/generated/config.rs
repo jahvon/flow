@@ -207,6 +207,7 @@ impl ColorPalette {
 #[doc = "      \"type\": \"string\","]
 #[doc = "      \"enum\": ["]
 #[doc = "        \"default\","]
+#[doc = "        \"everforest\","]
 #[doc = "        \"dark\","]
 #[doc = "        \"light\","]
 #[doc = "        \"dracula\","]
@@ -298,6 +299,7 @@ impl Config {
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
 #[doc = "    \"default\","]
+#[doc = "    \"everforest\","]
 #[doc = "    \"dark\","]
 #[doc = "    \"light\","]
 #[doc = "    \"dracula\","]
@@ -321,6 +323,8 @@ impl Config {
 pub enum ConfigTheme {
     #[serde(rename = "default")]
     Default,
+    #[serde(rename = "everforest")]
+    Everforest,
     #[serde(rename = "dark")]
     Dark,
     #[serde(rename = "light")]
@@ -339,6 +343,7 @@ impl ::std::fmt::Display for ConfigTheme {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match *self {
             Self::Default => write!(f, "default"),
+            Self::Everforest => write!(f, "everforest"),
             Self::Dark => write!(f, "dark"),
             Self::Light => write!(f, "light"),
             Self::Dracula => write!(f, "dracula"),
@@ -351,6 +356,7 @@ impl ::std::str::FromStr for ConfigTheme {
     fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
         match value {
             "default" => Ok(Self::Default),
+            "everforest" => Ok(Self::Everforest),
             "dark" => Ok(Self::Dark),
             "light" => Ok(Self::Light),
             "dracula" => Ok(Self::Dracula),

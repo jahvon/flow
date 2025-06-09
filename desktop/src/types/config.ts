@@ -56,7 +56,7 @@ export interface Config {
   /**
    * The theme of the interactive UI.
    */
-  theme?: 'default' | 'dark' | 'light' | 'dracula' | 'tokyo-night';
+  theme?: 'default' | 'everforest' | 'dark' | 'light' | 'dracula' | 'tokyo-night';
   /**
    * The mode of the workspace. This can be either `fixed` or `dynamic`.
    * In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.

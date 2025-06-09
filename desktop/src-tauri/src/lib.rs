@@ -1,64 +1,92 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use std::process::Stdio;
-use std::process::Command;
-use serde_json::Result;
-use serde::{Deserialize, Serialize};
+use std::result::Result;
+use std::sync::Arc;
+use tauri::Manager;
+use std::collections::HashMap;
 
-// Add this to expose the generated types
 pub mod generated;
+pub mod command_runner;
+pub mod cache;
 
-// Re-export for convenience
 pub use generated::*;
+pub use command_runner::{CommandRunner, CommandError, CommandResult};
+pub use cache::Cache;
 
-#[derive(Serialize, Deserialize)]
-struct WorkspacesData {
-    workspaces: Vec<workspace::Workspace>,
+#[tauri::command]
+async fn get_config() -> Result<config::Config, String> {
+  let runner = CommandRunner::new();
+  runner.get_config().await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn get_workspace(name: String, state: tauri::State<'_, Arc<Cache>>) -> Result<Option<workspace::Workspace>, String> {
+    let cache = state.get_workspace_cache();
+    if let Some(cache) = cache {
+        Ok(cache.workspaces.get(&name).cloned())
+    } else {
+        Ok(None)
+    }
 }
 
 #[tauri::command]
-fn workspaces() -> WorkspacesData {
-//     let mut output = run_cmd!(flow ws list --output json -x --verbosity -1);
-// //     println!("{}", output.ok())
-//     // print the output from the above command
-//     match output {
-//         Ok(result) => Ok(result),
-//         Err(err) => eprintln!("Error executing command: {}", err),
-//     }
-    let output = Command::new("flow")
-        .args(["ws", "list", "--output", "json", "-x", "--verbosity", "-1"])
-        // Tell the OS to record the command's output
-        .stdout(Stdio::piped())
-        // execute the command, wait for it to complete, then capture the output
-        .output()
-        // Blow up if the OS was unable to start the program
-        .unwrap();
+async fn list_workspaces(state: tauri::State<'_, Arc<Cache>>) -> Result<cache::WorkspaceCacheData, String> {
+    let cache = state.get_workspace_cache();
+    if let Some(cache) = cache {
+        Ok(cache)
+    } else {
+        Ok(cache::WorkspaceCacheData {
+            workspaces: HashMap::new(),
+            workspace_locations: HashMap::new(),
+        })
+    }
+}
 
-    // extract the raw bytes that we captured and interpret them as a string
-    let stdout = String::from_utf8(output.stdout).unwrap();
+#[tauri::command]
+async fn get_executable(executable_id: String) -> Result<flowfile::Executable, String> {
+    let runner = CommandRunner::new();
+    runner.get_executable(&executable_id).await.map_err(|e| e.to_string())
+}
 
-    let d: Result<WorkspacesData> = serde_json::from_str(&stdout);
-//     match d {
-//         Ok(result) => Ok(result),
-//         Err(err) => eprintln!("{}", err),
-//     }
+#[tauri::command]
+async fn list_executables(workspace: Option<String>, namespace: Option<String>) -> Result<Vec<flowfile::Executable>, String> {
+    let runner = CommandRunner::new();
+    runner.list_executables(
+        workspace.as_deref(),
+        namespace.as_deref(),
+    ).await.map_err(|e| e.to_string())
+}
 
-    return d.unwrap();
+#[tauri::command]
+async fn sync() -> Result<(), String> {
+    let runner = CommandRunner::new();
+    runner.sync().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn execute(verb: String, executable_id: String, args: Vec<String>) -> Result<(), String> {
+    let runner = CommandRunner::new();
+    let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    runner.execute(&verb, &executable_id, &args).await.map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-//     run_cmd!(flow ws list --output json -x --verbosity -1);
-
-workspaces();
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
-        .invoke_handler(tauri::generate_handler![workspaces])
+        .setup(|app| {
+            let cache = Arc::new(Cache::new(app.handle().clone()));
+            cache.init()?;
+            app.manage(cache);
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            sync,
+            execute,
+            list_executables,
+            get_executable,
+            get_workspace,
+            list_workspaces,
+            get_config,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

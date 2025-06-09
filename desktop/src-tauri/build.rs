@@ -55,5 +55,4 @@ fn main() {
 
     // Keep the existing Tauri build process
     tauri_build::build();
-
 }

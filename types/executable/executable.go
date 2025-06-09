@@ -524,3 +524,37 @@ func NewExecutableID(workspace, namespace, name string) string {
 		return ""
 	}
 }
+
+// MarshalJSON implements custom JSON marshaling for Executable
+func (e *Executable) MarshalJSON() ([]byte, error) {
+	type Alias Executable
+	return json.Marshal(&struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias:   (*Alias)(e),
+		Timeout: e.Timeout.String(),
+	})
+}
+
+// UnmarshalJSON implements custom JSON unmarshaling for Executable
+func (e *Executable) UnmarshalJSON(data []byte) error {
+	type Alias Executable
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(e),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Timeout != "" {
+		duration, err := time.ParseDuration(aux.Timeout)
+		if err != nil {
+			return err
+		}
+		e.Timeout = duration
+	}
+	return nil
+}

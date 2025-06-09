@@ -133,6 +133,7 @@ type ConfigTheme string
 const ConfigThemeDark ConfigTheme = "dark"
 const ConfigThemeDefault ConfigTheme = "default"
 const ConfigThemeDracula ConfigTheme = "dracula"
+const ConfigThemeEverforest ConfigTheme = "everforest"
 const ConfigThemeLight ConfigTheme = "light"
 const ConfigThemeTokyoNight ConfigTheme = "tokyo-night"
 

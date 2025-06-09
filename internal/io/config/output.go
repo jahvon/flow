@@ -16,9 +16,11 @@ func PrintUserConfig(logger tuikitIO.Logger, format string, userConfig *config.C
 
 	switch strings.ToLower(format) {
 	case "", "yaml", "yml":
-		fmt.Println(userConfig.YAML())
+		data, _ := userConfig.YAML()
+		fmt.Println(data)
 	case "json":
-		fmt.Println(userConfig.JSON())
+		data, _ := userConfig.JSON()
+		fmt.Println(data)
 	default:
 		logger.Fatalf("Unsupported output format %s", format)
 	}

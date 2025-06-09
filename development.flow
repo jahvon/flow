@@ -43,14 +43,25 @@ executables:
       cmd: |
         echo "generating completions..."
         ./scripts/completions.sh
-        
+
         go run ./tools/docsgen/.
 
   - verb: generate
     name: code
     exec:
       dir: //
-      cmd: echo "generating code..."; go generate ./...
+      cmd: |
+        echo "generating go code..."
+        go generate ./...
+        pushd desktop
+        echo "generating ts code..."
+        npm run generate-types
+
+        pushd src-tauri
+        echo "generating rust code..."
+        cargo build
+        popd
+        popd
 
   - verb: run
     name: linters
