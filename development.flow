@@ -48,13 +48,14 @@ executables:
 
   - verb: generate
     name: code
-    parallel:
+    serial:
       dir: //
       execs:
         - cmd: |
             echo "Generating go code..."
             go generate ./...
             echo "All go code generated successfully"
+        - ref: generate docs
         - ref: generate frontend
         - ref: generate backend
 
