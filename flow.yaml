@@ -3,3 +3,6 @@ displayName: flow repository
 description: |
   Source code for flow
   GitHub Repo: github.com/jahvon/flow
+executables:
+  excluded:
+    - node_modules
