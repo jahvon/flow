@@ -1,0 +1,137 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { invoke } from "@tauri-apps/api/core";
+import { EnrichedExecutable } from "../types/executable";
+import { Config } from "../types/generated/config";
+import { WorkspaceMap } from "../types/workspace";
+
+export function useConfig() {
+  const queryClient = useQueryClient();
+
+  const {
+    data: config,
+    isLoading: isConfigLoading,
+    error: configError,
+  } = useQuery({
+    queryKey: ["config"],
+    queryFn: async () => {
+      return await invoke<Config>("get_config");
+    },
+  });
+
+  const refreshConfig = () => {
+    queryClient.invalidateQueries({ queryKey: ["config"] });
+  };
+
+  return {
+    config,
+    isConfigLoading,
+    configError,
+    refreshConfig,
+  };
+}
+
+export function useWorkspaces() {
+  const queryClient = useQueryClient();
+
+  const {
+    data: workspaces,
+    isLoading: isWorkspacesLoading,
+    error: workspacesError,
+  } = useQuery({
+    queryKey: ["workspaces"],
+    queryFn: async () => {
+      const response = await invoke<{ workspaces: WorkspaceMap }>(
+        "list_workspaces"
+      );
+      return response.workspaces;
+    },
+  });
+
+  const refreshWorkspaces = () => {
+    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+  };
+
+  return {
+    workspaces,
+    isWorkspacesLoading,
+    workspacesError,
+    refreshWorkspaces,
+  };
+}
+
+export function useExecutables(selectedWorkspace: string | null) {
+  const queryClient = useQueryClient();
+
+  const {
+    data: executables,
+    isLoading: isExecutablesLoading,
+    error: executablesError,
+  } = useQuery({
+    queryKey: ["executables", selectedWorkspace],
+    queryFn: async () => {
+      if (!selectedWorkspace) return [];
+      const response = await invoke<EnrichedExecutable[]>("list_executables", {
+        workspace: selectedWorkspace,
+      });
+      return response;
+    },
+    enabled: !!selectedWorkspace, // Only run when workspace is selected
+  });
+
+  const refreshExecutables = () => {
+    if (selectedWorkspace) {
+      queryClient.invalidateQueries({
+        queryKey: ["executables", selectedWorkspace],
+      });
+    }
+  };
+
+  return {
+    executables: executables || [],
+    isExecutablesLoading,
+    executablesError,
+    refreshExecutables,
+  };
+}
+
+// Composite hook that combines all data sources
+export function useWorkspaceData(selectedWorkspace: string | null) {
+  const { config, isConfigLoading, configError, refreshConfig } = useConfig();
+  const {
+    workspaces,
+    isWorkspacesLoading,
+    workspacesError,
+    refreshWorkspaces,
+  } = useWorkspaces();
+  const {
+    executables,
+    isExecutablesLoading,
+    executablesError,
+    refreshExecutables,
+  } = useExecutables(selectedWorkspace);
+
+  const isLoading =
+    isConfigLoading || isWorkspacesLoading || isExecutablesLoading;
+  const hasError = configError || workspacesError || executablesError;
+  if (hasError) {
+    console.error("Error", hasError);
+  }
+
+  const refreshAll = () => {
+    refreshConfig();
+    refreshWorkspaces();
+    refreshExecutables();
+  };
+
+  return {
+    config,
+    workspaces,
+    executables,
+    isLoading,
+    hasError,
+    refreshAll,
+    refreshConfig,
+    refreshWorkspaces,
+    refreshExecutables,
+  };
+}

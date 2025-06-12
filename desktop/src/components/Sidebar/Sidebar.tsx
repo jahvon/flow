@@ -1,169 +1,73 @@
-import { Group, Loader, Text, UnstyledButton, Stack, rem, Select } from '@mantine/core';
-import { Workspace } from '../../types/workspace';
-import { IconHome, IconFolder, IconSettings } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
-import { Config } from '../../types/config';
-import { invoke } from '@tauri-apps/api/core';
-import { Executable } from '../../types/flowfile';
-
-interface WorkspaceMap {
-  [key: string]: Workspace;
-}
+import { ActionIcon, Group, rem, Stack, Text, Tooltip } from "@mantine/core";
+import { EnrichedExecutable } from "../../types/executable";
+import { WorkspaceMap } from "../../types/workspace";
+import { View, ViewLinks } from "../Viewer/Viewer";
+import { ExecutableTree } from "./ExecutableTree/ExecutableTree";
+import { WorkspaceSelector } from "./WorkspaceSelector/WorkspaceSelector";
 
 interface SidebarProps {
-  config: Config | null;
+  currentView: View;
+  setCurrentView: (view: View) => void;
+
   workspaces: WorkspaceMap;
-  selectedWorkspace: Workspace | null;
-  onSelectWorkspace: (workspace: Workspace) => void;
-  isLoading: boolean;
+  selectedWorkspace: string | null;
+  onSelectWorkspace: (workspace: string) => void;
+  onClickWorkspaceInfo: (workspace: string) => void;
+
+  visibleExecutables: EnrichedExecutable[];
+  onSelectExecutable: (executable: string) => void;
 }
 
-enum NavSection {
-  CurrentWorkspace = 'current-workspace',
-  AllWorkspaces = 'all-workspaces',
-  Settings = 'settings',
-}
-
-const mainLinks = [
-  { icon: IconHome, label: 'Current Workspace', section: NavSection.CurrentWorkspace },
-  { icon: IconFolder, label: 'All Workspaces', section: NavSection.AllWorkspaces },
-  { icon: IconSettings, label: 'Settings', section: NavSection.Settings },
-];
-
-export function Sidebar({ config, workspaces, selectedWorkspace, onSelectWorkspace, isLoading }: SidebarProps) {
-  const [activeSection, setActiveSection] = useState<NavSection>(NavSection.CurrentWorkspace);
-  const [executables, setExecutables] = useState<Executable[]>([]);
-  const [isLoadingExecutables, setIsLoadingExecutables] = useState(false);
-  const [executableError, setExecutableError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (config?.currentWorkspace) {
-      setIsLoadingExecutables(true);
-      setExecutableError(null);
-
-      // fetch executables for the current workspace
-      invoke<Executable[]>("list_executables", { workspace: config.currentWorkspace })
-        .then(result => {
-            setExecutables(result);
-        })
-        .catch(err => {
-          console.error('Failed to fetch executables:', err);
-          setExecutableError('Failed to load executables');
-          setExecutables([]);
-        })
-        .finally(() => {
-          setIsLoadingExecutables(false);
-        });
-    } else {
-      setExecutables([]);
-      setExecutableError(null);
-    }
-  }, [config?.currentWorkspace]);
-
-  if (isLoading) {
-    return (
-      <Group justify="center" h="100%">
-        <Loader size="sm" />
-      </Group>
-    );
-  }
-
+export function Sidebar({
+  currentView,
+  setCurrentView,
+  workspaces,
+  selectedWorkspace,
+  onSelectWorkspace,
+  onClickWorkspaceInfo,
+  visibleExecutables,
+  onSelectExecutable,
+}: SidebarProps) {
   const renderSecondaryNav = () => {
-    switch (activeSection) {
-      case NavSection.CurrentWorkspace:
+    switch (currentView) {
+      case View.Workspaces:
         return (
           <>
-            <Text size="xs" fw={700} c="dimmed" mb="md">CURRENT WORKSPACE</Text>
-            <Stack>
-              <Select
-                value={config?.currentWorkspace || ''}
-                onChange={(value) => {
-                  if (value && workspaces[value]) {
-                    onSelectWorkspace(workspaces[value]);
-                  }
-                }}
-                data={Object.entries(workspaces).map(([name, workspace]) => ({
-                  value: name,
-                  label: workspace.displayName || name,
-                }))}
-                placeholder="Select a workspace"
-                searchable
-                size="sm"
-                styles={{
-                  input: {
-                    backgroundColor: 'var(--mantine-color-dark-6)',
-                    borderColor: 'var(--mantine-color-dark-4)',
-                    color: 'var(--mantine-color-white)',
-                  },
-                  dropdown: {
-                    backgroundColor: 'var(--mantine-color-dark-6)',
-                    borderColor: 'var(--mantine-color-dark-4)',
-                  },
-                  option: {
-                    color: 'var(--mantine-color-white)',
-                    '&[data-selected]': {
-                      backgroundColor: 'var(--mantine-color-dark-5)',
-                    },
-                    '&[data-hovered]': {
-                      backgroundColor: 'var(--mantine-color-dark-5)',
-                    },
-                  },
-                }}
-              />
-              <Text size="xs" fw={700} c="dimmed" mt="md">EXECUTABLES</Text>
-              {isLoadingExecutables ? (
-                <Group justify="center">
-                  <Loader size="xs" />
-                </Group>
-              ) : executableError ? (
-                <Text size="xs" c="red">{executableError}</Text>
-              ) : executables.length === 0 ? (
-                <Text size="xs" c="dimmed">No executables found</Text>
-              ) : (
-                executables.map((exec: Executable) => (
-                  <Text size="xs" c="dimmed" key={exec.name}>{exec.verb} {exec.name}</Text>
-                ))
-              )}
-            </Stack>
+            <WorkspaceSelector
+              workspaces={workspaces}
+              selectedWorkspace={selectedWorkspace ?? ""}
+              onSelectWorkspace={onSelectWorkspace}
+              onClickWorkspaceInfo={onClickWorkspaceInfo}
+            />
+            <ExecutableTree
+              visibleExecutables={visibleExecutables}
+              onSelectExecutable={onSelectExecutable}
+            />
           </>
         );
 
-      case NavSection.AllWorkspaces:
+      case View.Logs:
         return (
           <>
-            <Text size="xs" fw={700} c="dimmed" mb="md">ALL WORKSPACES</Text>
-            {Object.entries(workspaces).map(([name, workspace]: [string, Workspace]) => (
-              <UnstyledButton
-                key={name}
-                onClick={() => onSelectWorkspace(workspace)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  backgroundColor: selectedWorkspace === workspace
-                    ? 'var(--mantine-color-dark-5)'
-                    : 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'var(--mantine-color-dark-5)',
-                  },
-                }}
-              >
-                <Text size="sm" fw={500} c="white">{workspace.displayName}</Text>
-                {workspace.description && (
-                  <Text size="xs" c="dimmed">{workspace.description}</Text>
-                )}
-              </UnstyledButton>
-            ))}
+            <Text size="xs" fw={700} c="dimmed" mb="md">
+              LOGS
+            </Text>
+            <Text size="xs" fw={700} c="dimmed" mb="md">
+              To Be Implemented
+            </Text>
           </>
         );
 
-      case NavSection.Settings:
+      case View.Settings:
         return (
           <>
-            <Text size="xs" fw={700} c="dimmed" mb="md">SETTINGS</Text>
+            <Text size="xs" fw={700} c="dimmed" mb="md">
+              SETTINGS
+            </Text>
             <Stack>
-              <Text size="xs" c="dimmed">Settings content will go here</Text>
+              <Text size="xs" c="dimmed">
+                Settings content will go here
+              </Text>
             </Stack>
           </>
         );
@@ -172,47 +76,42 @@ export function Sidebar({ config, workspaces, selectedWorkspace, onSelectWorkspa
 
   return (
     <Group h="100%" gap={0}>
-      {/* Main Navigation */}
       <Stack
         justify="flex-start"
         style={{
-          width: rem(60),
-          height: '100%',
-          backgroundColor: 'var(--mantine-color-dark-6)',
+          width: rem(35),
+          height: "100%",
+          alignItems: "center",
         }}
       >
-        {mainLinks.map((link) => (
-          <UnstyledButton
-            key={link.label}
-            onClick={() => setActiveSection(link.section)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: rem(60),
-              height: rem(60),
-              borderRadius: 'var(--mantine-radius-sm)',
-              color: 'var(--mantine-color-white)',
-              backgroundColor: activeSection === link.section
-                ? 'var(--mantine-color-dark-5)'
-                : 'transparent',
-              '&:hover': {
-                backgroundColor: 'var(--mantine-color-dark-5)',
-              },
-            }}
-          >
-            <link.icon style={{ width: rem(22), height: rem(22) }} stroke={1.5} />
-          </UnstyledButton>
+        {ViewLinks.map((link) => (
+          <Tooltip label={link.label} position="right">
+            <ActionIcon
+              onClick={() => setCurrentView(link.view)}
+              variant={currentView === link.view ? "filled" : "transparent"}
+              size="lg"
+              title={link.label}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <link.icon
+                style={{ width: rem(20), height: rem(20) }}
+                stroke={1.5}
+              />
+            </ActionIcon>
+          </Tooltip>
         ))}
       </Stack>
 
-      {/* Sub Navigation */}
       <Stack
         style={{
           flex: 1,
-          height: '100%',
-          backgroundColor: 'var(--mantine-color-dark-7)',
-          padding: 'var(--mantine-spacing-md)',
+          height: "100%",
+          backgroundColor: "var(--mantine-color-dark-7)",
+          padding: "var(--mantine-spacing-md)",
         }}
       >
         {renderSecondaryNav()}
