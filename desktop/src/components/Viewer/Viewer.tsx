@@ -2,7 +2,7 @@ import { Text } from "@mantine/core";
 import { IconFolders, IconLogs, IconSettings } from "@tabler/icons-react";
 import type { EnrichedExecutable } from "../../types/executable";
 import type { Workspace } from "../../types/generated/workspace";
-import ExecutableInfo from "./ExecutableInfo/ExecutableInfo";
+import ExecutableInfo from "./Executable/Executable";
 import { Settings } from "./Settings/Settings";
 import { Welcome } from "./Welcome/Welcome";
 import { Workspace as WorkspaceView } from "./Workspace/Workspace";
