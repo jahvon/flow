@@ -1,0 +1,19 @@
+.appShell {
+  background-color: var(--mantine-color-other-backgroundColors-main);
+  height: 100vh;
+  width: 100vw;
+}
+
+.header {
+  background-color: var(--mantine-color-other-backgroundColors-header);
+  border-bottom: 1px solid var(--mantine-color-other-colors-border);
+}
+
+.navbar {
+  background-color: var(--mantine-color-other-backgroundColors-sidebar);
+  border-right: 1px solid var(--mantine-color-other-colors-border);
+}
+
+.main {
+  background-color: var(--mantine-color-other-backgroundColors-main);
+}

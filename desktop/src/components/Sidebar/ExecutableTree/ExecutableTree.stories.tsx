@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ExecutableTree } from "./ExecutableTree";
 import { EnrichedExecutable } from "../../../types/executable";
+import { ExecutableTree } from "./ExecutableTree";
 
 const meta = {
   title: "Components/Sidebar/ExecutableTree",
@@ -16,7 +16,8 @@ type Story = StoryObj<typeof meta>;
 
 const sampleExecutables: EnrichedExecutable[] = [
   {
-    id: "run script",
+    id: "script",
+    ref: "run script",
     name: "script",
     namespace: null,
     verb: "run",
@@ -24,7 +25,8 @@ const sampleExecutables: EnrichedExecutable[] = [
     flowfile: "exec.flow",
   },
   {
-    id: "validate deps",
+    id: "deps",
+    ref: "validate deps",
     name: "deps",
     namespace: null,
     verb: "validate",
@@ -32,7 +34,8 @@ const sampleExecutables: EnrichedExecutable[] = [
     flowfile: "exec.flow",
   },
   {
-    id: "exec devserver",
+    id: "devserver",
+    ref: "exec frontend/devserver",
     name: "devserver",
     namespace: "frontend",
     workspace: "default",
@@ -40,15 +43,17 @@ const sampleExecutables: EnrichedExecutable[] = [
     verb: "exec",
   },
   {
-    id: "test frontend",
-    name: "frontend",
+    id: "frontend",
+    ref: "test frontend",
+    name: "",
     namespace: "frontend",
     workspace: "default",
     flowfile: "frontend.flow",
     verb: "test",
   },
   {
-    id: "build container",
+    id: "container",
+    ref: "build backend/container",
     name: "container",
     namespace: "backend",
     workspace: "default",
@@ -60,13 +65,13 @@ const sampleExecutables: EnrichedExecutable[] = [
 export const Default: Story = {
   args: {
     visibleExecutables: sampleExecutables,
-    onSelectExecutable: (id) => console.log("Selected executable:", id),
+    onSelectExecutable: (ref) => console.log("Selected executable:", ref),
   },
 };
 
 export const Empty: Story = {
   args: {
     visibleExecutables: [],
-    onSelectExecutable: (id) => console.log("Selected executable:", id),
+    onSelectExecutable: (ref) => console.log("Selected executable:", ref),
   },
 };

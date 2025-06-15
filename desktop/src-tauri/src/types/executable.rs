@@ -5,6 +5,7 @@ pub struct EnrichedExecutable {
     #[serde(flatten)]
     pub base: Executable,
     pub id: String,
+    #[serde(rename = "ref")]
     pub ref_: String,
     pub namespace: Option<String>,
     pub workspace: String,

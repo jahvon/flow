@@ -1,23 +1,37 @@
-import { AppShell, Group } from "@mantine/core";
-import { ActionButtons } from "./ActionButtons/ActionButtons";
+import { ActionIcon } from "@mantine/core";
+import { IconPlus, IconRefresh } from "@tabler/icons-react";
+import styles from "./Header.module.css";
 
 interface HeaderProps {
   onCreateWorkspace: () => void;
   onRefreshWorkspaces: () => void;
 }
 
-export function Header({ onCreateWorkspace, onRefreshWorkspaces }: HeaderProps) {
+export function Header({
+  onCreateWorkspace,
+  onRefreshWorkspaces,
+}: HeaderProps) {
   return (
-    <AppShell.Header>
-      <Group h="100%" px="sm" justify="space-between">
-        <img
-          src={`/logo-${window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'}.png`}
-          alt="Flow"
-          height="24"
-        />
-        <ActionButtons onCreateWorkspace={onCreateWorkspace} onRefreshWorkspaces={onRefreshWorkspaces} />
-      </Group>
-    </AppShell.Header>
+    <div className={styles.header}>
+      <div className={styles.header__actions}>
+        <ActionIcon
+          className={styles.header__button}
+          onClick={onCreateWorkspace}
+          title="Create workspace"
+          variant="light"
+        >
+          <IconPlus size={16} />
+        </ActionIcon>
 
-  )
+        <ActionIcon
+          className={styles.header__button}
+          variant="light"
+          onClick={onRefreshWorkspaces}
+          title="Refresh workspaces"
+        >
+          <IconRefresh size={16} />
+        </ActionIcon>
+      </div>
+    </div>
+  );
 }

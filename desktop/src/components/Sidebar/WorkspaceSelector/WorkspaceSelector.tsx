@@ -4,16 +4,15 @@ import {
   Group,
   OptionsFilter,
   Select,
-  Text,
 } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
-import { WorkspaceMap } from "../../../types/workspace";
+import type { Workspace } from "../../../types/generated/workspace";
 
 interface WorkspaceSelectorProps {
-  workspaces: WorkspaceMap;
-  selectedWorkspace: string;
-  onSelectWorkspace: (workspace: string) => void;
-  onClickWorkspaceInfo: (workspace: string) => void;
+  workspaces: Record<string, Workspace>;
+  selectedWorkspace: string | null;
+  onSelectWorkspace: (workspaceId: string) => void;
+  onClickWorkspaceInfo: () => void;
 }
 
 const filter: OptionsFilter = ({ options, search }) => {
@@ -33,10 +32,7 @@ export function WorkspaceSelector({
 }: WorkspaceSelectorProps) {
   return (
     <>
-      <Text size="xs" fw={700} c="dimmed" mb="sm">
-        CURRENT WORKSPACE
-      </Text>
-      <Group gap="xs">
+      <Group gap="xs" align="center" wrap="nowrap">
         <Select
           value={selectedWorkspace}
           onChange={(value) => {
@@ -51,8 +47,11 @@ export function WorkspaceSelector({
           filter={filter}
           placeholder="No workspace selected"
           searchable
-          size="md"
+          size="sm"
           styles={{
+            root: {
+              flex: 1,
+            },
             input: {
               backgroundColor: "var(--mantine-color-dark-6)",
               borderColor: "var(--mantine-color-dark-4)",
@@ -74,9 +73,9 @@ export function WorkspaceSelector({
           }}
         />
         <ActionIcon
-          size="xl"
+          size="md"
           aria-label="View workspace documentation"
-          onClick={() => onClickWorkspaceInfo(selectedWorkspace)}
+          onClick={onClickWorkspaceInfo}
           variant="transparent"
           color="var(--mantine-color-dark-4)"
         >

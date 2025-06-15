@@ -12,7 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "flow",
+        "title": "flow desktop",
+        "hiddenTitle": true,
+        "titleBarStyle": "Transparent",
         "width": 1000,
         "height": 800
       }

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
+import React from "react";
 import { EnrichedExecutable } from "../types/executable";
 import { Config } from "../types/generated/config";
 import { WorkspaceMap } from "../types/workspace";
@@ -56,6 +57,50 @@ export function useWorkspaces() {
     isWorkspacesLoading,
     workspacesError,
     refreshWorkspaces,
+  };
+}
+
+export function useExecutable(executableRef: string) {
+  const queryClient = useQueryClient();
+  const [currentExecutable, setCurrentExecutable] =
+    React.useState<EnrichedExecutable | null>(null);
+
+  const {
+    data: executable,
+    isLoading: isExecutableLoading,
+    error: executableError,
+  } = useQuery({
+    queryKey: ["executable", executableRef],
+    queryFn: async () => {
+      if (!executableRef) return null;
+      const response = await invoke<EnrichedExecutable>("get_executable", {
+        executableRef: executableRef,
+      });
+      return response;
+    },
+    enabled: !!executableRef,
+  });
+
+  // Update current executable when we have new data
+  React.useEffect(() => {
+    if (executable) {
+      setCurrentExecutable(executable);
+    }
+  }, [executable]);
+
+  const refreshExecutable = () => {
+    if (executableRef) {
+      queryClient.invalidateQueries({
+        queryKey: ["executable", executableRef],
+      });
+    }
+  };
+
+  return {
+    executable: currentExecutable,
+    isExecutableLoading,
+    executableError,
+    refreshExecutable,
   };
 }
 

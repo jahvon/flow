@@ -58,6 +58,8 @@ impl CommandRunner {
         let mut cmd = self.build_base_command();
         cmd.args(args);
 
+        println!("cmd: {:?}", cmd);
+
         let output = cmd
             .output()
             .map_err(|e| CommandError::ExecutionError(e.to_string()))?;
@@ -99,7 +101,6 @@ impl CommandRunner {
         }
 
         let response: ExecutableResponse = self.execute_command(&args).await?;
-        println!("response: {:?}", response);
         Ok(response.executables)
     }
 
@@ -107,8 +108,30 @@ impl CommandRunner {
         &self,
         exec_ref: &str,
     ) -> CommandResult<executable::EnrichedExecutable> {
-        self.execute_command(&["library", "view", exec_ref, "--output", "json"])
-            .await
+        let split_ref: Vec<&str> = exec_ref.split(" ").collect();
+        match split_ref.len() {
+            1 => {
+                // Just a verb
+                self.execute_command(&["library", "view", split_ref[0], "--output", "json"])
+                    .await
+            }
+            2 => {
+                // Verb and ID
+                self.execute_command(&[
+                    "library",
+                    "view",
+                    split_ref[0],
+                    split_ref[1],
+                    "--output",
+                    "json",
+                ])
+                .await
+            }
+            _ => Err(CommandError::ParseError(format!(
+                "Invalid executable reference format: {}",
+                exec_ref
+            ))),
+        }
     }
 
     pub async fn execute(

@@ -1,41 +1,42 @@
 import {
   Group,
   RenderTreeNodePayload,
+  ScrollArea,
   Text,
   Tree,
   TreeNodeData,
   useTree,
 } from "@mantine/core";
 import {
-  EnrichedExecutable,
-  GetUIVerbType,
-  DeactivationVerbType,
-  ConfigurationVerbType,
-  DestructionVerbType,
-  RetrievalVerbType,
-  UpdateVerbType,
-  ValidationVerbType,
-  LaunchVerbType,
-  CreationVerbType,
-  RestartVerbType,
-  BuildVerbType,
-} from "../../../types/executable";
-import {
+  IconBlocks,
+  IconCircleCheckFilled,
+  IconCirclePlus,
   IconFolder,
   IconFolderOpen,
   IconOctagon,
-  IconSettingsAutomation,
+  IconPlayerPlayFilled,
   IconProgressDown,
-  IconWindowMaximize,
   IconProgressX,
   IconRefresh,
   IconReload,
-  IconBlocks,
-  IconPlayerPlayFilled,
-  IconCircleCheckFilled,
-  IconCirclePlus,
+  IconSettingsAutomation,
+  IconWindowMaximize,
 } from "@tabler/icons-react";
 import React from "react";
+import {
+  BuildVerbType,
+  ConfigurationVerbType,
+  CreationVerbType,
+  DeactivationVerbType,
+  DestructionVerbType,
+  EnrichedExecutable,
+  GetUIVerbType,
+  LaunchVerbType,
+  RestartVerbType,
+  RetrievalVerbType,
+  UpdateVerbType,
+  ValidationVerbType,
+} from "../../../types/executable";
 
 interface ExecutableTreeProps {
   visibleExecutables: EnrichedExecutable[];
@@ -74,12 +75,12 @@ function getTreeData(executables: EnrichedExecutable[]): CustomTreeNodeData[] {
         isNamespace: true,
         verbType: null,
         children: executables
-          .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+          .sort((a, b) => (a.ref || "").localeCompare(b.ref || ""))
           .map((executable) => ({
             label: executable.name
               ? executable.verb + " " + executable.name
               : executable.verb,
-            value: executable.id,
+            value: executable.ref,
             isNamespace: false,
             verbType: GetUIVerbType(executable),
           })),
@@ -87,13 +88,13 @@ function getTreeData(executables: EnrichedExecutable[]): CustomTreeNodeData[] {
     });
 
   rootExecutables
-    .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+    .sort((a, b) => (a.ref || "").localeCompare(b.ref || ""))
     .forEach((executable) => {
       treeData.push({
         label: executable.name
           ? executable.verb + " " + executable.name
           : executable.verb,
-        value: executable.id,
+        value: executable.ref,
         isNamespace: false,
         verbType: GetUIVerbType(executable),
       });
@@ -155,7 +156,7 @@ function Leaf({
   }
 
   return (
-    <Group gap="xs" {...elementProps}>
+    <Group gap="xs" {...elementProps} key={customNode.value} mb="3">
       {icon}
       <Text>{customNode.label}</Text>
     </Group>
@@ -172,7 +173,7 @@ export function ExecutableTree({
     const selectedValue = tree.selectedState[0];
     if (selectedValue) {
       const findNode = (
-        nodes: CustomTreeNodeData[],
+        nodes: CustomTreeNodeData[]
       ): CustomTreeNodeData | undefined => {
         for (const node of nodes) {
           if (node.value === selectedValue) {
@@ -195,7 +196,7 @@ export function ExecutableTree({
 
   return (
     <>
-      <Text size="xs" fw={700} c="dimmed" mb="sm">
+      <Text size="xs" fw={700} c="dimmed" mb="0" mt="md">
         EXECUTABLES ({visibleExecutables.length})
       </Text>
       {visibleExecutables.length === 0 ? (
@@ -203,12 +204,14 @@ export function ExecutableTree({
           No executables found
         </Text>
       ) : (
-        <Tree
-          data={getTreeData(visibleExecutables)}
-          selectOnClick
-          tree={tree}
-          renderNode={Leaf}
-        />
+        <ScrollArea scrollbarSize={6} scrollHideDelay={100}>
+          <Tree
+            data={getTreeData(visibleExecutables)}
+            selectOnClick
+            tree={tree}
+            renderNode={Leaf}
+          />
+        </ScrollArea>
       )}
     </>
   );

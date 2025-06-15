@@ -46,10 +46,10 @@ async fn list_workspaces(
 }
 
 #[tauri::command]
-async fn get_executable(executable_id: String) -> Result<executable::EnrichedExecutable, String> {
+async fn get_executable(executable_ref: String) -> Result<executable::EnrichedExecutable, String> {
     let runner = CommandRunner::new();
     runner
-        .get_executable(&executable_id)
+        .get_executable(&executable_ref)
         .await
         .map_err(|e| e.to_string())
 }
@@ -82,6 +82,14 @@ async fn execute(verb: String, executable_id: String, args: Vec<String>) -> Resu
         .map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+async fn reload_window(app: tauri::AppHandle) -> Result<(), String> {
+    app.get_webview_window("main")
+        .ok_or_else(|| "Main window not found".to_string())?
+        .reload()
+        .map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -100,6 +108,7 @@ pub fn run() {
             get_workspace,
             list_workspaces,
             get_config,
+            reload_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,12 +1,26 @@
-import { ActionIcon, AppShell, Group, Loader, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  AppShell,
+  Loader,
+  Notification as MantineNotification,
+  Text,
+} from "@mantine/core";
 import "@mantine/core/styles.css";
+import { IconRefresh } from "@tabler/icons-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import "./App.css";
+import styles from "./components/AppShell.module.css";
+import { Header } from "./components/Header/Header";
 import { Sidebar } from "./components/Sidebar/Sidebar";
-import { View } from "./components/Viewer/Viewer";
-import { WorkspaceInfoModal } from "./components/Workspace/WorkspaceInfoModal";
-import { useWorkspaceData } from "./hooks/useWorkspaceData";
+import { View, Viewer } from "./components/Viewer/Viewer";
+import { useExecutable, useWorkspaceData } from "./hooks/useBackendData";
+import { ThemeProvider } from "./theme/ThemeProvider";
+import {
+  colorFromType,
+  Notification,
+  NotificationType,
+} from "./types/notification";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,87 +32,125 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  const [currentView, setCurrentView] = useState<View>(View.Workspaces);
+  const [currentView, setCurrentView] = useState<View>(View.Welcome);
+  const [welcomeMessage, setWelcomMessage] = useState<string>("");
+  const [selectedExecutable, setSelectedExecutable] = useState<string | null>(
+    null
+  );
   const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(
     null
   );
-  const [isWorkspaceInfoOpen, setIsWorkspaceInfoOpen] = useState(false);
+  const [notification, setNotification] = useState<Notification | null>(null);
 
   const { config, workspaces, executables, isLoading, hasError, refreshAll } =
     useWorkspaceData(selectedWorkspace);
 
+  const { executable, executableError, isExecutableLoading } = useExecutable(
+    selectedExecutable || ""
+  );
+
   // Set initial workspace from config when it loads
   useEffect(() => {
     if (config?.currentWorkspace && Object.keys(workspaces || {}).length > 0) {
-      setSelectedWorkspace(config.currentWorkspace);
+      // Only update if we don't have a selected workspace or if the config workspace is different
+      if (!selectedWorkspace || config.currentWorkspace !== selectedWorkspace) {
+        setSelectedWorkspace(config.currentWorkspace);
+      }
     }
   }, [config, workspaces]);
 
+  useEffect(() => {
+    if (notification?.autoClose) {
+      setTimeout(() => {
+        setNotification(null);
+      }, notification.autoCloseDelay || 6000);
+    }
+  }, [notification]);
+
+  useEffect(() => {
+    if (hasError) {
+      setNotification({
+        title: "Unexpected error",
+        message: hasError.message || "An error occurred",
+        type: NotificationType.Error,
+        autoClose: true,
+        autoCloseDelay: 6000,
+      });
+    }
+  }, [hasError]);
+
+  useEffect(() => {
+    if (welcomeMessage === "" && executables?.length > 0) {
+      setWelcomMessage("Select an executable to get started.");
+    }
+  }, [executables, welcomeMessage]);
+
   const handleWorkspaceInfoClick = () => {
     if (selectedWorkspace) {
-      setIsWorkspaceInfoOpen(true);
+      setCurrentView(View.Workspace);
     }
+  };
+
+  const handleLogoClick = () => {
+    setCurrentView(View.Welcome);
   };
 
   return (
     <AppShell
-      header={{ height: 60 }}
-      navbar={{ width: 360, breakpoint: "sm" }}
+      header={{ height: 48 }}
+      navbar={{ width: 300, breakpoint: "sm" }}
       padding="md"
+      classNames={{
+        root: styles.appShell,
+        main: styles.main,
+        header: styles.header,
+        navbar: styles.navbar,
+      }}
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <img
-            src={`/logo-${window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"}.png`}
-            alt="Flow"
-            height="32"
-          />
-          <ActionIcon
-            color="palette"
-            onClick={refreshAll}
-            loading={isLoading}
-            title="Refresh data"
-            size="lg"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 2v6h-6" />
-              <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-              <path d="M3 22v-6h6" />
-              <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-            </svg>
-          </ActionIcon>
-        </Group>
+        <Header
+          onCreateWorkspace={() => {}}
+          onRefreshWorkspaces={() => {
+            refreshAll();
+            setNotification({
+              title: "Refresh completed",
+              message: "flow data has synced and refreshed successfully",
+              type: NotificationType.Success,
+              autoClose: true,
+              autoCloseDelay: 3000,
+            });
+          }}
+          onLogoClick={handleLogoClick}
+        />
       </AppShell.Header>
 
-      <AppShell.Navbar p="md">
+      <AppShell.Navbar>
         <Sidebar
           currentView={currentView}
           setCurrentView={setCurrentView}
           workspaces={workspaces || {}}
           selectedWorkspace={selectedWorkspace}
-          onSelectWorkspace={setSelectedWorkspace}
+          onSelectWorkspace={(workspaceId) => {
+            setSelectedWorkspace(workspaceId);
+            setCurrentView(View.Workspace);
+          }}
           onClickWorkspaceInfo={handleWorkspaceInfoClick}
           visibleExecutables={executables}
-          onSelectExecutable={() => {}}
+          onSelectExecutable={(executable) => {
+            if (executable === selectedExecutable) {
+              return;
+            }
+            setSelectedExecutable(executable);
+            if (currentView !== View.Executable) {
+              setCurrentView(View.Executable);
+            }
+          }}
+          onLogoClick={handleLogoClick}
         />
       </AppShell.Navbar>
 
       <AppShell.Main>
-        {isLoading ? (
-          <Group justify="center" h="100%">
-            <Loader size="md" />
-          </Group>
-        ) : hasError ? (
+        {hasError ? (
           <div
             style={{
               display: "flex",
@@ -116,64 +168,53 @@ function AppContent() {
               title="Try again"
               variant="light"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 2v6h-6" />
-                <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                <path d="M3 22v-6h6" />
-                <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-              </svg>
+              <IconRefresh size={16} />
             </ActionIcon>
           </div>
-        ) : selectedWorkspace && workspaces ? (
-          <div>
-            <Text size="xl" fw={700} mb="md">
-              {workspaces[selectedWorkspace].displayName}
-            </Text>
-            {workspaces[selectedWorkspace].description && (
-              <Text mb="lg">{workspaces[selectedWorkspace].description}</Text>
-            )}
-            <div
-              style={{
-                padding: "20px",
-                backgroundColor: "var(--mantine-color-gray-0)",
-                borderRadius: "8px",
-                minHeight: "400px",
-              }}
-            >
-              <Text c="dimmed">Select a workspace to view its contents</Text>
-            </div>
-          </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-            }}
-          >
-            <Text c="dimmed">No workspaces available</Text>
+          <div style={{ position: "relative", height: "100%" }}>
+            <Viewer
+              currentView={currentView}
+              selectedExecutable={executable}
+              isExecutableLoading={isExecutableLoading}
+              executableError={executableError}
+              welcomeMessage={welcomeMessage}
+              workspace={
+                selectedWorkspace ? workspaces?.[selectedWorkspace] : null
+              }
+              workspaceId={selectedWorkspace}
+              onCloseWorkspace={() => setCurrentView(View.Workspace)}
+            />
+            {isLoading && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 16,
+                  right: 16,
+                  zIndex: 1000,
+                }}
+              >
+                <Loader size="sm" />
+              </div>
+            )}
           </div>
         )}
       </AppShell.Main>
 
-      {selectedWorkspace && workspaces && (
-        <WorkspaceInfoModal
-          workspace={workspaces[selectedWorkspace]}
-          workspaceId={selectedWorkspace}
-          isOpen={isWorkspaceInfoOpen}
-          onClose={() => setIsWorkspaceInfoOpen(false)}
-        />
+      {notification && (
+        <MantineNotification
+          title={notification.title}
+          onClose={() => setNotification(null)}
+          color={colorFromType(notification.type)}
+          style={{
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            zIndex: 1000,
+          }}
+        >
+          {notification.message}
+        </MantineNotification>
       )}
     </AppShell>
   );
@@ -182,9 +223,10 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppContent />
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
-
 export default App;
