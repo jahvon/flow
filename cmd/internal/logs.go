@@ -17,7 +17,7 @@ func RegisterLogsCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:     "logs",
 		Aliases: []string{"log"},
-		Short:   "List and view logs for previous flow executions.",
+		Short:   "View execution history and logs.",
 		Args:    cobra.NoArgs,
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
@@ -26,6 +26,7 @@ func RegisterLogsCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		},
 	}
 	RegisterFlag(ctx, subCmd, *flags.LastLogEntryFlag)
+	RegisterFlag(ctx, subCmd, *flags.OutputFormatFlag)
 	rootCmd.AddCommand(subCmd)
 }
 

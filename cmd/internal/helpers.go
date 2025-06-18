@@ -64,13 +64,6 @@ func TUIEnabled(ctx *context.Context, cmd *cobra.Command) bool {
 	return !formatDisabled && !envDisabled && ctx.Config.ShowTUI()
 }
 
-func AsNonTUIFormat(format string) string {
-	if format == "" || format == "tui" {
-		return "yaml"
-	}
-	return format
-}
-
 func SetView(ctx *context.Context, cmd *cobra.Command, view tuikit.View) {
 	if TUIEnabled(ctx, cmd) {
 		if err := ctx.SetView(view); err != nil {

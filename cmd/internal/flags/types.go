@@ -170,8 +170,8 @@ var SetSoundNotificationFlag = &Metadata{
 	Default: false,
 }
 
-var StoreFullFlag = &Metadata{
-	Name:    "full",
+var StoreAllFlag = &Metadata{
+	Name:    "all",
 	Usage:   "Force clear all stored data",
 	Default: false,
 }

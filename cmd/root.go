@@ -75,9 +75,10 @@ func RegisterSubCommands(ctx *context.Context, rootCmd *cobra.Command) {
 	internal.RegisterBrowseCmd(ctx, rootCmd)
 	internal.RegisterConfigCmd(ctx, rootCmd)
 	internal.RegisterSecretCmd(ctx, rootCmd)
+	internal.RegisterVaultCmd(ctx, rootCmd)
+	internal.RegisterCacheCmd(ctx, rootCmd)
 	internal.RegisterWorkspaceCmd(ctx, rootCmd)
 	internal.RegisterTemplateCmd(ctx, rootCmd)
 	internal.RegisterLogsCmd(ctx, rootCmd)
-	internal.RegisterStoreCmd(ctx, rootCmd)
 	internal.RegisterSyncCmd(ctx, rootCmd)
 }

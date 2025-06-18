@@ -11,7 +11,6 @@ import (
 
 	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/crypto"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/secret"
 	"github.com/jahvon/flow/internal/vault"
@@ -20,29 +19,28 @@ import (
 func RegisterSecretCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	secretCmd := &cobra.Command{
 		Use:     "secret",
-		Aliases: []string{"s"},
-		Short:   "Manage flow secrets.",
+		Aliases: []string{"scrt", "secrets"},
+		Short:   "Manage secrets stored in a vault.",
 	}
-	registerSecretVaultCmd(ctx, secretCmd)
 	registerSetSecretCmd(ctx, secretCmd)
 	registerListSecretCmd(ctx, secretCmd)
-	registerViewSecretCmd(ctx, secretCmd)
-	registerDeleteSecretCmd(ctx, secretCmd)
+	registerGetSecretCmd(ctx, secretCmd)
+	registerRemoveSecretCmd(ctx, secretCmd)
 	rootCmd.AddCommand(secretCmd)
 }
 
-func registerDeleteSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
-	deleteCmd := &cobra.Command{
-		Use:     "delete NAME",
-		Aliases: []string{"del", "remove", "rm"},
+func registerRemoveSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
+	removeCmd := &cobra.Command{
+		Use:     "remove NAME",
+		Aliases: []string{"delete", "rm"},
 		Short:   "Remove a secret from the vault.",
 		Args:    cobra.ExactArgs(1),
-		Run:     func(cmd *cobra.Command, args []string) { deleteSecretFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { removeSecretFunc(ctx, cmd, args) },
 	}
-	secretCmd.AddCommand(deleteCmd)
+	secretCmd.AddCommand(removeCmd)
 }
 
-func deleteSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func removeSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
 
@@ -74,55 +72,11 @@ func deleteSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger.PlainTextSuccess(fmt.Sprintf("Secret '%s' deleted from vault", reference))
 }
 
-func registerSecretVaultCmd(ctx *context.Context, secretCmd *cobra.Command) {
-	vaultCmd := &cobra.Command{
-		Use:   "vault",
-		Short: "Manage flow secret vault.",
-		Args:  cobra.NoArgs,
-	}
-	registerCreateSecretVaultCmd(ctx, vaultCmd)
-	secretCmd.AddCommand(vaultCmd)
-}
-
-func registerCreateSecretVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
-	createCmd := &cobra.Command{
-		Use:     "create",
-		Aliases: []string{"new", "setup"},
-		Short:   "Create a new flow secret vault.",
-		Args:    cobra.NoArgs,
-		Run:     func(cmd *cobra.Command, args []string) { createSecretVaultFunc(ctx, cmd, args) },
-	}
-	vaultCmd.AddCommand(createCmd)
-}
-
-func createSecretVaultFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
-	logger := ctx.Logger
-	generatedKey, err := crypto.GenerateKey()
-	if err != nil {
-		logger.FatalErr(err)
-	}
-	if err = vault.RegisterEncryptionKey(generatedKey); err != nil {
-		logger.FatalErr(err)
-	}
-
-	if verbosity := flags.ValueFor[int](ctx, cmd, *flags.LogLevel, false); verbosity >= 0 {
-		logger.PlainTextSuccess(fmt.Sprintf("Your vault encryption key is: %s", generatedKey))
-		newKeyMsg := fmt.Sprintf(
-			"You will need this key to modify your vault data. Store it somewhere safe!\n"+
-				"Set this value to the %s environment variable if you do not want to be prompted for it every time.",
-			vault.EncryptionKeyEnvVar,
-		)
-		logger.PlainTextInfo(newKeyMsg)
-	} else {
-		logger.PlainTextSuccess(fmt.Sprintf("Encryption key: %s", generatedKey))
-	}
-}
-
 func registerSetSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 	setCmd := &cobra.Command{
 		Use:     "set NAME [VALUE]",
 		Aliases: []string{"new", "create", "update"},
-		Short:   "Update or create a secret in the flow secret vault.",
+		Short:   "Set a secret in the current vault. If no value is provided, you will be prompted to enter one.",
 		Args:    cobra.MinimumNArgs(1),
 		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setSecretFunc(ctx, cmd, args) },
@@ -173,19 +127,21 @@ func registerListSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 	listCmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "View a list of secrets in the flow vault.",
+		Short:   "List secrets stored in the current vault.",
 		Args:    cobra.NoArgs,
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listSecretFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, listCmd, *flags.OutputSecretAsPlainTextFlag)
+	RegisterFlag(ctx, listCmd, *flags.OutputFormatFlag)
 	secretCmd.AddCommand(listCmd)
 }
 
 func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	asPlainText := flags.ValueFor[bool](ctx, cmd, *flags.OutputSecretAsPlainTextFlag, false)
+	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 
 	v := vault.NewVault(logger)
 	secrets, err := v.GetAllSecrets()
@@ -197,30 +153,24 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	if interactiveUI {
 		secret.LoadSecretListView(ctx, asPlainText)
 	} else {
-		for ref, s := range secrets {
-			if asPlainText {
-				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, s.PlainTextString()))
-			} else {
-				logger.PlainTextInfo(fmt.Sprintf("%s: %s", ref, s.String()))
-			}
-		}
+		secret.PrintSecrets(ctx, secrets, outputFormat, asPlainText)
 	}
 }
 
-func registerViewSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
-	viewCmd := &cobra.Command{
-		Use:     "view REFERENCE",
-		Aliases: []string{"show", "get"},
-		Short:   "Show the value of a secret in the secret vault.",
+func registerGetSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
+	getCmd := &cobra.Command{
+		Use:     "get REFERENCE",
+		Aliases: []string{"show", "view"},
+		Short:   "Get the value of a secret in the current vault.",
 		Args:    cobra.ExactArgs(1),
-		Run:     func(cmd *cobra.Command, args []string) { viewSecretFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { getSecretFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, viewCmd, *flags.OutputSecretAsPlainTextFlag)
-	RegisterFlag(ctx, viewCmd, *flags.CopyFlag)
-	secretCmd.AddCommand(viewCmd)
+	RegisterFlag(ctx, getCmd, *flags.OutputSecretAsPlainTextFlag)
+	RegisterFlag(ctx, getCmd, *flags.CopyFlag)
+	secretCmd.AddCommand(getCmd)
 }
 
-func viewSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func getSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	reference := args[0]
 	asPlainText := flags.ValueFor[bool](ctx, cmd, *flags.OutputSecretAsPlainTextFlag, false)

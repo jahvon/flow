@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jahvon/tuikit/types"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
@@ -20,9 +19,9 @@ func RegisterBrowseCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	browseCmd := &cobra.Command{
 		Use:     "browse [EXECUTABLE-REFERENCE]",
 		Short:   "Discover and explore available executables.",
-		Aliases: []string{"ls", "lib", "library"},
+		Aliases: []string{"ls", "library"}, // TODO: deprecate the "library" alias
 		Long: "Browse executables across workspaces.\n\n" +
-			"  flow browse                # Interactive library view of executables across registered workspaces\n" +
+			"  flow browse                # Interactive multi-pane executable browser\n" +
 			"  flow browse --list         # Simple list view of executables\n" +
 			"  flow browse VERB [ID]      # Detailed view of specific executable\n\n" +
 			fmt.Sprintf(
@@ -31,7 +30,18 @@ func RegisterBrowseCmd(ctx *context.Context, rootCmd *cobra.Command) {
 				io.TypesDocsURL("flowfile", "executableverb"),
 				io.TypesDocsURL("flowfile", "executableref"),
 			),
-		Args:    cobra.MaximumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+			execIDs := make([]string, 0, len(execList))
+			for _, e := range execList {
+				execIDs = append(execIDs, e.ID())
+			}
+			return execIDs, cobra.ShellCompDirectiveNoFileComp
+		},
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { browseFunc(ctx, cmd, args) },
@@ -155,15 +165,10 @@ func listExecutables(ctx *context.Context, cmd *cobra.Command, _ []string) {
 
 	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-		view := execIO.NewExecutableListView(
-			ctx,
-			filteredExec,
-			types.Format(outputFormat),
-			runFunc,
-		)
+		view := execIO.NewExecutableListView(ctx, filteredExec, runFunc)
 		SetView(ctx, cmd, view)
 	} else {
-		execIO.PrintExecutableList(logger, AsNonTUIFormat(outputFormat), filteredExec)
+		execIO.PrintExecutableList(logger, outputFormat, filteredExec)
 	}
 }
 
@@ -176,55 +181,18 @@ func viewExecutable(ctx *context.Context, cmd *cobra.Command, args []string) {
 		logger.FatalErr(err)
 	}
 
-	var id string
+	var execID string
 	if len(args) > 1 {
-		id = args[1]
-	}
-
-	// Handle nameless executables (no ID provided)
-	if id == "" {
-		// For nameless executables, we need to find them by verb only
-		allExecs, err := ctx.ExecutableCache.GetExecutableList(logger)
-		if err != nil {
-			logger.FatalErr(err)
+		id := args[1]
+		ws, ns, name := executable.MustParseExecutableID(id)
+		if ws == "" {
+			ws = ctx.CurrentWorkspace.AssignedName()
 		}
-
-		// Filter by verb and look for nameless executables
-		filteredExecs := allExecs.FilterByVerb(verb)
-		var foundExec *executable.Executable
-		for _, exec := range filteredExecs {
-			if exec.Name == "" && exec.Namespace() == "" {
-				foundExec = exec
-				break
-			}
+		if ns == "" && ctx.Config.CurrentNamespace != "" {
+			ns = ctx.Config.CurrentNamespace
 		}
-
-		if foundExec == nil {
-			logger.Fatalf("no nameless executable found with verb %s", verb)
-		}
-
-		outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
-		if TUIEnabled(ctx, cmd) {
-			runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-			view := execIO.NewExecutableView(ctx, foundExec, types.Format(outputFormat), runFunc)
-			SetView(ctx, cmd, view)
-		} else {
-			execIO.PrintExecutable(logger, outputFormat, foundExec)
-		}
-		return
+		execID = executable.NewExecutableID(ws, ns, name)
 	}
-
-	// Handle executables with ID
-	ws, ns, name := executable.MustParseExecutableID(id)
-	if ws == "" {
-		ws = ctx.CurrentWorkspace.AssignedName()
-	}
-	if ns == "" && ctx.Config.CurrentNamespace != "" {
-		ns = ctx.Config.CurrentNamespace
-	}
-
-	// Reconstruct the ID with proper workspace and namespace
-	execID := executable.NewExecutableID(ws, ns, name)
 	ref := executable.NewRef(execID, verb)
 
 	exec, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
@@ -244,7 +212,7 @@ func viewExecutable(ctx *context.Context, cmd *cobra.Command, args []string) {
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-		view := execIO.NewExecutableView(ctx, exec, types.Format(outputFormat), runFunc)
+		view := execIO.NewExecutableView(ctx, exec, runFunc)
 		SetView(ctx, cmd, view)
 	} else {
 		execIO.PrintExecutable(logger, outputFormat, exec)

@@ -32,12 +32,12 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:     "exec EXECUTABLE_ID [args...]",
 		Aliases: executable.SortedValidVerbs(),
-		Short:   "Execute a flow by ID.",
+		Short:   "Execute any executable by reference.",
 		Long: execDocumentation + fmt.Sprintf(
 			"\n\nSee %s for more information on executable verbs and "+
 				"%s for more information on executable IDs.\n\n%s",
-			io.TypesDocsURL("flowfile", "ExecutableVerb"),
-			io.TypesDocsURL("flowfile", "ExecutableRef"),
+			io.TypesDocsURL("flowfile", "executableverb"),
+			io.TypesDocsURL("flowfile", "executableref"),
 			execExamples,
 		),
 		Args: cobra.ArbitraryArgs,
