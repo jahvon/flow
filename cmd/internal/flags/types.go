@@ -15,11 +15,12 @@ type Metadata struct {
 	Required  bool
 }
 
-var VerbosityFlag = &Metadata{
-	Name:     "verbosity",
-	Usage:    "Log verbosity level (-1 to 1)",
-	Default:  0,
-	Required: false,
+var LogLevel = &Metadata{
+	Name:      "log-level",
+	Usage:     "Log verbosity level (debug, info, fatal)",
+	Shorthand: "L",
+	Default:   "info",
+	Required:  false,
 }
 
 var SyncCacheFlag = &Metadata{
@@ -80,8 +81,8 @@ var FilterTagFlag = &Metadata{
 var OutputFormatFlag = &Metadata{
 	Name:      "output",
 	Shorthand: "o",
-	Usage:     "Output format. One of: yaml, json, doc, or list.",
-	Default:   "",
+	Usage:     "Output format. One of: yaml, json, or tui.",
+	Default:   "tui",
 	Required:  false,
 }
 
@@ -109,13 +110,12 @@ var FixedWsModeFlag = &Metadata{
 	Required:  false,
 }
 
-var NonInteractiveFlag = &Metadata{
-	Name:      "non-interactive",
-	Shorthand: "x",
-	Usage: "Disable displaying flow output via terminal UI rendering. " +
-		"This is only needed if the interactive output is enabled by default in flow's configuration.",
-	Default:  false,
-	Required: false,
+var ListFlag = &Metadata{
+	Name:      "list",
+	Shorthand: "l",
+	Usage:     "Show a simple list view of executables instead of interactive discovery.",
+	Default:   false,
+	Required:  false,
 }
 
 var CopyFlag = &Metadata{

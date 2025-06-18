@@ -67,6 +67,16 @@ func ToPflag(cmd *cobra.Command, metadata Metadata, persistent bool) (*pflag.Fla
 	return flagSet, nil
 }
 
+func MaybeValueFor[T any](ctx *context.Context, cmd *cobra.Command, metadata Metadata, persistent bool) (T, bool) {
+	flag := cmd.Flag(metadata.Name)
+	if flag == nil || !flag.Changed {
+		return metadata.Default.(T), false
+	}
+
+	val := ValueFor[T](ctx, cmd, metadata, persistent)
+	return val, true
+}
+
 func ValueFor[T any](ctx *context.Context, cmd *cobra.Command, metadata Metadata, persistent bool) T {
 	logger := ctx.Logger
 	flagName := metadata.Name
