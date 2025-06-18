@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import React from "react";
 import { EnrichedExecutable } from "../types/executable";
 import { Config } from "../types/generated/config";
-import { WorkspaceMap } from "../types/workspace";
+import { EnrichedWorkspace } from "../types/workspace";
 
 export function useConfig() {
   const queryClient = useQueryClient();
@@ -41,10 +41,8 @@ export function useWorkspaces() {
   } = useQuery({
     queryKey: ["workspaces"],
     queryFn: async () => {
-      const response = await invoke<{ workspaces: WorkspaceMap }>(
-        "list_workspaces"
-      );
-      return response.workspaces;
+      const response = await invoke<EnrichedWorkspace[]>("list_workspaces");
+      return response;
     },
   });
 

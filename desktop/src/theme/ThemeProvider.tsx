@@ -1,7 +1,7 @@
 import { MantineProvider, createTheme } from "@mantine/core";
-import { useLocalStorage } from "@mantine/hooks";
+import { useEffect } from "react";
+import { useSettings } from "../hooks/useSettings";
 import { themes } from "./themes";
-import { ThemeName } from "./types";
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -22,12 +22,13 @@ const createColorArray = (color: string) =>
   ] as const;
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [themeName, setThemeName] = useLocalStorage<ThemeName>({
-    key: "theme",
-    defaultValue: "everforest",
-  });
+  const { settings } = useSettings();
+  const currentTheme = themes[settings.theme];
 
-  const currentTheme = themes[themeName];
+  // Set data-palette attribute for CSS variables
+  useEffect(() => {
+    document.documentElement.setAttribute("data-palette", settings.theme);
+  }, [settings.theme]);
 
   const theme = createTheme({
     colors: {

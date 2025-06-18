@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::result::Result;
 use std::sync::Arc;
 use tauri::Manager;
@@ -18,35 +17,19 @@ async fn get_config() -> Result<config::Config, String> {
 }
 
 #[tauri::command]
-async fn get_workspace(
-    name: String,
-    state: tauri::State<'_, Arc<Cache>>,
-) -> Result<Option<workspace::Workspace>, String> {
-    let cache = state.get_workspace_cache();
-    if let Some(cache) = cache {
-        Ok(cache.workspaces.get(&name).cloned())
-    } else {
-        Ok(None)
-    }
+async fn get_workspace(name: String) -> Result<enriched::Workspace, String> {
+    let runner = CommandRunner::new();
+    runner.get_workspace(&name).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn list_workspaces(
-    state: tauri::State<'_, Arc<Cache>>,
-) -> Result<cache::WorkspaceCacheData, String> {
-    let cache = state.get_workspace_cache();
-    if let Some(cache) = cache {
-        Ok(cache)
-    } else {
-        Ok(cache::WorkspaceCacheData {
-            workspaces: HashMap::new(),
-            workspace_locations: HashMap::new(),
-        })
-    }
+async fn list_workspaces() -> Result<Vec<enriched::Workspace>, String> {
+    let runner = CommandRunner::new();
+    runner.list_workspaces().await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn get_executable(executable_ref: String) -> Result<executable::EnrichedExecutable, String> {
+async fn get_executable(executable_ref: String) -> Result<enriched::Executable, String> {
     let runner = CommandRunner::new();
     runner
         .get_executable(&executable_ref)
@@ -58,7 +41,7 @@ async fn get_executable(executable_ref: String) -> Result<executable::EnrichedEx
 async fn list_executables(
     workspace: Option<String>,
     namespace: Option<String>,
-) -> Result<Vec<executable::EnrichedExecutable>, String> {
+) -> Result<Vec<enriched::Executable>, String> {
     let runner = CommandRunner::new();
     runner
         .list_executables(workspace.as_deref(), namespace.as_deref())
@@ -93,6 +76,7 @@ async fn reload_window(app: tauri::AppHandle) -> Result<(), String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let cache = Arc::new(Cache::new(app.handle().clone()));

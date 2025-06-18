@@ -6,6 +6,7 @@ export interface EnrichedExecutable extends Executable {
   namespace: string | null;
   workspace: string;
   flowfile: string;
+  fullDescription: string;
 }
 
 export const ExecutionVerbType = "execution";

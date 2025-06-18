@@ -1,12 +1,12 @@
-use std::collections::HashMap;
-use std::path::PathBuf;
-use std::sync::RwLock;
+use notify::{Event, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::env;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::sync::RwLock;
 use tauri::AppHandle;
 use tauri::Emitter;
-use notify::{Watcher, RecursiveMode, Event};
-use std::sync::Arc;
-use std::env;
 
 use crate::generated::workspace::Workspace;
 
@@ -62,7 +62,9 @@ impl Cache {
         let cache_data: WorkspaceCacheData = serde_yaml::from_str(&data)
             .map_err(|e| format!("Failed to parse workspace cache: {}", e))?;
 
-        let mut workspace_data = self.workspace_data.write()
+        let mut workspace_data = self
+            .workspace_data
+            .write()
             .map_err(|_| "Failed to acquire workspace cache lock".to_string())?;
         *workspace_data = cache_data;
 
@@ -81,7 +83,9 @@ impl Cache {
                 if event.kind.is_modify() {
                     if let Ok(mut data) = workspace_data.write() {
                         if let Ok(cache_str) = std::fs::read_to_string(&ws_cache_path) {
-                            if let Ok(cache_data) = serde_yaml::from_str::<WorkspaceCacheData>(&cache_str) {
+                            if let Ok(cache_data) =
+                                serde_yaml::from_str::<WorkspaceCacheData>(&cache_str)
+                            {
                                 *data = cache_data;
                                 let _ = app_handle.emit("workspace-cache-updated", ());
                             }
@@ -89,9 +93,11 @@ impl Cache {
                     }
                 }
             }
-        }).map_err(|e| format!("Failed to create workspace cache watcher: {}", e))?;
+        })
+        .map_err(|e| format!("Failed to create workspace cache watcher: {}", e))?;
 
-        ws_watcher.watch(&ws_cache_path_for_watch, RecursiveMode::NonRecursive)
+        ws_watcher
+            .watch(&ws_cache_path_for_watch, RecursiveMode::NonRecursive)
             .map_err(|e| format!("Failed to watch workspace cache: {}", e))?;
 
         Ok(())
@@ -102,8 +108,8 @@ impl Cache {
             PathBuf::from(custom_dir)
         } else {
             // Use the same path as Go's os.UserCacheDir()
-            let home = dirs::home_dir()
-                .ok_or_else(|| "Failed to get home directory".to_string())?;
+            let home =
+                dirs::home_dir().ok_or_else(|| "Failed to get home directory".to_string())?;
 
             #[cfg(target_os = "macos")]
             let cache_dir = home.join("Library/Caches");
@@ -124,8 +130,6 @@ impl Cache {
     }
 
     pub fn get_workspace_cache(&self) -> Option<WorkspaceCacheData> {
-        self.workspace_data.read()
-            .ok()
-            .map(|data| data.clone())
+        self.workspace_data.read().ok().map(|data| data.clone())
     }
 }

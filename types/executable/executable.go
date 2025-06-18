@@ -64,13 +64,14 @@ type enrichedExecutableList struct {
 	Executables []*enrichedExecutable `json:"executables" yaml:"executables"`
 }
 type enrichedExecutable struct {
-	*Executable `json:"-"         yaml:"-"`
+	*Executable
 
 	ID        string      `json:"id"        yaml:"id"`
 	Ref       string      `json:"ref"       yaml:"ref"`
 	Namespace string      `json:"namespace" yaml:"namespace"`
 	Workspace string      `json:"workspace" yaml:"workspace"`
 	Flowfile  string      `json:"flowfile"  yaml:"flowfile"`
+	FullDescription string `json:"fullDescription" yaml:"fullDescription"`
 }
 
 func (e *Executable) SetContext(workspaceName, workspacePath, namespace, flowFilePath string) {
@@ -106,6 +107,7 @@ func (e *Executable) Enriched() *enrichedExecutable {
 		Namespace:  e.Namespace(),
 		Workspace:  e.Workspace(),
 		Flowfile:   e.FlowFilePath(),
+		FullDescription: execDescriptionMarkdown(e),
 	}
 }
 
@@ -547,6 +549,7 @@ func (e *Executable) MarshalJSON() ([]byte, error) {
 	output["namespace"] = e.Namespace()
 	output["workspace"] = e.Workspace()
 	output["flowfile"] = e.FlowFilePath()
+	output["fullDescription"] = execDescriptionMarkdown(e)
 
 	// Convert timeout to string
 	output["timeout"] = e.Timeout.String()
@@ -573,6 +576,41 @@ func (e *Executable) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		e.Timeout = duration
+	}
+	return nil
+}
+
+func (r *RequestExecutableType) MarshalJSON() ([]byte, error) {
+	type Alias RequestExecutableType
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(r),
+	}
+	if r.Timeout != 0 {
+		aux.Timeout = r.Timeout.String()
+	}
+	return json.Marshal(aux)
+}
+
+func (r *RequestExecutableType) UnmarshalJSON(data []byte) error {
+	type Alias RequestExecutableType
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(r),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Timeout != "" {
+		duration, err := time.ParseDuration(aux.Timeout)
+		if err != nil {
+			return err
+		}
+		r.Timeout = duration
 	}
 	return nil
 }

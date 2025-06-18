@@ -1,18 +1,10 @@
-import {
-  ActionIcon,
-  ComboboxItem,
-  Group,
-  OptionsFilter,
-  Select,
-} from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
-import type { Workspace } from "../../../types/generated/workspace";
+import { ComboboxItem, Group, OptionsFilter, Select } from "@mantine/core";
+import { EnrichedWorkspace } from "../../../types/workspace";
 
 interface WorkspaceSelectorProps {
-  workspaces: Record<string, Workspace>;
+  workspaces: EnrichedWorkspace[];
   selectedWorkspace: string | null;
   onSelectWorkspace: (workspaceId: string) => void;
-  onClickWorkspaceInfo: () => void;
 }
 
 const filter: OptionsFilter = ({ options, search }) => {
@@ -28,7 +20,6 @@ export function WorkspaceSelector({
   workspaces,
   selectedWorkspace,
   onSelectWorkspace,
-  onClickWorkspaceInfo,
 }: WorkspaceSelectorProps) {
   return (
     <>
@@ -36,13 +27,13 @@ export function WorkspaceSelector({
         <Select
           value={selectedWorkspace}
           onChange={(value) => {
-            if (value && workspaces[value]) {
+            if (value && workspaces.find((w) => w.id === value)) {
               onSelectWorkspace(value);
             }
           }}
-          data={Object.entries(workspaces).map(([name, workspace]) => ({
-            value: name,
-            label: workspace.displayName || name,
+          data={workspaces.map((workspace) => ({
+            value: workspace.id,
+            label: workspace.displayName || workspace.id,
           }))}
           filter={filter}
           placeholder="No workspace selected"
@@ -72,15 +63,6 @@ export function WorkspaceSelector({
             },
           }}
         />
-        <ActionIcon
-          size="md"
-          aria-label="View workspace documentation"
-          onClick={onClickWorkspaceInfo}
-          variant="transparent"
-          color="var(--mantine-color-dark-4)"
-        >
-          <IconInfoCircle />
-        </ActionIcon>
       </Group>
     </>
   );

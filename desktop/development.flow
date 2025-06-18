@@ -5,7 +5,7 @@ executables:
   - verb: start
     name: storybook
     description: Start the Tauri desktop app's Storybook server.
-    timeout: "0s"
+    timeout: "24h"
     exec:
       dir: //desktop
       cmd: npm run storybook
@@ -14,7 +14,7 @@ executables:
     name: tauri
     aliases: [desktop]
     description: Start the Tauri desktop app in development mode.
-    timeout: "0s"
+    timeout: "24h"
     exec:
       dir: //desktop
       cmd: npm run tauri dev

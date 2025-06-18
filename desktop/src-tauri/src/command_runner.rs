@@ -1,4 +1,5 @@
-use crate::types::{config, executable};
+use crate::types::enriched::{Executable, Workspace};
+use crate::types::generated::config::Config;
 use serde::Deserialize;
 use std::fmt;
 use std::process::{Command, Stdio};
@@ -6,7 +7,11 @@ use std::process::{Command, Stdio};
 #[derive(Debug)]
 pub enum CommandError {
     ExecutionError(String),
-    ParseError(String),
+    ParseError {
+        message: String,
+        command: String,
+        output: String,
+    },
     NonZeroExit(i32),
 }
 
@@ -14,7 +19,17 @@ impl fmt::Display for CommandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CommandError::ExecutionError(e) => write!(f, "Failed to execute command: {}", e),
-            CommandError::ParseError(e) => write!(f, "Failed to parse command output: {}", e),
+            CommandError::ParseError {
+                message,
+                command,
+                output,
+            } => {
+                write!(
+                    f,
+                    "Failed to parse command output for '{}': {}\nOutput: {}",
+                    command, message, output
+                )
+            }
             CommandError::NonZeroExit(code) => {
                 write!(f, "Command returned non-zero exit code: {}", code)
             }
@@ -31,7 +46,12 @@ pub struct CommandRunner;
 
 #[derive(Deserialize, Debug)]
 struct ExecutableResponse {
-    executables: Vec<executable::EnrichedExecutable>,
+    executables: Vec<Executable>,
+}
+
+#[derive(Deserialize, Debug)]
+struct WorkspaceResponse {
+    workspaces: Vec<Workspace>,
 }
 
 impl CommandRunner {
@@ -70,13 +90,20 @@ impl CommandRunner {
             ));
         }
 
-        let stdout = String::from_utf8(output.stdout)
-            .map_err(|e| CommandError::ParseError(e.to_string()))?;
+        let stdout = String::from_utf8(output.stdout).map_err(|e| CommandError::ParseError {
+            message: e.to_string(),
+            command: format!("{:?}", cmd),
+            output: String::new(),
+        })?;
 
-        serde_json::from_str(&stdout).map_err(|e| CommandError::ParseError(e.to_string()))
+        serde_json::from_str(&stdout).map_err(|e| CommandError::ParseError {
+            message: e.to_string(),
+            command: format!("{:?}", cmd),
+            output: stdout.clone(),
+        })
     }
 
-    pub async fn get_config(&self) -> CommandResult<config::Config> {
+    pub async fn get_config(&self) -> CommandResult<Config> {
         self.execute_command(&["config", "view", "--output", "json"])
             .await
     }
@@ -85,12 +112,26 @@ impl CommandRunner {
         self.execute_command::<()>(&["sync"]).await
     }
 
+    pub async fn list_workspaces(&self) -> CommandResult<Vec<Workspace>> {
+        let response: WorkspaceResponse = self
+            .execute_command(&["workspace", "list", "--output", "json"])
+            .await?;
+        Ok(response.workspaces)
+    }
+
+    pub async fn get_workspace(&self, workspace: &str) -> CommandResult<Workspace> {
+        let response: Workspace = self
+            .execute_command(&["workspace", "view", workspace, "--output", "json"])
+            .await?;
+        Ok(response)
+    }
+
     pub async fn list_executables(
         &self,
         workspace: Option<&str>,
         namespace: Option<&str>,
-    ) -> CommandResult<Vec<executable::EnrichedExecutable>> {
-        let mut args = vec!["library", "glance", "--output", "json"];
+    ) -> CommandResult<Vec<Executable>> {
+        let mut args = vec!["library", "glance", "--output", "json", "--all"];
 
         if let Some(ws) = workspace {
             args.extend_from_slice(&["--workspace", ws]);
@@ -104,10 +145,7 @@ impl CommandRunner {
         Ok(response.executables)
     }
 
-    pub async fn get_executable(
-        &self,
-        exec_ref: &str,
-    ) -> CommandResult<executable::EnrichedExecutable> {
+    pub async fn get_executable(&self, exec_ref: &str) -> CommandResult<Executable> {
         let split_ref: Vec<&str> = exec_ref.split(" ").collect();
         match split_ref.len() {
             1 => {
@@ -127,10 +165,11 @@ impl CommandRunner {
                 ])
                 .await
             }
-            _ => Err(CommandError::ParseError(format!(
-                "Invalid executable reference format: {}",
-                exec_ref
-            ))),
+            _ => Err(CommandError::ParseError {
+                message: format!("Invalid executable reference format: {}", exec_ref),
+                command: format!("{:?}", exec_ref),
+                output: String::new(),
+            }),
         }
     }
 

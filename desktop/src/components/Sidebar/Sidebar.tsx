@@ -1,6 +1,6 @@
 import { Group, Image, NavLink, Stack } from "@mantine/core";
 import type { EnrichedExecutable } from "../../types/executable";
-import type { Workspace } from "../../types/generated/workspace";
+import { EnrichedWorkspace } from "../../types/workspace";
 import { View, ViewLinks } from "../Viewer/Viewer";
 import { ExecutableTree } from "./ExecutableTree/ExecutableTree";
 import styles from "./Sidebar.module.css";
@@ -10,10 +10,9 @@ import iconImage from "/logo-dark.png";
 interface SidebarProps {
   currentView: View;
   setCurrentView: (view: View) => void;
-  workspaces: Record<string, Workspace>;
+  workspaces: EnrichedWorkspace[];
   selectedWorkspace: string | null;
   onSelectWorkspace: (workspaceId: string) => void;
-  onClickWorkspaceInfo: () => void;
   visibleExecutables: EnrichedExecutable[];
   onSelectExecutable: (executableId: string) => void;
   onLogoClick: () => void;
@@ -25,7 +24,6 @@ export function Sidebar({
   workspaces,
   selectedWorkspace,
   onSelectWorkspace,
-  onClickWorkspaceInfo,
   visibleExecutables,
   onSelectExecutable,
   onLogoClick,
@@ -46,7 +44,6 @@ export function Sidebar({
           workspaces={workspaces}
           selectedWorkspace={selectedWorkspace}
           onSelectWorkspace={onSelectWorkspace}
-          onClickWorkspaceInfo={onClickWorkspaceInfo}
         />
 
         <Group gap="xs" mt="md">

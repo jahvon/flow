@@ -1,7 +1,7 @@
 import { Text } from "@mantine/core";
 import { IconFolders, IconLogs, IconSettings } from "@tabler/icons-react";
 import type { EnrichedExecutable } from "../../types/executable";
-import type { Workspace } from "../../types/generated/workspace";
+import { EnrichedWorkspace } from "../../types/workspace";
 import ExecutableInfo from "./Executable/Executable";
 import { Settings } from "./Settings/Settings";
 import { Welcome } from "./Welcome/Welcome";
@@ -16,7 +16,7 @@ export enum View {
 }
 
 export const ViewLinks = [
-  { icon: IconFolders, label: "Workspaces", view: View.Workspace },
+  { icon: IconFolders, label: "Workspace", view: View.Workspace },
   { icon: IconLogs, label: "Logs", view: View.Logs },
   { icon: IconSettings, label: "Settings", view: View.Settings },
 ];
@@ -27,9 +27,7 @@ interface ViewerProps {
   isExecutableLoading: boolean;
   executableError: Error | null;
   welcomeMessage?: string;
-  workspace?: Workspace | null;
-  workspaceId?: string | null;
-  onCloseWorkspace?: () => void;
+  workspace: EnrichedWorkspace | null;
 }
 
 export function Viewer({
@@ -39,19 +37,11 @@ export function Viewer({
   executableError,
   welcomeMessage,
   workspace,
-  workspaceId,
-  onCloseWorkspace,
 }: ViewerProps) {
   const renderContent = () => {
     switch (currentView) {
       case View.Workspace:
-        return (
-          <WorkspaceView
-            workspace={workspace || null}
-            workspaceId={workspaceId || null}
-            onClose={onCloseWorkspace || (() => {})}
-          />
-        );
+        return <WorkspaceView workspace={workspace} />;
       case View.Executable:
         if (selectedExecutable) {
           if (executableError) {

@@ -1,5 +1,5 @@
-import { Card, Select, Stack, Text, Title } from "@mantine/core";
-import { useLocalStorage } from "@mantine/hooks";
+import { Card, Select, Stack, Text, TextInput, Title } from "@mantine/core";
+import { useSettings } from "../../../hooks/useSettings";
 import { ThemeName } from "../../../theme/types";
 import styles from "./Settings.module.css";
 
@@ -12,10 +12,8 @@ const themeOptions = [
 ];
 
 export function Settings() {
-  const [theme, setTheme] = useLocalStorage<ThemeName>({
-    key: "theme",
-    defaultValue: "everforest",
-  });
+  const { settings, updateWorkspaceApp, updateExecutableApp, updateTheme } =
+    useSettings();
 
   return (
     <div className={styles.settings}>
@@ -31,10 +29,34 @@ export function Settings() {
           <Select
             label="Theme"
             description="Choose your preferred theme"
-            value={theme}
-            onChange={(value) => value && setTheme(value as ThemeName)}
+            value={settings.theme}
+            onChange={(value) => value && updateTheme(value as ThemeName)}
             data={themeOptions}
           />
+        </Card>
+
+        <Card className={styles.settings__section}>
+          <Text size="lg" fw={500} mb="md">
+            Application Configuration
+          </Text>
+          <Stack gap="md">
+            <TextInput
+              label="Workspace Command"
+              description="Command to use when opening workspace directories. Leave empty to use system default."
+              value={settings.workspaceApp}
+              onChange={(event) =>
+                updateWorkspaceApp(event.currentTarget.value)
+              }
+            />
+            <TextInput
+              label="Executable Command"
+              description="Command to use when opening flow files. Leave empty to use system default."
+              value={settings.executableApp}
+              onChange={(event) =>
+                updateExecutableApp(event.currentTarget.value)
+              }
+            />
+          </Stack>
         </Card>
       </Stack>
     </div>

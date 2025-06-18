@@ -4,7 +4,7 @@ namespace: examples
 description: This is a flow executable that demonstrates how to use render executable types.
 tags: [render]
 executables:
-  - verb: render
+  - verb: view
     name: markdown
     render:
       templateFile: template.md

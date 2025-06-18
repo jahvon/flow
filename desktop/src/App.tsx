@@ -15,6 +15,7 @@ import { Header } from "./components/Header/Header";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { View, Viewer } from "./components/Viewer/Viewer";
 import { useExecutable, useWorkspaceData } from "./hooks/useBackendData";
+import { SettingsProvider } from "./hooks/useSettings";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import {
   colorFromType,
@@ -51,7 +52,7 @@ function AppContent() {
 
   // Set initial workspace from config when it loads
   useEffect(() => {
-    if (config?.currentWorkspace && Object.keys(workspaces || {}).length > 0) {
+    if (config?.currentWorkspace && workspaces && workspaces.length > 0) {
       // Only update if we don't have a selected workspace or if the config workspace is different
       if (!selectedWorkspace || config.currentWorkspace !== selectedWorkspace) {
         setSelectedWorkspace(config.currentWorkspace);
@@ -120,7 +121,6 @@ function AppContent() {
               autoCloseDelay: 3000,
             });
           }}
-          onLogoClick={handleLogoClick}
         />
       </AppShell.Header>
 
@@ -128,13 +128,12 @@ function AppContent() {
         <Sidebar
           currentView={currentView}
           setCurrentView={setCurrentView}
-          workspaces={workspaces || {}}
+          workspaces={workspaces || []}
           selectedWorkspace={selectedWorkspace}
           onSelectWorkspace={(workspaceId) => {
             setSelectedWorkspace(workspaceId);
             setCurrentView(View.Workspace);
           }}
-          onClickWorkspaceInfo={handleWorkspaceInfoClick}
           visibleExecutables={executables}
           onSelectExecutable={(executable) => {
             if (executable === selectedExecutable) {
@@ -180,10 +179,8 @@ function AppContent() {
               executableError={executableError}
               welcomeMessage={welcomeMessage}
               workspace={
-                selectedWorkspace ? workspaces?.[selectedWorkspace] : null
+                workspaces?.find((w) => w.id === selectedWorkspace) || null
               }
-              workspaceId={selectedWorkspace}
-              onCloseWorkspace={() => setCurrentView(View.Workspace)}
             />
             {isLoading && (
               <div
@@ -223,9 +220,11 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AppContent />
-      </ThemeProvider>
+      <SettingsProvider>
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
+      </SettingsProvider>
     </QueryClientProvider>
   );
 }
