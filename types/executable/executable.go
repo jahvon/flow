@@ -63,9 +63,16 @@ func (e *ExecExecutableType) GetLogFields() map[string]interface{} {
 type enrichedExecutableList struct {
 	Executables []*enrichedExecutable `json:"executables" yaml:"executables"`
 }
+
 type enrichedExecutable struct {
-	ID   string      `json:"id"   yaml:"id"`
-	Spec *Executable `json:"spec" yaml:"spec"`
+	*Executable
+
+	ID              string `json:"id"              yaml:"id"`
+	Ref             string `json:"ref"             yaml:"ref"`
+	Namespace       string `json:"namespace"       yaml:"namespace"`
+	Workspace       string `json:"workspace"       yaml:"workspace"`
+	Flowfile        string `json:"flowfile"        yaml:"flowfile"`
+	FullDescription string `json:"fullDescription" yaml:"fullDescription"`
 }
 
 func (e *Executable) SetContext(workspaceName, workspacePath, namespace, flowFilePath string) {
@@ -93,12 +100,20 @@ func (e *Executable) SetInheritedFields(flowFile *FlowFile) {
 	e.inheritedDescription = strings.Join([]string{flowFile.Description, descFromFIle}, "\n")
 }
 
-func (e *Executable) YAML() (string, error) {
-	enriched := &enrichedExecutable{
-		ID:   e.ID(),
-		Spec: e,
+func (e *Executable) enriched() *enrichedExecutable {
+	return &enrichedExecutable{
+		Executable:      e,
+		ID:              e.ID(),
+		Ref:             e.Ref().String(),
+		Namespace:       e.Namespace(),
+		Workspace:       e.Workspace(),
+		Flowfile:        e.FlowFilePath(),
+		FullDescription: strings.TrimSpace(execDescriptionMarkdown(e, false)),
 	}
-	yamlBytes, err := yaml.Marshal(enriched)
+}
+
+func (e *Executable) YAML() (string, error) {
+	yamlBytes, err := yaml.Marshal(e.enriched())
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal executable - %w", err)
 	}
@@ -106,11 +121,7 @@ func (e *Executable) YAML() (string, error) {
 }
 
 func (e *Executable) JSON() (string, error) {
-	enriched := &enrichedExecutable{
-		ID:   e.ID(),
-		Spec: e,
-	}
-	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
+	jsonBytes, err := json.MarshalIndent(e.enriched(), "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal executable - %w", err)
 	}
@@ -316,10 +327,7 @@ func (e *Executable) IsExecutableFromWorkspace(workspaceFilter string) bool {
 func (l ExecutableList) YAML() (string, error) {
 	enriched := &enrichedExecutableList{}
 	for _, exec := range l {
-		enriched.Executables = append(enriched.Executables, &enrichedExecutable{
-			ID:   exec.ID(),
-			Spec: exec,
-		})
+		enriched.Executables = append(enriched.Executables, exec.enriched())
 	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
@@ -331,10 +339,7 @@ func (l ExecutableList) YAML() (string, error) {
 func (l ExecutableList) JSON() (string, error) {
 	enriched := &enrichedExecutableList{}
 	for _, exec := range l {
-		enriched.Executables = append(enriched.Executables, &enrichedExecutable{
-			ID:   exec.ID(),
-			Spec: exec,
-		})
+		enriched.Executables = append(enriched.Executables, exec.enriched())
 	}
 	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
 	if err != nil {
@@ -525,4 +530,74 @@ func NewExecutableID(workspace, namespace, name string) string {
 		// for now, exclude the workspace from the string (until we can indicate that it's root / not named in the tui)
 		return ""
 	}
+}
+
+func (e *Executable) MarshalJSON() ([]byte, error) {
+	type Alias Executable
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(e),
+	}
+	if e.Timeout != 0 {
+		aux.Timeout = e.Timeout.String()
+	}
+	return json.Marshal(aux)
+}
+
+func (e *Executable) UnmarshalJSON(data []byte) error {
+	type Alias Executable
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(e),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Timeout != "" {
+		duration, err := time.ParseDuration(aux.Timeout)
+		if err != nil {
+			return err
+		}
+		e.Timeout = duration
+	}
+	return nil
+}
+
+func (r *RequestExecutableType) MarshalJSON() ([]byte, error) {
+	type Alias RequestExecutableType
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(r),
+	}
+	if r.Timeout != 0 {
+		aux.Timeout = r.Timeout.String()
+	}
+	return json.Marshal(aux)
+}
+
+func (r *RequestExecutableType) UnmarshalJSON(data []byte) error {
+	type Alias RequestExecutableType
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(r),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Timeout != "" {
+		duration, err := time.ParseDuration(aux.Timeout)
+		if err != nil {
+			return err
+		}
+		r.Timeout = duration
+	}
+	return nil
 }
