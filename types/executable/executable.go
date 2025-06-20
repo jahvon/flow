@@ -67,11 +67,11 @@ type enrichedExecutableList struct {
 type enrichedExecutable struct {
 	*Executable
 
-	ID              string `json:"id"        yaml:"id"`
-	Ref             string `json:"ref"       yaml:"ref"`
-	Namespace       string `json:"namespace" yaml:"namespace"`
-	Workspace       string `json:"workspace" yaml:"workspace"`
-	Flowfile        string `json:"flowfile"  yaml:"flowfile"`
+	ID              string `json:"id"              yaml:"id"`
+	Ref             string `json:"ref"             yaml:"ref"`
+	Namespace       string `json:"namespace"       yaml:"namespace"`
+	Workspace       string `json:"workspace"       yaml:"workspace"`
+	Flowfile        string `json:"flowfile"        yaml:"flowfile"`
 	FullDescription string `json:"fullDescription" yaml:"fullDescription"`
 }
 
@@ -544,7 +544,6 @@ func (e *Executable) MarshalJSON() ([]byte, error) {
 		aux.Timeout = e.Timeout.String()
 	}
 	return json.Marshal(aux)
-
 }
 
 func (e *Executable) UnmarshalJSON(data []byte) error {

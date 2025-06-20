@@ -22,8 +22,8 @@ type enrichedWorkspaceList struct {
 
 type enrichedWorkspace struct {
 	*Workspace
-	Name            string `json:"name" yaml:"name"`
-	Path            string `json:"path" yaml:"path"`
+	Name            string `json:"name"            yaml:"name"`
+	Path            string `json:"path"            yaml:"path"`
 	FullDescription string `json:"fullDescription" yaml:"fullDescription"`
 }
 
