@@ -58,7 +58,7 @@ func executablesFromFile(logger io.Logger, fileBase, filePath string) (*executab
 			if err != nil {
 				return nil, errors.Wrapf(err, "unable to parse timeout duration %s", value)
 			}
-			exec.Timeout = dur
+			exec.Timeout = &dur
 		case fileparser.VerbConfigurationKey:
 			exec.Verb = executable.Verb(value)
 		case fileparser.NameConfigurationKey:

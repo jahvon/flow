@@ -91,7 +91,7 @@ func ExecWithTimeout(opts ...Option) *executable.Executable {
 		Name:        name,
 		Visibility:  privateExecVisibility(),
 		Description: docstring,
-		Timeout:     timeout,
+		Timeout:     &timeout,
 		Exec: &executable.ExecExecutableType{
 			Cmd: fmt.Sprintf("sleep %d", int(timeout.Seconds()+10)),
 		},
