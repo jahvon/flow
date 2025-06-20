@@ -19,10 +19,18 @@ func NewRootCmd(ctx *context.Context) *cobra.Command {
 		Short: "flow is a command line interface designed to make managing and running development workflows easier.",
 		Long: "flow is a command line interface designed to make managing and running development workflows easier." +
 			"It's driven by executables organized across workspaces and namespaces defined in a workspace.\n\n" +
-			"See github.com/jahvon/flow for more information.",
+			"See https://flowexec.io for more information.",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			verbosity := flags.ValueFor[int](ctx, cmd.Root(), *flags.VerbosityFlag, true)
-			ctx.Logger.SetLevel(verbosity)
+			level := flags.ValueFor[string](ctx, cmd.Root(), *flags.LogLevel, true)
+			// TODO: make the tuikit less ambiguous about the log level
+			switch level {
+			case "debug":
+				ctx.Logger.SetLevel(1)
+			case "info":
+				ctx.Logger.SetLevel(0)
+			case "fatal":
+				ctx.Logger.SetLevel(-1)
+			}
 			sync := flags.ValueFor[bool](ctx, cmd.Root(), *flags.SyncCacheFlag, true)
 			if sync {
 				if err := cache.UpdateAll(ctx.Logger); err != nil {
@@ -33,9 +41,8 @@ func NewRootCmd(ctx *context.Context) *cobra.Command {
 		PersistentPostRun: func(cmd *cobra.Command, args []string) { ctx.Finalize() },
 		Version:           version.String(),
 	}
-	internal.RegisterPersistentFlag(ctx, rootCmd, *flags.VerbosityFlag)
+	internal.RegisterPersistentFlag(ctx, rootCmd, *flags.LogLevel)
 	internal.RegisterPersistentFlag(ctx, rootCmd, *flags.SyncCacheFlag)
-	internal.RegisterPersistentFlag(ctx, rootCmd, *flags.NonInteractiveFlag)
 	return rootCmd
 }
 
@@ -65,12 +72,13 @@ func RegisterSubCommands(ctx *context.Context, rootCmd *cobra.Command) {
 	}
 
 	internal.RegisterExecCmd(ctx, rootCmd)
-	internal.RegisterLibraryCmd(ctx, rootCmd)
+	internal.RegisterBrowseCmd(ctx, rootCmd)
 	internal.RegisterConfigCmd(ctx, rootCmd)
 	internal.RegisterSecretCmd(ctx, rootCmd)
+	internal.RegisterVaultCmd(ctx, rootCmd)
+	internal.RegisterCacheCmd(ctx, rootCmd)
 	internal.RegisterWorkspaceCmd(ctx, rootCmd)
 	internal.RegisterTemplateCmd(ctx, rootCmd)
 	internal.RegisterLogsCmd(ctx, rootCmd)
-	internal.RegisterStoreCmd(ctx, rootCmd)
 	internal.RegisterSyncCmd(ctx, rootCmd)
 }

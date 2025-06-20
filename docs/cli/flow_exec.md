@@ -1,6 +1,6 @@
 ## flow exec
 
-Execute a flow by ID.
+Execute any executable by reference.
 
 ### Synopsis
 
@@ -12,7 +12,7 @@ If the target executable accept arguments, they can be passed in the form of fla
 Flag arguments are specified with the format 'flag=value' and positional arguments are specified as values without any prefix.
 
 
-See https://flowexec.io/#/types/flowfile#ExecutableVerb for more information on executable verbs and https://flowexec.io/#/types/flowfile#ExecutableRef for more information on executable IDs.
+See https://flowexec.io/#/types/flowfile#executableverb for more information on executable verbs and https://flowexec.io/#/types/flowfile#executableref for more information on executable IDs.
 
 
 #### Examples
@@ -56,9 +56,8 @@ flow exec EXECUTABLE_ID [args...] [flags]
 ### Options inherited from parent commands
 
 ```
-  -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
-      --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (-1 to 1)
+  -L, --log-level string   Log verbosity level (debug, info, fatal) (default "info")
+      --sync               Sync flow cache and workspaces
 ```
 
 ### SEE ALSO

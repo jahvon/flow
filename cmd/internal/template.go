@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 
-	"github.com/jahvon/tuikit/types"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
@@ -18,20 +17,20 @@ import (
 func RegisterTemplateCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	templateCmd := &cobra.Command{
 		Use:     "template",
-		Aliases: []string{"tmpl", "t"},
+		Aliases: []string{"tmpl", "templates"},
 		Short:   "Manage flowfile templates.",
 	}
 	registerGenerateTemplateCmd(ctx, templateCmd)
-	registerRegisterTemplateCmd(ctx, templateCmd)
+	registerAddTemplateCmd(ctx, templateCmd)
 	registerListTemplateCmd(ctx, templateCmd)
-	registerViewTemplateCmd(ctx, templateCmd)
+	registerGetTemplateCmd(ctx, templateCmd)
 	rootCmd.AddCommand(templateCmd)
 }
 
 func registerGenerateTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
 	generateCmd := &cobra.Command{
 		Use:     "generate FLOWFILE_NAME [-w WORKSPACE ] [-o OUTPUT_DIR] [-f FILE | -t TEMPLATE]",
-		Aliases: []string{"init", "render", "run"},
+		Aliases: []string{"gen", "scaffold"},
 		Short:   "Generate workspace executables and scaffolding from a flowfile template.",
 		Long:    templateLong,
 		Args:    cobra.MaximumNArgs(1),
@@ -77,18 +76,18 @@ func generateTemplateFunc(ctx *context.Context, cmd *cobra.Command, args []strin
 	logger.PlainTextSuccess(fmt.Sprintf("Template '%s' rendered successfully", flowFilename))
 }
 
-func registerRegisterTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
-	registerCmd := &cobra.Command{
-		Use:     "register NAME DEFINITION_TEMPLATE_PATH",
-		Aliases: []string{"set", "new"},
-		Short:   "Register a flowfile template.",
+func registerAddTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
+	addCmd := &cobra.Command{
+		Use:     "add NAME DEFINITION_TEMPLATE_PATH",
+		Aliases: []string{"register", "new"},
+		Short:   "Register a flowfile template by name.",
 		Args:    cobra.ExactArgs(2),
-		Run:     func(cmd *cobra.Command, args []string) { setTemplateFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { addTemplateFunc(ctx, cmd, args) },
 	}
-	templateCmd.AddCommand(registerCmd)
+	templateCmd.AddCommand(addCmd)
 }
 
-func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func addTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 	flowFilePath := args[1]
@@ -114,7 +113,7 @@ func registerListTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
 	listCmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "View a list of registered flowfile templates.",
+		Short:   "List registered flowfile templates.",
 		Args:    cobra.NoArgs,
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
@@ -135,7 +134,7 @@ func listTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
 		view := executable.NewTemplateListView(
-			ctx, tmpls, types.Format(outputFormat),
+			ctx, tmpls,
 			func(name string) error {
 				tmpl := tmpls.Find(name)
 				if tmpl == nil {
@@ -156,14 +155,14 @@ func listTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 }
 
-func registerViewTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
+func registerGetTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
 	templateCmd := &cobra.Command{
-		Use:     "view",
-		Aliases: []string{"show"},
-		Short:   "View a flowfile template's documentation. Either it's registered name or file path can be used.",
+		Use:     "get",
+		Aliases: []string{"show", "view", "info"},
+		Short:   "Get a flowfile template's details. Either it's registered name or file path can be used.",
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { viewTemplateFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { getTemplateFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, templateCmd, *flags.TemplateFlag)
 	RegisterFlag(ctx, templateCmd, *flags.TemplateFilePathFlag)
@@ -172,7 +171,7 @@ func registerViewTemplateCmd(ctx *context.Context, getCmd *cobra.Command) {
 	getCmd.AddCommand(templateCmd)
 }
 
-func viewTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func getTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	template := flags.ValueFor[string](ctx, cmd, *flags.TemplateFlag, false)
 	templateFilePath := flags.ValueFor[string](ctx, cmd, *flags.TemplateFilePathFlag, false)
@@ -185,7 +184,7 @@ func viewTemplateFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-		view := executable.NewTemplateView(ctx, tmpl, types.Format(outputFormat), runFunc)
+		view := executable.NewTemplateView(ctx, tmpl, runFunc)
 		SetView(ctx, cmd, view)
 	} else {
 		executable.PrintTemplate(logger, outputFormat, tmpl)

@@ -4,6 +4,9 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"strings"
+
+	"github.com/jahvon/tuikit/io"
 
 	"github.com/jahvon/flow/internal/services/open"
 )
@@ -24,4 +27,25 @@ func OpenInEditor(path string, stdIn, stdOut *os.File) error {
 	cmd.Stdin = stdIn
 	cmd.Stdout = stdOut
 	return cmd.Run()
+}
+
+const (
+	YAMLFormat = "yaml"
+	ymlFormat  = "yml"
+	JSONFormat = "json"
+)
+
+func NormalizeFormat(logger io.Logger, format string) string {
+	switch strings.ToLower(format) {
+	case YAMLFormat, ymlFormat:
+		return YAMLFormat
+	case JSONFormat:
+		return JSONFormat
+	default:
+		// tui is a special case, it's the default output mode and should not be logged as an unsupported format
+		if format != "" && format != "tui" {
+			logger.Warnf("Unsupported output format '%s', defaulting to YAML", format)
+		}
+		return YAMLFormat
+	}
 }

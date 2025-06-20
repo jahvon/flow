@@ -67,6 +67,12 @@ func ToPflag(cmd *cobra.Command, metadata Metadata, persistent bool) (*pflag.Fla
 	return flagSet, nil
 }
 
+func HasFlag(cmd *cobra.Command, metadata Metadata) bool {
+	flagName := metadata.Name
+	flagSet := cmd.Flags()
+	return flagSet.Lookup(flagName) != nil
+}
+
 func ValueFor[T any](ctx *context.Context, cmd *cobra.Command, metadata Metadata, persistent bool) T {
 	logger := ctx.Logger
 	flagName := metadata.Name

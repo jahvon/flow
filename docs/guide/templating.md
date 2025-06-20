@@ -4,12 +4,12 @@ of create a set of executables for managing a Kubernetes deployment.
 
 ## Registering templates
 
-Templates are registered with flow using the [flow template register](../cli/flow_template_register.md) command. This command accepts a
+Templates are registered with flow using the [flow template add](../cli/flow_template_add.md) command. This command accepts a
 the name to be given to the template and the path to the template file.
 
 ```shell
 # Register the k8s-deployment template
-flow template register k8s-deployment --file /path/to/k8s-deployment.flow.tmpl
+flow template add k8s-deployment --file /path/to/k8s-deployment.flow.tmpl
 ```
 
 ## Generating scaffolding from a template
@@ -31,14 +31,14 @@ flow template generate mealie --output mealie --file /path/to/k8s-deployment.flo
 
 ## Viewing templates
 
-Individual templates can be viewed using the [flow template view](../cli/flow_template_view.md) command. This command 
+Individual templates can be viewed using the [flow template get](../cli/flow_template_get.md) command. This command 
 accepts either the registered name of the template or the path to the template file.
 
 ```shell
 # View the k8s-deployment template by its registered name
-flow template view --template k8s-deployment
+flow template get --template k8s-deployment
 # View the k8s-deployment template by its file path
-flow template view --file /path/to/k8s-deployment.flow.tmpl
+flow template get --file /path/to/k8s-deployment.flow.tmpl
 ```
 
 You can also list all registered templates using the [flow template list](../cli/flow_template_list.md) command.

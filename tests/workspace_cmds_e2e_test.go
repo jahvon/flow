@@ -42,29 +42,29 @@ var _ = Describe("workspace e2e", Ordered, func() {
 		Expect(os.RemoveAll(wsPath)).To(Succeed())
 	})
 
-	When("creating a new workspace (flow workspace create)", func() {
+	When("creating a new workspace (flow workspace add)", func() {
 		It("creates successfully", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "workspace", "create", wsName, wsPath)).To(Succeed())
+			Expect(run.Run(ctx, "workspace", "add", wsName, wsPath)).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring(fmt.Sprintf("Workspace '%s' created", wsName)))
 		})
 	})
 
-	When("setting a workspace (flow workspace set)", func() {
+	When("setting a workspace (flow workspace switch)", func() {
 		It("sets successfully", func() {
-			Expect(run.Run(ctx, "workspace", "set", wsName)).To(Succeed())
+			Expect(run.Run(ctx, "workspace", "switch", wsName)).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring(fmt.Sprintf("Workspace set to %s", wsName)))
 		})
 	})
 
-	When("getting a workspace (flow workspace view)", func() {
+	When("getting a workspace (flow workspace get)", func() {
 		It("should returns the workspace", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "workspace", "view", wsName)).To(Succeed())
+			Expect(run.Run(ctx, "workspace", "get", wsName)).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring(wsName))
@@ -81,7 +81,7 @@ var _ = Describe("workspace e2e", Ordered, func() {
 		})
 	})
 
-	When("deleting a workspace (flow workspace delete)", func() {
+	When("deleting a workspace (flow workspace remove)", func() {
 		It("should remove the workspace from the user config", func() {
 			reader, writer, err := os.Pipe()
 			Expect(err).NotTo(HaveOccurred())
@@ -89,7 +89,7 @@ var _ = Describe("workspace e2e", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			ctx.SetIO(reader, ctx.StdOut())
-			Expect(run.Run(ctx, "workspace", "delete", origWsName)).To(Succeed())
+			Expect(run.Run(ctx, "workspace", "remove", origWsName)).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring(fmt.Sprintf("Workspace '%s' deleted", origWsName)))

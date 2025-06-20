@@ -11,7 +11,6 @@ import (
 func NewUserConfigView(
 	container *tuikit.Container,
 	cfg config.Config,
-	format types.Format,
 ) tuikit.View {
-	return views.NewEntityView(container.RenderState(), &cfg, format)
+	return views.NewEntityView(container.RenderState(), &cfg, types.EntityFormatDocument)
 }

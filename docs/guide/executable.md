@@ -1,22 +1,22 @@
 ## Finding Executables
 
-Executables are customizable actions defined in a YAML [flowfile](#flowfile). There are a few [flow library](../cli/flow_library.md)
+Executables are customizable actions defined in a YAML [flowfile](#flowfile). There are a few [flow library](../cli/flow_browse.md)
 command that can be used to find executables:
     
 ```shell
-flow library # Multi-pane view for browsing executables
-flow library glance # Single-pane view for browsing executables
-flow library view # View documentation for a single executable
+flow browse            # Multi-pane view for browsing executables
+flow browse --list     # Single-pane view for browsing executables
+flow browse VERB ID    # View documentation for a single executable
 ```
 
-The `flow library` and `flow library glance` commands accept optional command-line flags to filter the list of 
+The `flow browse` command accept optional command-line flags to filter the list of 
 executables by workspace, namespace, verb, or tag:
 
 ```shell
-flow library --workspace ws --namespace ns --verb exec --tag my-tag 
+flow browse --workspace ws --namespace ns --verb exec --tag my-tag 
 # additionally, the --all flag can be used to show executables from all namespaces and the 
 # --filter flag can be used to search the executable names and descriptions
-flow library --all --filter "search string"
+flow browse --all --filter "search string"
 ```
 
 ## Running Executables

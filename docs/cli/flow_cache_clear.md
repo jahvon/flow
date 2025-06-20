@@ -1,6 +1,6 @@
-## flow store clear
+## flow cache clear
 
-Clear data from the store. Use --full to remove all stored data.
+Clear cache data. Use --all to remove data across all scopes.
 
 ### Synopsis
 
@@ -9,25 +9,24 @@ The data store is a key-value store that can be used to persist data across exec
 This will remove all keys and values from the data store.
 
 ```
-flow store clear [flags]
+flow cache clear [flags]
 ```
 
 ### Options
 
 ```
-      --full   Force clear all stored data
+      --all    Force clear all stored data
   -h, --help   help for clear
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
-      --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (-1 to 1)
+  -L, --log-level string   Log verbosity level (debug, info, fatal) (default "info")
+      --sync               Sync flow cache and workspaces
 ```
 
 ### SEE ALSO
 
-* [flow store](flow_store.md)	 - Manage the data store for persisting key-value data.
+* [flow cache](flow_cache.md)	 - Manage temporary key-value data.
 

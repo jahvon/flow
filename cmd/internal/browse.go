@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jahvon/tuikit/types"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
@@ -16,31 +15,67 @@ import (
 	"github.com/jahvon/flow/types/executable"
 )
 
-func RegisterLibraryCmd(ctx *context.Context, rootCmd *cobra.Command) {
-	libraryCmd := &cobra.Command{
-		Use:     "library",
-		Short:   "View and manage your library of workspaces and executables.",
-		Aliases: []string{"lib"},
-		Args:    cobra.NoArgs,
+func RegisterBrowseCmd(ctx *context.Context, rootCmd *cobra.Command) {
+	browseCmd := &cobra.Command{
+		Use:     "browse [EXECUTABLE-REFERENCE]",
+		Short:   "Discover and explore available executables.",
+		Aliases: []string{"ls", "library"},
+		Long: "Browse executables across workspaces.\n\n" +
+			"  flow browse                # Interactive multi-pane executable browser\n" +
+			"  flow browse --list         # Simple list view of executables\n" +
+			"  flow browse VERB [ID]      # Detailed view of specific executable\n\n" +
+			fmt.Sprintf(
+				"See %s for more information on executable verbs and "+
+					"%s for more information on executable references.",
+				io.TypesDocsURL("flowfile", "executableverb"),
+				io.TypesDocsURL("flowfile", "executableref"),
+			),
+		Args: cobra.MaximumNArgs(2),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+			execIDs := make([]string, 0, len(execList))
+			for _, e := range execList {
+				execIDs = append(execIDs, e.ID())
+			}
+			return execIDs, cobra.ShellCompDirectiveNoFileComp
+		},
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { libraryFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { browseFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, libraryCmd, *flags.FilterWorkspaceFlag)
-	RegisterFlag(ctx, libraryCmd, *flags.FilterNamespaceFlag)
-	RegisterFlag(ctx, libraryCmd, *flags.FilterVerbFlag)
-	RegisterFlag(ctx, libraryCmd, *flags.FilterTagFlag)
-	RegisterFlag(ctx, libraryCmd, *flags.FilterExecSubstringFlag)
-	RegisterFlag(ctx, libraryCmd, *flags.AllNamespacesFlag)
-	registerGlanceLibraryCmd(ctx, libraryCmd)
-	registerViewLibraryCmd(ctx, libraryCmd)
-	rootCmd.AddCommand(libraryCmd)
+	RegisterFlag(ctx, browseCmd, *flags.ListFlag)
+	RegisterFlag(ctx, browseCmd, *flags.OutputFormatFlag)
+	RegisterFlag(ctx, browseCmd, *flags.FilterWorkspaceFlag)
+	RegisterFlag(ctx, browseCmd, *flags.FilterNamespaceFlag)
+	RegisterFlag(ctx, browseCmd, *flags.FilterVerbFlag)
+	RegisterFlag(ctx, browseCmd, *flags.FilterTagFlag)
+	RegisterFlag(ctx, browseCmd, *flags.FilterExecSubstringFlag)
+	RegisterFlag(ctx, browseCmd, *flags.AllNamespacesFlag)
+	rootCmd.AddCommand(browseCmd)
 }
 
-func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func browseFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+	if len(args) >= 1 {
+		viewExecutable(ctx, cmd, args)
+		return
+	}
+
+	listMode := flags.ValueFor[bool](ctx, cmd, *flags.ListFlag, false)
+	if listMode || !TUIEnabled(ctx, cmd) {
+		listExecutables(ctx, cmd, args)
+		return
+	}
+
+	executableLibrary(ctx, cmd, args)
+}
+
+func executableLibrary(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	if !TUIEnabled(ctx, cmd) {
-		logger.FatalErr(errors.New("library command requires an interactive terminal"))
+		logger.FatalErr(errors.New("interactive discovery requires an interactive terminal"))
 	}
 
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
@@ -92,26 +127,7 @@ func libraryFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	SetView(ctx, cmd, libraryModel)
 }
 
-func registerGlanceLibraryCmd(ctx *context.Context, libraryCmd *cobra.Command) {
-	glanceCmd := &cobra.Command{
-		Use:     "glance",
-		Short:   "View a list of just executables.",
-		Args:    cobra.NoArgs,
-		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
-		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { glanceLibraryCmd(ctx, cmd, args) },
-	}
-	RegisterFlag(ctx, glanceCmd, *flags.OutputFormatFlag)
-	RegisterFlag(ctx, glanceCmd, *flags.FilterWorkspaceFlag)
-	RegisterFlag(ctx, glanceCmd, *flags.FilterNamespaceFlag)
-	RegisterFlag(ctx, glanceCmd, *flags.FilterVerbFlag)
-	RegisterFlag(ctx, glanceCmd, *flags.FilterTagFlag)
-	RegisterFlag(ctx, glanceCmd, *flags.FilterExecSubstringFlag)
-	RegisterFlag(ctx, glanceCmd, *flags.AllNamespacesFlag)
-	libraryCmd.AddCommand(glanceCmd)
-}
-
-func glanceLibraryCmd(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func listExecutables(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	wsFilter := flags.ValueFor[string](ctx, cmd, *flags.FilterWorkspaceFlag, false)
 	if wsFilter == "." {
@@ -149,57 +165,35 @@ func glanceLibraryCmd(ctx *context.Context, cmd *cobra.Command, _ []string) {
 
 	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-		view := execIO.NewExecutableListView(
-			ctx,
-			filteredExec,
-			types.Format(outputFormat),
-			runFunc,
-		)
+		view := execIO.NewExecutableListView(ctx, filteredExec, runFunc)
 		SetView(ctx, cmd, view)
 	} else {
 		execIO.PrintExecutableList(logger, outputFormat, filteredExec)
 	}
 }
 
-func registerViewLibraryCmd(ctx *context.Context, libraryCmd *cobra.Command) {
-	viewCmd := &cobra.Command{
-		Use:     "view VERB ID",
-		Aliases: []string{"show", "find"},
-		Short:   "View an executable's documentation. The executable is found by reference.",
-		Long: "View an executable by the executable's verb and ID.\nThe target executable's ID should be in the  " +
-			"form of 'ws/ns:name' and the verb should match the target executable's verb or one of its aliases.\n\n" +
-			fmt.Sprintf(
-				"See %s for more information on executable verbs.\n"+
-					"See %s for more information on executable IDs.",
-				io.TypesDocsURL("flowfile", "ExecutableVerb"),
-				io.TypesDocsURL("flowfile", "ExecutableRef"),
-			),
-		Args:    cobra.ExactArgs(2),
-		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
-		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { viewLibraryFunc(ctx, cmd, args) },
-	}
-	RegisterFlag(ctx, viewCmd, *flags.OutputFormatFlag)
-	libraryCmd.AddCommand(viewCmd)
-}
-
-func viewLibraryFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func viewExecutable(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
+
 	verbStr := args[0]
 	verb := executable.Verb(verbStr)
 	if err := verb.Validate(); err != nil {
 		logger.FatalErr(err)
 	}
-	id := args[1]
-	ws, ns, name := executable.MustParseExecutableID(id)
-	if ws == "" {
-		ws = ctx.CurrentWorkspace.AssignedName()
+
+	var execID string
+	if len(args) > 1 {
+		id := args[1]
+		ws, ns, name := executable.MustParseExecutableID(id)
+		if ws == executable.WildcardWorkspace {
+			ws = ctx.CurrentWorkspace.AssignedName()
+		}
+		if ns == executable.WildcardNamespace && ctx.Config.CurrentNamespace != "" {
+			ns = ctx.Config.CurrentNamespace
+		}
+		execID = executable.NewExecutableID(ws, ns, name)
 	}
-	if ns == "" && ctx.Config.CurrentNamespace != "" {
-		ns = ctx.Config.CurrentNamespace
-	}
-	id = executable.NewExecutableID(ws, ns, name)
-	ref := executable.NewRef(id, verb)
+	ref := executable.NewRef(execID, verb)
 
 	exec, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
 	if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
@@ -218,7 +212,7 @@ func viewLibraryFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
 		runFunc := func(ref string) error { return runByRef(ctx, cmd, ref) }
-		view := execIO.NewExecutableView(ctx, exec, types.Format(outputFormat), runFunc)
+		view := execIO.NewExecutableView(ctx, exec, runFunc)
 		SetView(ctx, cmd, view)
 	} else {
 		execIO.PrintExecutable(logger, outputFormat, exec)
