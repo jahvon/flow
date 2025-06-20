@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 
@@ -54,7 +54,7 @@ func NewWorkspaceView(
 					container.HandleError(err)
 				}
 				container.SetState(common.HeaderContextKey, fmt.Sprintf("%s/*", ws.AssignedName()))
-				container.SetNotice("workspace updated", styles.OutputLevelInfo)
+				container.SetNotice("workspace updated", themes.OutputLevelInfo)
 				return nil
 			},
 		},
