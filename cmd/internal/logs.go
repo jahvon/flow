@@ -45,7 +45,7 @@ func logFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	
+
 	if lastEntry {
 		if len(entries) == 0 {
 			ctx.Logger.Fatalf("No log entries found")
