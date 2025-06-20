@@ -14,7 +14,7 @@ func execMarkdown(e *Executable) string {
 	if e.Visibility != nil {
 		mkdwn += fmt.Sprintf("**Visibility:** %s\n", *e.Visibility)
 	}
-	if e.Timeout != 0 {
+	if e.Timeout != nil {
 		mkdwn += fmt.Sprintf("**Timeout:** %s\n", e.Timeout.String())
 	}
 	if len(e.Aliases) > 0 {

@@ -21,8 +21,7 @@ import (
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o executable.gen.go --capitalization URI --capitalization URL executable_schema.yaml
 
 const (
-	TmpDirLabel    = "f:tmp"
-	DefaultTimeout = 30 * time.Minute
+	TmpDirLabel = "f:tmp"
 )
 
 type ExecutableList []*Executable
@@ -231,11 +230,10 @@ func (e *Executable) SetDefaults() {
 		e.Visibility = &v
 	}
 
-	if e.Timeout == 0 {
-		e.Timeout = DefaultTimeout
+	if e.Timeout == nil {
 		if v, ok := os.LookupEnv(TimeoutOverrideEnv); ok {
 			if d, err := time.ParseDuration(v); err == nil {
-				e.Timeout = d
+				e.Timeout = &d
 			}
 		}
 	}
@@ -540,7 +538,7 @@ func (e *Executable) MarshalJSON() ([]byte, error) {
 	}{
 		Alias: (*Alias)(e),
 	}
-	if e.Timeout != 0 {
+	if e.Timeout != nil {
 		aux.Timeout = e.Timeout.String()
 	}
 	return json.Marshal(aux)
@@ -562,7 +560,7 @@ func (e *Executable) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		e.Timeout = duration
+		e.Timeout = &duration
 	}
 	return nil
 }
