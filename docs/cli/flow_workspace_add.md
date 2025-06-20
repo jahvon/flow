@@ -1,17 +1,16 @@
-## flow workspace list
+## flow workspace add
 
-List all registered workspaces.
+Initialize a new workspace.
 
 ```
-flow workspace list [flags]
+flow workspace add NAME PATH [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help              help for list
-  -o, --output string     Output format. One of: yaml, json, or tui. (default "tui")
-  -t, --tag stringArray   Filter by tags.
+  -h, --help   help for add
+  -s, --set    Set the newly created workspace as the current workspace
 ```
 
 ### Options inherited from parent commands

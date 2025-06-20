@@ -1,17 +1,17 @@
-## flow secret list
+## flow secret get
 
-List secrets stored in the current vault.
+Get the value of a secret in the current vault.
 
 ```
-flow secret list [flags]
+flow secret get REFERENCE [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for list
-  -o, --output string   Output format. One of: yaml, json, or tui. (default "tui")
-  -p, --plaintext       Output the secret value as plain text instead of an obfuscated string
+      --copy        Copy the secret value to the clipboard
+  -h, --help        help for get
+  -p, --plaintext   Output the secret value as plain text instead of an obfuscated string
 ```
 
 ### Options inherited from parent commands

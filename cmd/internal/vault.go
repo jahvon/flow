@@ -45,7 +45,7 @@ func createSecretVaultFunc(ctx *context.Context, cmd *cobra.Command, _ []string)
 		logger.FatalErr(err)
 	}
 
-	if verbosity := flags.ValueFor[int](ctx, cmd, *flags.LogLevel, false); verbosity >= 0 {
+	if level := flags.ValueFor[string](ctx, cmd, *flags.LogLevel, false); level != "fatal" {
 		logger.PlainTextSuccess(fmt.Sprintf("Your vault encryption key is: %s", generatedKey))
 		newKeyMsg := fmt.Sprintf(
 			"You will need this key to modify your vault data. Store it somewhere safe!\n"+

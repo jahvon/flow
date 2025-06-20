@@ -79,15 +79,15 @@ func generateTemplateFunc(ctx *context.Context, cmd *cobra.Command, args []strin
 func registerAddTemplateCmd(ctx *context.Context, templateCmd *cobra.Command) {
 	addCmd := &cobra.Command{
 		Use:     "add NAME DEFINITION_TEMPLATE_PATH",
-		Aliases: []string{"create", "new"},
-		Short:   "Register a flowfile template.",
+		Aliases: []string{"register", "new"},
+		Short:   "Register a flowfile template by name.",
 		Args:    cobra.ExactArgs(2),
-		Run:     func(cmd *cobra.Command, args []string) { setTemplateFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { addTemplateFunc(ctx, cmd, args) },
 	}
 	templateCmd.AddCommand(addCmd)
 }
 
-func setTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func addTemplateFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 	flowFilePath := args[1]

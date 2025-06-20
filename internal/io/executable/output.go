@@ -1,8 +1,6 @@
 package executable
 
 import (
-	"fmt"
-
 	tuikitIO "github.com/jahvon/tuikit/io"
 
 	"github.com/jahvon/flow/internal/io/common"
@@ -33,7 +31,6 @@ func PrintExecutable(logger tuikitIO.Logger, format string, exec *executable.Exe
 	if exec == nil {
 		logger.Fatalf("Executable type is nil")
 	}
-	logger.Infox(fmt.Sprintf("Executable %s", exec.ID()), "Location", exec.FlowFilePath())
 	switch common.NormalizeFormat(logger, format) {
 	case common.YAMLFormat:
 		str, err := exec.YAML()

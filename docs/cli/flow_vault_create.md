@@ -1,15 +1,15 @@
-## flow config set tui
+## flow vault create
 
-Enable or disable the interactive terminal UI experience.
+Create a new vault.
 
 ```
-flow config set tui [true|false] [flags]
+flow vault create [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tui
+  -h, --help   help for create
 ```
 
 ### Options inherited from parent commands
@@ -21,5 +21,5 @@ flow config set tui [true|false] [flags]
 
 ### SEE ALSO
 
-* [flow config set](flow_config_set.md)	 - Set a global configuration value.
+* [flow vault](flow_vault.md)	 - Manage sensitive secret stores.
 

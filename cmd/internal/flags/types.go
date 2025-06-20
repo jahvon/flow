@@ -1,4 +1,4 @@
-//nolint:cyclop,lll
+//nolint:lll
 package flags
 
 import (
@@ -87,7 +87,7 @@ var OutputFormatFlag = &Metadata{
 }
 
 var OutputSecretAsPlainTextFlag = &Metadata{
-	Name:      "plainText",
+	Name:      "plaintext",
 	Shorthand: "p",
 	Usage:     "Output the secret value as plain text instead of an obfuscated string",
 	Default:   false,

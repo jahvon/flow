@@ -40,7 +40,7 @@ func RegisterWorkspaceCmd(ctx *context.Context, rootCmd *cobra.Command) {
 func registerAddWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
 	createCmd := &cobra.Command{
 		Use:     "add NAME PATH",
-		Aliases: []string{"init"},
+		Aliases: []string{"init", "create", "new"},
 		Short:   "Initialize a new workspace.",
 		Args:    cobra.ExactArgs(2),
 		Run:     func(cmd *cobra.Command, args []string) { addWorkspaceFunc(ctx, cmd, args) },

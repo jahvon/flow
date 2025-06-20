@@ -39,7 +39,7 @@ flow secret list # List all secrets in the vault
 flow secret view KEY # View the value of a specific secret
 ```
 
-By default, those commands will not display the secret values. You will need to provide the `--plainText` flag to view 
+By default, those commands will not display the secret values. You will need to provide the `--plaintext` flag to view 
 the values.
 
 ## Removing Secrets

@@ -1,15 +1,15 @@
-## flow config set tui
+## flow template add
 
-Enable or disable the interactive terminal UI experience.
+Register a flowfile template by name.
 
 ```
-flow config set tui [true|false] [flags]
+flow template add NAME DEFINITION_TEMPLATE_PATH [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tui
+  -h, --help   help for add
 ```
 
 ### Options inherited from parent commands
@@ -21,5 +21,5 @@ flow config set tui [true|false] [flags]
 
 ### SEE ALSO
 
-* [flow config set](flow_config_set.md)	 - Set a global configuration value.
+* [flow template](flow_template.md)	 - Manage flowfile templates.
 

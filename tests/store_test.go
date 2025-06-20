@@ -10,7 +10,7 @@ import (
 	"github.com/jahvon/flow/tests/utils"
 )
 
-var _ = Describe("store e2e", Ordered, func() {
+var _ = Describe("cache e2e", Ordered, func() {
 	var (
 		ctx *context.Context
 		run *utils.CommandRunner
@@ -29,32 +29,32 @@ var _ = Describe("store e2e", Ordered, func() {
 		ctx.Finalize()
 	})
 
-	When("setting a key (flow store set)", func() {
+	When("setting a key (flow cache set)", func() {
 		It("should save the value into the store", func() {
-			Expect(run.Run(ctx, "store", "set", "my-key", "my-value")).To(Succeed())
+			Expect(run.Run(ctx, "cache", "set", "my-key", "my-value")).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
-			Expect(out).To(ContainSubstring("Key \"my-key\" set in the store"))
+			Expect(out).To(ContainSubstring("Key \"my-key\" set in the cache"))
 		})
 	})
 
-	When("getting a value (flow store get)", func() {
+	When("getting a value (flow cache get)", func() {
 		It("should return the secret value", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "store", "get", "my-key")).To(Succeed())
+			Expect(run.Run(ctx, "cache", "get", "my-key")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("my-value"))
 		})
 	})
 
-	When("clearing the store (flow store clear)", func() {
+	When("clearing the store (flow cache clear)", func() {
 		It("should remove all set secrets", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "store", "clear")).To(Succeed())
+			Expect(run.Run(ctx, "cache", "clear")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(out).To(ContainSubstring("Store store cleared"))
+			Expect(out).To(ContainSubstring("Cache cleared"))
 		})
 	})
 })

@@ -26,7 +26,7 @@ var _ = Describe("exec e2e", func() {
 	DescribeTable("with dir example executables", func(ref string) {
 		runner := utils.NewE2ECommandRunner()
 		stdOut := ctx.StdOut()
-		Expect(runner.Run(ctx, "exec", ref)).To(Succeed())
+		Expect(runner.Run(ctx, "exec", ref, "--log-level", "debug")).To(Succeed())
 		Expect(readFileContent(stdOut)).To(ContainSubstring("flow completed"))
 	},
 		Entry("print example", "examples:simple-print"),

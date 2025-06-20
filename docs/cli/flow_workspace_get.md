@@ -1,17 +1,16 @@
-## flow secret list
+## flow workspace get
 
-List secrets stored in the current vault.
+Get workspace details. If the name is omitted, the current workspace is used.
 
 ```
-flow secret list [flags]
+flow workspace get NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for list
+  -h, --help            help for get
   -o, --output string   Output format. One of: yaml, json, or tui. (default "tui")
-  -p, --plaintext       Output the secret value as plain text instead of an obfuscated string
 ```
 
 ### Options inherited from parent commands
@@ -23,5 +22,5 @@ flow secret list [flags]
 
 ### SEE ALSO
 
-* [flow secret](flow_secret.md)	 - Manage secrets stored in a vault.
+* [flow workspace](flow_workspace.md)	 - Manage development workspaces.
 

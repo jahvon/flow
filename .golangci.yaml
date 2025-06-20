@@ -99,6 +99,7 @@ linters:
       - third_party$
       - builtin$
       - examples$
+      - gomock_reflect$
 issues:
   max-same-issues: 0
 formatters:

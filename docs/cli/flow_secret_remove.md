@@ -1,17 +1,15 @@
-## flow secret list
+## flow secret remove
 
-List secrets stored in the current vault.
+Remove a secret from the vault.
 
 ```
-flow secret list [flags]
+flow secret remove NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for list
-  -o, --output string   Output format. One of: yaml, json, or tui. (default "tui")
-  -p, --plaintext       Output the secret value as plain text instead of an obfuscated string
+  -h, --help   help for remove
 ```
 
 ### Options inherited from parent commands

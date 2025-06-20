@@ -56,8 +56,8 @@ func MarkFlagFilename(ctx *context.Context, cmd *cobra.Command, name string) {
 
 func TUIEnabled(ctx *context.Context, cmd *cobra.Command) bool {
 	formatDisabled := false
-	format, set := flags.MaybeValueFor[string](ctx, cmd.Root(), *flags.OutputFormatFlag, true)
-	if set {
+	if flags.HasFlag(cmd, *flags.OutputFormatFlag) {
+		format := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 		formatDisabled = format == "yaml" || format == "yml" || format == "json"
 	}
 	envDisabled, _ := strconv.ParseBool(os.Getenv("DISABLE_FLOW_INTERACTIVE"))

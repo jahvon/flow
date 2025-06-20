@@ -19,12 +19,12 @@ func PrintCache(ctx *context.Context, cache map[string]string, format string) {
 		if err != nil {
 			logger.Fatalf("Failed to marshal cache - %v", err)
 		}
-		_, _ = fmt.Fprintf(ctx.StdOut(), str)
+		_, _ = fmt.Fprint(ctx.StdOut(), str)
 	case common.JSONFormat:
 		str, err := output.JSON()
 		if err != nil {
 			logger.Fatalf("Failed to marshal cache - %v", err)
 		}
-		_, _ = fmt.Fprintf(ctx.StdOut(), str)
+		_, _ = fmt.Fprint(ctx.StdOut(), str)
 	}
 }

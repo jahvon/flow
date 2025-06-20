@@ -1,15 +1,16 @@
-## flow config set tui
+## flow workspace switch
 
-Enable or disable the interactive terminal UI experience.
+Switch the current workspace.
 
 ```
-flow config set tui [true|false] [flags]
+flow workspace switch NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for tui
+  -f, --fixed   Set the workspace mode to fixed
+  -h, --help    help for switch
 ```
 
 ### Options inherited from parent commands
@@ -21,5 +22,5 @@ flow config set tui [true|false] [flags]
 
 ### SEE ALSO
 
-* [flow config set](flow_config_set.md)	 - Set a global configuration value.
+* [flow workspace](flow_workspace.md)	 - Manage development workspaces.
 
