@@ -109,7 +109,7 @@ properties:
     $ref: '#/definitions/Interactive'
   theme:
     type: string
-    enum: [default, dark, light, dracula, tokyo-night]
+    enum: [default, everforest, dark, light, dracula, tokyo-night]
     description: The theme of the interactive UI.
     default: default
   colorOverride:
