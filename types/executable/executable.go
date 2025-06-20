@@ -108,7 +108,7 @@ func (e *Executable) enriched() *enrichedExecutable {
 		Namespace:       e.Namespace(),
 		Workspace:       e.Workspace(),
 		Flowfile:        e.FlowFilePath(),
-		FullDescription: execDescriptionMarkdown(e),
+		FullDescription: strings.TrimSpace(execDescriptionMarkdown(e, false)),
 	}
 }
 
@@ -532,36 +532,21 @@ func NewExecutableID(workspace, namespace, name string) string {
 	}
 }
 
-// MarshalJSON implements custom JSON marshaling for Executable
 func (e *Executable) MarshalJSON() ([]byte, error) {
-	output := make(map[string]interface{})
-
-	type BaseExecutable Executable
-	baseData, err := json.Marshal((*BaseExecutable)(e))
-	if err != nil {
-		return nil, err
+	type Alias Executable
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(e),
 	}
-
-	if err := json.Unmarshal(baseData, &output); err != nil {
-		return nil, err
+	if e.Timeout != 0 {
+		aux.Timeout = e.Timeout.String()
 	}
+	return json.Marshal(aux)
 
-	// Add the enriched fields for the YAML and JSON functions
-	output["id"] = e.ID()
-	output["ref"] = e.Ref().String()
-	output["namespace"] = e.Namespace()
-	output["workspace"] = e.Workspace()
-	output["flowfile"] = e.FlowFilePath()
-	output["fullDescription"] = execDescriptionMarkdown(e)
-
-	// Convert timeout to string
-	output["timeout"] = e.Timeout.String()
-
-	// Marshal the complete map to JSON
-	return json.Marshal(output)
 }
 
-// UnmarshalJSON implements custom JSON unmarshaling for Executable
 func (e *Executable) UnmarshalJSON(data []byte) error {
 	type Alias Executable
 	aux := &struct {

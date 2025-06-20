@@ -14,7 +14,7 @@ func workspaceMarkdown(w *Workspace) string {
 	} else {
 		mkdwn = fmt.Sprintf("# [Workspace] %s\n", w.AssignedName())
 	}
-	mkdwn += workspaceDescription(w)
+	mkdwn += workspaceDescription(w, true)
 	if len(w.Tags) > 0 {
 		mkdwn += "**Tags**\n"
 		for _, tag := range w.Tags {
@@ -40,30 +40,42 @@ func workspaceMarkdown(w *Workspace) string {
 	return mkdwn
 }
 
-func workspaceDescription(w *Workspace) string {
+func workspaceDescription(w *Workspace, withPrefix bool) string {
+	if w.Description == "" && w.DescriptionFile == "" {
+		return ""
+	}
 	var mkdwn string
-	const descSpacer = "> \n"
-	if w.Description != "" {
-		mkdwn += descSpacer
-		lines := strings.Split(w.Description, "\n")
-		for _, line := range lines {
-			mkdwn += fmt.Sprintf("> %s\n", line)
-		}
-		mkdwn += descSpacer
+
+	prefix := ""
+	if withPrefix {
+		prefix = "> "
+	}
+	if d := strings.TrimSpace(w.Description); d != "" {
+		mkdwn += prefix + "\n"
+		mkdwn += addPrefix(d, prefix)
 	}
 	if w.DescriptionFile != "" {
 		wsFile := filepath.Join(w.Location(), w.DescriptionFile)
 		mdBytes, err := os.ReadFile(filepath.Clean(wsFile))
 		if err != nil {
-			mkdwn += fmt.Sprintf("> **error rendering description file**: %s\n", err)
-		} else {
-			lines := strings.Split(string(mdBytes), "\n")
-			for _, line := range lines {
-				mkdwn += fmt.Sprintf("> %s\n", line)
-			}
+			mkdwn += addPrefix(fmt.Sprintf("**error rendering description file**: %s", err), prefix)
+		} else if d := strings.TrimSpace(string(mdBytes)); d != "" {
+			mkdwn += prefix + "\n"
+			mkdwn += addPrefix(d, prefix)
 		}
-		mkdwn += descSpacer
+	}
+	if mkdwn != "" {
+		mkdwn += prefix + "\n"
 	}
 	mkdwn += "\n"
 	return mkdwn
+}
+
+func addPrefix(s, prefix string) string {
+	lines := strings.Split(s, "\n")
+	var final string
+	for _, line := range lines {
+		final += prefix + line + "\n"
+	}
+	return final
 }

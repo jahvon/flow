@@ -3,6 +3,7 @@ package workspace
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/jahvon/tuikit/types"
 	"gopkg.in/yaml.v3"
@@ -31,7 +32,7 @@ func (w *Workspace) enriched() *enrichedWorkspace {
 		Workspace:       w,
 		Name:            w.AssignedName(),
 		Path:            w.Location(),
-		FullDescription: workspaceDescription(w),
+		FullDescription: strings.TrimSpace(workspaceDescription(w, false)),
 	}
 }
 
