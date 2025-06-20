@@ -1,6 +1,6 @@
-## flow store set
+## flow cache set
 
-Set a key-value pair in the store.
+Set cached data by key.
 
 ### Synopsis
 
@@ -9,7 +9,7 @@ The data store is a key-value store that can be used to persist data across exec
 This will overwrite any existing value for the key.
 
 ```
-flow store set KEY [VALUE] [flags]
+flow cache set KEY [VALUE] [flags]
 ```
 
 ### Options
@@ -21,12 +21,11 @@ flow store set KEY [VALUE] [flags]
 ### Options inherited from parent commands
 
 ```
-  -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
-      --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (-1 to 1)
+  -L, --log-level string   Log verbosity level (debug, info, fatal) (default "info")
+      --sync               Sync flow cache and workspaces
 ```
 
 ### SEE ALSO
 
-* [flow store](flow_store.md)	 - Manage the data store for persisting key-value data.
+* [flow cache](flow_cache.md)	 - Manage temporary key-value data.
 

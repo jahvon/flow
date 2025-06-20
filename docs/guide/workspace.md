@@ -3,13 +3,13 @@ directory structures called **workspaces**. Executables can also be grouped acro
 
 ## Workspace Registration
 
-You can register multiple workspaces with Flow. To do so, use the [flow workspace create](../cli/flow_workspace_create.md) command:
+You can register multiple workspaces with Flow. To do so, use the [flow workspace add](../cli/flow_workspace_add.md) command:
 
 ```shell
 # Create a workspace named "my-workspace" in the current directory
-flow workspace create my-workspace .
+flow workspace add my-workspace .
 # Create a workspace named "my-workspace" in a specific directory and set it as the current workspace
-flow workspace create my-workspace /path/to/directory --set
+flow workspace add my-workspace /path/to/directory --set
 ```
 
 When a workspace is created, a [configuration](#workspace-configuration) file is added to the root of the workspace if one does not already exist.
@@ -23,22 +23,22 @@ For more details about workspace configuration options, see [Workspace](../types
 
 ## Changing the Current Workspace
 
-To change the current workspace, use the [flow workspace set](../cli/flow_workspace_set.md) command:
+To change the current workspace, use the [flow workspace switch](../cli/flow_workspace_switch.md) command:
 
 ```shell
 # Set the current workspace to "my-workspace"
-flow workspace set my-workspace
+flow workspace switch my-workspace
 ```
 
 Also see the [workspace mode](interactive.md#changing-the-workspace-mode) documentation for more information on workspace modes.
 
 ## Deleting a Workspace
 
-To delete a workspace, use the [flow workspace delete](../cli/flow_workspace_delete.md) command:
+To delete a workspace, use the [flow workspace remove](../cli/flow_workspace_remove.md) command:
 
 ```shell
 # Delete the workspace named "my-workspace"
-flow workspace delete my-workspace
+flow workspace remove my-workspace
 ```
 
 ## Workspace Viewer
@@ -47,9 +47,9 @@ The [flow workspace](../cli/flow_workspace.md) command provides various viewing 
 
 ```shell
 # View the current workspace
-flow workspace view
+flow workspace get
 # View a specific workspace
-flow workspace view my-workspace
+flow workspace get my-workspace
 # List all registered workspaces
 flow workspace list
 # List all workspaces with a specific tag

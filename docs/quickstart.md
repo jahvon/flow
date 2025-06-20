@@ -11,7 +11,7 @@ A workspace can be created anywhere on your system but must be registered in ord
 To create a new workspace, run the following command in the directory where you want the workspace to be created:
 
 ```shell
-flow workspace create my-workspace . --set
+flow workspace add my-workspace . --set
 ```
 
 You can replace `my-workspace` with any name you want to give your workspace and `.` with the path to the root directory 
@@ -53,7 +53,7 @@ If you're new to flow, try adding the `flow` workspace and explore the executabl
 
 ```shell
 git clone github.com/jahvon/flow
-flow workspace create flow flow
+flow workspace add flow flow
 ```
 
 When you have multiple workspaces, you can switch between them using a command like the following:
@@ -87,7 +87,7 @@ Try adding more executables to the workspace! You can create multiple flow files
 executables, try viewing them from the interactive UI:
 
 ```shell
-flow library
+flow browse
 ```
 
 When in the library, you can press the <kbd>R</kbd> key on a selected executable to run it.

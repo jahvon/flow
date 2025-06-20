@@ -19,7 +19,6 @@ import (
 func NewWorkspaceView(
 	ctx *context.Context,
 	ws *workspace.Workspace,
-	format types.Format,
 ) tuikit.View {
 	container := ctx.TUIContainer
 	var workspaceKeyCallbacks = []types.KeyCallback{
@@ -61,13 +60,12 @@ func NewWorkspaceView(
 		},
 	}
 
-	return views.NewEntityView(container.RenderState(), ws, format, workspaceKeyCallbacks...)
+	return views.NewEntityView(container.RenderState(), ws, types.EntityFormatDocument, workspaceKeyCallbacks...)
 }
 
 func NewWorkspaceListView(
 	ctx *context.Context,
 	workspaces workspace.WorkspaceList,
-	format types.Format,
 ) tuikit.View {
 	container := ctx.TUIContainer
 	if len(workspaces.Items()) == 0 {
@@ -86,8 +84,8 @@ func NewWorkspaceListView(
 			return fmt.Errorf("workspace not found")
 		}
 
-		return ctx.SetView(NewWorkspaceView(ctx, ws, format))
+		return ctx.SetView(NewWorkspaceView(ctx, ws))
 	}
 
-	return views.NewCollectionView(container.RenderState(), workspaces, format, selectFunc)
+	return views.NewCollectionView(container.RenderState(), workspaces, types.CollectionFormatList, selectFunc)
 }

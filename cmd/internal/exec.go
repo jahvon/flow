@@ -32,12 +32,12 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:     "exec EXECUTABLE_ID [args...]",
 		Aliases: executable.SortedValidVerbs(),
-		Short:   "Execute a flow by ID.",
+		Short:   "Execute any executable by reference.",
 		Long: execDocumentation + fmt.Sprintf(
 			"\n\nSee %s for more information on executable verbs and "+
 				"%s for more information on executable IDs.\n\n%s",
-			io.TypesDocsURL("flowfile", "ExecutableVerb"),
-			io.TypesDocsURL("flowfile", "ExecutableRef"),
+			io.TypesDocsURL("flowfile", "executableverb"),
+			io.TypesDocsURL("flowfile", "executableref"),
 			execExamples,
 		),
 		Args: cobra.ArbitraryArgs,
@@ -164,7 +164,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		}
 		_ = processStore.Close()
 	}
-	logger.Infox(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
+	logger.Debugx(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
 	if TUIEnabled(ctx, cmd) {
 		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
 			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)

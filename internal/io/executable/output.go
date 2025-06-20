@@ -1,30 +1,22 @@
 package executable
 
 import (
-	"fmt"
-	"strings"
-
 	tuikitIO "github.com/jahvon/tuikit/io"
 
+	"github.com/jahvon/flow/internal/io/common"
 	"github.com/jahvon/flow/types/executable"
 )
 
-const (
-	yamlFormat = "yaml"
-	ymlFormat  = "yml"
-	jsonFormat = "json"
-)
-
 func PrintExecutableList(logger tuikitIO.Logger, format string, executables executable.ExecutableList) {
-	logger.Infof("listing %d executables", len(executables))
-	switch strings.ToLower(format) {
-	case "", yamlFormat, ymlFormat:
+	logger.Debugf("listing %d executables", len(executables))
+	switch common.NormalizeFormat(logger, format) {
+	case common.YAMLFormat:
 		str, err := executables.YAML()
 		if err != nil {
 			logger.Fatalf("Failed to marshal executable list - %v", err)
 		}
 		logger.Println(str)
-	case jsonFormat:
+	case common.JSONFormat:
 		str, err := executables.JSON()
 		if err != nil {
 			logger.Fatalf("Failed to marshal executable list - %v", err)
@@ -37,66 +29,59 @@ func PrintExecutableList(logger tuikitIO.Logger, format string, executables exec
 
 func PrintExecutable(logger tuikitIO.Logger, format string, exec *executable.Executable) {
 	if exec == nil {
-		logger.Fatalf("Executable is nil")
+		logger.Fatalf("Executable type is nil")
 	}
-	logger.Infox(fmt.Sprintf("Executable %s", exec.ID()), "Location", exec.FlowFilePath())
-	switch strings.ToLower(format) {
-	case "", yamlFormat, ymlFormat:
+	switch common.NormalizeFormat(logger, format) {
+	case common.YAMLFormat:
 		str, err := exec.YAML()
 		if err != nil {
 			logger.Fatalf("Failed to marshal executable - %v", err)
 		}
 		logger.Println(str)
-	case jsonFormat:
+	case common.JSONFormat:
 		str, err := exec.JSON()
 		if err != nil {
 			logger.Fatalf("Failed to marshal executable - %v", err)
 		}
 		logger.Println(str)
-	default:
-		logger.Fatalf("Unsupported output format %s", format)
 	}
 }
 
 func PrintTemplate(logger tuikitIO.Logger, format string, template *executable.Template) {
 	if template == nil {
-		logger.Fatalf("Template is nil")
+		logger.Fatalf("Template type is nil")
 	}
-	logger.Infof("Template %s", template.Name())
-	switch strings.ToLower(format) {
-	case "", yamlFormat, ymlFormat:
+	logger.Debugf("Template %s", template.Name())
+	switch common.NormalizeFormat(logger, format) {
+	case common.YAMLFormat:
 		str, err := template.YAML()
 		if err != nil {
 			logger.Fatalf("Failed to marshal template - %v", err)
 		}
 		logger.Println(str)
-	case jsonFormat:
+	case common.JSONFormat:
 		str, err := template.JSON()
 		if err != nil {
 			logger.Fatalf("Failed to marshal template - %v", err)
 		}
 		logger.Println(str)
-	default:
-		logger.Fatalf("Unsupported output format %s", format)
 	}
 }
 
 func PrintTemplateList(logger tuikitIO.Logger, format string, templates executable.TemplateList) {
-	logger.Infof("listing %d templates", len(templates))
-	switch strings.ToLower(format) {
-	case "", yamlFormat, ymlFormat:
+	logger.Debugf("listing %d templates", len(templates))
+	switch common.NormalizeFormat(logger, format) {
+	case common.YAMLFormat:
 		str, err := templates.YAML()
 		if err != nil {
 			logger.Fatalf("Failed to marshal template list - %v", err)
 		}
 		logger.Println(str)
-	case jsonFormat:
+	case common.JSONFormat:
 		str, err := templates.JSON()
 		if err != nil {
 			logger.Fatalf("Failed to marshal template list - %v", err)
 		}
 		logger.Println(str)
-	default:
-		logger.Fatalf("Unsupported output format %s", format)
 	}
 }

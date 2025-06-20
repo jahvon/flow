@@ -23,6 +23,7 @@ type JSONSchema struct {
 	Schema               string                   `json:"$schema,omitempty"              yaml:"$schema,omitempty"`
 	Ref                  Ref                      `json:"$ref,omitempty"                 yaml:"$ref,omitempty"`
 	ID                   string                   `json:"$id,omitempty"                  yaml:"$id,omitempty"`
+	Title                string                   `json:"title,omitempty"                yaml:"title,omitempty"`
 	Description          string                   `json:"description,omitempty"          yaml:"description,omitempty"`
 	Type                 string                   `json:"type,omitempty"                 yaml:"type,omitempty"`
 	Required             []string                 `json:"required,omitempty"             yaml:"required,omitempty"`

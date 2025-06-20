@@ -90,7 +90,7 @@ Executables are the building blocks of workflows and are used to define the acti
 | `request` |  | [ExecutableRequestExecutableType](#ExecutableRequestExecutableType) | <no value> |  |
 | `serial` |  | [ExecutableSerialExecutableType](#ExecutableSerialExecutableType) | <no value> |  |
 | `tags` |  | [CommonTags](#CommonTags) | [] |  |
-| `timeout` | The maximum amount of time the executable is allowed to run before being terminated. The timeout is specified in Go duration format (e.g. 30s, 5m, 1h).  | `string` | 30m0s |  |
+| `timeout` | The maximum amount of time the executable is allowed to run before being terminated. The timeout is specified in Go duration format (e.g. 30s, 5m, 1h).  | `string` | <no value> |  |
 | `verb` |  | [ExecutableVerb](#ExecutableVerb) | exec | ✘ |
 | `visibility` |  | [CommonVisibility](#CommonVisibility) | <no value> |  |
 

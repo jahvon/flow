@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/bubbletea/v2 v2.0.0-beta1
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1
-	github.com/expr-lang/expr v1.17.3
+	github.com/expr-lang/expr v1.17.4
 	github.com/gen2brain/beeep v0.0.0-20240516210008-9c006672e7f4
 	github.com/jahvon/glamour v0.8.1-patch3
 	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef

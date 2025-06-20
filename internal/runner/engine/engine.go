@@ -33,13 +33,13 @@ func (rs ResultSummary) HasErrors() bool {
 func (rs ResultSummary) String() string {
 	var res string
 	if rs.HasErrors() {
-		res += "execution error encountered\n\n"
+		res += "execution error encountered\n"
 	}
 	for _, r := range rs.Results {
 		if r.Error == nil {
 			continue
 		}
-		res += fmt.Sprintf("- Executable: %s\n  Error: %v", r.ID, r.Error)
+		res += fmt.Sprintf("\n- Executable: %s\n  Error: %v", r.ID, r.Error)
 		if r.Retries > 0 {
 			res += fmt.Sprintf("\n  Retries: %d\n", r.Retries)
 		}

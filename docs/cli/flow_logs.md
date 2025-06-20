@@ -1,6 +1,6 @@
 ## flow logs
 
-List and view logs for previous flow executions.
+View execution history and logs.
 
 ```
 flow logs [flags]
@@ -9,16 +9,16 @@ flow logs [flags]
 ### Options
 
 ```
-  -h, --help   help for logs
-      --last   Print the last execution's logs
+  -h, --help            help for logs
+      --last            Print the last execution's logs
+  -o, --output string   Output format. One of: yaml, json, or tui. (default "tui")
 ```
 
 ### Options inherited from parent commands
 
 ```
-  -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
-      --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (-1 to 1)
+  -L, --log-level string   Log verbosity level (debug, info, fatal) (default "info")
+      --sync               Sync flow cache and workspaces
 ```
 
 ### SEE ALSO
