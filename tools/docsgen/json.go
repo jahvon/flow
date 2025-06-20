@@ -31,6 +31,7 @@ func generateJSONSchemas() {
 				schema.MergeSchemas(s, value, fn, sm)
 			}
 
+			s.Title = fn.Title()
 			schemaJSON, err := json.MarshalIndent(s, "", "  ")
 			if err != nil {
 				panic(err)
