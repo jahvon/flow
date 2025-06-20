@@ -52,7 +52,8 @@ func workspaceDescription(w *Workspace) string {
 		mkdwn += descSpacer
 	}
 	if w.DescriptionFile != "" {
-		mdBytes, err := os.ReadFile(filepath.Clean(w.DescriptionFile))
+		wsFile := filepath.Join(w.Location(), w.DescriptionFile)
+		mdBytes, err := os.ReadFile(filepath.Clean(wsFile))
 		if err != nil {
 			mkdwn += fmt.Sprintf("> **error rendering description file**: %s\n", err)
 		} else {

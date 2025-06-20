@@ -15,8 +15,24 @@ import (
 
 type WorkspaceList []*Workspace
 
-type enrichedWorkspaceConfigList struct {
-	Workspaces WorkspaceList `json:"workspaces" yaml:"workspaces"`
+type enrichedWorkspaceList struct {
+	Workspaces []*enrichedWorkspace `json:"workspaces" yaml:"workspaces"`
+}
+
+type enrichedWorkspace struct {
+	*Workspace
+	Name            string `json:"name" yaml:"name"`
+	Path            string `json:"path" yaml:"path"`
+	FullDescription string `json:"fullDescription" yaml:"fullDescription"`
+}
+
+func (w *Workspace) enriched() *enrichedWorkspace {
+	return &enrichedWorkspace{
+		Workspace:       w,
+		Name:            w.AssignedName(),
+		Path:            w.Location(),
+		FullDescription: workspaceDescription(w),
+	}
 }
 
 func (w *Workspace) AssignedName() string {
@@ -33,7 +49,7 @@ func (w *Workspace) SetContext(name, location string) {
 }
 
 func (w *Workspace) YAML() (string, error) {
-	yamlBytes, err := yaml.Marshal(w)
+	yamlBytes, err := yaml.Marshal(w.enriched())
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config - %w", err)
 	}
@@ -41,7 +57,7 @@ func (w *Workspace) YAML() (string, error) {
 }
 
 func (w *Workspace) JSON() (string, error) {
-	jsonBytes, err := json.MarshalIndent(w, "", "  ")
+	jsonBytes, err := json.MarshalIndent(w.enriched(), "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config - %w", err)
 	}
@@ -57,7 +73,10 @@ func DefaultWorkspaceConfig(name string) *Workspace {
 }
 
 func (l WorkspaceList) YAML() (string, error) {
-	enriched := enrichedWorkspaceConfigList{Workspaces: l}
+	enriched := enrichedWorkspaceList{Workspaces: make([]*enrichedWorkspace, 0, len(l))}
+	for _, ws := range l {
+		enriched.Workspaces = append(enriched.Workspaces, ws.enriched())
+	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config list - %w", err)
@@ -66,7 +85,10 @@ func (l WorkspaceList) YAML() (string, error) {
 }
 
 func (l WorkspaceList) JSON() (string, error) {
-	enriched := enrichedWorkspaceConfigList{Workspaces: l}
+	enriched := enrichedWorkspaceList{Workspaces: make([]*enrichedWorkspace, 0, len(l))}
+	for _, ws := range l {
+		enriched.Workspaces = append(enriched.Workspaces, ws.enriched())
+	}
 	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config list - %w", err)
