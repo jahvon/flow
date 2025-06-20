@@ -136,6 +136,8 @@ func registerCacheListCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Short:   "List all keys in the store.",
 		Long:    dataStoreDescription + "This will list all keys currently stored in the data store.",
 		Args:    cobra.NoArgs,
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run: func(cmd *cobra.Command, args []string) {
 			cacheListFunc(ctx, cmd, args)
 		},

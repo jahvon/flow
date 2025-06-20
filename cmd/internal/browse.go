@@ -19,7 +19,7 @@ func RegisterBrowseCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	browseCmd := &cobra.Command{
 		Use:     "browse [EXECUTABLE-REFERENCE]",
 		Short:   "Discover and explore available executables.",
-		Aliases: []string{"ls", "library"}, // TODO: deprecate the "library" alias
+		Aliases: []string{"ls", "library"},
 		Long: "Browse executables across workspaces.\n\n" +
 			"  flow browse                # Interactive multi-pane executable browser\n" +
 			"  flow browse --list         # Simple list view of executables\n" +
@@ -185,10 +185,10 @@ func viewExecutable(ctx *context.Context, cmd *cobra.Command, args []string) {
 	if len(args) > 1 {
 		id := args[1]
 		ws, ns, name := executable.MustParseExecutableID(id)
-		if ws == "" {
+		if ws == executable.WildcardWorkspace {
 			ws = ctx.CurrentWorkspace.AssignedName()
 		}
-		if ns == "" && ctx.Config.CurrentNamespace != "" {
+		if ns == executable.WildcardNamespace && ctx.Config.CurrentNamespace != "" {
 			ns = ctx.Config.CurrentNamespace
 		}
 		execID = executable.NewExecutableID(ws, ns, name)

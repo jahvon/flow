@@ -6,7 +6,7 @@ there are several [flow config commands](../cli/flow_config.md) that can be used
 > [!TIP]
 > You can view your current settings with the config view command:
 > ```shell
-> flow config view
+> flow config get
 > ```
 
 ### Changing the TUI theme
@@ -29,8 +29,6 @@ flow config set theme (default|light|dark|dracula|tokyo-night)
 Additionally, you can override the theme colors by setting the `colorOverride` field in the config file. Any color not 
 set in the `colorOverride` field will use the default color for the set theme.
 See the [config file reference](../types/config.md#ColorPalette) for more information.
-
-```yaml
 
 ### Changing desktop notification settings
 

@@ -3,55 +3,55 @@
 flow provides several mechanisms for managing state across [executable](executable.md) runs. This guide explores how to use the data store
 and temporary directories to maintain state, as well as how to make execution decisions based on that state.
 
-### Data Store
+### Cache
 
-The data store is a key-value store that persists data across executions. It provides a simple way to share information
+The cache is a key-value store that persists data across executions. It provides a simple way to share information
 between executables and maintain state between runs.
 
 #### Store Persistence Scope
 
-Values in the data store have different persistence scopes depending on where they are set:
+Values in the cache have different persistence scopes depending on where they are set:
 
 - Values set outside an executable (using the CLI directly) persist across all executions until explicitly cleared
 - Values set within an executable persist only across that executable's sub-executables (both serial and parallel)
 - All values set within an executable are automatically cleared when the parent executable completes
 
-#### Managing Store Data
+#### Managing Cache Data
 
-The data store can be managed at a global level in the CLI and within an executable's script. Here are the key operations:
+The cache can be managed at a global level in the CLI and within an executable's script. Here are the key operations:
 
 **Setting Values**
 
 ```shell
 # Direct CLI usage
-flow store set KEY VALUE
+flow cache set KEY VALUE
 
 # for example:
-flow store set my-key "my value"
+flow cache set my-key "my value"
 # or pipe a value from a command
-echo "my value" | flow store set my-key
+echo "my value" | flow cache set my-key
 ```
 
 **Getting Values**
 
 ```shell
 # Direct CLI usage
-flow store get KEY
+flow cache get KEY
 
 # for example:
-value=$(flow store get my-key)
+value=$(flow cache get my-key)
 ```
 
 **Clearing Values**
 
 ```shell
 # Clear all values
-flow store clear
-# Clear with full flag to remove all stored data
-flow store clear --full
+flow cache clear
+# Clear with all flag to remove all stored data
+flow cache clear --all
 ```
 
-#### Using the Store in Executables
+#### Using the Cache in Executables
 
 Here's an example of how to use the data store within an executable:
 
@@ -64,16 +64,16 @@ executables:
       execs:
         # Set some values in the store
         - cmd: |
-            flow store set user-preference dark-mode
-            flow store set last-run "$(date)"
+            flow cache set user-preference dark-mode
+            flow cache set last-run "$(date)"
         # Use those values in a subsequent step
         - cmd: |
-            preference=$(flow store get user-preference)
+            preference=$(flow cache get user-preference)
             echo "User preference is: $preference"
-            echo "Last run: $(flow store get last-run)"
+            echo "Last run: $(flow cache get last-run)"
 ```
 
-#### Store-Based Conditional Execution
+#### Cache-Based Conditional Execution
 
 The data store's contents can be accessed in executable `if` conditions using the `data` context variable. This allows for
 dynamic execution paths based on stored values:
@@ -84,7 +84,7 @@ executables:
     name: conditional-demo
     serial:
       execs:
-        - cmd: flow store set feature-enabled true
+        - cmd: flow cache set feature-enabled true
         # This will execute because feature-enabled is set to "true"
         - if: data["feature-enabled"] == "true"
           cmd: echo "Feature is enabled"

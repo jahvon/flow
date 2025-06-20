@@ -513,8 +513,10 @@ func NewExecutableID(workspace, namespace, name string) string {
 	}
 
 	switch {
-	case ws == "", ns != "" && name == "":
+	case ws == "":
 		return "" // TODO: return error or log warning
+	case ns != "" && name == "":
+		return fmt.Sprintf("%s:", ns)
 	case ns != "":
 		return fmt.Sprintf("%s/%s:%s", ws, ns, name)
 	case name != "":
