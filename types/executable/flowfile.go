@@ -2,7 +2,6 @@ package executable
 
 import (
 	"fmt"
-	"path/filepath"
 	"regexp"
 
 	"gopkg.in/yaml.v3"
@@ -78,5 +77,5 @@ func (l *FlowFileList) FilterByTag(tag string) FlowFileList {
 }
 
 func HasFlowFileExt(file string) bool {
-	return FlowFileExtRegex.MatchString(filepath.Base(file))
+	return FlowFileExtRegex.MatchString(file)
 }

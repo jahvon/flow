@@ -169,5 +169,5 @@ func (t TemplateList) Find(name string) *Template {
 }
 
 func HasFlowFileTemplateExt(file string) bool {
-	return FlowFileTemplateExtRegex.MatchString(filepath.Base(file))
+	return FlowFileTemplateExtRegex.MatchString(file)
 }

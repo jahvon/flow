@@ -309,3 +309,22 @@ var _ = Describe("ExecutableList", func() {
 		})
 	})
 })
+
+var _ = DescribeTable("HasFlowFileExt", func(file string, expected bool) {
+	Expect(executable.HasFlowFileExt(file)).To(Equal(expected))
+},
+	Entry("ends with .flow", "development.flow", true),
+	Entry("ends with .flow.yaml", "development.flow.yaml", true),
+	Entry("ends with .flow.yml", "development.flow.yml", true),
+	Entry("ends with something else", "development.txt", false),
+)
+
+var _ = DescribeTable("HasFlowFileExt", func(file string, expected bool) {
+	Expect(executable.HasFlowFileTemplateExt(file)).To(Equal(expected))
+},
+	Entry("ends with .flow.tmpl", "development.flow.tmpl", true),
+	Entry("ends with .flow.tmpl.yaml", "development.flow.tmpl.yaml", true),
+	Entry("ends with .flow.tmpl.yml", "development.flow.tmpl.yml", true),
+	Entry("ends with .flow", "development.flow", false),
+	Entry("ends with something else", "development.flow.txt", false),
+)
