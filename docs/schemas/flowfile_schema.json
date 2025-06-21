@@ -212,6 +212,10 @@
         "args": {
           "$ref": "#/definitions/ExecutableArgumentList"
         },
+        "dir": {
+          "$ref": "#/definitions/ExecutableDirectory",
+          "default": ""
+        },
         "execs": {
           "$ref": "#/definitions/ExecutableParallelRefConfigList",
           "description": "A list of executables to run in parallel.\nEach executable can be a command or a reference to another executable.\n"
@@ -449,6 +453,10 @@
       "properties": {
         "args": {
           "$ref": "#/definitions/ExecutableArgumentList"
+        },
+        "dir": {
+          "$ref": "#/definitions/ExecutableDirectory",
+          "default": ""
         },
         "execs": {
           "$ref": "#/definitions/ExecutableSerialRefConfigList",

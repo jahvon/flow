@@ -187,6 +187,7 @@ Launches an application or opens a URI.
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | :--------: |
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  |  |
 | `execs` | A list of executables to run in parallel. Each executable can be a command or a reference to another executable.  | [ExecutableParallelRefConfigList](#ExecutableParallelRefConfigList) | <no value> | ✘ |
 | `failFast` | End the parallel execution as soon as an exec exits with a non-zero status. This is the default behavior. When set to false, all execs will be run regardless of the exit status of parallel execs.  | `boolean` | <no value> |  |
 | `maxThreads` | The maximum number of threads to use when executing the parallel executables. | `integer` | 5 |  |
@@ -335,6 +336,7 @@ Executes a list of executables in serial.
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | :--------: |
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
+| `dir` |  | [ExecutableDirectory](#ExecutableDirectory) |  |  |
 | `execs` | A list of executables to run in serial. Each executable can be a command or a reference to another executable.  | [ExecutableSerialRefConfigList](#ExecutableSerialRefConfigList) | <no value> | ✘ |
 | `failFast` | End the serial execution as soon as an exec exits with a non-zero status. This is the default behavior. When set to false, all execs will be run regardless of the exit status of the previous exec.  | `boolean` | <no value> |  |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |

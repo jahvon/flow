@@ -1,8 +1,4 @@
-# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
-visibility: private
-namespace: examples
 description: This is a flow executable that demonstrates how to use request executable types.
-tags: [request]
 executables:
   - verb: send
     name: post-request
@@ -56,9 +52,3 @@ executables:
         Application: $NAME
       body: '{"hello": "$NAME"}'
       logResponse: true
-
-  - verb: watch
-    name: timeout-request
-    request:
-      url: https://httpbin.org/delay/10
-      timeout: 5s

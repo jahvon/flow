@@ -74,7 +74,7 @@ var _ = Describe("SerialRunner", func() {
 
 		BeforeEach(func() {
 			ns := "examples"
-			rootExec = builder.SerialExecByRefConfig(
+			rootExec = main.SerialExecByRefConfig(
 				builder.WithNamespaceName(ns),
 				builder.WithWorkspaceName(ctx.Ctx.CurrentWorkspace.AssignedName()),
 				builder.WithWorkspacePath(ctx.Ctx.CurrentWorkspace.Location()),

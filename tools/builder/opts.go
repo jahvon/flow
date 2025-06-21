@@ -1,4 +1,4 @@
-package builder
+package main
 
 type Option func(*OptionsValue)
 

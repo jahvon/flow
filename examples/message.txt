@@ -1,1 +1,6 @@
-Super!
+This is a simple text file used in examples.
+
+It contains multiple lines of text to demonstrate 
+file handling and processing in flow executables.
+
+End of message.

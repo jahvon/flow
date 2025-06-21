@@ -36,7 +36,7 @@ func ProcessTemplate(
 		flowfileName = fmt.Sprintf("executables_%s", time.Now().Format("20060102150405"))
 	}
 	flowfileName = strings.ReplaceAll(strings.ToLower(flowfileName), " ", "_")
-	if !strings.HasSuffix(flowfileName, executable.FlowFileExt) {
+	if !executable.HasFlowFileExt(flowfileName) {
 		flowfileName += executable.FlowFileExt
 	}
 

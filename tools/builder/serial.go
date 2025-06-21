@@ -1,4 +1,4 @@
-package builder
+package main
 
 import (
 	"github.com/jahvon/flow/types/executable"
@@ -16,8 +16,7 @@ func SerialExecByRefConfig(opts ...Option) *executable.Executable {
 		Verb:       "start",
 		Name:       name,
 		Visibility: privateExecVisibility(),
-		Description: serialBaseDesc +
-			"The `execs` field can be used to define the child executables with more options. " +
+		Description: "The `execs` field can be used to define the child executables with more options. " +
 			"This includes defining an executable inline, retries, arguments, and more.",
 		Serial: &executable.SerialExecutableType{
 			Execs: []executable.SerialRefConfig{
@@ -41,12 +40,11 @@ func SerialExecWithExit(opts ...Option) *executable.Executable {
 	e3 := SimpleExec(opts...)
 	ff := true
 	e := &executable.Executable{
-		Verb:       "start",
-		Name:       name,
-		Aliases:    []string{"serial-exit"},
-		Visibility: privateExecVisibility(),
-		Description: serialBaseDesc +
-			"The `failFast` option can be set to `true` to stop the executable if a sub-executable fails.",
+		Verb:        "start",
+		Name:        name,
+		Aliases:     []string{"serial-exit"},
+		Visibility:  privateExecVisibility(),
+		Description: "The `failFast` option can be set to `true` to stop the executable if a sub-executable fails.",
 		Serial: &executable.SerialExecutableType{
 			FailFast: &ff,
 			Execs:    []executable.SerialRefConfig{{Ref: e1.Ref()}, {Ref: e2.Ref()}, {Ref: e3.Ref()}},

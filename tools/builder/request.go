@@ -1,4 +1,4 @@
-package builder
+package main
 
 import (
 	"github.com/jahvon/flow/types/executable"
@@ -10,12 +10,11 @@ const (
 
 func RequestExec(opts ...Option) *executable.Executable {
 	name := "request"
-	docstring := requestBaseDesc +
-		"The `url` field is required and must be a valid URL. " +
+	docstring := "The `url` field is required and must be a valid URL. " +
 		"The `method` field is optional and defaults to `GET`.\n" +
 		"The `headers` field is optional and can be used to set request headers."
 	e := &executable.Executable{
-		Verb:        "run",
+		Verb:        "send",
 		Name:        name,
 		Visibility:  privateExecVisibility(),
 		Description: docstring,
@@ -37,10 +36,9 @@ func RequestExec(opts ...Option) *executable.Executable {
 
 func RequestExecWithBody(opts ...Option) *executable.Executable {
 	name := "request-with-body"
-	docstring := requestBaseDesc +
-		"The `body` field is optional and can be used to send a request body."
+	docstring := "The `body` field is optional and can be used to send a request body."
 	e := &executable.Executable{
-		Verb:        "run",
+		Verb:        "send",
 		Name:        name,
 		Visibility:  privateExecVisibility(),
 		Description: docstring,
@@ -59,10 +57,9 @@ func RequestExecWithBody(opts ...Option) *executable.Executable {
 
 func RequestExecWithTransform(opts ...Option) *executable.Executable {
 	name := "request-with-transform"
-	docstring := requestBaseDesc +
-		"The `transformResponse` field is optional and can be used to transform the response using an Expr expression."
+	docstring := "The `transformResponse` field is optional and can be used to transform the response using an Expr expression."
 	e := &executable.Executable{
-		Verb:        "run",
+		Verb:        "send",
 		Name:        name,
 		Visibility:  privateExecVisibility(),
 		Description: docstring,
@@ -80,10 +77,9 @@ func RequestExecWithTransform(opts ...Option) *executable.Executable {
 
 func RequestExecWithTimeout(opts ...Option) *executable.Executable {
 	name := "request-with-timeout"
-	docstring := requestBaseDesc +
-		"The `timeout` field is optional and can be used to set the request timeout."
+	docstring := "The `timeout` field is optional and can be used to set the request timeout."
 	e := &executable.Executable{
-		Verb:        "run",
+		Verb:        "send",
 		Name:        name,
 		Visibility:  privateExecVisibility(),
 		Description: docstring,
@@ -101,11 +97,10 @@ func RequestExecWithTimeout(opts ...Option) *executable.Executable {
 
 func RequestExecWithValidatedStatus(opts ...Option) *executable.Executable {
 	name := "request-with-validated-status"
-	docstring := requestBaseDesc +
-		"The `validStatusCodes` field is optional and can be used to specify the valid status codes. " +
+	docstring := "The `validStatusCodes` field is optional and can be used to specify the valid status codes. " +
 		"If the response status code is not in the list, the executable will fail."
 	e := &executable.Executable{
-		Verb:        "run",
+		Verb:        "send",
 		Name:        name,
 		Visibility:  privateExecVisibility(),
 		Description: docstring,

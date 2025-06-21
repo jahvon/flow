@@ -2,6 +2,8 @@ package executable
 
 import (
 	"fmt"
+	"path/filepath"
+	"regexp"
 
 	"gopkg.in/yaml.v3"
 
@@ -11,6 +13,8 @@ import (
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o flowfile.gen.go flowfile_schema.yaml
 
 const FlowFileExt = ".flow"
+
+var FlowFileExtRegex = regexp.MustCompile(fmt.Sprintf(`%s(\.yaml|\.yml)?`, regexp.QuoteMeta(FlowFileExt)))
 
 type FlowFileList []*FlowFile
 
@@ -71,4 +75,8 @@ func (l *FlowFileList) FilterByTag(tag string) FlowFileList {
 		}
 	}
 	return filteredCfgs
+}
+
+func HasFlowFileExt(file string) bool {
+	return FlowFileExtRegex.MatchString(filepath.Base(file))
 }

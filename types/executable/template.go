@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/jahvon/tuikit/types"
@@ -14,6 +15,8 @@ import (
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o template.gen.go template_schema.yaml
 
 const FlowFileTemplateExt = ".flow.tmpl"
+
+var FlowFileTemplateExtRegex = regexp.MustCompile(fmt.Sprintf(`%s(\.yaml|\.yml)?`, regexp.QuoteMeta(FlowFileTemplateExt)))
 
 type TemplateList []*Template
 
@@ -75,10 +78,10 @@ func (t *Template) SetContext(name, location string) {
 	if name == "" {
 		fn := filepath.Base(location)
 		switch {
-		case strings.HasSuffix(fn, FlowFileTemplateExt):
-			fn = strings.TrimSuffix(fn, FlowFileTemplateExt)
-		case strings.HasSuffix(fn, FlowFileExt):
-			fn = strings.TrimSuffix(fn, FlowFileExt)
+		case HasFlowFileTemplateExt(fn):
+			fn, _, _ = strings.Cut(fn, FlowFileTemplateExt)
+		case HasFlowFileExt(fn):
+			fn, _, _ = strings.Cut(fn, FlowFileExt)
 		default:
 			fn = strings.TrimSuffix(fn, filepath.Ext(fn))
 		}
@@ -163,4 +166,8 @@ func (t TemplateList) Find(name string) *Template {
 		}
 	}
 	return nil
+}
+
+func HasFlowFileTemplateExt(file string) bool {
+	return FlowFileTemplateExtRegex.MatchString(filepath.Base(file))
 }

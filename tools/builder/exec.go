@@ -1,5 +1,5 @@
 //nolint:lll
-package builder
+package main
 
 import (
 	"fmt"
@@ -28,10 +28,28 @@ func SimpleExec(opts ...Option) *executable.Executable {
 	return e
 }
 
-func NamelessExec(opts ...Option) *executable.Executable {
+func SimpleFileExec(opts ...Option) *executable.Executable {
+	name := "simple-file"
 	e := &executable.Executable{
 		Verb:       "run",
+		Name:       name,
 		Visibility: privateExecVisibility(),
+		Exec: &executable.ExecExecutableType{
+			File: "simple-script.sh",
+		},
+	}
+	if len(opts) > 0 {
+		vals := NewOptionValues(opts...)
+		e.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.NamespaceName, vals.FlowFilePath)
+	}
+	return e
+}
+
+func NamelessExec(opts ...Option) *executable.Executable {
+	e := &executable.Executable{
+		Verb:        "run",
+		Visibility:  privateExecVisibility(),
+		Description: "When the `name` field is not set, the executable can be run with just the verb.",
 		Exec: &executable.ExecExecutableType{
 			Cmd: "echo 'hello from nameless'",
 		},
@@ -54,6 +72,23 @@ func ExecWithPauses(opts ...Option) *executable.Executable {
 				"echo 'hello from %[1]s'; sleep 1; echo 'hello from %[1]s'; sleep 1; echo 'hello from %[1]s'",
 				name,
 			),
+		},
+	}
+	if len(opts) > 0 {
+		vals := NewOptionValues(opts...)
+		e.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.NamespaceName, vals.FlowFilePath)
+	}
+	return e
+}
+
+func ExecWithInput(opts ...Option) *executable.Executable {
+	name := "with-input"
+	e := &executable.Executable{
+		Verb:       "run",
+		Name:       name,
+		Visibility: privateExecVisibility(),
+		Exec: &executable.ExecExecutableType{
+			Cmd: "echo \"Enter your name:\"\nread name\necho \"Hello, $name!\"",
 		},
 	}
 	if len(opts) > 0 {

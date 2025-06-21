@@ -74,7 +74,7 @@ var _ = Describe("ParallelRunner", func() {
 
 		BeforeEach(func() {
 			ns := "examples"
-			rootExec = builder.ParallelExecByRefConfig(
+			rootExec = main.ParallelExecByRefConfig(
 				builder.WithNamespaceName(ns),
 				builder.WithWorkspaceName(ctx.Ctx.CurrentWorkspace.AssignedName()),
 				builder.WithWorkspacePath(ctx.Ctx.CurrentWorkspace.Location()),
