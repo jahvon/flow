@@ -146,7 +146,7 @@ type Executable struct {
 	// terminated.
 	// The timeout is specified in Go duration format (e.g. 30s, 5m, 1h).
 	//
-	Timeout time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty" mapstructure:"timeout,omitempty"`
+	Timeout *time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty" mapstructure:"timeout,omitempty"`
 
 	// Verb corresponds to the JSON schema field "verb".
 	Verb Verb `json:"verb" yaml:"verb" mapstructure:"verb"`

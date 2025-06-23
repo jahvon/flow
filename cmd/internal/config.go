@@ -7,7 +7,6 @@ import (
 	"time"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -23,11 +22,11 @@ import (
 func RegisterConfigCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	setCmd := &cobra.Command{
 		Use:     "config",
-		Aliases: []string{"c", "cfg"},
+		Aliases: []string{"cfg"},
 		Short:   "Update flow configuration values.",
 	}
 	registerConfigResetCmd(ctx, setCmd)
-	registerViewConfigCmd(ctx, setCmd)
+	registerConfigGetCmd(ctx, setCmd)
 	registerSetConfigCmd(ctx, setCmd)
 	rootCmd.AddCommand(setCmd)
 }
@@ -74,8 +73,8 @@ func resetConfigFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
 func registerSetConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
 	setCmd := &cobra.Command{
 		Use:     "set",
-		Aliases: []string{"s", "update"},
-		Short:   "Update flow configuration values.",
+		Aliases: []string{"update"},
+		Short:   "Set a global configuration value.",
 	}
 	registerSetNamespaceCmd(ctx, setCmd)
 	registerSetWorkspaceModeCmd(ctx, setCmd)
@@ -290,26 +289,26 @@ func setTimeoutFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger.PlainTextSuccess("Default timeout set to " + timeoutStr)
 }
 
-func registerViewConfigCmd(ctx *context.Context, configCmd *cobra.Command) {
-	viewCmd := &cobra.Command{
-		Use:     "view",
-		Aliases: []string{"show", "current"},
-		Short:   "View the current global configuration values.",
+func registerConfigGetCmd(ctx *context.Context, configCmd *cobra.Command) {
+	getCmd := &cobra.Command{
+		Use:     "get",
+		Aliases: []string{"view", "show", "current"},
+		Short:   "Get the current global configuration values.",
 		Args:    cobra.NoArgs,
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { viewConfigFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { getConfigFunc(ctx, cmd, args) },
 	}
-	RegisterFlag(ctx, viewCmd, *flags.OutputFormatFlag)
-	configCmd.AddCommand(viewCmd)
+	RegisterFlag(ctx, getCmd, *flags.OutputFormatFlag)
+	configCmd.AddCommand(getCmd)
 }
 
-func viewConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
+func getConfigFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	logger := ctx.Logger
 	userConfig := ctx.Config
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
-		view := configIO.NewUserConfigView(ctx.TUIContainer, *userConfig, types.Format(outputFormat))
+		view := configIO.NewUserConfigView(ctx.TUIContainer, *userConfig)
 		SetView(ctx, cmd, view)
 	} else {
 		configIO.PrintUserConfig(logger, outputFormat, userConfig)

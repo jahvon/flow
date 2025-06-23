@@ -2,16 +2,21 @@
 visibility: private
 tags: [development]
 executables:
+  - verb: generate
+    description: Generate code and documentation for the project.
+    parallel:
+      failFast: true
+      execs:
+          - ref: generate code
+          - ref: generate docs
+
   - verb: validate
     description: |
-      Run the repository validation checks. This includes linting, tests, and code generation.
+      Run the repository validation checks. This includes linting and tests.
       Validate should be run before committing changes.
     parallel:
       failFast: true
-      maxThreads: 2
       execs:
-        - ref: generate code
-        - ref: generate docs
         - ref: run linters
         - ref: run tests
 

@@ -21,8 +21,7 @@ import (
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p executable -o executable.gen.go --capitalization URI --capitalization URL executable_schema.yaml
 
 const (
-	TmpDirLabel    = "f:tmp"
-	DefaultTimeout = 30 * time.Minute
+	TmpDirLabel = "f:tmp"
 )
 
 type ExecutableList []*Executable
@@ -63,14 +62,15 @@ func (e *ExecExecutableType) GetLogFields() map[string]interface{} {
 type enrichedExecutableList struct {
 	Executables []*enrichedExecutable `json:"executables" yaml:"executables"`
 }
+
 type enrichedExecutable struct {
 	*Executable
 
-	ID        string      `json:"id"        yaml:"id"`
-	Ref       string      `json:"ref"       yaml:"ref"`
-	Namespace string      `json:"namespace" yaml:"namespace"`
-	Workspace string      `json:"workspace" yaml:"workspace"`
-	Flowfile  string      `json:"flowfile"  yaml:"flowfile"`
+	ID              string `json:"id"              yaml:"id"`
+	Ref             string `json:"ref"             yaml:"ref"`
+	Namespace       string `json:"namespace"       yaml:"namespace"`
+	Workspace       string `json:"workspace"       yaml:"workspace"`
+	Flowfile        string `json:"flowfile"        yaml:"flowfile"`
 	FullDescription string `json:"fullDescription" yaml:"fullDescription"`
 }
 
@@ -99,20 +99,20 @@ func (e *Executable) SetInheritedFields(flowFile *FlowFile) {
 	e.inheritedDescription = strings.Join([]string{flowFile.Description, descFromFIle}, "\n")
 }
 
-func (e *Executable) Enriched() *enrichedExecutable {
+func (e *Executable) enriched() *enrichedExecutable {
 	return &enrichedExecutable{
-		Executable: e,
-		ID:         e.ID(),
-		Ref:        e.Ref().String(),
-		Namespace:  e.Namespace(),
-		Workspace:  e.Workspace(),
-		Flowfile:   e.FlowFilePath(),
-		FullDescription: execDescriptionMarkdown(e),
+		Executable:      e,
+		ID:              e.ID(),
+		Ref:             e.Ref().String(),
+		Namespace:       e.Namespace(),
+		Workspace:       e.Workspace(),
+		Flowfile:        e.FlowFilePath(),
+		FullDescription: strings.TrimSpace(execDescriptionMarkdown(e, false)),
 	}
 }
 
 func (e *Executable) YAML() (string, error) {
-	yamlBytes, err := yaml.Marshal(e.Enriched())
+	yamlBytes, err := yaml.Marshal(e.enriched())
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal executable - %w", err)
 	}
@@ -120,7 +120,7 @@ func (e *Executable) YAML() (string, error) {
 }
 
 func (e *Executable) JSON() (string, error) {
-	jsonBytes, err := json.MarshalIndent(e.Enriched(), "", "  ")
+	jsonBytes, err := json.MarshalIndent(e.enriched(), "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal executable - %w", err)
 	}
@@ -230,11 +230,10 @@ func (e *Executable) SetDefaults() {
 		e.Visibility = &v
 	}
 
-	if e.Timeout == 0 {
-		e.Timeout = DefaultTimeout
+	if e.Timeout == nil {
 		if v, ok := os.LookupEnv(TimeoutOverrideEnv); ok {
 			if d, err := time.ParseDuration(v); err == nil {
-				e.Timeout = d
+				e.Timeout = &d
 			}
 		}
 	}
@@ -326,7 +325,7 @@ func (e *Executable) IsExecutableFromWorkspace(workspaceFilter string) bool {
 func (l ExecutableList) YAML() (string, error) {
 	enriched := &enrichedExecutableList{}
 	for _, exec := range l {
-		enriched.Executables = append(enriched.Executables, exec.Enriched())
+		enriched.Executables = append(enriched.Executables, exec.enriched())
 	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
@@ -338,7 +337,7 @@ func (l ExecutableList) YAML() (string, error) {
 func (l ExecutableList) JSON() (string, error) {
 	enriched := &enrichedExecutableList{}
 	for _, exec := range l {
-		enriched.Executables = append(enriched.Executables, exec.Enriched())
+		enriched.Executables = append(enriched.Executables, exec.enriched())
 	}
 	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
 	if err != nil {
@@ -517,8 +516,10 @@ func NewExecutableID(workspace, namespace, name string) string {
 	}
 
 	switch {
-	case ws == "", ns != "" && name == "":
+	case ws == "":
 		return "" // TODO: return error or log warning
+	case ns != "" && name == "":
+		return fmt.Sprintf("%s:", ns)
 	case ns != "":
 		return fmt.Sprintf("%s/%s:%s", ws, ns, name)
 	case name != "":
@@ -529,36 +530,20 @@ func NewExecutableID(workspace, namespace, name string) string {
 	}
 }
 
-// MarshalJSON implements custom JSON marshaling for Executable
 func (e *Executable) MarshalJSON() ([]byte, error) {
-	output := make(map[string]interface{})
-
-	type BaseExecutable Executable
-	baseData, err := json.Marshal((*BaseExecutable)(e))
-	if err != nil {
-		return nil, err
+	type Alias Executable
+	aux := &struct {
+		*Alias
+		Timeout string `json:"timeout,omitempty"`
+	}{
+		Alias: (*Alias)(e),
 	}
-
-	if err := json.Unmarshal(baseData, &output); err != nil {
-		return nil, err
+	if e.Timeout != nil {
+		aux.Timeout = e.Timeout.String()
 	}
-
-	// Add the enriched fields for the YAML and JSON functions
-	output["id"] = e.ID()
-	output["ref"] = e.Ref().String()
-	output["namespace"] = e.Namespace()
-	output["workspace"] = e.Workspace()
-	output["flowfile"] = e.FlowFilePath()
-	output["fullDescription"] = execDescriptionMarkdown(e)
-
-	// Convert timeout to string
-	output["timeout"] = e.Timeout.String()
-
-	// Marshal the complete map to JSON
-	return json.Marshal(output)
+	return json.Marshal(aux)
 }
 
-// UnmarshalJSON implements custom JSON unmarshaling for Executable
 func (e *Executable) UnmarshalJSON(data []byte) error {
 	type Alias Executable
 	aux := &struct {
@@ -575,7 +560,7 @@ func (e *Executable) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return err
 		}
-		e.Timeout = duration
+		e.Timeout = &duration
 	}
 	return nil
 }

@@ -18,7 +18,6 @@ import (
 func NewExecutableView(
 	ctx *context.Context,
 	exec *executable.Executable,
-	format types.Format,
 	runFunc func(string) error,
 ) tuikit.View {
 	container := ctx.TUIContainer
@@ -59,7 +58,7 @@ func NewExecutableView(
 	return views.NewEntityView(
 		container.RenderState(),
 		exec,
-		format,
+		types.EntityFormatDocument,
 		executableKeyCallbacks...,
 	)
 }
@@ -67,7 +66,6 @@ func NewExecutableView(
 func NewExecutableListView(
 	ctx *context.Context,
 	executables executable.ExecutableList,
-	format types.Format,
 	runFunc func(string) error,
 ) tuikit.View {
 	container := ctx.TUIContainer
@@ -85,16 +83,15 @@ func NewExecutableListView(
 		if err != nil {
 			return fmt.Errorf("executable not found")
 		}
-		return ctx.SetView(NewExecutableView(ctx, exec, format, runFunc))
+		return ctx.SetView(NewExecutableView(ctx, exec, runFunc))
 	}
 
-	return views.NewCollectionView(container.RenderState(), executables, format, selectFunc)
+	return views.NewCollectionView(container.RenderState(), executables, types.CollectionFormatList, selectFunc)
 }
 
 func NewTemplateView(
 	ctx *context.Context,
 	template *executable.Template,
-	format types.Format,
 	runFunc func(string) error,
 ) tuikit.View {
 	container := ctx.TUIContainer
@@ -130,7 +127,7 @@ func NewTemplateView(
 	return views.NewEntityView(
 		container.RenderState(),
 		template,
-		format,
+		types.EntityFormatDocument,
 		templateKeyCallbacks...,
 	)
 }
@@ -138,7 +135,6 @@ func NewTemplateView(
 func NewTemplateListView(
 	ctx *context.Context,
 	templates executable.TemplateList,
-	format types.Format,
 	runFunc func(string) error,
 ) tuikit.View {
 	container := ctx.TUIContainer
@@ -152,8 +148,8 @@ func NewTemplateListView(
 			return fmt.Errorf("template %s not found", filterVal)
 		}
 
-		return ctx.SetView(NewTemplateView(ctx, template, format, runFunc))
+		return ctx.SetView(NewTemplateView(ctx, template, runFunc))
 	}
 
-	return views.NewCollectionView(container.RenderState(), templates, format, selectFunc)
+	return views.NewCollectionView(container.RenderState(), templates, types.CollectionFormatList, selectFunc)
 }

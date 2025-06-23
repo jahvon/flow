@@ -10,7 +10,7 @@ import (
 func RegisterSyncCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	subCmd := &cobra.Command{
 		Use:   "sync",
-		Short: "Scan workspaces and update flow cache.",
+		Short: "Refresh workspace cache and discover new executables.",
 		Args:  cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			printContext(ctx, cmd)

@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "FlowFile",
   "$id": "https://flowexec.io/schemas/flowfile_schema.json",
+  "title": "FlowFile",
   "description": "Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered \nby the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).\nA workspace can have multiple flow files located anywhere in the workspace directory\n",
   "type": "object",
   "definitions": {
@@ -76,8 +77,7 @@
         },
         "timeout": {
           "description": "The maximum amount of time the executable is allowed to run before being terminated.\nThe timeout is specified in Go duration format (e.g. 30s, 5m, 1h).\n",
-          "type": "string",
-          "default": "30m0s"
+          "type": "string"
         },
         "verb": {
           "$ref": "#/definitions/ExecutableVerb",

@@ -4,7 +4,7 @@ The flow CLI has an integrated vault that can be used to store secrets. The vaul
 Secrets are stored locally and encrypted with a generated key. To setup a new vault, run the following command:
 
 ```shell
-flow secret vault create
+flow vault create
 ```
 
 The output will include the randomly generated key. You will need to store this key in a safe place. If you lose this key, 
@@ -39,7 +39,7 @@ flow secret list # List all secrets in the vault
 flow secret view KEY # View the value of a specific secret
 ```
 
-By default, those commands will not display the secret values. You will need to provide the `--plainText` flag to view 
+By default, those commands will not display the secret values. You will need to provide the `--plaintext` flag to view 
 the values.
 
 ## Removing Secrets
@@ -47,7 +47,7 @@ the values.
 To remove a secret from the vault, run the following command:
 
 ```shell
-flow secret delete KEY
+flow secret remove KEY
 ```
 
 You can also delete secrets in the interactive views when retrieving secrets.

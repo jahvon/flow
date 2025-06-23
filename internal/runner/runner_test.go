@@ -69,9 +69,10 @@ var _ = Describe("Runner", func() {
 
 		It("should return error when execution times out", func() {
 			ctx := &context.Context{}
+			timeout := 250 * time.Millisecond
 			exec := &executable.Executable{
 				Name:    "test-exec",
-				Timeout: 250 * time.Millisecond,
+				Timeout: &timeout,
 			}
 			promptedEnv := make(map[string]string)
 

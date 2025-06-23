@@ -1,6 +1,6 @@
 ## flow workspace
 
-Manage flow workspaces.
+Manage development workspaces.
 
 ### Options
 
@@ -11,17 +11,16 @@ Manage flow workspaces.
 ### Options inherited from parent commands
 
 ```
-  -x, --non-interactive   Disable displaying flow output via terminal UI rendering. This is only needed if the interactive output is enabled by default in flow's configuration.
-      --sync              Sync flow cache and workspaces
-      --verbosity int     Log verbosity level (-1 to 1)
+  -L, --log-level string   Log verbosity level (debug, info, fatal) (default "info")
+      --sync               Sync flow cache and workspaces
 ```
 
 ### SEE ALSO
 
 * [flow](flow.md)	 - flow is a command line interface designed to make managing and running development workflows easier.
-* [flow workspace create](flow_workspace_create.md)	 - Initialize a new workspace and register it in the user configurations.
-* [flow workspace delete](flow_workspace_delete.md)	 - Remove an existing workspace from the global configuration's workspaces list.
-* [flow workspace list](flow_workspace_list.md)	 - View a list of registered workspaces.
-* [flow workspace set](flow_workspace_set.md)	 - Change the current workspace.
-* [flow workspace view](flow_workspace_view.md)	 - View the documentation for a workspace. If the name is omitted, the current workspace is used.
+* [flow workspace add](flow_workspace_add.md)	 - Initialize a new workspace.
+* [flow workspace get](flow_workspace_get.md)	 - Get workspace details. If the name is omitted, the current workspace is used.
+* [flow workspace list](flow_workspace_list.md)	 - List all registered workspaces.
+* [flow workspace remove](flow_workspace_remove.md)	 - Remove an existing workspace.
+* [flow workspace switch](flow_workspace_switch.md)	 - Switch the current workspace.
 

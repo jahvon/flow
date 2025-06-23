@@ -10,11 +10,11 @@ import (
 func execMarkdown(e *Executable) string {
 	var mkdwn string
 	mkdwn += fmt.Sprintf("# [Executable] %s\n", e.Ref())
-	mkdwn += execDescriptionMarkdown(e)
+	mkdwn += execDescriptionMarkdown(e, true)
 	if e.Visibility != nil {
 		mkdwn += fmt.Sprintf("**Visibility:** %s\n", *e.Visibility)
 	}
-	if e.Timeout != 0 {
+	if e.Timeout != nil {
 		mkdwn += fmt.Sprintf("**Timeout:** %s\n", e.Timeout.String())
 	}
 	if len(e.Aliases) > 0 {
@@ -38,12 +38,16 @@ func execMarkdown(e *Executable) string {
 	return mkdwn
 }
 
-func execDescriptionMarkdown(e *Executable) string {
+func execDescriptionMarkdown(e *Executable, withPrefix bool) string {
 	if e.Description == "" && e.inheritedDescription == "" {
 		return ""
 	}
 	var mkdwn string
-	const prefix = "│ "
+
+	prefix := ""
+	if withPrefix {
+		prefix = "│ "
+	}
 	if d := strings.TrimSpace(e.Description); d != "" {
 		mkdwn += prefix + "\n"
 		mkdwn += addPrefx(d, prefix)

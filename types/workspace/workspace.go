@@ -3,6 +3,7 @@ package workspace
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/jahvon/tuikit/types"
 	"gopkg.in/yaml.v3"
@@ -15,15 +16,24 @@ import (
 
 type WorkspaceList []*Workspace
 
-type enrichedWorkspaceConfigList struct {
+type enrichedWorkspaceList struct {
 	Workspaces []*enrichedWorkspace `json:"workspaces" yaml:"workspaces"`
 }
 
 type enrichedWorkspace struct {
 	*Workspace
-	ID         string `json:"id" yaml:"id"`
-	Path       string `json:"path" yaml:"path"`
+	Name            string `json:"name"            yaml:"name"`
+	Path            string `json:"path"            yaml:"path"`
 	FullDescription string `json:"fullDescription" yaml:"fullDescription"`
+}
+
+func (w *Workspace) enriched() *enrichedWorkspace {
+	return &enrichedWorkspace{
+		Workspace:       w,
+		Name:            w.AssignedName(),
+		Path:            w.Location(),
+		FullDescription: strings.TrimSpace(workspaceDescription(w, false)),
+	}
 }
 
 func (w *Workspace) AssignedName() string {
@@ -39,17 +49,8 @@ func (w *Workspace) SetContext(name, location string) {
 	w.location = location
 }
 
-func (w *Workspace) Enriched() *enrichedWorkspace {
-	return &enrichedWorkspace{
-		Workspace: w,
-		ID:        w.AssignedName(),
-		Path:      w.Location(),
-		FullDescription: workspaceDescription(w),
-	}
-}
-
 func (w *Workspace) YAML() (string, error) {
-	yamlBytes, err := yaml.Marshal(w.Enriched())
+	yamlBytes, err := yaml.Marshal(w.enriched())
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config - %w", err)
 	}
@@ -57,7 +58,7 @@ func (w *Workspace) YAML() (string, error) {
 }
 
 func (w *Workspace) JSON() (string, error) {
-	jsonBytes, err := json.MarshalIndent(w.Enriched(), "", "  ")
+	jsonBytes, err := json.MarshalIndent(w.enriched(), "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal workspace config - %w", err)
 	}
@@ -73,9 +74,9 @@ func DefaultWorkspaceConfig(name string) *Workspace {
 }
 
 func (l WorkspaceList) YAML() (string, error) {
-	enriched := enrichedWorkspaceConfigList{Workspaces: make([]*enrichedWorkspace, 0, len(l))}
+	enriched := enrichedWorkspaceList{Workspaces: make([]*enrichedWorkspace, 0, len(l))}
 	for _, ws := range l {
-		enriched.Workspaces = append(enriched.Workspaces, ws.Enriched())
+		enriched.Workspaces = append(enriched.Workspaces, ws.enriched())
 	}
 	yamlBytes, err := yaml.Marshal(enriched)
 	if err != nil {
@@ -85,9 +86,9 @@ func (l WorkspaceList) YAML() (string, error) {
 }
 
 func (l WorkspaceList) JSON() (string, error) {
-	enriched := enrichedWorkspaceConfigList{Workspaces: make([]*enrichedWorkspace, 0, len(l))}
+	enriched := enrichedWorkspaceList{Workspaces: make([]*enrichedWorkspace, 0, len(l))}
 	for _, ws := range l {
-		enriched.Workspaces = append(enriched.Workspaces, ws.Enriched())
+		enriched.Workspaces = append(enriched.Workspaces, ws.enriched())
 	}
 	jsonBytes, err := json.MarshalIndent(enriched, "", "  ")
 	if err != nil {

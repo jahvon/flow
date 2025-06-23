@@ -43,7 +43,7 @@ func Exec(
 		return fmt.Errorf("compatible runner not found for executable %s", executable.ID())
 	}
 
-	if executable.Timeout == 0 {
+	if executable.Timeout == nil {
 		return assignedRunner.Exec(ctx, executable, eng, inputEnv)
 	}
 
@@ -55,8 +55,8 @@ func Exec(
 	select {
 	case err := <-done:
 		return err
-	case <-time.After(executable.Timeout):
-		return fmt.Errorf("timeout after %v", executable.Timeout)
+	case <-time.After(*executable.Timeout):
+		return fmt.Errorf("timeout after %v", *executable.Timeout)
 	}
 }
 

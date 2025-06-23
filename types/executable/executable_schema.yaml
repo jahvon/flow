@@ -624,7 +624,6 @@ properties:
     description: |
       The maximum amount of time the executable is allowed to run before being terminated.
       The timeout is specified in Go duration format (e.g. 30s, 5m, 1h).
-    default: 30m0s
   #### Executable context fields
   workspace:
     type: string

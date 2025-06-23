@@ -100,10 +100,10 @@ var _ = Describe("flowfile template commands e2e", Ordered, func() {
 		ctx.Finalize()
 	})
 
-	When("registering a new template (flow template register)", func() {
+	When("registering a new template (flow template add)", func() {
 		It("should complete successfully", func() {
 			stdOut := ctx.StdOut()
-			err := run.Run(ctx, "template", "register", "--verbosity", "-1", template.Name(), template.Location())
+			err := run.Run(ctx, "template", "add", template.Name(), template.Location())
 			Expect(err).ToNot(HaveOccurred())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
@@ -111,10 +111,10 @@ var _ = Describe("flowfile template commands e2e", Ordered, func() {
 		})
 	})
 
-	When("getting a registered template (flow template view)", func() {
+	When("getting a registered template (flow template get)", func() {
 		It("should return the template", func() {
 			stdOut := ctx.StdOut()
-			err := run.Run(ctx, "template", "view", "-t", template.Name(), "-o", "yaml")
+			err := run.Run(ctx, "template", "get", "-t", template.Name(), "-o", "yaml")
 			Expect(err).ToNot(HaveOccurred())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
@@ -124,10 +124,10 @@ var _ = Describe("flowfile template commands e2e", Ordered, func() {
 		})
 	})
 
-	When("getting a template by path (flow template view)", func() {
+	When("getting a template by path (flow template get)", func() {
 		It("should return the template", func() {
 			stdOut := ctx.StdOut()
-			err := run.Run(ctx, "template", "view", "-f", template.Location(), "-o", "yaml")
+			err := run.Run(ctx, "template", "get", "-f", template.Location(), "-o", "yaml")
 			Expect(err).ToNot(HaveOccurred())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())

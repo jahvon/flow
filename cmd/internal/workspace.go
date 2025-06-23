@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -27,30 +26,30 @@ import (
 func RegisterWorkspaceCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	wsCmd := &cobra.Command{
 		Use:     "workspace",
-		Aliases: []string{"ws"},
-		Short:   "Manage flow workspaces.",
+		Aliases: []string{"ws", "workspaces"},
+		Short:   "Manage development workspaces.",
 	}
-	registerCreateWorkspaceCmd(ctx, wsCmd)
-	registerSetWorkspaceCmd(ctx, wsCmd)
-	registerDeleteWsCmd(ctx, wsCmd)
+	registerAddWorkspaceCmd(ctx, wsCmd)
+	registerSwitchWorkspaceCmd(ctx, wsCmd)
+	registerRemoveWorkspaceCmd(ctx, wsCmd)
 	registerListWorkspaceCmd(ctx, wsCmd)
-	registerViewWsCmd(ctx, wsCmd)
+	registerGetWorkspaceCmd(ctx, wsCmd)
 	rootCmd.AddCommand(wsCmd)
 }
 
-func registerCreateWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
+func registerAddWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
 	createCmd := &cobra.Command{
-		Use:     "create NAME PATH",
-		Aliases: []string{"init"},
-		Short:   "Initialize a new workspace and register it in the user configurations.",
+		Use:     "add NAME PATH",
+		Aliases: []string{"init", "create", "new"},
+		Short:   "Initialize a new workspace.",
 		Args:    cobra.ExactArgs(2),
-		Run:     func(cmd *cobra.Command, args []string) { createWorkspaceFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { addWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, createCmd, *flags.SetAfterCreateFlag)
 	wsCmd.AddCommand(createCmd)
 }
 
-func createWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func addWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 	path := args[1]
@@ -115,27 +114,27 @@ func createWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string
 	logger.PlainTextSuccess(fmt.Sprintf("Workspace '%s' created in %s", name, path))
 }
 
-func registerSetWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
+func registerSwitchWorkspaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 	workspaceCmd := &cobra.Command{
-		Use:     "set NAME",
-		Aliases: []string{"update"},
-		Short:   "Change the current workspace.",
+		Use:     "switch NAME",
+		Aliases: []string{"set", "use"},
+		Short:   "Switch the current workspace.",
 		Args:    cobra.ExactArgs(1),
 		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { setWorkspaceFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { switchWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, workspaceCmd, *flags.FixedWsModeFlag)
 	setCmd.AddCommand(workspaceCmd)
 }
 
-func setWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func switchWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
-	workspace := args[0]
+	ws := args[0]
 	userConfig := ctx.Config
-	if _, found := userConfig.Workspaces[workspace]; !found {
-		logger.Fatalf("workspace %s not found", workspace)
+	if _, found := userConfig.Workspaces[ws]; !found {
+		logger.Fatalf("workspace %s not found", ws)
 	}
-	userConfig.CurrentWorkspace = workspace
+	userConfig.CurrentWorkspace = ws
 	fixedMode := flags.ValueFor[bool](ctx, cmd, *flags.FixedWsModeFlag, false)
 	if fixedMode {
 		userConfig.WorkspaceMode = config.ConfigWorkspaceModeFixed
@@ -144,26 +143,26 @@ func setWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	if err := filesystem.WriteConfig(userConfig); err != nil {
 		logger.FatalErr(err)
 	}
-	logger.PlainTextSuccess("Workspace set to " + workspace)
+	logger.PlainTextSuccess("Workspace set to " + ws)
 }
 
-func registerDeleteWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
+func registerRemoveWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
 	deleteCmd := &cobra.Command{
-		Use:     "delete NAME",
-		Aliases: []string{"del", "remove", "rm"},
-		Short:   "Remove an existing workspace from the global configuration's workspaces list.",
+		Use:     "remove NAME",
+		Aliases: []string{"delete", "rm"},
+		Short:   "Remove an existing workspace.",
 		Long: "Remove an existing workspace. File contents will remain in the corresponding directory but the " +
 			"workspace will be unlinked from the flow global configurations.\nNote: You cannot remove the current workspace.",
 		Args: cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
-		Run: func(cmd *cobra.Command, args []string) { deleteWsFunc(ctx, cmd, args) },
+		Run: func(cmd *cobra.Command, args []string) { removeWorkspaceFunc(ctx, cmd, args) },
 	}
 	wsCmd.AddCommand(deleteCmd)
 }
 
-func deleteWsFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func removeWorkspaceFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	name := args[0]
 
@@ -212,7 +211,7 @@ func registerListWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
 	listCmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "View a list of registered workspaces.",
+		Short:   "List all registered workspaces.",
 		Args:    cobra.NoArgs,
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
@@ -228,7 +227,6 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	tagsFilter := flags.ValueFor[[]string](ctx, cmd, *flags.FilterTagFlag, false)
 
-	logger.Debugf("Loading workspace configs from cache")
 	workspaceCache, err := ctx.WorkspacesCache.GetLatestData(logger)
 	if err != nil {
 		logger.Fatalx("failure loading workspace configs from cache", "err", err)
@@ -249,35 +247,31 @@ func listWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	}
 
 	if TUIEnabled(ctx, cmd) {
-		view := workspaceIO.NewWorkspaceListView(
-			ctx,
-			filteredWorkspaces,
-			types.Format(outputFormat),
-		)
+		view := workspaceIO.NewWorkspaceListView(ctx, filteredWorkspaces)
 		SetView(ctx, cmd, view)
 	} else {
 		workspaceIO.PrintWorkspaceList(logger, outputFormat, filteredWorkspaces)
 	}
 }
 
-func registerViewWsCmd(ctx *context.Context, wsCmd *cobra.Command) {
+func registerGetWorkspaceCmd(ctx *context.Context, wsCmd *cobra.Command) {
 	viewCmd := &cobra.Command{
-		Use:     "view NAME",
-		Aliases: []string{"show"},
-		Short:   "View the documentation for a workspace. If the name is omitted, the current workspace is used.",
+		Use:     "get NAME",
+		Aliases: []string{"show", "view", "info"},
+		Short:   "Get workspace details. If the name is omitted, the current workspace is used.",
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return maps.Keys(ctx.Config.Workspaces), cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
 		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
-		Run:     func(cmd *cobra.Command, args []string) { viewWsFunc(ctx, cmd, args) },
+		Run:     func(cmd *cobra.Command, args []string) { getWorkspaceFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, viewCmd, *flags.OutputFormatFlag)
 	wsCmd.AddCommand(viewCmd)
 }
 
-func viewWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+func getWorkspaceFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	var workspaceName, wsPath string
 	if len(args) == 1 {
@@ -297,7 +291,7 @@ func viewWsFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 	if TUIEnabled(ctx, cmd) {
-		view := workspaceIO.NewWorkspaceView(ctx, wsCfg, types.Format(outputFormat))
+		view := workspaceIO.NewWorkspaceView(ctx, wsCfg)
 		SetView(ctx, cmd, view)
 	} else {
 		workspaceIO.PrintWorkspaceConfig(logger, outputFormat, wsCfg)
