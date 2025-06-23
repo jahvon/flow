@@ -1,3 +1,11 @@
+/* Layout dimensions as CSS custom properties */
+:root {
+  --app-header-height: 48px;
+  --app-navbar-width: 300px;
+  --app-shell-padding: 16px;
+  --app-shell-padding-total: 32px; /* 16px top + 16px bottom */
+}
+
 .appShell {
   background-color: var(--mantine-color-other-backgroundColors-main);
   height: 100vh;

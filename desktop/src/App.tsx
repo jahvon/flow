@@ -14,14 +14,11 @@ import styles from "./components/AppShell.module.css";
 import { Header } from "./components/Header/Header";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { View, Viewer } from "./components/Viewer/Viewer";
-import { useExecutable, useBackendData } from "./hooks/useBackendData";
+import { useBackendData, useExecutable } from "./hooks/useBackendData";
+import { NotifierProvider, useNotifier } from "./hooks/useNotifier";
 import { SettingsProvider } from "./hooks/useSettings";
 import { ThemeProvider } from "./theme/ThemeProvider";
-import {
-  colorFromType,
-  Notification,
-  NotificationType,
-} from "./types/notification";
+import { colorFromType, NotificationType } from "./types/notification";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +38,7 @@ function AppContent() {
   const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(
     null
   );
-  const [notification, setNotification] = useState<Notification | null>(null);
+  const { notification, setNotification } = useNotifier();
 
   const { config, workspaces, executables, isLoading, hasError, refreshAll } =
     useBackendData(selectedWorkspace);
@@ -59,14 +56,6 @@ function AppContent() {
       }
     }
   }, [config, workspaces]);
-
-  useEffect(() => {
-    if (notification?.autoClose) {
-      setTimeout(() => {
-        setNotification(null);
-      }, notification.autoCloseDelay || 6000);
-    }
-  }, [notification]);
 
   useEffect(() => {
     if (hasError) {
@@ -92,8 +81,8 @@ function AppContent() {
 
   return (
     <AppShell
-      header={{ height: 48 }}
-      navbar={{ width: 300, breakpoint: "sm" }}
+      header={{ height: "var(--app-header-height)" }}
+      navbar={{ width: "var(--app-navbar-width)", breakpoint: "sm" }}
       padding="md"
       classNames={{
         root: styles.appShell,
@@ -214,11 +203,13 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SettingsProvider>
-        <ThemeProvider>
-          <AppContent />
-        </ThemeProvider>
-      </SettingsProvider>
+      <NotifierProvider>
+        <SettingsProvider>
+          <ThemeProvider>
+            <AppContent />
+          </ThemeProvider>
+        </SettingsProvider>
+      </NotifierProvider>
     </QueryClientProvider>
   );
 }

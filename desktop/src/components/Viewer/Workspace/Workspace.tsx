@@ -12,15 +12,15 @@ import {
 } from "@mantine/core";
 import {
   IconExternalLink,
+  IconFilter,
   IconFolder,
   IconInfoCircle,
   IconTag,
 } from "@tabler/icons-react";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { ComponentPropsWithoutRef } from "react";
-import ReactMarkdown from "react-markdown";
 import { useSettings } from "../../../hooks/useSettings";
 import { EnrichedWorkspace } from "../../../types/workspace";
+import { MarkdownRenderer } from "../../MarkdownRenderer";
 
 interface WorkspaceProps {
   workspace: EnrichedWorkspace | null;
@@ -88,44 +88,16 @@ export function Workspace({ workspace }: WorkspaceProps) {
           {workspace.fullDescription && (
             <>
               <Divider />
-              <ReactMarkdown
-                components={{
-                  h1: (props: ComponentPropsWithoutRef<typeof Title>) => (
-                    <Title order={3} {...props} />
-                  ),
-                  h2: (props: ComponentPropsWithoutRef<typeof Title>) => (
-                    <Title order={4} {...props} />
-                  ),
-                  h3: (props: ComponentPropsWithoutRef<typeof Title>) => (
-                    <Title order={5} {...props} />
-                  ),
-                  h4: (props: ComponentPropsWithoutRef<typeof Title>) => (
-                    <Title order={6} {...props} />
-                  ),
-                  h5: (props: ComponentPropsWithoutRef<typeof Title>) => (
-                    <Text size="sm" fw={700} {...props} />
-                  ),
-                  h6: (props: ComponentPropsWithoutRef<typeof Text>) => (
-                    <Text size="xs" fw={500} {...props} />
-                  ),
-                  p: (props: ComponentPropsWithoutRef<typeof Text>) => (
-                    <Text size="sm" {...props} />
-                  ),
-                }}
-              >
-                {workspace.fullDescription}
-              </ReactMarkdown>
+              <MarkdownRenderer>{workspace.fullDescription}</MarkdownRenderer>
             </>
           )}
         </Stack>
       </Card>
 
       <Grid>
-        {/* Left Column */}
-        <Grid.Col span={6}>
-          <Stack gap="md">
-            {/* Tags */}
-            {workspace.tags && workspace.tags.length > 0 && (
+        {workspace.tags && workspace.tags.length > 0 && (
+          <Grid.Col span={6}>
+            <Stack gap="md">
               <Card withBorder>
                 <Stack gap="sm">
                   <Title order={4}>
@@ -143,20 +115,18 @@ export function Workspace({ workspace }: WorkspaceProps) {
                   </Group>
                 </Stack>
               </Card>
-            )}
-          </Stack>
-        </Grid.Col>
+            </Stack>
+          </Grid.Col>
+        )}
 
-        {/* Right Column */}
-        <Grid.Col span={6}>
-          <Stack gap="md">
-            {/* Executable Filters */}
-            {workspace.executables && (
+        {workspace.executables && (
+          <Grid.Col span={6}>
+            <Stack gap="md">
               <Card withBorder>
                 <Stack gap="sm">
                   <Title order={4}>
                     <Group gap="xs">
-                      <IconFolder size={16} />
+                      <IconFilter size={16} />
                       Executable Filters
                     </Group>
                   </Title>
@@ -202,9 +172,9 @@ export function Workspace({ workspace }: WorkspaceProps) {
                   </Stack>
                 </Stack>
               </Card>
-            )}
-          </Stack>
-        </Grid.Col>
+            </Stack>
+          </Grid.Col>
+        )}
       </Grid>
     </Stack>
   );

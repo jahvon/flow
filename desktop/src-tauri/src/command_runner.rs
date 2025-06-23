@@ -3,6 +3,9 @@ use crate::types::generated::config::Config;
 use serde::Deserialize;
 use std::fmt;
 use std::process::{Command, Stdio};
+use tauri::Emitter;
+use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::process::Command as TokioCommand;
 
 #[derive(Debug)]
 pub enum CommandError {
@@ -12,7 +15,7 @@ pub enum CommandError {
         command: String,
         output: String,
     },
-    NonZeroExit(i32),
+    NonZeroExit(String, i32, String),
 }
 
 impl fmt::Display for CommandError {
@@ -30,8 +33,12 @@ impl fmt::Display for CommandError {
                     command, message, output
                 )
             }
-            CommandError::NonZeroExit(code) => {
-                write!(f, "Command returned non-zero exit code: {}", code)
+            CommandError::NonZeroExit(command, code, output) => {
+                write!(
+                    f,
+                    "Command '{}' returned non-zero exit code: {}\nOutput: {}",
+                    command, code, output
+                )
             }
         }
     }
@@ -62,8 +69,7 @@ impl CommandRunner {
     fn build_base_command(&self) -> Command {
         // TODO: Make this configurable / use the main flow binary
         let mut cmd = Command::new("/Users/jahvon/workspaces/github.com/jahvon/flow/.bin/flow");
-        cmd.stdout(Stdio::piped())
-            .stderr(Stdio::piped());
+        cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
         cmd
     }
@@ -83,7 +89,9 @@ impl CommandRunner {
 
         if !output.status.success() {
             return Err(CommandError::NonZeroExit(
+                format!("{:?}", cmd),
                 output.status.code().unwrap_or(-1),
+                String::from_utf8_lossy(&output.stdout).to_string(),
             ));
         }
 
@@ -95,7 +103,7 @@ impl CommandRunner {
 
         serde_json::from_str(&stdout).map_err(|e| CommandError::ParseError {
             message: e.to_string(),
-            command: format!("{:?}", cmd),
+            command: format!("{:?}", args),
             output: stdout.clone(),
         })
     }
@@ -154,14 +162,8 @@ impl CommandRunner {
             }
             2 => {
                 // Verb and ID
-                self.execute_command(&[
-                    "browse",
-                    split_ref[0],
-                    split_ref[1],
-                    "--output",
-                    "json",
-                ])
-                .await
+                self.execute_command(&["browse", split_ref[0], split_ref[1], "--output", "json"])
+                    .await
             }
             _ => Err(CommandError::ParseError {
                 message: format!("Invalid executable reference format: {}", exec_ref),
@@ -173,12 +175,117 @@ impl CommandRunner {
 
     pub async fn execute(
         &self,
+        app: tauri::AppHandle,
         verb: &str,
         executable_id: &str,
         args: &[&str],
     ) -> CommandResult<()> {
         let mut cmd_args = vec![verb, executable_id];
         cmd_args.extend(args);
-        self.execute_command::<()>(&cmd_args).await
+
+        let mut cmd =
+            TokioCommand::new("/Users/jahvon/workspaces/github.com/jahvon/flow/.bin/flow");
+        cmd.args(&cmd_args);
+        cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
+
+        println!("streaming cmd: {:?}", cmd);
+
+        let mut child = cmd
+            .spawn()
+            .map_err(|e| CommandError::ExecutionError(e.to_string()))?;
+
+        let stdout = child
+            .stdout
+            .take()
+            .ok_or_else(|| CommandError::ExecutionError("Failed to capture stdout".to_string()))?;
+        let stderr = child
+            .stderr
+            .take()
+            .ok_or_else(|| CommandError::ExecutionError("Failed to capture stderr".to_string()))?;
+
+        let app_stdout = app.clone();
+        let app_stderr = app.clone();
+
+        // Handle stdout
+        let stdout_handle = tokio::spawn(async move {
+            let reader = BufReader::new(stdout);
+            let mut lines = reader.lines();
+
+            while let Ok(Some(line)) = lines.next_line().await {
+                let event_id = format!(
+                    "{}-{}",
+                    line,
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_millis()
+                );
+
+                println!("Emitting event: {}", event_id);
+                let _ = app_stdout.emit(
+                    "command-output",
+                    serde_json::json!({
+                        "type": "stdout",
+                        "line": line
+                    }),
+                );
+            }
+        });
+
+        // Handle stderr
+        let stderr_handle = tokio::spawn(async move {
+            let reader = BufReader::new(stderr);
+            let mut lines = reader.lines();
+
+            while let Ok(Some(line)) = lines.next_line().await {
+                let event_id = format!(
+                    "{}-{}",
+                    line,
+                    std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_millis()
+                );
+
+                println!("Emitting event: {}", event_id);
+
+                let _ = app_stderr.emit(
+                    "command-output",
+                    serde_json::json!({
+                        "type": "stderr",
+                        "line": line
+                    }),
+                );
+            }
+        });
+
+        let (stdout_result, stderr_result) = tokio::join!(stdout_handle, stderr_handle);
+        stdout_result.map_err(|e| CommandError::ExecutionError(format!("Stdout error: {}", e)))?;
+        stderr_result.map_err(|e| CommandError::ExecutionError(format!("Stderr error: {}", e)))?;
+
+        // Wait for the process to complete
+        let status = child
+            .wait()
+            .await
+            .map_err(|e| CommandError::ExecutionError(e.to_string()))?;
+
+        if !status.success() {
+            return Err(CommandError::NonZeroExit(
+                format!("{:?}", cmd_args),
+                status.code().unwrap_or(-1),
+                String::new(),
+            ));
+        }
+
+        // Emit completion event
+        let _ = app.emit(
+            "command-complete",
+            serde_json::json!({
+                "success": true,
+                "exit_code": status.code()
+            }),
+        );
+
+        Ok(())
     }
 }

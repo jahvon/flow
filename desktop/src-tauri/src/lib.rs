@@ -56,11 +56,16 @@ async fn sync() -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn execute(verb: String, executable_id: String, args: Vec<String>) -> Result<(), String> {
+async fn execute(
+    app: tauri::AppHandle,
+    verb: String,
+    executable_id: String,
+    args: Vec<String>,
+) -> Result<(), String> {
     let runner = CommandRunner::new();
     let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
     runner
-        .execute(&verb, &executable_id, &args)
+        .execute(app, &verb, &executable_id, &args)
         .await
         .map_err(|e| e.to_string())
 }

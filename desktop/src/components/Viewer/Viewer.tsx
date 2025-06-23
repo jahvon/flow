@@ -1,7 +1,13 @@
-import { Text } from "@mantine/core";
-import {IconDatabase, IconFolders, IconLogs, IconSettings} from "@tabler/icons-react";
+import { ScrollArea, Text } from "@mantine/core";
+import {
+  IconDatabase,
+  IconFolders,
+  IconLogs,
+  IconSettings,
+} from "@tabler/icons-react";
 import type { EnrichedExecutable } from "../../types/executable";
 import { EnrichedWorkspace } from "../../types/workspace";
+import Data from "./Data/Data";
 import ExecutableInfo from "./Executable/Executable";
 import { Settings } from "./Settings/Settings";
 import { Welcome } from "./Welcome/Welcome";
@@ -63,6 +69,8 @@ export function Viewer({
         return <Welcome welcomeMessage={welcomeMessage} />;
       case View.Logs:
         return <Text>Logs view coming soon...</Text>;
+      case View.Data:
+        return <Data />;
       case View.Settings:
         return <Settings />;
       default:
@@ -70,5 +78,16 @@ export function Viewer({
     }
   };
 
-  return renderContent();
+  return (
+    <ScrollArea
+      h="calc(100vh - var(--app-header-height) - var(--app-shell-padding-total))"
+      w="calc(100vw - var(--app-navbar-width) - var(--app-shell-padding-total))"
+      type="auto"
+      scrollbarSize={6}
+      scrollHideDelay={100}
+      offsetScrollbars
+    >
+      {renderContent()}
+    </ScrollArea>
+  );
 }
