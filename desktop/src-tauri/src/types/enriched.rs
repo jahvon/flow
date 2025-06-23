@@ -5,7 +5,7 @@ use crate::types::generated::workspace::Workspace as GeneratedWorkspace;
 pub struct Workspace {
     #[serde(flatten)]
     pub base: GeneratedWorkspace,
-    pub id: String,
+    pub name: String,
     pub path: String,
     #[serde(rename = "fullDescription")]
     pub full_description: String,
@@ -14,13 +14,13 @@ pub struct Workspace {
 impl Workspace {
     pub fn new(
         base: GeneratedWorkspace,
-        id: String,
+        name: String,
         path: String,
         full_description: String,
     ) -> Self {
         Self {
             base,
-            id,
+            name,
             path,
             full_description,
         }

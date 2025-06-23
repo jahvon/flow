@@ -60,7 +60,6 @@ executables:
             echo "Generating go code..."
             go generate ./...
             echo "All go code generated successfully"
-        - ref: generate docs
         - ref: generate frontend
         - ref: generate backend
 

@@ -63,10 +63,7 @@ impl CommandRunner {
         // TODO: Make this configurable / use the main flow binary
         let mut cmd = Command::new("/Users/jahvon/workspaces/github.com/jahvon/flow/.bin/flow");
         cmd.stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .arg("-x") // Always non-interactive
-            .arg("--verbosity")
-            .arg("-1"); // Always minimum verbosity
+            .stderr(Stdio::piped());
 
         cmd
     }
@@ -104,7 +101,7 @@ impl CommandRunner {
     }
 
     pub async fn get_config(&self) -> CommandResult<Config> {
-        self.execute_command(&["config", "view", "--output", "json"])
+        self.execute_command(&["config", "get", "--output", "json"])
             .await
     }
 
@@ -121,7 +118,7 @@ impl CommandRunner {
 
     pub async fn get_workspace(&self, workspace: &str) -> CommandResult<Workspace> {
         let response: Workspace = self
-            .execute_command(&["workspace", "view", workspace, "--output", "json"])
+            .execute_command(&["workspace", "get", workspace, "--output", "json"])
             .await?;
         Ok(response)
     }
@@ -131,7 +128,7 @@ impl CommandRunner {
         workspace: Option<&str>,
         namespace: Option<&str>,
     ) -> CommandResult<Vec<Executable>> {
-        let mut args = vec!["library", "glance", "--output", "json", "--all"];
+        let mut args = vec!["browse", "--list", "--output", "json"];
 
         if let Some(ws) = workspace {
             args.extend_from_slice(&["--workspace", ws]);
@@ -139,6 +136,8 @@ impl CommandRunner {
 
         if let Some(ns) = namespace {
             args.extend_from_slice(&["--namespace", ns]);
+        } else {
+            args.push("--all");
         }
 
         let response: ExecutableResponse = self.execute_command(&args).await?;
@@ -150,14 +149,13 @@ impl CommandRunner {
         match split_ref.len() {
             1 => {
                 // Just a verb
-                self.execute_command(&["library", "view", split_ref[0], "--output", "json"])
+                self.execute_command(&["browse", split_ref[0], "--output", "json"])
                     .await
             }
             2 => {
                 // Verb and ID
                 self.execute_command(&[
-                    "library",
-                    "view",
+                    "browse",
                     split_ref[0],
                     split_ref[1],
                     "--output",

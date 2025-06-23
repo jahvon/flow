@@ -138,7 +138,7 @@ export function useExecutables(selectedWorkspace: string | null) {
 }
 
 // Composite hook that combines all data sources
-export function useWorkspaceData(selectedWorkspace: string | null) {
+export function useBackendData(selectedWorkspace: string | null) {
   const { config, isConfigLoading, configError, refreshConfig } = useConfig();
   const {
     workspaces,

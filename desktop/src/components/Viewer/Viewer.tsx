@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import { IconFolders, IconLogs, IconSettings } from "@tabler/icons-react";
+import {IconDatabase, IconFolders, IconLogs, IconSettings} from "@tabler/icons-react";
 import type { EnrichedExecutable } from "../../types/executable";
 import { EnrichedWorkspace } from "../../types/workspace";
 import ExecutableInfo from "./Executable/Executable";
@@ -12,12 +12,14 @@ export enum View {
   Workspace = "workspace",
   Executable = "executable",
   Logs = "logs",
+  Data = "data",
   Settings = "settings",
 }
 
 export const ViewLinks = [
   { icon: IconFolders, label: "Workspace", view: View.Workspace },
   { icon: IconLogs, label: "Logs", view: View.Logs },
+  { icon: IconDatabase, label: "Data", view: View.Data },
   { icon: IconSettings, label: "Settings", view: View.Settings },
 ];
 

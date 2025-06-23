@@ -4,7 +4,7 @@ import { EnrichedWorkspace } from "../../../types/workspace";
 interface WorkspaceSelectorProps {
   workspaces: EnrichedWorkspace[];
   selectedWorkspace: string | null;
-  onSelectWorkspace: (workspaceId: string) => void;
+  onSelectWorkspace: (workspaceName: string) => void;
 }
 
 const filter: OptionsFilter = ({ options, search }) => {
@@ -27,13 +27,13 @@ export function WorkspaceSelector({
         <Select
           value={selectedWorkspace}
           onChange={(value) => {
-            if (value && workspaces.find((w) => w.id === value)) {
+            if (value && workspaces.find((w) => w.name === value)) {
               onSelectWorkspace(value);
             }
           }}
           data={workspaces.map((workspace) => ({
-            value: workspace.id,
-            label: workspace.displayName || workspace.id,
+            value: workspace.name,
+            label: workspace.displayName || workspace.name,
           }))}
           filter={filter}
           placeholder="No workspace selected"

@@ -53,7 +53,7 @@ export function Workspace({ workspace }: WorkspaceProps) {
                 </ThemeIcon>
                 <div>
                   <Title order={2}>
-                    {workspace.displayName || workspace.id}
+                    {workspace.displayName || workspace.name}
                   </Title>
                   <Text size="sm" c="dimmed">
                     Workspace
@@ -61,11 +61,11 @@ export function Workspace({ workspace }: WorkspaceProps) {
                 </div>
               </Group>
 
-              {workspace.id && (
+              {workspace.name && (
                 <Badge variant="light" color="gray">
                   <Group gap={4}>
                     <IconInfoCircle size={12} />
-                    {workspace.id}
+                    {workspace.name}
                   </Group>
                 </Badge>
               )}

@@ -12,7 +12,7 @@ interface SidebarProps {
   setCurrentView: (view: View) => void;
   workspaces: EnrichedWorkspace[];
   selectedWorkspace: string | null;
-  onSelectWorkspace: (workspaceId: string) => void;
+  onSelectWorkspace: (workspaceName: string) => void;
   visibleExecutables: EnrichedExecutable[];
   onSelectExecutable: (executableId: string) => void;
   onLogoClick: () => void;

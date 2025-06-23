@@ -14,7 +14,7 @@ import styles from "./components/AppShell.module.css";
 import { Header } from "./components/Header/Header";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { View, Viewer } from "./components/Viewer/Viewer";
-import { useExecutable, useWorkspaceData } from "./hooks/useBackendData";
+import { useExecutable, useBackendData } from "./hooks/useBackendData";
 import { SettingsProvider } from "./hooks/useSettings";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import {
@@ -34,7 +34,7 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<View>(View.Welcome);
-  const [welcomeMessage, setWelcomMessage] = useState<string>("");
+  const [welcomeMessage, setWelcomeMessage] = useState<string>("");
   const [selectedExecutable, setSelectedExecutable] = useState<string | null>(
     null
   );
@@ -44,7 +44,7 @@ function AppContent() {
   const [notification, setNotification] = useState<Notification | null>(null);
 
   const { config, workspaces, executables, isLoading, hasError, refreshAll } =
-    useWorkspaceData(selectedWorkspace);
+    useBackendData(selectedWorkspace);
 
   const { executable, executableError, isExecutableLoading } = useExecutable(
     selectedExecutable || ""
@@ -82,15 +82,9 @@ function AppContent() {
 
   useEffect(() => {
     if (welcomeMessage === "" && executables?.length > 0) {
-      setWelcomMessage("Select an executable to get started.");
+      setWelcomeMessage("Select an executable to get started.");
     }
   }, [executables, welcomeMessage]);
-
-  const handleWorkspaceInfoClick = () => {
-    if (selectedWorkspace) {
-      setCurrentView(View.Workspace);
-    }
-  };
 
   const handleLogoClick = () => {
     setCurrentView(View.Welcome);
@@ -130,8 +124,8 @@ function AppContent() {
           setCurrentView={setCurrentView}
           workspaces={workspaces || []}
           selectedWorkspace={selectedWorkspace}
-          onSelectWorkspace={(workspaceId) => {
-            setSelectedWorkspace(workspaceId);
+          onSelectWorkspace={(workspaceName) => {
+            setSelectedWorkspace(workspaceName);
             setCurrentView(View.Workspace);
           }}
           visibleExecutables={executables}
@@ -179,7 +173,7 @@ function AppContent() {
               executableError={executableError}
               welcomeMessage={welcomeMessage}
               workspace={
-                workspaces?.find((w) => w.id === selectedWorkspace) || null
+                workspaces?.find((w) => w.name === selectedWorkspace) || null
               }
             />
             {isLoading && (
