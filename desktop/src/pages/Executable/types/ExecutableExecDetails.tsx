@@ -1,8 +1,8 @@
 import { Badge, Card, Code, Group, Stack, Title } from "@mantine/core";
 import { IconTerminal } from "@tabler/icons-react";
-import { useSettings } from "../../../../hooks/useSettings";
-import { EnrichedExecutable } from "../../../../types/executable";
-import { CodeHighlighter } from "../../../CodeHighlighter";
+import { useSettings } from "../../../hooks/useSettings";
+import { EnrichedExecutable } from "../../../types/executable";
+import { CodeHighlighter } from "../../../components/CodeHighlighter";
 
 export type ExecutableExecDetailsProps = {
   executable: EnrichedExecutable;

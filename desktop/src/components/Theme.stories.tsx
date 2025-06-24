@@ -10,7 +10,7 @@ import {
   Title,
 } from "@mantine/core";
 import type { Meta, StoryObj } from "@storybook/react";
-import { theme } from "../theme";
+import { mantineTheme as theme } from "../theme/mantineTheme";
 
 const meta = {
   title: "Design System/Theme",

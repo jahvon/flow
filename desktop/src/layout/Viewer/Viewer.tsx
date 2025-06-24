@@ -1,17 +1,11 @@
 import { ScrollArea, Text } from "@mantine/core";
-import {
-  IconDatabase,
-  IconFolders,
-  IconLogs,
-  IconSettings,
-} from "@tabler/icons-react";
+import Data from "../../pages/Data/Data";
+import Executable from "../../pages/Executable/Executable";
+import { Settings } from "../../pages/Settings/Settings";
+import { Welcome } from "../../pages/Welcome/Welcome";
+import { Workspace } from "../../pages/Workspace/Workspace";
 import type { EnrichedExecutable } from "../../types/executable";
 import { EnrichedWorkspace } from "../../types/workspace";
-import Data from "./Data/Data";
-import ExecutableInfo from "./Executable/Executable";
-import { Settings } from "./Settings/Settings";
-import { Welcome } from "./Welcome/Welcome";
-import { Workspace as WorkspaceView } from "./Workspace/Workspace";
 
 export enum View {
   Welcome = "welcome",
@@ -22,17 +16,9 @@ export enum View {
   Settings = "settings",
 }
 
-export const ViewLinks = [
-  { icon: IconFolders, label: "Workspace", view: View.Workspace },
-  { icon: IconLogs, label: "Logs", view: View.Logs },
-  { icon: IconDatabase, label: "Data", view: View.Data },
-  { icon: IconSettings, label: "Settings", view: View.Settings },
-];
-
 interface ViewerProps {
   currentView: View;
   selectedExecutable: EnrichedExecutable | null;
-  isExecutableLoading: boolean;
   executableError: Error | null;
   welcomeMessage?: string;
   workspace: EnrichedWorkspace | null;
@@ -41,7 +27,6 @@ interface ViewerProps {
 export function Viewer({
   currentView,
   selectedExecutable,
-  isExecutableLoading,
   executableError,
   welcomeMessage,
   workspace,
@@ -49,7 +34,7 @@ export function Viewer({
   const renderContent = () => {
     switch (currentView) {
       case View.Workspace:
-        return <WorkspaceView workspace={workspace} />;
+        return <Workspace workspace={workspace} />;
       case View.Executable:
         if (selectedExecutable) {
           if (executableError) {
@@ -60,7 +45,7 @@ export function Viewer({
               </Text>
             );
           }
-          return <ExecutableInfo executable={selectedExecutable} />;
+          return <Executable executable={selectedExecutable} />;
         }
         return (
           <Welcome welcomeMessage="Select an executable to get started." />

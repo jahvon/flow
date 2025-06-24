@@ -1,6 +1,6 @@
 import { Card, Select, Stack, Text, TextInput, Title } from "@mantine/core";
-import { useSettings } from "../../../hooks/useSettings";
-import { ThemeName } from "../../../theme/types";
+import { useSettings } from "../../hooks/useSettings";
+import { ThemeName } from "../../theme/types";
 import styles from "./Settings.module.css";
 
 const themeOptions = [

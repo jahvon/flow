@@ -1,24 +1,13 @@
-import {
-  ActionIcon,
-  AppShell,
-  Loader,
-  Notification as MantineNotification,
-  Text,
-} from "@mantine/core";
 import "@mantine/core/styles.css";
-import { IconRefresh } from "@tabler/icons-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import "./App.css";
-import styles from "./components/AppShell.module.css";
-import { Header } from "./components/Header/Header";
-import { Sidebar } from "./components/Sidebar/Sidebar";
-import { View, Viewer } from "./components/Viewer/Viewer";
 import { useBackendData, useExecutable } from "./hooks/useBackendData";
 import { NotifierProvider, useNotifier } from "./hooks/useNotifier";
 import { SettingsProvider } from "./hooks/useSettings";
+import { AppShell, View, Viewer } from "./layout";
 import { ThemeProvider } from "./theme/ThemeProvider";
-import { colorFromType, NotificationType } from "./types/notification";
+import { NotificationType } from "./types/notification";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,121 +70,41 @@ function AppContent() {
 
   return (
     <AppShell
-      header={{ height: "var(--app-header-height)" }}
-      navbar={{ width: "var(--app-navbar-width)", breakpoint: "sm" }}
-      padding="md"
-      classNames={{
-        root: styles.appShell,
-        main: styles.main,
-        header: styles.header,
-        navbar: styles.navbar,
+      currentView={currentView}
+      setCurrentView={(view: string) => setCurrentView(view as View)}
+      workspaces={workspaces || []}
+      selectedWorkspace={selectedWorkspace}
+      onSelectWorkspace={(workspaceName) => {
+        setSelectedWorkspace(workspaceName);
+        setCurrentView(View.Workspace);
       }}
+      visibleExecutables={executables || []}
+      onSelectExecutable={(executable) => {
+        if (executable === selectedExecutable) {
+          return;
+        }
+        setSelectedExecutable(executable);
+        if (currentView !== View.Executable) {
+          setCurrentView(View.Executable);
+        }
+      }}
+      onLogoClick={handleLogoClick}
+      hasError={hasError}
+      isLoading={isLoading}
+      refreshAll={refreshAll}
+      notification={notification}
+      setNotification={setNotification}
     >
-      <AppShell.Header>
-        <Header
-          onCreateWorkspace={() => {}}
-          onRefreshWorkspaces={() => {
-            refreshAll();
-            setNotification({
-              title: "Refresh completed",
-              message: "flow data has synced and refreshed successfully",
-              type: NotificationType.Success,
-              autoClose: true,
-              autoCloseDelay: 3000,
-            });
-          }}
-        />
-      </AppShell.Header>
-
-      <AppShell.Navbar>
-        <Sidebar
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-          workspaces={workspaces || []}
-          selectedWorkspace={selectedWorkspace}
-          onSelectWorkspace={(workspaceName) => {
-            setSelectedWorkspace(workspaceName);
-            setCurrentView(View.Workspace);
-          }}
-          visibleExecutables={executables}
-          onSelectExecutable={(executable) => {
-            if (executable === selectedExecutable) {
-              return;
-            }
-            setSelectedExecutable(executable);
-            if (currentView !== View.Executable) {
-              setCurrentView(View.Executable);
-            }
-          }}
-          onLogoClick={handleLogoClick}
-        />
-      </AppShell.Navbar>
-
-      <AppShell.Main>
-        {hasError ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              flexDirection: "column",
-              gap: "1rem",
-            }}
-          >
-            <Text c="red">Error loading data</Text>
-            <ActionIcon
-              color="red"
-              onClick={refreshAll}
-              title="Try again"
-              variant="light"
-            >
-              <IconRefresh size={16} />
-            </ActionIcon>
-          </div>
-        ) : (
-          <div style={{ position: "relative", height: "100%" }}>
-            <Viewer
-              currentView={currentView}
-              selectedExecutable={executable}
-              isExecutableLoading={isExecutableLoading}
-              executableError={executableError}
-              welcomeMessage={welcomeMessage}
-              workspace={
-                workspaces?.find((w) => w.name === selectedWorkspace) || null
-              }
-            />
-            {isLoading && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 16,
-                  right: 16,
-                  zIndex: 1000,
-                }}
-              >
-                <Loader size="sm" />
-              </div>
-            )}
-          </div>
-        )}
-      </AppShell.Main>
-
-      {notification && (
-        <MantineNotification
-          title={notification.title}
-          onClose={() => setNotification(null)}
-          color={colorFromType(notification.type)}
-          style={{
-            position: "fixed",
-            bottom: 20,
-            right: 20,
-            zIndex: 1000,
-          }}
-        >
-          {notification.message}
-        </MantineNotification>
-      )}
+      <Viewer
+        currentView={currentView}
+        selectedExecutable={executable}
+        isExecutableLoading={isExecutableLoading}
+        executableError={executableError}
+        welcomeMessage={welcomeMessage}
+        workspace={
+          workspaces?.find((w) => w.name === selectedWorkspace) || null
+        }
+      />
     </AppShell>
   );
 }

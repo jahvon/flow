@@ -1,4 +1,3 @@
-/* Layout dimensions as CSS custom properties */
 :root {
   --app-header-height: 48px;
   --app-navbar-width: 300px;

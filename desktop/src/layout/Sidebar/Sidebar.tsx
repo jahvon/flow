@@ -1,7 +1,8 @@
 import { Group, Image, NavLink, Stack } from "@mantine/core";
 import type { EnrichedExecutable } from "../../types/executable";
 import { EnrichedWorkspace } from "../../types/workspace";
-import { View, ViewLinks } from "../Viewer/Viewer";
+import { View } from "../Viewer/Viewer";
+import { ViewLinks } from "../Viewer/ViewLinks";
 import { ExecutableTree } from "./ExecutableTree/ExecutableTree";
 import styles from "./Sidebar.module.css";
 import { WorkspaceSelector } from "./WorkspaceSelector/WorkspaceSelector";

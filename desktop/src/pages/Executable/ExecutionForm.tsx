@@ -9,8 +9,8 @@ import {
   Title,
 } from "@mantine/core";
 import { useState } from "react";
-import { EnrichedExecutable } from "../../../types/executable";
-import { ExecutableArgument } from "../../../types/generated/flowfile";
+import { EnrichedExecutable } from "../../types/executable";
+import { ExecutableArgument } from "../../types/generated/flowfile";
 
 export interface ExecutionFormData {
   params: Record<string, string>;

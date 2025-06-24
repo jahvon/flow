@@ -1,5 +1,5 @@
 import { Grid } from "@mantine/core";
-import { EnrichedExecutable } from "../../../types/executable";
+import { EnrichedExecutable } from "../../types/executable";
 import { ExecutableExecDetails } from "./types/ExecutableExecDetails";
 import { ExecutableLaunchDetails } from "./types/ExecutableLaunchDetails";
 import { ExecutableParallelDetails } from "./types/ExecutableParallelDetails";

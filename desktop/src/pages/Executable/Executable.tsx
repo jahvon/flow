@@ -27,17 +27,17 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { useEffect, useRef, useState } from "react";
-import { useNotifier } from "../../../hooks/useNotifier";
-import { useSettings } from "../../../hooks/useSettings";
-import { EnrichedExecutable } from "../../../types/executable";
-import { NotificationType } from "../../../types/notification";
-import { MarkdownRenderer } from "../../MarkdownRenderer";
-import { LogLine, LogViewer } from "../Logs/LogViewer.tsx";
+import { MarkdownRenderer } from "../../components/MarkdownRenderer";
+import { useNotifier } from "../../hooks/useNotifier";
+import { useSettings } from "../../hooks/useSettings";
+import { EnrichedExecutable } from "../../types/executable";
+import { NotificationType } from "../../types/notification";
+import { LogLine, LogViewer } from "../Logs/LogViewer";
 import { ExecutableEnvironmentDetails } from "./ExecutableEnvironmentDetails";
 import { ExecutableTypeDetails } from "./ExecutableTypeDetails";
 import { ExecutionForm, ExecutionFormData } from "./ExecutionForm";
 
-export type ExecutableInfoProps = {
+export type ExecutableProps = {
   executable: EnrichedExecutable;
 };
 
@@ -96,7 +96,7 @@ function getVisibilityColor(visibility?: string) {
   }
 }
 
-export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
+export default function Executable({ executable }: ExecutableProps) {
   const typeInfo = getExecutableTypeInfo(executable);
   const { settings } = useSettings();
   const { setNotification } = useNotifier();

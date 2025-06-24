@@ -1,6 +1,6 @@
 import { Badge, Card, Code, Group, Stack, Text, Title } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
-import { EnrichedExecutable } from "../../../../types/executable";
+import { EnrichedExecutable } from "../../../types/executable";
 
 export type ExecutableLaunchDetailsProps = {
   executable: EnrichedExecutable;

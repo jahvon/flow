@@ -9,7 +9,7 @@ import {
   Title,
 } from "@mantine/core";
 import { IconBook, IconBrandGithub } from "@tabler/icons-react";
-import iconImage from "../../../assets/icon.png";
+import iconImage from "../../assets/icon.png";
 import styles from "./Welcome.module.css";
 
 interface WelcomeProps {

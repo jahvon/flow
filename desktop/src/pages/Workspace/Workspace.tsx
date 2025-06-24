@@ -19,9 +19,9 @@ import {
   IconTag,
 } from "@tabler/icons-react";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { useSettings } from "../../../hooks/useSettings";
-import { EnrichedWorkspace } from "../../../types/workspace";
-import { MarkdownRenderer } from "../../MarkdownRenderer";
+import { useSettings } from "../../hooks/useSettings";
+import { EnrichedWorkspace } from "../../types/workspace";
+import { MarkdownRenderer } from "../../components/MarkdownRenderer";
 
 interface WorkspaceProps {
   workspace: EnrichedWorkspace | null;

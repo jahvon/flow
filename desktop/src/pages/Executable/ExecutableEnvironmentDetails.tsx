@@ -12,11 +12,11 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconFlag, IconInfoCircle, IconKey } from "@tabler/icons-react";
-import { EnrichedExecutable } from "../../../types/executable";
+import { EnrichedExecutable } from "../../types/executable";
 import {
   ExecutableArgument,
   ExecutableParameter,
-} from "../../../types/generated/flowfile";
+} from "../../types/generated/flowfile";
 
 export type ExecutableEnvironmentDetailsProps = {
   executable: EnrichedExecutable;
