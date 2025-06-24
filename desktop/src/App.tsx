@@ -32,7 +32,7 @@ function AppContent() {
   const { config, workspaces, executables, isLoading, hasError, refreshAll } =
     useBackendData(selectedWorkspace);
 
-  const { executable, executableError, isExecutableLoading } = useExecutable(
+  const { executable, executableError } = useExecutable(
     selectedExecutable || ""
   );
 
@@ -98,7 +98,6 @@ function AppContent() {
       <Viewer
         currentView={currentView}
         selectedExecutable={executable}
-        isExecutableLoading={isExecutableLoading}
         executableError={executableError}
         welcomeMessage={welcomeMessage}
         workspace={
