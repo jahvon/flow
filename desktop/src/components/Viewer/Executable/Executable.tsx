@@ -42,6 +42,7 @@ import {
 import { NotificationType } from "../../../types/notification";
 import { CodeHighlighter } from "../../CodeHighlighter";
 import { MarkdownRenderer } from "../../MarkdownRenderer";
+import {LogLine, LogViewer} from "../Logs/LogViewer.tsx";
 
 export type ExecutableInfoProps = {
   executable: EnrichedExecutable;
@@ -102,16 +103,11 @@ function getVisibilityColor(visibility?: string) {
   }
 }
 
-type OutputLine = {
-  type: "stdout" | "stderr";
-  line: string;
-};
-
 export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
   const typeInfo = getExecutableTypeInfo(executable);
   const { settings } = useSettings();
   const { setNotification } = useNotifier();
-  const [output, setOutput] = useState<OutputLine[]>([]);
+  const [output, setOutput] = useState<LogLine[]>([]);
   const outputListenerSetup = useRef(false);
 
   useEffect(() => {
@@ -126,7 +122,7 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
     const setupListeners = async () => {
       console.log("Setting up listeners for executable:", executable.ref);
       unlistenOutput = await listen("command-output", (event) => {
-        const payload = event.payload as OutputLine;
+        const payload = event.payload as LogLine;
         console.log("Received output:", payload);
         setOutput((prev) => [...prev, payload]);
       });
@@ -496,19 +492,10 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
           opened={true}
           onClose={() => setOutput([])}
           title="Execution Output"
-          scrollAreaComponent={ScrollArea.Autosize}
+          // scrollAreaComponent={ScrollArea.Autosize}
           position="bottom"
         >
-          <Stack gap="sm">
-            {output.map((line, index) => (
-              <Text
-                key={index}
-                color={line.type === "stderr" ? "red" : "green"}
-              >
-                {line.line}
-              </Text>
-            ))}
-          </Stack>
+          <LogViewer logs={output} formatted={true} fontSize={12} />
         </Drawer>
       )}
     </Stack>
