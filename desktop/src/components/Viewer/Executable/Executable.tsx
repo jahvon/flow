@@ -1,5 +1,4 @@
 import {
-  ActionIcon,
   Badge,
   Button,
   Card,
@@ -9,7 +8,6 @@ import {
   Grid,
   Group,
   Stack,
-  Table,
   Text,
   ThemeIcon,
   Title,
@@ -20,9 +18,6 @@ import {
   IconExternalLink,
   IconEye,
   IconFile,
-  IconFlag,
-  IconInfoCircle,
-  IconKey,
   IconPlayerPlay,
   IconTag,
   IconTerminal,
@@ -34,14 +29,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNotifier } from "../../../hooks/useNotifier";
 import { useSettings } from "../../../hooks/useSettings";
 import { EnrichedExecutable } from "../../../types/executable";
-import {
-  ExecutableArgument,
-  ExecutableParameter,
-} from "../../../types/generated/flowfile";
 import { NotificationType } from "../../../types/notification";
-import { CodeHighlighter } from "../../CodeHighlighter";
 import { MarkdownRenderer } from "../../MarkdownRenderer";
 import { LogLine, LogViewer } from "../Logs/LogViewer.tsx";
+import { ExecutableEnvironmentDetails } from "./ExecutableEnvironmentDetails";
+import { ExecutableTypeDetails } from "./ExecutableTypeDetails";
 import { ExecutionForm, ExecutionFormData } from "./ExecutionForm";
 
 export type ExecutableInfoProps = {
@@ -338,187 +330,17 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
             </Card>
           </Grid.Col>
         )}
-
-        {executable.exec?.params && executable.exec.params.length > 0 && (
-          <Grid.Col span={12}>
-            <Card withBorder>
-              <Stack gap="sm">
-                <Title order={4}>
-                  <Group gap="xs">
-                    <IconKey size={16} />
-                    Environment Parameters
-                  </Group>
-                </Title>
-                <Table>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Variable</Table.Th>
-                      <Table.Th>Type</Table.Th>
-                      <Table.Th>Source</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {executable.exec.params.map(
-                      (param: ExecutableParameter, index: number) => {
-                        const type = param.text
-                          ? "static"
-                          : param.secretRef
-                            ? "secret"
-                            : "prompt";
-                        const source =
-                          param.text || param.secretRef || param.prompt;
-
-                        return (
-                          <Table.Tr key={index}>
-                            <Table.Td>
-                              <Code>{param.envKey}</Code>
-                            </Table.Td>
-                            <Table.Td>
-                              <Badge
-                                size="sm"
-                                variant="light"
-                                color={
-                                  type === "secret"
-                                    ? "red"
-                                    : type === "prompt"
-                                      ? "blue"
-                                      : "gray"
-                                }
-                              >
-                                {type}
-                              </Badge>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text size="sm" style={{ maxWidth: 200 }}>
-                                {source}
-                              </Text>
-                            </Table.Td>
-                          </Table.Tr>
-                        );
-                      }
-                    )}
-                  </Table.Tbody>
-                </Table>
-              </Stack>
-            </Card>
-          </Grid.Col>
-        )}
-
-        {executable.exec?.args && executable.exec.args.length > 0 && (
-          <Grid.Col span={12}>
-            <Card withBorder>
-              <Stack gap="sm">
-                <Title order={4}>
-                  <Group gap="xs">
-                    <IconFlag size={16} />
-                    Command Arguments
-                  </Group>
-                </Title>
-                <Table>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Variable</Table.Th>
-                      <Table.Th>Input</Table.Th>
-                      <Table.Th>Type</Table.Th>
-                      <Table.Th>Required</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {executable.exec.args.map(
-                      (arg: ExecutableArgument, index: number) => (
-                        <Table.Tr key={index}>
-                          <Table.Td>
-                            <Code>{arg.envKey}</Code>
-                          </Table.Td>
-                          <Table.Td>
-                            <Group gap="xs">
-                              <Badge size="sm" variant="light">
-                                {arg.pos ? `pos-${arg.pos}` : `--${arg.flag}`}
-                              </Badge>
-                              {arg.default && (
-                                <Tooltip label={`Default: ${arg.default}`}>
-                                  <ActionIcon variant="subtle" size="xs">
-                                    <IconInfoCircle size={12} />
-                                  </ActionIcon>
-                                </Tooltip>
-                              )}
-                            </Group>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{arg.type || "string"}</Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Badge
-                              size="sm"
-                              variant="light"
-                              color={arg.required ? "red" : "green"}
-                            >
-                              {arg.required ? "Yes" : "No"}
-                            </Badge>
-                          </Table.Td>
-                        </Table.Tr>
-                      )
-                    )}
-                  </Table.Tbody>
-                </Table>
-              </Stack>
-            </Card>
-          </Grid.Col>
-        )}
-
-        {executable.exec && (
-          <Grid.Col span={12}>
-            <Card withBorder>
-              <Stack gap="sm">
-                <Title order={4}>
-                  <Group gap="xs">
-                    <IconTerminal size={16} />
-                    Execution Details
-                  </Group>
-                </Title>
-                <Stack gap="xs">
-                  {executable.exec.cmd && (
-                    <div>
-                      <Title order={5}>Command:</Title>
-                      <CodeHighlighter
-                        theme={settings.theme}
-                        copyButton={false}
-                      >
-                        {executable.exec.cmd}
-                      </CodeHighlighter>
-                    </div>
-                  )}
-                  {executable.exec.file && (
-                    <div>
-                      <Title order={5}>File:</Title>
-                      <Code>{executable.exec.file}</Code>
-                    </div>
-                  )}
-                  {executable.exec.dir && (
-                    <div>
-                      <Title order={5}>Directory:</Title>
-                      <Code>{executable.exec.dir}</Code>
-                    </div>
-                  )}
-                  {executable.exec.logMode && (
-                    <div>
-                      <Title order={5}>Log Mode:</Title>
-                      <Badge variant="light">{executable.exec.logMode}</Badge>
-                    </div>
-                  )}
-                </Stack>
-              </Stack>
-            </Card>
-          </Grid.Col>
-        )}
       </Grid>
+
+      <ExecutableEnvironmentDetails executable={executable} />
+      <ExecutableTypeDetails executable={executable} />
 
       {output.length > 0 && (
         <Drawer
           opened={true}
           onClose={() => setOutput([])}
           title="Execution Output"
-          // scrollAreaComponent={ScrollArea.Autosize}
+          size="33%"
           position="bottom"
         >
           <LogViewer logs={output} formatted={true} fontSize={12} />

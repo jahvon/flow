@@ -75,7 +75,7 @@ function getTreeData(executables: EnrichedExecutable[]): CustomTreeNodeData[] {
         isNamespace: true,
         verbType: null,
         children: executables
-          .sort((a, b) => (a.ref || "").localeCompare(b.ref || ""))
+          .sort((a, b) => (a.id || "").localeCompare(b.id || ""))
           .map((executable) => ({
             label: executable.name
               ? executable.verb + " " + executable.name
@@ -88,7 +88,7 @@ function getTreeData(executables: EnrichedExecutable[]): CustomTreeNodeData[] {
     });
 
   rootExecutables
-    .sort((a, b) => (a.ref || "").localeCompare(b.ref || ""))
+    .sort((a, b) => (a.id || "").localeCompare(b.id || ""))
     .forEach((executable) => {
       treeData.push({
         label: executable.name
