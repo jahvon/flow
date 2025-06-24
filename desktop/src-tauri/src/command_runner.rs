@@ -179,6 +179,7 @@ impl CommandRunner {
         verb: &str,
         executable_id: &str,
         args: &[&str],
+        params: Option<std::collections::HashMap<String, String>>,
     ) -> CommandResult<()> {
         let mut cmd_args = vec![verb, executable_id];
         cmd_args.extend(args);
@@ -187,6 +188,13 @@ impl CommandRunner {
             TokioCommand::new("/Users/jahvon/workspaces/github.com/jahvon/flow/.bin/flow");
         cmd.args(&cmd_args);
         cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
+
+        // TODO: ensure that the CLI supports this
+        if let Some(params) = params {
+            for (key, value) in params {
+                cmd.env(key, value);
+            }
+        }
 
         println!("streaming cmd: {:?}", cmd);
 

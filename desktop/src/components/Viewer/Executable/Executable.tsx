@@ -8,7 +8,6 @@ import {
   Drawer,
   Grid,
   Group,
-  ScrollArea,
   Stack,
   Table,
   Text,
@@ -42,7 +41,8 @@ import {
 import { NotificationType } from "../../../types/notification";
 import { CodeHighlighter } from "../../CodeHighlighter";
 import { MarkdownRenderer } from "../../MarkdownRenderer";
-import {LogLine, LogViewer} from "../Logs/LogViewer.tsx";
+import { LogLine, LogViewer } from "../Logs/LogViewer.tsx";
+import { ExecutionForm, ExecutionFormData } from "./ExecutionForm";
 
 export type ExecutableInfoProps = {
   executable: EnrichedExecutable;
@@ -108,6 +108,7 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
   const { settings } = useSettings();
   const { setNotification } = useNotifier();
   const [output, setOutput] = useState<LogLine[]>([]);
+  const [formOpened, setFormOpened] = useState(false);
   const outputListenerSetup = useRef(false);
 
   useEffect(() => {
@@ -167,6 +168,20 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
   };
 
   const onExecute = async () => {
+    const hasPromptParams = executable.exec?.params?.some(
+      (param) => param.prompt
+    );
+    const hasArgs = executable.exec?.args && executable.exec.args.length > 0;
+
+    if (hasPromptParams || hasArgs) {
+      setFormOpened(true);
+      return;
+    }
+
+    await executeWithData({ params: {}, args: "" });
+  };
+
+  const executeWithData = async (formData: ExecutionFormData) => {
     try {
       setOutput([]);
 
@@ -177,11 +192,22 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
         autoClose: true,
         autoCloseDelay: 5000,
       });
-      await invoke("execute", {
+
+      const argsArray = formData.args.trim()
+        ? formData.args.trim().split(/\s+/)
+        : [];
+
+      const invokeParams: any = {
         verb: executable.verb,
         executableId: executable.id,
-        args: [],
-      });
+        args: argsArray,
+      };
+
+      if (Object.keys(formData.params).length > 0) {
+        invokeParams.params = formData.params;
+      }
+
+      await invoke("execute", invokeParams);
     } catch (error) {
       console.error(error);
       setNotification({
@@ -497,6 +523,15 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
         >
           <LogViewer logs={output} formatted={true} fontSize={12} />
         </Drawer>
+      )}
+
+      {formOpened && (
+        <ExecutionForm
+          opened={formOpened}
+          onClose={() => setFormOpened(false)}
+          onSubmit={executeWithData}
+          executable={executable}
+        />
       )}
     </Stack>
   );

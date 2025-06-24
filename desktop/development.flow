@@ -48,3 +48,30 @@ executables:
       execs:
         - ref: generate frontend
         - ref: generate backend
+
+  - verb: test
+    name: form-demo
+    description: Test executable to demonstrate the new form functionality with parameters and arguments.
+    exec:
+      dir: //desktop
+      cmd: echo "Testing form functionality"
+      params:
+        - prompt: "What is your name?"
+          envKey: "USER_NAME"
+        - prompt: "What is your favorite color?"
+          envKey: "FAVORITE_COLOR"
+        - text: "demo"
+          envKey: "DEMO_MODE"
+      args:
+        - pos: 1
+          envKey: "MESSAGE"
+          required: true
+          type: "string"
+        - flag: "verbose"
+          envKey: "VERBOSE"
+          type: "bool"
+          default: "false"
+        - flag: "count"
+          envKey: "COUNT"
+          type: "int"
+          default: "1"

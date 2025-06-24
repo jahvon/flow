@@ -61,11 +61,12 @@ async fn execute(
     verb: String,
     executable_id: String,
     args: Vec<String>,
+    params: Option<std::collections::HashMap<String, String>>,
 ) -> Result<(), String> {
     let runner = CommandRunner::new();
     let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
     runner
-        .execute(app, &verb, &executable_id, &args)
+        .execute(app, &verb, &executable_id, &args, params)
         .await
         .map_err(|e| e.to_string())
 }
