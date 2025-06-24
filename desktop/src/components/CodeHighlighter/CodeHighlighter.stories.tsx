@@ -114,7 +114,7 @@ cat /etc/hosts`,
   },
 };
 
-export const SystemTheme: Story = {
+export const EverforestTheme: Story = {
   args: {
     children: `#!/bin/bash
 # This will use the system theme setting
@@ -122,6 +122,6 @@ echo "Using system theme"
 echo "Current time: $(date)"
 echo "System info: $(uname -a)"`,
     copyButton: true,
-    theme: "system",
+    theme: "everforest",
   },
 };

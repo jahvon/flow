@@ -2,7 +2,7 @@
   --app-header-height: 48px;
   --app-navbar-width: 300px;
   --app-shell-padding: 16px;
-  --app-shell-padding-total: 32px; /* 16px top + 16px bottom */
+  --app-shell-padding-total: 30px; /* 16px top + 16px bottom */
 }
 
 .appShell {

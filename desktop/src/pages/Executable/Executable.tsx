@@ -26,7 +26,7 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MarkdownRenderer } from "../../components/MarkdownRenderer";
 import { useNotifier } from "../../hooks/useNotifier";
 import { useSettings } from "../../hooks/useSettings";
@@ -102,14 +102,8 @@ export default function Executable({ executable }: ExecutableProps) {
   const { setNotification } = useNotifier();
   const [output, setOutput] = useState<LogLine[]>([]);
   const [formOpened, setFormOpened] = useState(false);
-  const outputListenerSetup = useRef(false);
 
   useEffect(() => {
-    if (outputListenerSetup.current) {
-      return;
-    }
-
-    outputListenerSetup.current = true;
     let unlistenOutput: (() => void) | undefined;
     let unlistenComplete: (() => void) | undefined;
 
@@ -141,7 +135,6 @@ export default function Executable({ executable }: ExecutableProps) {
     setupListeners();
 
     return () => {
-      outputListenerSetup.current = false;
       if (unlistenOutput) {
         unlistenOutput();
       }

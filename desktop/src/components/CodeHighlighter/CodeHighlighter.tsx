@@ -5,8 +5,9 @@ import "prismjs/components/prism-shell-session";
 import "prismjs/themes/prism-dark.css";
 import "prismjs/themes/prism.css";
 import { useEffect, useRef } from "react";
-
+import { useNotifier } from "../../hooks/useNotifier";
 import { ThemeName } from "../../theme/types";
+import { NotificationType } from "../../types/notification";
 import { getConfigForTheme } from "./config";
 
 interface CodeHighlighterProps {
@@ -24,7 +25,7 @@ export function CodeHighlighter({
 }: CodeHighlighterProps) {
   const codeRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const { setNotification } = useNotifier();
   const config = getConfigForTheme(theme);
   const finalCopyButton =
     copyButton !== undefined ? copyButton : config.defaultCopyButton;
@@ -39,10 +40,19 @@ export function CodeHighlighter({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(children);
-      // TODO: Add a toast notification here
-      console.log("Code copied to clipboard");
+      setNotification({
+        title: "Code copied to clipboard",
+        message: "The code has been copied to your clipboard.",
+        type: NotificationType.Success,
+        autoClose: true,
+      });
     } catch (error) {
-      console.error("Failed to copy code:", error);
+      setNotification({
+        title: "Failed to copy code",
+        message: "The code has not been copied to your clipboard.",
+        type: NotificationType.Error,
+        autoClose: true,
+      });
     }
   };
 

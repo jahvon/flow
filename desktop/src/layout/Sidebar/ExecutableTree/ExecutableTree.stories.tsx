@@ -23,6 +23,7 @@ const sampleExecutables: EnrichedExecutable[] = [
     verb: "run",
     workspace: "default",
     flowfile: "exec.flow",
+    fullDescription: "Run a script",
   },
   {
     id: "deps",
@@ -32,6 +33,7 @@ const sampleExecutables: EnrichedExecutable[] = [
     verb: "validate",
     workspace: "default",
     flowfile: "exec.flow",
+    fullDescription: "Validate dependencies",
   },
   {
     id: "devserver",
@@ -41,6 +43,7 @@ const sampleExecutables: EnrichedExecutable[] = [
     workspace: "default",
     flowfile: "frontend.flow",
     verb: "exec",
+    fullDescription: "Execute a development server",
   },
   {
     id: "frontend",
@@ -50,6 +53,7 @@ const sampleExecutables: EnrichedExecutable[] = [
     workspace: "default",
     flowfile: "frontend.flow",
     verb: "test",
+    fullDescription: "Test a frontend",
   },
   {
     id: "container",
@@ -59,6 +63,7 @@ const sampleExecutables: EnrichedExecutable[] = [
     workspace: "default",
     flowfile: "backend.flow",
     verb: "build",
+    fullDescription: "Build a container",
   },
 ];
 

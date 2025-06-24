@@ -1,6 +1,8 @@
-import { Text, Title } from "@mantine/core";
-import { ComponentPropsWithoutRef } from "react";
+import { Code, Text, Title } from "@mantine/core";
+import React, { ComponentPropsWithoutRef } from "react";
 import ReactMarkdown from "react-markdown";
+import { CodeHighlighter } from "../CodeHighlighter/CodeHighlighter";
+import styles from "./MarkdownRenderer.module.css";
 
 interface MarkdownRendererProps {
   children: string;
@@ -12,7 +14,7 @@ export function MarkdownRenderer({
   className,
 }: MarkdownRendererProps) {
   return (
-    <div className={className}>
+    <div className={`${styles.container} ${className || ""}`}>
       <ReactMarkdown
         components={{
           h1: (props: ComponentPropsWithoutRef<typeof Title>) => (
@@ -36,6 +38,14 @@ export function MarkdownRenderer({
           p: (props: ComponentPropsWithoutRef<typeof Text>) => (
             <Text size="sm" {...props} />
           ),
+          code: (props: ComponentPropsWithoutRef<typeof Code>) => (
+            <Code {...props} />
+          ),
+          pre: (props: ComponentPropsWithoutRef<typeof Code>) => {
+            const codeElement = props.children as React.ReactElement;
+            const codeContent = codeElement?.props?.children || "";
+            return <CodeHighlighter>{codeContent}</CodeHighlighter>;
+          },
         }}
       >
         {children}
