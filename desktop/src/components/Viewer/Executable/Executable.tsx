@@ -18,6 +18,7 @@ import {
   IconExternalLink,
   IconEye,
   IconFile,
+  IconLabel,
   IconPlayerPlay,
   IconTag,
   IconTerminal,
@@ -295,7 +296,7 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
               <Stack gap="sm">
                 <Title order={4}>
                   <Group gap="xs">
-                    <IconTag size={16} />
+                    <IconLabel size={16} />
                     Aliases
                   </Group>
                 </Title>
@@ -339,7 +340,7 @@ export default function ExecutableInfo({ executable }: ExecutableInfoProps) {
         <Drawer
           opened={true}
           onClose={() => setOutput([])}
-          title="Execution Output"
+          title={<Text size="sm">Execution Output</Text>}
           size="33%"
           position="bottom"
         >

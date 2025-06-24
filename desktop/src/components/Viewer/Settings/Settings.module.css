@@ -5,7 +5,8 @@
 }
 
 .settings__section {
-  background-color: var(--mantine-color-other-backgroundColors-card);
+  background-color: var(--mantine-color-other-backgroundColors-main);
+  padding: 0;
 }
 
 .settings :global(.mantine-Select-input) {
@@ -36,19 +37,15 @@
   background-color: var(--mantine-color-other-backgroundColors-main);
 }
 
-.settings :global(.mantine-Button-root) {
-  background-color: var(--mantine-color-primary-0);
-  color: var(--mantine-color-other-colors-bodyLight);
-}
-
-.settings :global(.mantine-Button-root:hover) {
-  background-color: var(--mantine-color-primary-1);
-}
-
 .settings :global(.mantine-Title-root) {
-  color: var(--mantine-color-other-colors-body);
+  color: var(--mantine-color-primary-1);
 }
 
 .settings :global(.mantine-Text-root) {
-  color: var(--mantine-color-other-colors-body);
+  color: var(--mantine-color-secondary-1);
+}
+
+.settings :global(.mantine-TextInput-label),
+.settings :global(.mantine-Select-label) {
+  color: var(--mantine-color-tertiary-1);
 }

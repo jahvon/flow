@@ -9,6 +9,7 @@ import {
   Text,
   ThemeIcon,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -62,12 +63,14 @@ export function Workspace({ workspace }: WorkspaceProps) {
               </Group>
 
               {workspace.name && (
-                <Badge variant="light" color="gray">
-                  <Group gap={4}>
-                    <IconInfoCircle size={12} />
-                    {workspace.name}
-                  </Group>
-                </Badge>
+                <Tooltip label={`Registered at ${workspace.path}`}>
+                  <Badge variant="light" color="gray">
+                    <Group gap={4}>
+                      <IconInfoCircle size={12} />
+                      {workspace.name}
+                    </Group>
+                  </Badge>
+                </Tooltip>
               )}
             </Stack>
 

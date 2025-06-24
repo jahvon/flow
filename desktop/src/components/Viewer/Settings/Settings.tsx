@@ -17,11 +17,11 @@ export function Settings() {
 
   return (
     <div className={styles.settings}>
-      <Title order={2} mb="xl">
+      <Title order={2} mb="md">
         Settings
       </Title>
 
-      <Stack gap="md">
+      <Stack gap="sm">
         <Card className={styles.settings__section}>
           <Text size="lg" fw={500} mb="md">
             Appearance
