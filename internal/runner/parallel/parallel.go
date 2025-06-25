@@ -119,7 +119,9 @@ func handleExec(
 		fields := map[string]interface{}{
 			"step": exec.ID(),
 		}
-		exec.Exec.SetLogFields(fields)
+		if exec.Exec != nil {
+			exec.Exec.SetLogFields(fields)
+		}
 
 		runExec := func() error {
 			err := runner.Exec(ctx, exec, eng, execPromptedEnv)

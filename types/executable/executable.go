@@ -530,20 +530,41 @@ func NewExecutableID(workspace, namespace, name string) string {
 	}
 }
 
+// MarshalJSON is used to handle the custom marshaling of the Executable type.
+// It enriches the Executable with additional fields for YAML and JSON output,
+// and also handles the timeout field as a string for better readability in the output.
 func (e *Executable) MarshalJSON() ([]byte, error) {
-	type Alias Executable
-	aux := &struct {
-		*Alias
-		Timeout string `json:"timeout,omitempty"`
-	}{
-		Alias: (*Alias)(e),
+	output := make(map[string]interface{})
+
+	type BaseExecutable Executable
+	baseData, err := json.Marshal((*BaseExecutable)(e))
+	if err != nil {
+		return nil, err
 	}
+
+	if err := json.Unmarshal(baseData, &output); err != nil {
+		return nil, err
+	}
+
 	if e.Timeout != nil {
-		aux.Timeout = e.Timeout.String()
+		output["timeout"] = e.Timeout.String()
 	}
-	return json.Marshal(aux)
+
+	// These are required in order to enrich the output with additional fields when
+	// marshalling an ExecutableList
+	output["id"] = e.ID()
+	output["ref"] = e.Ref().String()
+	output["namespace"] = e.Namespace()
+	output["workspace"] = e.Workspace()
+	output["flowfile"] = e.FlowFilePath()
+	output["fullDescription"] = execDescriptionMarkdown(e, false)
+
+	return json.Marshal(output)
 }
 
+// UnmarshalJSON is used to handle the custom unmarshaling of the Executable type.
+// It parses the timeout field from a string to a time.Duration, allowing for
+// more flexible input formats in JSON.
 func (e *Executable) UnmarshalJSON(data []byte) error {
 	type Alias Executable
 	aux := &struct {
