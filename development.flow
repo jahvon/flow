@@ -57,7 +57,7 @@ executables:
       dir: //
       execs:
         - cmd: |
-            echo "Generating go code..."
+            echo "Generating go CLI code..."
             go generate ./...
             echo "All go code generated successfully"
         - ref: generate frontend

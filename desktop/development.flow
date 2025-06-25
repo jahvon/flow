@@ -2,6 +2,12 @@
 visibility: private
 tags: [development, tauri]
 executables:
+  - verb: install
+    name: modules
+    aliases: [node-modules, nodemod]
+    exec:
+      dir: //desktop
+      cmd: npm install
   - verb: start
     name: storybook
     description: Start the Tauri desktop app's Storybook server.
