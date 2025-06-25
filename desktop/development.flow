@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+visibility: private
+tags: [development, tauri]
+executables:
+  - verb: install
+    name: modules
+    aliases: [node-modules, nodemod]
+    exec:
+      dir: //desktop
+      cmd: npm install
+  - verb: start
+    name: storybook
+    description: Start the Tauri desktop app's Storybook server.
+    timeout: "24h"
+    exec:
+      dir: //desktop
+      cmd: npm run storybook
+
+  - verb: start
+    name: tauri
+    aliases: [desktop]
+    description: Start the Tauri desktop app in development mode.
+    timeout: "24h"
+    exec:
+      dir: //desktop
+      cmd: npm run tauri dev
+
+  - verb: generate
+    name: frontend
+    aliases: [js-types, ts-types, frontend-types]
+    description: Generate code for the Tauri desktop app's frontend.
+    exec:
+      dir: //desktop
+      cmd: npm run generate-types
+
+  - verb: lint
+    name: frontend
+    description: Run eslint on the Tauri desktop app's frontend.
+    exec:
+      dir: //desktop
+      cmd: npm run lint
+
+  - verb: generate
+    name: backend
+    description: Generate code for the Tauri desktop app's backend.
+    exec:
+      dir: //desktop
+      cmd: ./scripts/generate-rust-types.sh
+
+  - verb: generate
+    name: tauri
+    description: Generate code for the Tauri frontend and backend.
+    parallel:
+      execs:
+        - ref: generate frontend
+        - ref: generate backend
+
+  - verb: test
+    name: form-demo
+    description: Test executable to demonstrate the new form functionality with parameters and arguments.
+    exec:
+      dir: //desktop
+      cmd: echo "Testing form functionality"
+      params:
+        - prompt: "What is your name?"
+          envKey: "USER_NAME"
+        - prompt: "What is your favorite color?"
+          envKey: "FAVORITE_COLOR"
+        - text: "demo"
+          envKey: "DEMO_MODE"
+      args:
+        - pos: 1
+          envKey: "MESSAGE"
+          required: true
+          type: "string"
+        - flag: "verbose"
+          envKey: "VERBOSE"
+          type: "bool"
+          default: "false"
+        - flag: "count"
+          envKey: "COUNT"
+          type: "int"
+          default: "1"

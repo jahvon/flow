@@ -84,7 +84,7 @@ Executables are the building blocks of workflows and are used to define the acti
 | `description` | A description of the executable. This description is rendered as markdown in the interactive UI.  | `string` |  |  |
 | `exec` |  | [ExecutableExecExecutableType](#ExecutableExecExecutableType) | <no value> |  |
 | `launch` |  | [ExecutableLaunchExecutableType](#ExecutableLaunchExecutableType) | <no value> |  |
-| `name` | The name of the executable.   Name is used to reference the executable in the CLI using the format `workspace/namespace:name`. [Verb group + Name] must be unique within the namespace of the workspace.  Name is required if the executable is defined within a namespace.  | `string` |  |  |
+| `name` | The name of the executable.  Name is used to reference the executable in the CLI using the format `workspace/namespace:name`. [Verb group + Name] must be unique within the namespace of the workspace. Name is required if the executable is defined within a namespace.  | `string` |  |  |
 | `parallel` |  | [ExecutableParallelExecutableType](#ExecutableParallelExecutableType) | <no value> |  |
 | `render` |  | [ExecutableRenderExecutableType](#ExecutableRenderExecutableType) | <no value> |  |
 | `request` |  | [ExecutableRequestExecutableType](#ExecutableRequestExecutableType) | <no value> |  |
@@ -206,7 +206,7 @@ Configuration for a parallel executable.
 | ----- | ----------- | ---- | ------- | :--------: |
 | `args` | Arguments to pass to the executable. | `array` (`string`) | [] |  |
 | `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  |  |
-| `if` | An expression that determines whether the executable should run, using the Expr language syntax.  The expression is evaluated at runtime and must resolve to a boolean value.   The expression has access to OS/architecture information (os, arch), environment variables (env), stored data  (store), and context information (ctx) like workspace and paths.   For example, `os == "darwin"` will only run on macOS, `len(store["feature"]) > 0` will run if a value exists  in the store, and `env["CI"] == "true"` will run in CI environments.  See the [Expr documentation](https://expr-lang.org/docs/language-definition) for more information.  | `string` |  |  |
+| `if` | An expression that determines whether the executable should run, using the Expr language syntax. The expression is evaluated at runtime and must resolve to a boolean value.  The expression has access to OS/architecture information (os, arch), environment variables (env), stored data (store), and context information (ctx) like workspace and paths.  For example, `os == "darwin"` will only run on macOS, `len(store["feature"]) > 0` will run if a value exists in the store, and `env["CI"] == "true"` will run in CI environments. See the [Expr documentation](https://expr-lang.org/docs/language-definition) for more information.  | `string` |  |  |
 | `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  |  |
 | `retries` | The number of times to retry the executable if it fails. | `integer` | 0 |  |
 
@@ -302,7 +302,7 @@ Makes an HTTP request.
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
 | `responseFile` |  | [ExecutableRequestResponseFile](#ExecutableRequestResponseFile) | <no value> |  |
 | `timeout` | The timeout for the request in Go duration format (e.g. 30s, 5m, 1h). | `string` | 30m0s |  |
-| `transformResponse` | [Expr](https://expr-lang.org/docs/language-definition) expression used to transform the response before  saving it to a file or outputting it.  The following variables are available in the expression:   - `status`: The response status string.   - `code`: The response status code.   - `body`: The response body.   - `headers`: The response headers.  For example, to capitalize a JSON body field's value, you can use `upper(fromJSON(body)["field"])`.  | `string` |  |  |
+| `transformResponse` | [Expr](https://expr-lang.org/docs/language-definition) expression used to transform the response before saving it to a file or outputting it.  The following variables are available in the expression:   - `status`: The response status string.   - `code`: The response status code.   - `body`: The response body.   - `headers`: The response headers.  For example, to capitalize a JSON body field's value, you can use `upper(fromJSON(body)["field"])`.  | `string` |  |  |
 | `url` | The URL to make the request to. | `string` |  | ✘ |
 | `validStatusCodes` | A list of valid status codes. If the response status code is not in this list, the executable will fail. If not set, the response status code will not be checked.  | `array` (`integer`) | [] |  |
 
@@ -353,7 +353,7 @@ Configuration for a serial executable.
 | ----- | ----------- | ---- | ------- | :--------: |
 | `args` | Arguments to pass to the executable. | `array` (`string`) | [] |  |
 | `cmd` | The command to execute. One of `cmd` or `ref` must be set.  | `string` |  |  |
-| `if` | An expression that determines whether the executable should run, using the Expr language syntax.  The expression is evaluated at runtime and must resolve to a boolean value.   The expression has access to OS/architecture information (os, arch), environment variables (env), stored data  (store), and context information (ctx) like workspace and paths.   For example, `os == "darwin"` will only run on macOS, `len(store["feature"]) > 0` will run if a value exists  in the store, and `env["CI"] == "true"` will run in CI environments.  See the [Expr documentation](https://expr-lang.org/docs/language-definition) for more information.  | `string` |  |  |
+| `if` | An expression that determines whether the executable should run, using the Expr language syntax. The expression is evaluated at runtime and must resolve to a boolean value.  The expression has access to OS/architecture information (os, arch), environment variables (env), stored data (store), and context information (ctx) like workspace and paths.  For example, `os == "darwin"` will only run on macOS, `len(store["feature"]) > 0` will run if a value exists in the store, and `env["CI"] == "true"` will run in CI environments. See the [Expr documentation](https://expr-lang.org/docs/language-definition) for more information.  | `string` |  |  |
 | `ref` | A reference to another executable to run in serial. One of `cmd` or `ref` must be set.  | [ExecutableRef](#ExecutableRef) |  |  |
 | `retries` | The number of times to retry the executable if it fails. | `integer` | 0 |  |
 | `reviewRequired` | If set to true, the user will be prompted to review the output of the executable before continuing. | `boolean` | false |  |
@@ -370,9 +370,9 @@ A list of executables to run in serial. The executables can be defined by it's e
 
 ### ExecutableVerb
 
-Keywords that describe the action an executable performs. While executables are configured with a single verb, 
-the verb can be aliased to related verbs within its group. For example, the `activate` verb can be replaced 
-with "enable" or "start" when referencing an executable. This allows users to use the verb that best describes 
+Keywords that describe the action an executable performs. While executables are configured with a single verb,
+the verb can be aliased to related verbs within its group. For example, the `activate` verb can be replaced
+with "enable" or "start" when referencing an executable. This allows users to use the verb that best describes
 the action they are performing.
 
 ### Verb Groups
@@ -414,8 +414,8 @@ the action they are performing.
 - An executable configured with the `activate` verb could also be referenced using "enable" or "start".
 - A build process might use `build` as its primary verb, but could also be invoked with "package" or "assemble".
 - A cleanup routine configured with `clean` could be called using "purge" or "sanitize" for more specific connotations.
-  
-By organizing verbs into these groups, flow provides flexibility in how actions are described while maintaining a 
+
+By organizing verbs into these groups, flow provides flexibility in how actions are described while maintaining a
 clear structure for executable operations.
 
 

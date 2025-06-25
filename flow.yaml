@@ -1,5 +1,9 @@
 # yaml-language-server: $schema=https://flowexec.io/schemas/workspace_schema.json
 displayName: flow repository
 description: |
-  Source code for flow
-  GitHub Repo: github.com/jahvon/flow
+   Source code for flow
+   GitHub Repo: github.com/jahvon/flow
+descriptionFile: docs/development.md
+executables:
+  excluded:
+    - node_modules

@@ -24,8 +24,8 @@ executables:
     name: binary
     aliases: [bin, flow]
     description: |
-        Build the flow binary. The binary is built at the path specified in the first positional argument.
-        If not set, the binary is built at .bin/flow.
+      Build the flow binary. The binary is built at the path specified in the first positional argument.
+      If not set, the binary is built at .bin/flow.
     exec:
       dir: //
       args:
@@ -48,14 +48,20 @@ executables:
       cmd: |
         echo "generating completions..."
         ./scripts/completions.sh
-        
+
         go run ./tools/docsgen/.
 
   - verb: generate
     name: code
-    exec:
+    serial:
       dir: //
-      cmd: echo "generating code..."; go generate ./...
+      execs:
+        - cmd: |
+            echo "Generating go CLI code..."
+            go generate ./...
+            echo "All go code generated successfully"
+        - ref: generate frontend
+        - ref: generate backend
 
   - verb: run
     name: linters
