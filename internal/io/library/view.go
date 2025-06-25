@@ -39,6 +39,11 @@ var (
 )
 
 func (l *Library) View() string {
+	// Clear viewports before setting new content for GoLand terminal compatibility
+	l.paneZeroViewport.SetContent("")
+	l.paneOneViewport.SetContent("")
+	l.paneTwoViewport.SetContent("")
+
 	l.paneZeroViewport.Style = paneStyle(0, l.theme, l.splitView)
 	l.paneZeroViewport.SetContent(l.paneZeroContent())
 	l.paneZeroViewport.SetYOffset(int(l.currentWorkspace + l.currentNamespace))
@@ -87,12 +92,12 @@ func (l *Library) setSize() {
 	l.termWidth = l.ctx.TUIContainer.Width()
 	l.termHeight = l.ctx.TUIContainer.Height()
 	p0, p1, p2 := calculateViewportWidths(l.termWidth-widthPadding, l.splitView)
-	l.paneZeroViewport.SetWidth(p0)
-	l.paneOneViewport.SetWidth(p1)
-	l.paneTwoViewport.SetWidth(p2)
-	l.paneZeroViewport.SetHeight(l.termHeight - heightPadding)
-	l.paneOneViewport.SetHeight(l.termHeight - heightPadding)
-	l.paneTwoViewport.SetHeight(l.termHeight - heightPadding)
+	l.paneZeroViewport.Width = p0
+	l.paneOneViewport.Width = p1
+	l.paneTwoViewport.Width = p2
+	l.paneZeroViewport.Height = l.termHeight - heightPadding
+	l.paneOneViewport.Height = l.termHeight - heightPadding
+	l.paneTwoViewport.Height = l.termHeight - heightPadding
 }
 
 func (l *Library) paneZeroContent() string {

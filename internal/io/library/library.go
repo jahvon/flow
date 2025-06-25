@@ -3,7 +3,7 @@ package library
 import (
 	"fmt"
 
-	"github.com/charmbracelet/bubbles/v2/viewport"
+	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/themes"
 	"github.com/jahvon/tuikit/views"
@@ -54,9 +54,9 @@ func NewLibrary(
 	theme themes.Theme,
 	runFunc func(string) error,
 ) *Library {
-	p1 := viewport.New()
-	p2 := viewport.New()
-	p3 := viewport.New()
+	p1 := viewport.New(0, 0)
+	p2 := viewport.New(0, 0)
+	p3 := viewport.New(0, 0)
 	return &Library{
 		ctx:                ctx,
 		allWorkspaces:      workspaces,

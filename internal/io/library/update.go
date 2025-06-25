@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/atotto/clipboard"
-	"github.com/charmbracelet/bubbles/v2/viewport"
-	tea "github.com/charmbracelet/bubbletea/v2"
+	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/jahvon/tuikit/themes"
 
 	"github.com/jahvon/flow/internal/filesystem"
@@ -23,7 +23,7 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		key := msg.String()
 		switch key {
-		case "left":
+		case tea.KeyLeft.String():
 			if l.currentPane == 0 {
 				break
 			}
@@ -34,12 +34,12 @@ func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				l.currentExecutable = 0
 				l.paneOneViewport.GotoTop()
 			}
-		case "right", "enter":
+		case tea.KeyRight.String(), tea.KeyEnter.String():
 			if l.currentPane == 2 {
 				break
 			}
 			l.currentPane++
-		case "tab":
+		case tea.KeyTab.String():
 			l.splitView = !l.splitView
 			l.setSize()
 		case "h":
@@ -100,19 +100,19 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 		key := msg.String()
 
 		switch key {
-		case "down":
+		case tea.KeyDown.String():
 			if l.showNamespaces && nsCanMoveDown {
 				l.currentNamespace++
 			} else if !l.showNamespaces && wsCanMoveDown {
 				l.currentWorkspace++
 			}
-		case "up":
+		case tea.KeyUp.String():
 			if l.showNamespaces && nsCanMoveUp {
 				l.currentNamespace--
 			} else if !l.showNamespaces && wsCanMoveUp {
 				l.currentWorkspace--
 			}
-		case "space":
+		case tea.KeySpace.String():
 			if numNs > 0 {
 				l.showNamespaces = !l.showNamespaces
 				l.currentNamespace = 0
@@ -212,11 +212,11 @@ func (l *Library) updateExecPanes(msg tea.Msg) (viewport.Model, tea.Cmd) {
 		key := msg.String()
 
 		switch key {
-		case "down":
+		case tea.KeyDown.String():
 			if l.currentPane == 1 && canMoveDown {
 				l.currentExecutable++
 			}
-		case "up":
+		case tea.KeyUp.String():
 			if l.currentPane == 1 && canMoveUp {
 				l.currentExecutable--
 			}
