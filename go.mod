@@ -5,15 +5,15 @@ go 1.24
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/atotto/clipboard v0.1.4
-	github.com/charmbracelet/bubbles/v2 v2.0.0-beta.1
-	github.com/charmbracelet/bubbletea/v2 v2.0.0-beta1
+	github.com/charmbracelet/bubbles v0.21.0
+	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1
 	github.com/expr-lang/expr v1.17.4
 	github.com/gen2brain/beeep v0.0.0-20240516210008-9c006672e7f4
 	github.com/jahvon/glamour v0.8.1-patch3
 	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
-	github.com/jahvon/tuikit v0.1.1
+	github.com/jahvon/tuikit v0.1.2
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
@@ -38,17 +38,13 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/catppuccin/go v0.3.0 // indirect
-	github.com/charmbracelet/bubbles v0.21.0 // indirect
-	github.com/charmbracelet/bubbletea v1.3.5 // indirect
 	github.com/charmbracelet/colorprofile v0.3.1 // indirect
 	github.com/charmbracelet/huh v0.7.0 // indirect
 	github.com/charmbracelet/log v0.4.2 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.14-0.20250501183327-ad3bc78c6a81 // indirect
 	github.com/charmbracelet/x/exp/strings v0.0.0-20250213125511-a0c32e22e4fc // indirect
-	github.com/charmbracelet/x/input v0.3.5-0.20250424101541-abb4d9a9b197 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
-	github.com/charmbracelet/x/windows v0.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -93,5 +89,3 @@ require (
 	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
 )
-
-replace github.com/jahvon/tuikit => ./../tuikit

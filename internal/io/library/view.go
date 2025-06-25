@@ -39,11 +39,6 @@ var (
 )
 
 func (l *Library) View() string {
-	// Clear viewports before setting new content for GoLand terminal compatibility
-	l.paneZeroViewport.SetContent("")
-	l.paneOneViewport.SetContent("")
-	l.paneTwoViewport.SetContent("")
-
 	l.paneZeroViewport.Style = paneStyle(0, l.theme, l.splitView)
 	l.paneZeroViewport.SetContent(l.paneZeroContent())
 	l.paneZeroViewport.SetYOffset(int(l.currentWorkspace + l.currentNamespace))
