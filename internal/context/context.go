@@ -12,6 +12,7 @@ import (
 	"github.com/jahvon/tuikit/io"
 	"github.com/jahvon/tuikit/themes"
 	"github.com/pkg/errors"
+	"golang.org/x/exp/slices"
 
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/filesystem"
@@ -73,6 +74,15 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 
 	ctxx, cancel := context.WithCancel(ctx)
 	logMode := cfg.DefaultLogMode
+	loggerOpts := []io.LoggerOptions{
+		io.WithOutput(stdOut),
+		io.WithTheme(flowIO.Theme(cfg.Theme.String())),
+		io.WithMode(logMode),
+	}
+	// only create a log archive file for exec commands
+	if args := os.Args; len(args) > 0 && slices.Contains(executable.ValidVerbs(), executable.Verb(args[0])) {
+		loggerOpts = append(loggerOpts, io.WithArchiveDirectory(filesystem.LogsDir()))
+	}
 	c := &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
@@ -80,14 +90,9 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  workspaceCache,
 		ExecutableCache:  executableCache,
-		Logger: io.NewLogger(
-			io.WithOutput(stdOut),
-			io.WithTheme(flowIO.Theme(cfg.Theme.String())),
-			io.WithMode(logMode),
-			io.WithArchiveDirectory(filesystem.LogsDir()),
-		),
-		stdOut: stdOut,
-		stdIn:  stdIn,
+		Logger:           io.NewLogger(loggerOpts...),
+		stdOut:           stdOut,
+		stdIn:            stdIn,
 	}
 
 	app := tuikit.NewApplication(
