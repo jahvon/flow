@@ -8,10 +8,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/internal/cache"
@@ -81,9 +80,14 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  workspaceCache,
 		ExecutableCache:  executableCache,
-		Logger:           io.NewLogger(stdOut, flowIO.Theme(cfg.Theme.String()), logMode, filesystem.LogsDir()),
-		stdOut:           stdOut,
-		stdIn:            stdIn,
+		Logger: io.NewLogger(
+			io.WithOutput(stdOut),
+			io.WithTheme(flowIO.Theme(cfg.Theme.String())),
+			io.WithMode(logMode),
+			io.WithArchiveDirectory(filesystem.LogsDir()),
+		),
+		stdOut: stdOut,
+		stdIn:  stdIn,
 	}
 
 	app := tuikit.NewApplication(
@@ -225,48 +229,48 @@ func currentWorkspace(cfg *config.Config) (*workspace.Workspace, error) {
 	return filesystem.LoadWorkspaceConfig(ws, wsPath)
 }
 
-func overrideThemeColor(theme styles.Theme, palette *config.ColorPalette) styles.Theme {
+func overrideThemeColor(theme themes.Theme, palette *config.ColorPalette) themes.Theme {
 	if palette == nil {
 		return theme
 	}
 	if palette.Primary != nil {
-		theme.PrimaryColor = lipgloss.Color(*palette.Primary)
+		theme.ColorPalette().Primary = *palette.Primary
 	}
 	if palette.Secondary != nil {
-		theme.SecondaryColor = lipgloss.Color(*palette.Secondary)
+		theme.ColorPalette().Secondary = *palette.Secondary
 	}
 	if palette.Tertiary != nil {
-		theme.TertiaryColor = lipgloss.Color(*palette.Tertiary)
+		theme.ColorPalette().Tertiary = *palette.Tertiary
 	}
 	if palette.Success != nil {
-		theme.SuccessColor = lipgloss.Color(*palette.Success)
+		theme.ColorPalette().Success = *palette.Success
 	}
 	if palette.Warning != nil {
-		theme.WarningColor = lipgloss.Color(*palette.Warning)
+		theme.ColorPalette().Warning = *palette.Warning
 	}
 	if palette.Error != nil {
-		theme.ErrorColor = lipgloss.Color(*palette.Error)
+		theme.ColorPalette().Error = *palette.Error
 	}
 	if palette.Info != nil {
-		theme.InfoColor = lipgloss.Color(*palette.Info)
+		theme.ColorPalette().Info = *palette.Info
 	}
 	if palette.Body != nil {
-		theme.BodyColor = lipgloss.Color(*palette.Body)
+		theme.ColorPalette().Body = *palette.Body
 	}
 	if palette.Emphasis != nil {
-		theme.EmphasisColor = lipgloss.Color(*palette.Emphasis)
+		theme.ColorPalette().Emphasis = *palette.Emphasis
 	}
 	if palette.White != nil {
-		theme.White = lipgloss.Color(*palette.White)
+		theme.ColorPalette().White = *palette.White
 	}
 	if palette.Black != nil {
-		theme.Black = lipgloss.Color(*palette.Black)
+		theme.ColorPalette().Black = *palette.Black
 	}
 	if palette.Gray != nil {
-		theme.Gray = lipgloss.Color(*palette.Gray)
+		theme.ColorPalette().Gray = *palette.Gray
 	}
 	if palette.CodeStyle != nil {
-		theme.ChromaCodeStyle = *palette.CodeStyle
+		theme.ColorPalette().ChromaCodeStyle = *palette.CodeStyle
 	}
 	return theme
 }

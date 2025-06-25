@@ -10,7 +10,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/jahvon/glamour"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 
 	"github.com/jahvon/flow/types/common"
 	"github.com/jahvon/flow/types/workspace"
@@ -35,7 +35,7 @@ const (
 var (
 	// heightPadding is used when determining the height of the panes.
 	// It is used to account for the header and footer
-	heightPadding = styles.HeaderHeight + styles.FooterHeight
+	heightPadding = themes.HeaderHeight + themes.FooterHeight
 )
 
 func (l *Library) View() string {
@@ -76,9 +76,9 @@ func (l *Library) View() string {
 	return lipgloss.JoinVertical(lipgloss.Top, header, panes, footer)
 }
 
-func (l *Library) SetNotice(notice string, level styles.OutputLevel) {
+func (l *Library) SetNotice(notice string, level themes.OutputLevel) {
 	if level == "" {
-		level = styles.OutputLevelInfo
+		level = themes.OutputLevelInfo
 	}
 	l.noticeText = l.theme.RenderLevel(notice, level)
 }
@@ -190,7 +190,7 @@ func (l *Library) paneTwoContent() string {
 
 	_, _, maxWidth := calculateViewportWidths(l.termWidth, l.splitView)
 	paneTwoMaxWidth := math.Floor(float64(maxWidth) * 0.95)
-	mdStyles, err := l.theme.MarkdownStyleJSON()
+	mdStyles, err := l.theme.GlamourMarkdownStyleJSON()
 	if err != nil {
 		return l.theme.RenderError(fmt.Sprintf("unable to render markdown: %s", err.Error()))
 	}

@@ -6,51 +6,51 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/jahvon/tuikit/styles"
+	"github.com/jahvon/tuikit/themes"
 	"github.com/mattn/go-runewidth"
 
 	"github.com/jahvon/flow/types/executable"
 )
 
-func renderSelection(s string, theme styles.Theme) string {
-	style := lipgloss.NewStyle().Foreground(theme.PrimaryColor)
+func renderSelection(s string, theme themes.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.ColorPalette().PrimaryColor())
 	return style.Render(s)
 }
 
-func renderSecondarySelection(s string, theme styles.Theme) string {
-	style := lipgloss.NewStyle().Foreground(theme.TertiaryColor)
+func renderSecondarySelection(s string, theme themes.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.ColorPalette().SecondaryColor())
 	return style.Render(s)
 }
 
-func renderInactive(s string, theme styles.Theme) string {
-	style := lipgloss.NewStyle().Foreground(theme.Gray)
+func renderInactive(s string, theme themes.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.ColorPalette().GrayColor())
 	return style.Render(s)
 }
 
-func renderDescription(s string, theme styles.Theme) string {
-	style := lipgloss.NewStyle().Foreground(theme.BodyColor)
+func renderDescription(s string, theme themes.Theme) string {
+	style := lipgloss.NewStyle().Foreground(theme.ColorPalette().BodyColor())
 	return style.Render(s)
 }
 
-func renderPaneTitle(s string, count int, active bool, theme styles.Theme) string {
+func renderPaneTitle(s string, count int, active bool, theme themes.Theme) string {
 	var title string
 	if count == 0 {
 		title = s
 	} else {
 		title = fmt.Sprintf("%s (%d)", s, count)
 	}
-	style := lipgloss.NewStyle().Foreground(theme.SecondaryColor).Padding(0, 1).Bold(true)
+	style := lipgloss.NewStyle().Foreground(theme.ColorPalette().SecondaryColor()).Padding(0, 1).Bold(true)
 	if active {
 		style = style.Underline(true)
 	}
 	return style.Render(title) + "\n\n"
 }
 
-func paneStyle(pos int, theme styles.Theme, splitView bool) lipgloss.Style {
+func paneStyle(pos int, theme themes.Theme, splitView bool) lipgloss.Style {
 	style := lipgloss.NewStyle().Padding(0, 1)
 	if pos == 2 && splitView {
 		style = style.BorderStyle(lipgloss.OuterHalfBlockBorder()).
-			BorderForeground(theme.BorderColor).BorderLeft(true)
+			BorderForeground(theme.ColorPalette().BorderColor()).BorderLeft(true)
 	}
 
 	return style
