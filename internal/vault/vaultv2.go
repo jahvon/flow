@@ -105,6 +105,27 @@ func NewAgeVault(logger io.Logger, name, storagePath, recipients, identityKey, i
 	logger.PlainTextSuccess(fmt.Sprintf("Vault '%s' with Age encryption created successfully", v.ID()))
 }
 
+func VaultFromName(name string) (vault.Provider, error) {
+	if name == "" {
+		return nil, fmt.Errorf("vault name cannot be empty")
+	}
+
+	cfgPath := ConfigFilePath(name)
+	cfg, err := vault.LoadConfigJSON(cfgPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load vault config: %w", err)
+	}
+
+	switch cfg.Type {
+	case vault.ProviderTypeAge:
+		return vault.NewAgeVault(&cfg)
+	case vault.ProviderTypeAES256:
+		return vault.NewAES256Vault(&cfg)
+	default:
+		return nil, fmt.Errorf("unsupported vault type: %s", cfg.Type)
+	}
+}
+
 func CacheDirectory(subPath string) string {
 	return filepath.Join(filesystem.CachedDataDirPath(), v2CacheDataDir, subPath)
 }
