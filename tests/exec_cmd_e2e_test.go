@@ -34,4 +34,19 @@ var _ = Describe("exec e2e", func() {
 		Entry("nameless example", ""),
 		Entry("request with transformation", "examples:request-with-transform"),
 	)
+
+	When("param overrides are provided", func() {
+		It("should run the executable with the provided overrides", func() {
+			runner := utils.NewE2ECommandRunner()
+			stdOut := ctx.StdOut()
+			Expect(runner.Run(
+				ctx, "exec", "examples:with-params",
+				"--param", "PARAM1=value1", "--param", "PARAM2=value2", "--param", "PARAM3=value3",
+			)).To(Succeed())
+			out, _ := readFileContent(stdOut)
+			Expect(out).To(ContainSubstring("value1"))
+			Expect(out).To(ContainSubstring("value2"))
+			Expect(out).To(ContainSubstring("value3"))
+		})
+	})
 })

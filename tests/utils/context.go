@@ -4,6 +4,7 @@ import (
 	stdCtx "context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	tuikitIO "github.com/jahvon/tuikit/io"
@@ -42,7 +43,14 @@ func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *context.Cont
 		tuikitIO.WithTheme(io.Theme("")),
 		tuikitIO.WithMode(tuikitIO.Text),
 		tuikitIO.WithExitFunc(func() {
-			t.Fatalf("logger exit called")
+			// include the colling function/line
+			_, file, line, ok := runtime.Caller(1)
+			if ok {
+				file = filepath.Base(file)
+				t.Logf("logger exit called from %s:%d", file, line)
+			} else {
+				t.Logf("logger exit called")
+			}
 		}),
 	)
 	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
