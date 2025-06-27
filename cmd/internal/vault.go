@@ -43,7 +43,6 @@ func registerCreateVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 
 	RegisterFlag(ctx, createCmd, *flags.VaultTypeFlag)
 	RegisterFlag(ctx, createCmd, *flags.VaultPathFlag)
-	RegisterFlag(ctx, createCmd, *flags.VaultInteractiveFlag)
 	// AES flags
 	RegisterFlag(ctx, createCmd, *flags.VaultKeyEnvFlag)
 	RegisterFlag(ctx, createCmd, *flags.VaultKeyFileFlag)

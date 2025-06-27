@@ -226,11 +226,3 @@ var VaultIdentityFileFlag = &Metadata{
 	Default:  "",
 	Required: false,
 }
-
-var VaultInteractiveFlag = &Metadata{
-	Name:      "interactive",
-	Shorthand: "i",
-	Usage:     "Launch the interactive vault creation form.",
-	Default:   false,
-	Required:  false,
-}
