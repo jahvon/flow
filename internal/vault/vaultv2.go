@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	DefaultVaultKeyEnv = "FLOW_VAULT_KEY"
+	DefaultVaultKeyEnv      = "FLOW_VAULT_KEY"
+	LegacyVaultReservedName = "legacy"
 
 	v2CacheDataDir = "vaults"
 )

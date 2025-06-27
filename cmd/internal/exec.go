@@ -134,7 +134,9 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		envMap = make(map[string]string)
 	}
 
-	setAuthEnv(ctx, cmd, e)
+	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vault.LegacyVaultReservedName {
+		setAuthEnv(ctx, cmd, e)
+	}
 	textInputs := pendingFormFields(ctx, e)
 	if len(textInputs) > 0 {
 		form, err := views.NewForm(io.Theme(ctx.Config.Theme.String()), ctx.StdIn(), ctx.StdOut(), textInputs...)
