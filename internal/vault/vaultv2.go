@@ -63,7 +63,7 @@ func NewAES256Vault(logger io.Logger, name, storagePath, keyEnv, keyFile, logLev
 		logger.FatalErr(err)
 	}
 
-	cfgPath := CacheDirectory(fmt.Sprintf("configs/%s.json", v.ID()))
+	cfgPath := ConfigFilePath(v.ID())
 	if err = vault.SaveConfigJSON(*cfg, cfgPath); err != nil {
 		logger.FatalErr(fmt.Errorf("unable to save vault config: %w", err))
 	}
@@ -97,7 +97,7 @@ func NewAgeVault(logger io.Logger, name, storagePath, recipients, identityKey, i
 		logger.FatalErr(err)
 	}
 
-	cfgPath := CacheDirectory(fmt.Sprintf("configs/%s.json", v.ID()))
+	cfgPath := ConfigFilePath(v.ID())
 	if err = vault.SaveConfigJSON(*cfg, cfgPath); err != nil {
 		logger.FatalErr(fmt.Errorf("unable to save vault config: %w", err))
 	}
@@ -107,6 +107,14 @@ func NewAgeVault(logger io.Logger, name, storagePath, recipients, identityKey, i
 
 func CacheDirectory(subPath string) string {
 	return filepath.Join(filesystem.CachedDataDirPath(), v2CacheDataDir, subPath)
+}
+
+func ConfigFilePath(vaultName string) string {
+	return filepath.Join(
+		filesystem.CachedDataDirPath(),
+		v2CacheDataDir,
+		fmt.Sprintf("configs/%s.json", vaultName),
+	)
 }
 
 func writeKeyToFile(logger io.Logger, key, filePath string) error {

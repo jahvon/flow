@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/jahvon/tuikit/views"
+	extvault "github.com/jahvon/vault"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 
@@ -29,6 +30,8 @@ func RegisterVaultCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	registerListVaultCmd(ctx, vaultCmd)
 	registerSwitchVaultCmd(ctx, vaultCmd)
 	registerRemoveVaultCmd(ctx, vaultCmd)
+	registerEditVaultCmd(ctx, vaultCmd)
+	// TODO: add command for testing vault connectivity
 	rootCmd.AddCommand(vaultCmd)
 }
 
@@ -87,7 +90,7 @@ func registerGetVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 		Short:   "Get the details of a vault.",
 		Args:    cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return maps.Keys(ctx.Config.Vaults), cobra.ShellCompDirectiveNoFileComp
+			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(cmd *cobra.Command, args []string) { getVaultFunc(ctx, cmd, args) },
 	}
@@ -100,7 +103,9 @@ func getVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 
 	vaultName := args[0]
-	if err := vault.ValidateReference(vaultName); err != nil {
+	if vaultName == vault.LegacyVaultReservedName {
+		logger.Fatalf("get is unsupported for the legacy vault")
+	} else if err := vault.ValidateReference(vaultName); err != nil {
 		logger.Fatalf("invalid vault name '%s': %v", vaultName, err)
 	}
 
@@ -150,7 +155,7 @@ func registerRemoveVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 			"but the vault will be unlinked from the global configuration.\nNote: You cannot remove the current vault.",
 		Args: cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return maps.Keys(ctx.Config.Vaults), cobra.ShellCompDirectiveNoFileComp
+			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(cmd *cobra.Command, args []string) { removeVaultFunc(ctx, cmd, args) },
 	}
@@ -160,6 +165,10 @@ func registerRemoveVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 func removeVaultFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	vaultName := args[0]
+
+	if vaultName == vault.LegacyVaultReservedName {
+		logger.Fatalf("remove is unsupported for the legacy vault")
+	}
 
 	form, err := views.NewForm(
 		io.Theme(ctx.Config.Theme.String()),
@@ -206,7 +215,7 @@ func registerSwitchVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 		Short:   "Switch the active vault.",
 		Args:    cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return maps.Keys(ctx.Config.Vaults), cobra.ShellCompDirectiveNoFileComp
+			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(cmd *cobra.Command, args []string) { switchVaultFunc(ctx, cmd, args) },
 	}
@@ -226,4 +235,106 @@ func switchVaultFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		logger.FatalErr(err)
 	}
 	logger.PlainTextSuccess("Vault set to " + vaultName)
+}
+
+func registerEditVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
+	editCmd := &cobra.Command{
+		Use:     "edit NAME",
+		Aliases: []string{"update", "modify"},
+		Short:   "Edit the configuration of an existing vault.",
+		Long: "Edit the configuration of an existing vault. " +
+			"Note: You cannot change the vault type after creation.",
+		Args: cobra.ExactArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
+		},
+		Run: func(cmd *cobra.Command, args []string) { editVaultFunc(ctx, cmd, args) },
+	}
+
+	RegisterFlag(ctx, editCmd, *flags.VaultPathFlag)
+	// AES flags
+	RegisterFlag(ctx, editCmd, *flags.VaultKeyEnvFlag)
+	RegisterFlag(ctx, editCmd, *flags.VaultKeyFileFlag)
+	// Age flags
+	RegisterFlag(ctx, editCmd, *flags.VaultRecipientsFlag)
+	RegisterFlag(ctx, editCmd, *flags.VaultIdentityEnvFlag)
+	RegisterFlag(ctx, editCmd, *flags.VaultIdentityFileFlag)
+
+	vaultCmd.AddCommand(editCmd)
+}
+
+func editVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
+	logger := ctx.Logger
+
+	vaultName := args[0]
+	if vaultName == vault.LegacyVaultReservedName {
+		logger.Fatalf("set is unsupported for the legacy vault")
+	} else if err := vault.ValidateReference(vaultName); err != nil {
+		logger.Fatalf("invalid vault name '%s': %v", vaultName, err)
+	}
+
+	userConfig := ctx.Config
+	if _, found := userConfig.Vaults[vaultName]; !found {
+		logger.Fatalf("vault %s not found", vaultName)
+	}
+
+	vaultPath := flags.ValueFor[string](ctx, cmd, *flags.VaultPathFlag, false)
+	keyEnv := flags.ValueFor[string](ctx, cmd, *flags.VaultKeyEnvFlag, false)
+	keyFile := flags.ValueFor[string](ctx, cmd, *flags.VaultKeyFileFlag, false)
+	recipients := flags.ValueFor[string](ctx, cmd, *flags.VaultRecipientsFlag, false)
+	identityEnv := flags.ValueFor[string](ctx, cmd, *flags.VaultIdentityEnvFlag, false)
+	identityFile := flags.ValueFor[string](ctx, cmd, *flags.VaultIdentityFileFlag, false)
+
+	cfgPath := vault.ConfigFilePath(vaultName)
+	existingCfg, err := extvault.LoadConfigJSON(cfgPath)
+	if err != nil {
+		logger.Fatalf("failed to load vault configuration: %v", err)
+	}
+
+	// TODO: add support for appending KeySources and IdentitySources instead of overwriting them
+	switch existingCfg.Type {
+	case extvault.ProviderTypeAES256:
+		if vaultPath != "" {
+			existingCfg.Aes.StoragePath = vaultPath
+		}
+		if keyEnv != "" {
+			existingCfg.Aes.KeySource = []extvault.KeySource{{
+				Type: "env",
+				Name: keyEnv,
+			}}
+		}
+		if keyFile != "" {
+			existingCfg.Aes.KeySource = []extvault.KeySource{{
+				Type: "file",
+				Path: keyFile,
+			}}
+		}
+	case extvault.ProviderTypeAge:
+		if vaultPath != "" {
+			existingCfg.Age.StoragePath = vaultPath
+		}
+		if recipients != "" {
+			existingCfg.Age.Recipients = strings.Split(recipients, ",")
+		}
+		if identityEnv != "" {
+			existingCfg.Age.IdentitySources = []extvault.IdentitySource{{
+				Type: "env",
+				Name: identityEnv,
+			}}
+		}
+		if identityFile != "" {
+			existingCfg.Age.IdentitySources = []extvault.IdentitySource{{
+				Type: "file",
+				Path: identityFile,
+			}}
+		}
+	default:
+		logger.Fatalf("unsupported vault type: %s", existingCfg.Type)
+	}
+
+	if err = extvault.SaveConfigJSON(existingCfg, cfgPath); err != nil {
+		logger.Fatalf("failed to save vault configuration: %v", err)
+	}
+
+	logger.PlainTextSuccess(fmt.Sprintf("Vault '%s' configuration updated successfully", vaultName))
 }
