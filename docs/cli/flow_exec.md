@@ -50,7 +50,8 @@ flow exec EXECUTABLE_ID [args...] [flags]
 ### Options
 
 ```
-  -h, --help   help for exec
+  -h, --help                help for exec
+  -p, --param stringArray   Set a parameter value by env key. (i.e. KEY=value) Use multiple times to set multiple parameters.This will override any existing parameter values defined for the executable.
 ```
 
 ### Options inherited from parent commands
