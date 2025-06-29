@@ -8,14 +8,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/vault"
 	"github.com/jahvon/flow/tests/utils"
 )
 
 var _ = Describe("vault/secrets e2e", Ordered, func() {
 	var (
-		ctx *context.Context
+		ctx *utils.Context
 		run *utils.CommandRunner
 	)
 
@@ -35,7 +34,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 	When("creating a new vault (flow vault create)", func() {
 		It("should return the generated key", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "vault", "create")).To(Succeed())
+			Expect(run.Run(ctx.Context, "vault", "create")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -50,7 +49,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 
 	When("setting a secret (flow secret set)", func() {
 		It("should save into the vault", func() {
-			Expect(run.Run(ctx, "secret", "set", "my-secret", "my-value")).To(Succeed())
+			Expect(run.Run(ctx.Context, "secret", "set", "my-secret", "my-value")).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("Secret my-secret set in vault"))
@@ -60,7 +59,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 	When("getting a secret (flow secret get)", func() {
 		It("should return the secret value", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "secret", "get", "my-secret", "--plaintext")).To(Succeed())
+			Expect(run.Run(ctx.Context, "secret", "get", "my-secret", "--plaintext")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("my-value"))
@@ -70,7 +69,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 	When("listing secrets (flow secret list)", func() {
 		It("should return the list of secrets", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "secret", "list")).To(Succeed())
+			Expect(run.Run(ctx.Context, "secret", "list")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("my-secret"))
@@ -85,7 +84,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			ctx.SetIO(reader, ctx.StdOut())
-			Expect(run.Run(ctx, "secret", "remove", "my-secret")).To(Succeed())
+			Expect(run.Run(ctx.Context, "secret", "remove", "my-secret")).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("Secret 'my-secret' deleted from vault"))

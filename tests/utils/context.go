@@ -19,6 +19,7 @@ import (
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/runner/mocks"
+	"github.com/jahvon/flow/internal/services/store"
 	"github.com/jahvon/flow/tools/builder"
 	"github.com/jahvon/flow/types/config"
 	"github.com/jahvon/flow/types/workspace"
@@ -32,29 +33,37 @@ const (
 	cacheSubdir      = "cache"
 )
 
+type Context struct {
+	*context.Context
+	cacheDir  string
+	configDir string
+}
+
 // NewContext creates a new context for testing runners. It initializes the context with
 // a real logger that writes it's output to a temporary file.
 // It also creates a temporary testing directory for the test workspace, user configs, and caches.
 // Test environment variables are set the config and cache directories override paths.
-func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *context.Context {
+func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *Context {
 	stdOut, stdIn := createTempIOFiles(t)
 	logger := tuikitIO.NewLogger(
 		tuikitIO.WithOutput(stdOut),
 		tuikitIO.WithTheme(io.Theme("")),
 		tuikitIO.WithMode(tuikitIO.Text),
 		tuikitIO.WithExitFunc(func() {
-			// include the colling function/line
-			_, file, line, ok := runtime.Caller(1)
+			_, file, line, ok := runtime.Caller(3)
 			if ok {
-				file = filepath.Base(file)
-				t.Logf("logger exit called from %s:%d", file, line)
+				t.Fatalf("logger exit called from %s:%d", file, line)
 			} else {
-				t.Logf("logger exit called")
+				t.Fatalf("logger exit called")
 			}
 		}),
 	)
-	ctxx := newTestContext(ctx, t, logger, stdIn, stdOut)
-	return ctxx
+	ctxx, configDir, cacheDir := newTestContext(ctx, t, logger, stdIn, stdOut)
+	return &Context{
+		Context:   ctxx,
+		configDir: configDir,
+		cacheDir:  cacheDir,
+	}
 }
 
 type ContextWithMocks struct {
@@ -105,16 +114,22 @@ func NewContextWithMocks(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *Con
 	}
 }
 
-func ResetTestContext(ctx *context.Context, t ginkgo.FullGinkgoTInterface) {
+func ResetTestContext(ctx *Context, t ginkgo.FullGinkgoTInterface) {
 	ctx.Ctx = stdCtx.Background()
 	stdIn, stdOut := createTempIOFiles(t)
 	ctx.SetIO(stdIn, stdOut)
+	setTestEnv(t, ctx.configDir, ctx.cacheDir)
 	logger := tuikitIO.NewLogger(
 		tuikitIO.WithOutput(stdOut),
 		tuikitIO.WithTheme(io.Theme("")),
 		tuikitIO.WithMode(tuikitIO.Text),
 		tuikitIO.WithExitFunc(func() {
-			t.Fatalf("unexpected logger exit called")
+			_, file, line, ok := runtime.Caller(3)
+			if ok {
+				t.Fatalf("logger exit called from %s:%d", file, line)
+			} else {
+				t.Fatalf("logger exit called")
+			}
 		}),
 	)
 	ctx.Logger = logger
@@ -138,7 +153,7 @@ func newTestContext(
 	t ginkgo.FullGinkgoTInterface,
 	logger tuikitIO.Logger,
 	stdIn, stdOut *os.File,
-) *context.Context {
+) (*context.Context, string, string) {
 	configDir, cacheDir, wsDir := initTestDirectories(t)
 	setTestEnv(t, configDir, cacheDir)
 
@@ -167,12 +182,13 @@ func newTestContext(
 		ExecutableCache:  execCache,
 	}
 	ctxx.SetIO(stdIn, stdOut)
-	return ctxx
+	return ctxx, configDir, cacheDir
 }
 
 func initTestDirectories(t ginkgo.FullGinkgoTInterface) (string, string, string) {
 	replacer := strings.NewReplacer("-", "", "'", "-", "/", "-", " ", "_")
-	tmpDir, err := os.MkdirTemp("", replacer.Replace(strings.ToLower(t.Name())))
+	suiteName := getSuiteName()
+	tmpDir, err := os.MkdirTemp("", replacer.Replace(strings.ToLower(suiteName)))
 	if err != nil {
 		t.Fatalf("unable to create temp dir: %v", err)
 	}
@@ -277,6 +293,7 @@ func setTestEnv(t ginkgo.FullGinkgoTInterface, configDir, cacheDir string) {
 
 	t.Setenv(filesystem.FlowConfigDirEnvVar, configDir)
 	t.Setenv(filesystem.FlowCacheDirEnvVar, cacheDir)
+	t.Setenv(store.BucketEnv, "")
 }
 
 func expectInternalMockLoggerCalls(logger *tuikitIOMocks.MockLogger) {
@@ -284,4 +301,12 @@ func expectInternalMockLoggerCalls(logger *tuikitIOMocks.MockLogger) {
 	logger.EXPECT().Debugx(gomock.Any(), gomock.Any()).AnyTimes()
 	logger.EXPECT().LogMode().AnyTimes()
 	logger.EXPECT().SetMode(gomock.Any()).AnyTimes()
+}
+
+// getSuiteName returns the name of the current Ginkgo test suite
+func getSuiteName() string {
+	if len(ginkgo.CurrentSpecReport().ContainerHierarchyTexts) > 0 {
+		return ginkgo.CurrentSpecReport().ContainerHierarchyTexts[0]
+	}
+	return "flow-e2e-test" // generic fallback name
 }
