@@ -146,6 +146,14 @@ properties:
       `logfmt` will display logs with a log level, timestamp, and message.
       `text` will just display the log message.
     default: logfmt
+  vaults:
+    type: object
+    additionalProperties:
+      type: string
+    description: A map of vault names to their paths. The path should be a valid absolute path to the vault file created by flow.
+  currentVault:
+    type: string
+    description: The name of the current vault. This should match a key in the `vaults` map.
 required:
   - workspaces
   - currentWorkspace

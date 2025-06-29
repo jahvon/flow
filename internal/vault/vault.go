@@ -23,6 +23,8 @@ const (
 	cacheDirName = "vault"
 )
 
+// DEPRECATED: Use the github.com/jahvon/vault package instead.
+// This vault will be removed in a future release.
 type Vault struct {
 	cachedEncryptionKey string
 	cachedData          *data
@@ -233,6 +235,7 @@ func (v *Vault) saveData(d *data) error {
 	return nil
 }
 
+// TODO: rename this function. It's also used to validate vault names
 func ValidateReference(reference string) error {
 	if reference == "" {
 		return errors.New("reference cannot be empty")

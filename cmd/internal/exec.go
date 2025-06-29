@@ -156,7 +156,9 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		}
 	}
 
-	setAuthEnv(ctx, cmd, e)
+	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vault.LegacyVaultReservedName {
+		setAuthEnv(ctx, cmd, e)
+	}
 	startTime := time.Now()
 	eng := engine.NewExecEngine()
 	if err := runner.Exec(ctx, e, eng, envMap); err != nil {

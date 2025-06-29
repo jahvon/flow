@@ -7,6 +7,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/jahvon/tuikit/views"
+	vault2 "github.com/jahvon/vault"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"
@@ -14,6 +15,7 @@ import (
 	"github.com/jahvon/flow/internal/io"
 	"github.com/jahvon/flow/internal/io/secret"
 	"github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/types/config"
 )
 
 func RegisterSecretCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -65,10 +67,24 @@ func removeSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 		return
 	}
 
-	v := vault.NewVault(logger)
-	if err = v.DeleteSecret(reference); err != nil {
-		logger.FatalErr(err)
+	if currentVault(ctx.Config) == vault.LegacyVaultReservedName {
+		logger.Warnf("Using deprecated vault. Consider creating a new vault with 'flow vault create' command.")
+		v := vault.NewVault(logger)
+		if err = v.DeleteSecret(reference); err != nil {
+			logger.FatalErr(err)
+		}
+	} else {
+		v, err := vault.VaultFromName(currentVault(ctx.Config))
+		defer v.Close()
+
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		if err = v.DeleteSecret(reference); err != nil {
+			logger.FatalErr(err)
+		}
 	}
+
 	logger.PlainTextSuccess(fmt.Sprintf("Secret '%s' deleted from vault", reference))
 }
 
@@ -115,11 +131,26 @@ func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	}
 
 	sv := vault.SecretValue(value)
-	v := vault.NewVault(logger)
-	err := v.SetSecret(reference, sv)
-	if err != nil {
-		logger.FatalErr(err)
+	vaultName := currentVault(ctx.Config)
+	if vaultName == vault.LegacyVaultReservedName {
+		logger.Warnf("Using deprecated vault '%s'. Consider creating a new vault with 'flow vault create' command.", vaultName)
+		v := vault.NewVault(logger)
+		err := v.SetSecret(reference, sv)
+		if err != nil {
+			logger.FatalErr(err)
+		}
+	} else {
+		v, err := vault.VaultFromName(vaultName)
+		defer v.Close()
+
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		if err = v.SetSecret(reference, vault2.NewSecretValue([]byte(value))); err != nil {
+			logger.FatalErr(err)
+		}
 	}
+
 	logger.PlainTextSuccess(fmt.Sprintf("Secret %s set in vault", reference))
 }
 
@@ -176,23 +207,58 @@ func getSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	asPlainText := flags.ValueFor[bool](ctx, cmd, *flags.OutputSecretAsPlainTextFlag, false)
 	copyValue := flags.ValueFor[bool](ctx, cmd, *flags.CopyFlag, false)
 
-	v := vault.NewVault(logger)
-	s, err := v.GetSecret(reference)
-	if err != nil {
-		logger.FatalErr(err)
-	}
+	if currentVault(ctx.Config) == vault.LegacyVaultReservedName {
+		logger.Warnf("Using deprecated vault. Consider creating a new vault with 'flow vault create' command.")
+		v := vault.NewVault(logger)
+		s, err := v.GetSecret(reference)
+		if err != nil {
+			logger.FatalErr(err)
+		}
 
-	if asPlainText {
-		logger.PlainTextInfo(s.PlainTextString())
-	} else {
-		logger.PlainTextInfo(s.String())
-	}
-
-	if copyValue {
-		if err := clipboard.WriteAll(s.PlainTextString()); err != nil {
-			logger.Error(err, "\nunable to copy secret value to clipboard")
+		if asPlainText {
+			logger.PlainTextInfo(s.PlainTextString())
 		} else {
-			logger.PlainTextSuccess("\ncopied secret value to clipboard")
+			logger.PlainTextInfo(s.String())
+		}
+
+		if copyValue {
+			if err := clipboard.WriteAll(s.PlainTextString()); err != nil {
+				logger.Error(err, "\nunable to copy secret value to clipboard")
+			} else {
+				logger.PlainTextSuccess("\ncopied secret value to clipboard")
+			}
+		}
+	} else {
+		v, err := vault.VaultFromName(currentVault(ctx.Config))
+		defer v.Close()
+
+		if err != nil {
+			logger.FatalErr(err)
+		}
+		s, err := v.GetSecret(reference)
+		if err != nil {
+			logger.FatalErr(err)
+		}
+
+		if asPlainText {
+			logger.PlainTextInfo(s.PlainTextString())
+		} else {
+			logger.PlainTextInfo(s.String())
+		}
+		if copyValue {
+			if err := clipboard.WriteAll(s.PlainTextString()); err != nil {
+				logger.Error(err, "\nunable to copy secret value to clipboard")
+			} else {
+				logger.PlainTextSuccess("\ncopied secret value to clipboard")
+			}
+
 		}
 	}
+}
+
+func currentVault(cfg *config.Config) string {
+	if cfg.CurrentVault == nil || *cfg.CurrentVault == "" {
+		return vault.LegacyVaultReservedName
+	}
+	return *cfg.CurrentVault
 }
