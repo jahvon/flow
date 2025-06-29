@@ -180,13 +180,16 @@ func ExecWithParams(opts ...Option) *executable.Executable {
 	for _, param := range params {
 		switch {
 		case param.Text != "":
-			paramCmds = append(paramCmds, fmt.Sprintf("echo 'key=%s, value=%s'", param.EnvKey, param.Text))
+			paramCmds = append(paramCmds, fmt.Sprintf(`echo "key=%s, value=$%[1]s"`, param.EnvKey))
 		case param.SecretRef != "":
-			paramCmds = append(paramCmds, fmt.Sprintf("echo 'key=%s, secret=%s'", param.EnvKey, param.SecretRef))
+			paramCmds = append(
+				paramCmds,
+				fmt.Sprintf(`echo "key=%s, secret=%s, value=$%[1]s"`, param.EnvKey, param.SecretRef),
+			)
 		case param.Prompt != "":
 			paramCmds = append(
 				paramCmds,
-				fmt.Sprintf("echo 'key=%s, prompt=%s', value=$%[1]s", param.EnvKey, param.Prompt),
+				fmt.Sprintf(`echo "key=%s, prompt=%s value=$%[1]s"`, param.EnvKey, param.Prompt),
 			)
 		}
 	}

@@ -157,6 +157,13 @@ parameter type sets a static value for the environment variable.
 
 _This example used the `exec` type, but the `params` field can be used with any executable type._
 
+You can override any environment variable defined in the `params` or provide additional ones by using the `--param` flag
+when running the executable:
+
+```shell
+flow deploy devbox --param API_TOKEN=token --param DRY_RUN=true --param VERBOSE=value
+```
+
 **Args**
 
 

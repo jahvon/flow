@@ -11,6 +11,7 @@ import (
 	"github.com/jahvon/tuikit/views"
 	"github.com/spf13/cobra"
 
+	"github.com/jahvon/flow/cmd/internal/flags"
 	"github.com/jahvon/flow/internal/cache"
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"
@@ -61,6 +62,7 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			execFunc(ctx, cmd, verb, args)
 		},
 	}
+	RegisterFlag(ctx, subCmd, *flags.ParameterValueFlag)
 	rootCmd.AddCommand(subCmd)
 }
 
@@ -114,6 +116,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		))
 	}
 
+	// add args to the env map
 	execArgs := make([]string, 0)
 	if len(args) >= 2 {
 		execArgs = args[1:]
@@ -134,10 +137,12 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		envMap = make(map[string]string)
 	}
 
-	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vault.LegacyVaultReservedName {
-		setAuthEnv(ctx, cmd, e)
-	}
-	textInputs := pendingFormFields(ctx, e)
+	// add --param overrides to the env map
+	paramOverrides := flags.ValueFor[[]string](ctx, cmd, *flags.ParameterValueFlag, false)
+	applyParameterOverrides(paramOverrides, envMap)
+
+	// add values from the prompt param type to the env map
+	textInputs := pendingFormFields(ctx, e, envMap)
 	if len(textInputs) > 0 {
 		form, err := views.NewForm(io.Theme(ctx.Config.Theme.String()), ctx.StdIn(), ctx.StdOut(), textInputs...)
 		if err != nil {
@@ -149,6 +154,10 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		for key, val := range form.ValueMap() {
 			envMap[key] = fmt.Sprintf("%v", val)
 		}
+	}
+
+	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vault.LegacyVaultReservedName {
+		setAuthEnv(ctx, cmd, e)
 	}
 	startTime := time.Now()
 	eng := engine.NewExecEngine()
@@ -306,36 +315,43 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 }
 
 //nolint:gocognit
-func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []*views.FormField {
+func pendingFormFields(
+	ctx *context.Context, rootExec *executable.Executable, envMap map[string]string,
+) []*views.FormField {
 	pending := make([]*views.FormField, 0)
 	switch {
 	case rootExec.Exec != nil:
 		for _, param := range rootExec.Exec.Params {
-			if param.Prompt != "" {
+			_, exists := envMap[param.EnvKey]
+			if param.Prompt != "" && !exists {
 				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Launch != nil:
 		for _, param := range rootExec.Launch.Params {
-			if param.Prompt != "" {
+			_, exists := envMap[param.EnvKey]
+			if param.Prompt != "" && !exists {
 				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Request != nil:
 		for _, param := range rootExec.Request.Params {
-			if param.Prompt != "" {
+			_, exists := envMap[param.EnvKey]
+			if param.Prompt != "" && !exists {
 				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Render != nil:
 		for _, param := range rootExec.Render.Params {
-			if param.Prompt != "" {
+			_, exists := envMap[param.EnvKey]
+			if param.Prompt != "" && !exists {
 				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
 	case rootExec.Serial != nil:
 		for _, param := range rootExec.Serial.Params {
-			if param.Prompt != "" {
+			_, exists := envMap[param.EnvKey]
+			if param.Prompt != "" && !exists {
 				pending = append(pending, &views.FormField{Key: param.EnvKey, Title: param.Prompt})
 			}
 		}
@@ -345,7 +361,7 @@ func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []
 				if err != nil {
 					continue
 				}
-				childPending := pendingFormFields(ctx, childExec)
+				childPending := pendingFormFields(ctx, childExec, envMap)
 				pending = append(pending, childPending...)
 			}
 		}
@@ -361,12 +377,23 @@ func pendingFormFields(ctx *context.Context, rootExec *executable.Executable) []
 				if err != nil {
 					continue
 				}
-				childPending := pendingFormFields(ctx, childExec)
+				childPending := pendingFormFields(ctx, childExec, envMap)
 				pending = append(pending, childPending...)
 			}
 		}
 	}
 	return pending
+}
+
+func applyParameterOverrides(overrides []string, envMap map[string]string) {
+	for _, override := range overrides {
+		parts := strings.SplitN(override, "=", 2)
+		if len(parts) != 2 {
+			continue // skip invalid overrides
+		}
+		key, value := parts[0], parts[1]
+		envMap[key] = value
+	}
 }
 
 var (

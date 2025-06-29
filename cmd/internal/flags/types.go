@@ -176,6 +176,14 @@ var StoreAllFlag = &Metadata{
 	Default: false,
 }
 
+var ParameterValueFlag = &Metadata{
+	Name:      "param",
+	Shorthand: "p",
+	Usage: "Set a parameter value by env key. (i.e. KEY=value) Use multiple times to set multiple parameters." +
+		"This will override any existing parameter values defined for the executable.",
+	Default: []string{},
+}
+
 var VaultTypeFlag = &Metadata{
 	Name:      "type",
 	Shorthand: "t",

@@ -93,7 +93,7 @@ func (s *BoltStore) CreateAndSetBucket(id string) (string, error) {
 
 func EnvironmentBucket() string {
 	id := RootBucket
-	if val, set := os.LookupEnv(BucketEnv); set {
+	if val, set := os.LookupEnv(BucketEnv); set && val != "" {
 		id = val
 	}
 	replacer := strings.NewReplacer(":", "_", "/", "_", " ", "_")
@@ -163,11 +163,38 @@ func (s *BoltStore) GetKeys() ([]string, error) {
 		if bucket == nil {
 			return fmt.Errorf("bucket %s not found", s.processBucket)
 		}
-		bucket.Stats()
-		return bucket.ForEach(func(k, _ []byte) error {
-			keys = append(keys, string(k))
+
+		// Collect keys from process bucket
+		processKeys := make(map[string]bool)
+		err := bucket.ForEach(func(k, _ []byte) error {
+			key := string(k)
+			keys = append(keys, key)
+			processKeys[key] = true
 			return nil
 		})
+		if err != nil {
+			return err
+		}
+
+		// If not using root bucket, also collect keys from root bucket
+		if s.processBucket != RootBucket {
+			rBucket := tx.Bucket([]byte(RootBucket))
+			if rBucket == nil {
+				return nil
+			}
+			err := rBucket.ForEach(func(k, _ []byte) error {
+				// Only add keys that aren't already in the process bucket
+				if key := string(k); !processKeys[key] {
+					keys = append(keys, key)
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
 	return keys, err
 }
@@ -186,10 +213,36 @@ func (s *BoltStore) GetAll() (map[string]string, error) {
 		if bucket == nil {
 			return fmt.Errorf("bucket %s not found", s.processBucket)
 		}
-		return bucket.ForEach(func(k, v []byte) error {
+
+		// First, collect all key-value pairs from process bucket
+		err := bucket.ForEach(func(k, v []byte) error {
 			m[string(k)] = string(v)
 			return nil
 		})
+		if err != nil {
+			return err
+		}
+
+		// If not using root bucket, also collect from root bucket
+		if s.processBucket != RootBucket {
+			rBucket := tx.Bucket([]byte(RootBucket))
+			if rBucket == nil {
+				return nil
+			}
+			err := rBucket.ForEach(func(k, v []byte) error {
+				key := string(k)
+				// Only add if key doesn't already exist in process bucket
+				if _, exists := m[key]; !exists {
+					m[key] = string(v)
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
 	return m, err
 }

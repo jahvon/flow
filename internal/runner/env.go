@@ -38,6 +38,11 @@ func ResolveParameterValue(
 	param executable.Parameter,
 	promptedEnv map[string]string,
 ) (string, error) {
+	if val, found := promptedEnv[param.EnvKey]; found {
+		// existing values win - these could come in as a param override from the CLI
+		return val, nil
+	}
+
 	switch {
 	case param.Text == "" && param.SecretRef == "" && param.Prompt == "":
 		return "", nil

@@ -6,13 +6,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/tests/utils"
 )
 
 var _ = Describe("browse e2e", Ordered, func() {
 	var (
-		ctx *context.Context
+		ctx *utils.Context
 		run *utils.CommandRunner
 	)
 
@@ -33,7 +32,7 @@ var _ = Describe("browse e2e", Ordered, func() {
 		func(args []string) {
 			stdOut := ctx.StdOut()
 			cmdArgs := append([]string{"browse", "--list"}, args...)
-			Expect(run.Run(ctx, cmdArgs...)).To(Succeed())
+			Expect(run.Run(ctx.Context, cmdArgs...)).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("executables:"))
@@ -50,7 +49,7 @@ var _ = Describe("browse e2e", Ordered, func() {
 
 	It("should show executable details by verb and name", func() {
 		stdOut := ctx.StdOut()
-		Expect(run.Run(ctx, "browse", "exec", "examples:simple-print")).To(Succeed())
+		Expect(run.Run(ctx.Context, "browse", "exec", "examples:simple-print")).To(Succeed())
 		out, err := readFileContent(stdOut)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(out).To(ContainSubstring("name: simple-print"))

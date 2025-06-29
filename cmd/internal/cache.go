@@ -79,7 +79,7 @@ func cacheSetFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	if err != nil {
 		ctx.Logger.FatalErr(err)
 	}
-	if err = s.CreateBucket(store.EnvironmentBucket()); err != nil {
+	if _, err = s.CreateAndSetBucket(store.EnvironmentBucket()); err != nil {
 		ctx.Logger.FatalErr(err)
 	}
 	defer func() {

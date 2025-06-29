@@ -6,13 +6,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/tests/utils"
 )
 
 var _ = Describe("logs e2e", Ordered, func() {
 	var (
-		ctx *context.Context
+		ctx *utils.Context
 		run *utils.CommandRunner
 	)
 
@@ -32,7 +31,7 @@ var _ = Describe("logs e2e", Ordered, func() {
 	When("viewing logs (flow logs)", func() {
 		It("should display logs in yaml format", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "logs")).To(Succeed())
+			Expect(run.Run(ctx.Context, "logs")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(ContainSubstring("logs:"))
@@ -44,7 +43,7 @@ var _ = Describe("logs e2e", Ordered, func() {
 			// TODO: test that log archiving works
 			Skip("e2e test does not include log archiving, so this will not return any logs")
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx, "logs", "--last")).To(Succeed())
+			Expect(run.Run(ctx.Context, "logs", "--last")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(out).To(Or(ContainSubstring("msg="), ContainSubstring("No log entries")))
