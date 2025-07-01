@@ -63,7 +63,7 @@ var _ = Describe("Executable", func() {
 			Expect(exec.Ref().String()).
 				To(Equal(fmt.Sprintf("%s %s/%s:%s", exec.Verb, testWsName, testNsName, exec.Name)))
 		})
-		It("ID should return the ID of the executable", func() {
+		It("Ref should return the Ref of the executable", func() {
 			Expect(exec.ID()).
 				To(Equal(fmt.Sprintf("%s/%s:%s", testWsName, testNsName, exec.Name)))
 		})

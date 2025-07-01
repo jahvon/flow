@@ -20,6 +20,9 @@ const (
 	v2CacheDataDir = "vaults"
 )
 
+type Vault = vault.Provider
+type VaultConfig = vault.Config
+
 func NewAES256Vault(logger io.Logger, name, storagePath, keyEnv, keyFile, logLevel string) {
 	key, err := vault.GenerateEncryptionKey()
 	if err != nil {
@@ -105,24 +108,28 @@ func NewAgeVault(logger io.Logger, name, storagePath, recipients, identityKey, i
 	logger.PlainTextSuccess(fmt.Sprintf("Vault '%s' with Age encryption created successfully", v.ID()))
 }
 
-func VaultFromName(name string) (vault.Provider, error) {
+func VaultFromName(name string) (*VaultConfig, Vault, error) {
 	if name == "" {
-		return nil, fmt.Errorf("vault name cannot be empty")
+		return nil, nil, fmt.Errorf("vault name cannot be empty")
+	} else if strings.ToLower(name) == DemoVaultReservedName {
+		return newDemoVaultConfig(), newDemoVault(), nil
 	}
 
 	cfgPath := ConfigFilePath(name)
 	cfg, err := vault.LoadConfigJSON(cfgPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load vault config: %w", err)
+		return nil, nil, fmt.Errorf("failed to load vault config: %w", err)
 	}
 
 	switch cfg.Type {
 	case vault.ProviderTypeAge:
-		return vault.NewAgeVault(&cfg)
+		provider, err := vault.NewAgeVault(&cfg)
+		return &cfg, provider, err
 	case vault.ProviderTypeAES256:
-		return vault.NewAES256Vault(&cfg)
+		provider, err := vault.NewAES256Vault(&cfg)
+		return &cfg, provider, err
 	default:
-		return nil, fmt.Errorf("unsupported vault type: %s", cfg.Type)
+		return nil, nil, fmt.Errorf("unsupported vault type: %s", cfg.Type)
 	}
 }
 

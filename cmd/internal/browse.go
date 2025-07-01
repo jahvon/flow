@@ -23,7 +23,7 @@ func RegisterBrowseCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		Long: "Browse executables across workspaces.\n\n" +
 			"  flow browse                # Interactive multi-pane executable browser\n" +
 			"  flow browse --list         # Simple list view of executables\n" +
-			"  flow browse VERB [ID]      # Detailed view of specific executable\n\n" +
+			"  flow browse VERB [Ref]      # Detailed view of specific executable\n\n" +
 			fmt.Sprintf(
 				"See %s for more information on executable verbs and "+
 					"%s for more information on executable references.",

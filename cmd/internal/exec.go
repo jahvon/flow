@@ -26,6 +26,7 @@ import (
 	"github.com/jahvon/flow/internal/services/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	"github.com/jahvon/flow/internal/vault"
+	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
 	"github.com/jahvon/flow/types/executable"
 )
 
@@ -156,7 +157,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		}
 	}
 
-	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vault.LegacyVaultReservedName {
+	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vaultV2.LegacyVaultReservedName {
 		setAuthEnv(ctx, cmd, e)
 	}
 	startTime := time.Now()
@@ -399,7 +400,7 @@ func applyParameterOverrides(overrides []string, envMap map[string]string) {
 var (
 	//nolint:lll
 	execDocumentation = `
-Execute an executable where EXECUTABLE_ID is the target executable's ID in the form of 'ws/ns:name'.
+Execute an executable where EXECUTABLE_ID is the target executable's Ref in the form of 'ws/ns:name'.
 The flow subcommand used should match the target executable's verb or one of its aliases.
 
 If the target executable accept arguments, they can be passed in the form of flag or positional arguments.

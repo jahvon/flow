@@ -16,6 +16,8 @@ import (
 	"github.com/jahvon/flow/internal/io"
 	vaultIO "github.com/jahvon/flow/internal/io/vault"
 	"github.com/jahvon/flow/internal/vault"
+	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
+	"github.com/jahvon/flow/types/config"
 )
 
 func RegisterVaultCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -72,12 +74,12 @@ func createVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		keyEnv := flags.ValueFor[string](ctx, cmd, *flags.VaultKeyEnvFlag, false)
 		keyFile := flags.ValueFor[string](ctx, cmd, *flags.VaultKeyFileFlag, false)
 		logLevel := flags.ValueFor[string](ctx, cmd, *flags.LogLevel, false)
-		vault.NewAES256Vault(logger, vaultName, vaultPath, keyEnv, keyFile, logLevel)
+		vaultV2.NewAES256Vault(logger, vaultName, vaultPath, keyEnv, keyFile, logLevel)
 	case "age":
 		recipients := flags.ValueFor[string](ctx, cmd, *flags.VaultRecipientsFlag, false)
 		identityEnv := flags.ValueFor[string](ctx, cmd, *flags.VaultIdentityEnvFlag, false)
 		identityFile := flags.ValueFor[string](ctx, cmd, *flags.VaultIdentityFileFlag, false)
-		vault.NewAgeVault(logger, vaultName, vaultPath, recipients, identityEnv, identityFile)
+		vaultV2.NewAgeVault(logger, vaultName, vaultPath, recipients, identityEnv, identityFile)
 	default:
 		logger.Fatalf("unsupported vault type: %s - must be one of 'aes256' or 'age'", vaultType)
 	}
@@ -88,11 +90,13 @@ func registerGetVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 		Use:     "get NAME",
 		Aliases: []string{"view", "show"},
 		Short:   "Get the details of a vault.",
-		Args:    cobra.ExactArgs(1),
+		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
+			return vaultNames(ctx.Config), cobra.ShellCompDirectiveNoFileComp
 		},
-		Run: func(cmd *cobra.Command, args []string) { getVaultFunc(ctx, cmd, args) },
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
+		Run:     func(cmd *cobra.Command, args []string) { getVaultFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, getCmd, *flags.OutputFormatFlag)
 	vaultCmd.AddCommand(getCmd)
@@ -102,10 +106,16 @@ func getVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 
-	vaultName := args[0]
-	if vaultName == vault.LegacyVaultReservedName {
+	var vaultName string
+	if len(args) == 0 {
+		vaultName = ctx.Config.CurrentVaultName()
+	} else {
+		vaultName = args[0]
+	}
+
+	if vaultName == vaultV2.LegacyVaultReservedName {
 		logger.Fatalf("get is unsupported for the legacy vault")
-	} else if err := vault.ValidateReference(vaultName); err != nil {
+	} else if err := vaultV2.ValidateIdentifier(vaultName); err != nil {
 		logger.Fatalf("invalid vault name '%s': %v", vaultName, err)
 	}
 
@@ -123,6 +133,8 @@ func registerListVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 		Aliases: []string{"ls"},
 		Short:   "List all available vaults.",
 		Args:    cobra.NoArgs,
+		PreRun:  func(cmd *cobra.Command, args []string) { StartTUI(ctx, cmd) },
+		PostRun: func(cmd *cobra.Command, args []string) { WaitForTUI(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { listVaultsFunc(ctx, cmd, args) },
 	}
 	RegisterFlag(ctx, listCmd, *flags.OutputFormatFlag)
@@ -134,7 +146,7 @@ func listVaultsFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 
 	cfg := ctx.Config
-	if cfg.Vaults == nil || len(cfg.Vaults) == 0 {
+	if len(cfg.Vaults) == 0 {
 		logger.Fatalf("no vaults configured")
 	}
 
@@ -155,7 +167,7 @@ func registerRemoveVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 			"but the vault will be unlinked from the global configuration.\nNote: You cannot remove the current vault.",
 		Args: cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
+			return vaultNames(ctx.Config), cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(cmd *cobra.Command, args []string) { removeVaultFunc(ctx, cmd, args) },
 	}
@@ -166,8 +178,8 @@ func removeVaultFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	vaultName := args[0]
 
-	if vaultName == vault.LegacyVaultReservedName {
-		logger.Fatalf("remove is unsupported for the legacy vault")
+	if vaultName == vaultV2.LegacyVaultReservedName || vaultName == vaultV2.DemoVaultReservedName {
+		logger.Fatalf("remove is unsupported for the current vault")
 	}
 
 	form, err := views.NewForm(
@@ -205,7 +217,6 @@ func removeVaultFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	}
 
 	logger.Warnf("Vault '%s' deleted", vaultName)
-
 }
 
 func registerSwitchVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
@@ -215,7 +226,7 @@ func registerSwitchVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 		Short:   "Switch the active vault.",
 		Args:    cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
+			return vaultNames(ctx.Config), cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(cmd *cobra.Command, args []string) { switchVaultFunc(ctx, cmd, args) },
 	}
@@ -226,7 +237,8 @@ func switchVaultFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 	logger := ctx.Logger
 	vaultName := args[0]
 	userConfig := ctx.Config
-	if _, found := userConfig.Vaults[vaultName]; !found {
+	reservedName := vaultName == vaultV2.LegacyVaultReservedName || vaultName == vaultV2.DemoVaultReservedName
+	if _, found := userConfig.Vaults[vaultName]; !found && !reservedName {
 		logger.Fatalf("vault %s not found", vaultName)
 	}
 	userConfig.CurrentVault = &vaultName
@@ -246,7 +258,7 @@ func registerEditVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 			"Note: You cannot change the vault type after creation.",
 		Args: cobra.ExactArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return append(maps.Keys(ctx.Config.Vaults), vault.LegacyVaultReservedName), cobra.ShellCompDirectiveNoFileComp
+			return vaultNames(ctx.Config), cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(cmd *cobra.Command, args []string) { editVaultFunc(ctx, cmd, args) },
 	}
@@ -267,9 +279,9 @@ func editVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	logger := ctx.Logger
 
 	vaultName := args[0]
-	if vaultName == vault.LegacyVaultReservedName {
-		logger.Fatalf("set is unsupported for the legacy vault")
-	} else if err := vault.ValidateReference(vaultName); err != nil {
+	if vaultName == vaultV2.LegacyVaultReservedName || vaultName == vaultV2.DemoVaultReservedName {
+		logger.Fatalf("set is unsupported for the current vault")
+	} else if err := vaultV2.ValidateIdentifier(vaultName); err != nil {
 		logger.Fatalf("invalid vault name '%s': %v", vaultName, err)
 	}
 
@@ -285,7 +297,7 @@ func editVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	identityEnv := flags.ValueFor[string](ctx, cmd, *flags.VaultIdentityEnvFlag, false)
 	identityFile := flags.ValueFor[string](ctx, cmd, *flags.VaultIdentityFileFlag, false)
 
-	cfgPath := vault.ConfigFilePath(vaultName)
+	cfgPath := vaultV2.ConfigFilePath(vaultName)
 	existingCfg, err := extvault.LoadConfigJSON(cfgPath)
 	if err != nil {
 		logger.Fatalf("failed to load vault configuration: %v", err)
@@ -337,4 +349,15 @@ func editVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	}
 
 	logger.PlainTextSuccess(fmt.Sprintf("Vault '%s' configuration updated successfully", vaultName))
+}
+
+func vaultNames(cfg *config.Config) []string {
+	names := []string{vaultV2.LegacyVaultReservedName, vaultV2.DemoVaultReservedName}
+	if cfg == nil || cfg.Vaults == nil {
+		return nil
+	}
+	for name := range cfg.Vaults {
+		names = append(names, name)
+	}
+	return names
 }

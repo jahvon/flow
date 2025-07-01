@@ -2,15 +2,14 @@ package vault
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
-	"github.com/jahvon/vault"
+	extVault "github.com/jahvon/vault"
 	"gopkg.in/yaml.v3"
 
-	vault2 "github.com/jahvon/flow/internal/vault"
+	"github.com/jahvon/flow/internal/vault/v2"
 )
 
 type vaultEntity struct {
@@ -140,28 +139,28 @@ func NewVaultListView(
 }
 
 func vaultFromName(vaultName string) (*vaultEntity, error) {
-	cfg, err := vault.LoadConfigJSON(
-		filepath.Join(vault2.CacheDirectory(fmt.Sprintf("configs/%s.json", vaultName))),
-	)
+	cfg, vlt, err := vault.VaultFromName(vaultName)
 	if err != nil {
 		return nil, err
 	}
+	data := make(map[string]interface{})
+	data["created"] = vlt.Metadata().Created
+	data["lastModified"] = vlt.Metadata().LastModified
+
 	v := &vaultEntity{
-		Name: cfg.ID,
+		Name: vlt.ID(),
 		Type: string(cfg.Type),
+		Data: data,
 	}
 
-	data := make(map[string]interface{})
 	switch cfg.Type {
-	case vault.ProviderTypeAES256:
+	case extVault.ProviderTypeAES256:
 		v.Path = cfg.Aes.StoragePath
 		data["sources"] = cfg.Aes.KeySource
-		v.Data = data
-	case vault.ProviderTypeAge:
+	case extVault.ProviderTypeAge:
 		v.Path = cfg.Age.StoragePath
 		data["sources"] = cfg.Age.IdentitySources
 		data["recipients"] = cfg.Age.Recipients
-		v.Data = data
 	}
 
 	return v, nil

@@ -54,6 +54,13 @@ func (c *Config) ShowTUI() bool {
 	return c.Interactive != nil && c.Interactive.Enabled
 }
 
+func (c *Config) CurrentVaultName() string {
+	if c.CurrentVault == nil {
+		return ""
+	}
+	return *c.CurrentVault
+}
+
 func (c *Config) SendTextNotification() bool {
 	return c.Interactive != nil && c.Interactive.Enabled &&
 		c.Interactive.NotifyOnCompletion != nil && *c.Interactive.NotifyOnCompletion

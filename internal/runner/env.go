@@ -11,13 +11,19 @@ import (
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/vault"
+	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
 	"github.com/jahvon/flow/types/executable"
 )
 
-func SetEnv(logger io.Logger, exec *executable.ExecutableEnvironment, promptedEnv map[string]string) error {
+func SetEnv(
+	logger io.Logger,
+	currentVault string,
+	exec *executable.ExecutableEnvironment,
+	promptedEnv map[string]string,
+) error {
 	var errs []error
 	for _, param := range exec.Params {
-		val, err := ResolveParameterValue(logger, param, promptedEnv)
+		val, err := ResolveParameterValue(logger, currentVault, param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -35,6 +41,7 @@ func SetEnv(logger io.Logger, exec *executable.ExecutableEnvironment, promptedEn
 
 func ResolveParameterValue(
 	logger io.Logger,
+	currentVault string,
 	param executable.Parameter,
 	promptedEnv map[string]string,
 ) (string, error) {
@@ -55,15 +62,35 @@ func ResolveParameterValue(
 		}
 		return val, nil
 	case param.SecretRef != "":
-		if err := vault.ValidateReference(param.SecretRef); err != nil {
-			return "", err
+		if currentVault == "" {
+			if err := vault.ValidateReference(param.SecretRef); err != nil {
+				return "", err
+			}
+			v := vault.NewVault(logger)
+			secret, err := v.GetSecret(param.SecretRef)
+			if err != nil {
+				return "", err
+			}
+			return secret.PlainTextString(), nil
+		} else {
+			rVault, key, err := vaultV2.RefToParts(vaultV2.SecretRef(param.SecretRef))
+			if err != nil {
+				return "", err
+			}
+			if rVault == "" {
+				rVault = currentVault
+			}
+			_, v, err := vaultV2.VaultFromName(rVault)
+			if err != nil {
+				return "", err
+			}
+			defer v.Close()
+			secret, err := v.GetSecret(key)
+			if err != nil {
+				return "", err
+			}
+			return secret.PlainTextString(), nil
 		}
-		v := vault.NewVault(logger)
-		secret, err := v.GetSecret(param.SecretRef)
-		if err != nil {
-			return "", err
-		}
-		return secret.PlainTextString(), nil
 	default:
 		return "", errors.New("failed to get value for parameter")
 	}
@@ -71,6 +98,7 @@ func ResolveParameterValue(
 
 func BuildEnvList(
 	logger io.Logger,
+	currentVault string,
 	exec *executable.ExecutableEnvironment,
 	inputEnv map[string]string,
 	defaultEnv map[string]string,
@@ -84,7 +112,7 @@ func BuildEnvList(
 		}
 	}
 	for _, param := range exec.Params {
-		val, err := ResolveParameterValue(logger, param, inputEnv)
+		val, err := ResolveParameterValue(logger, currentVault, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -103,6 +131,7 @@ func BuildEnvList(
 
 func BuildEnvMap(
 	logger io.Logger,
+	currentVault string,
 	exec *executable.ExecutableEnvironment,
 	inputEnv map[string]string,
 	defaultEnv map[string]string,
@@ -116,7 +145,7 @@ func BuildEnvMap(
 		}
 	}
 	for _, param := range exec.Params {
-		val, err := ResolveParameterValue(logger, param, inputEnv)
+		val, err := ResolveParameterValue(logger, currentVault, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
 			continue
