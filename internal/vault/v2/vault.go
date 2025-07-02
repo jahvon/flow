@@ -45,7 +45,7 @@ func NewAES256Vault(logger io.Logger, name, storagePath, keyEnv, keyFile, logLev
 		storagePath = CacheDirectory("")
 	}
 
-	opts := []vault.Option{vault.WithLocalPath(storagePath), vault.WithProvider(vault.ProviderTypeAES256)}
+	opts := []vault.Option{vault.WithAESPath(storagePath), vault.WithProvider(vault.ProviderTypeAES256)}
 	if keyEnv != "" {
 		opts = append(opts, vault.WithAESKeyFromEnv(keyEnv))
 	}
@@ -79,7 +79,7 @@ func NewAgeVault(logger io.Logger, name, storagePath, recipients, identityKey, i
 		storagePath = CacheDirectory("")
 	}
 
-	opts := []vault.Option{vault.WithLocalPath(storagePath), vault.WithProvider(vault.ProviderTypeAge)}
+	opts := []vault.Option{vault.WithAgePath(storagePath), vault.WithProvider(vault.ProviderTypeAge)}
 	if recipients != "" {
 		opts = append(opts, vault.WithAgeRecipients(strings.Split(recipients, ",")...))
 	}

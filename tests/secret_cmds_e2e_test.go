@@ -34,7 +34,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 	When("creating a new vault (flow vault create)", func() {
 		It("should return the generated key", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx.Context, "vault", "create")).To(Succeed())
+			Expect(run.Run(ctx.Context, "vault", "create", "test")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -45,8 +45,62 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 			encryptionKey := strings.TrimSpace(parts[1])
 			Expect(os.Setenv(vault.EncryptionKeyEnvVar, encryptionKey)).To(Succeed())
 		})
+
+		It("should create vault with custom path", func() {
+			stdOut := ctx.StdOut()
+			tmpdir, err := os.MkdirTemp("", "flow-vault-test")
+			Expect(err).NotTo(HaveOccurred())
+			defer os.RemoveAll(tmpdir)
+
+			Expect(run.Run(ctx.Context, "vault", "create", "test2", "--type", "aes256", "--path", tmpdir)).To(Succeed())
+			out, err := readFileContent(stdOut)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(out).To(ContainSubstring("Vault 'test2' with AES256 encryption created successfully"))
+		})
 	})
 
+	It("Should remove the created vault", func() {
+		reader, writer, err := os.Pipe()
+		Expect(err).NotTo(HaveOccurred())
+		_, err = writer.Write([]byte("yes\n"))
+		Expect(err).ToNot(HaveOccurred())
+
+		ctx.Context.SetIO(reader, ctx.StdOut())
+		Expect(run.Run(ctx.Context, "vault", "remove", "test2")).To(Succeed())
+		out, err := readFileContent(ctx.StdOut())
+		Expect(err).NotTo(HaveOccurred())
+		Expect(out).To(ContainSubstring("Vault 'test2' deleted"))
+	})
+
+	When("switching vaults (flow vault switch)", func() {
+		It("should switch to demo vault successfully", func() {
+			Expect(run.Run(ctx.Context, "vault", "switch", "demo")).To(Succeed())
+			out, err := readFileContent(ctx.StdOut())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(out).To(ContainSubstring("Vault set to demo"))
+		})
+	})
+
+	When("getting vault information (flow vault get)", func() {
+		It("should get demo vault in YAML format", func() {
+			stdOut := ctx.StdOut()
+			Expect(run.Run(ctx.Context, "vault", "get", "demo")).To(Succeed())
+			out, err := readFileContent(stdOut)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(out).To(ContainSubstring("name: demo"))
+			Expect(out).To(ContainSubstring("type: demo"))
+		})
+	})
+
+	When("listing vaults (flow vault list)", func() {
+		It("should list vaults in YAML format", func() {
+			stdOut := ctx.StdOut()
+			Expect(run.Run(ctx.Context, "vault", "list")).To(Succeed())
+			out, err := readFileContent(stdOut)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(out).To(ContainSubstring("vaults:"))
+		})
+	})
 	When("setting a secret (flow secret set)", func() {
 		It("should save into the vault", func() {
 			Expect(run.Run(ctx.Context, "secret", "set", "my-secret", "my-value")).To(Succeed())

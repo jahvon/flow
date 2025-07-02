@@ -158,7 +158,7 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	}
 
 	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vaultV2.LegacyVaultReservedName {
-		setAuthEnv(ctx, cmd, e)
+		setAuthEnv(ctx, cmd, e, false)
 	}
 	startTime := time.Now()
 	eng := engine.NewExecEngine()
@@ -218,8 +218,8 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 	return nil
 }
 
-func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.Executable) {
-	if authRequired(ctx, executable) {
+func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.Executable, force bool) {
+	if authRequired(ctx, executable) || force {
 		form, err := views.NewForm(
 			io.Theme(ctx.Config.Theme.String()),
 			ctx.StdIn(),

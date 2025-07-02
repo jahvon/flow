@@ -51,7 +51,7 @@ type secret struct {
 // enrichedSecret is used for JSON/YAML marshaling to control how the value is serialized
 type enrichedSecret struct {
 	Vault string `json:"vault" yaml:"vault"`
-	Key   string `json:"key" yaml:"key"`
+	Key   string `json:"key"   yaml:"key"`
 	Value string `json:"value" yaml:"value"`
 }
 
@@ -209,6 +209,9 @@ type enrichedSecretList struct {
 func (l SecretList) AsPlaintext() SecretList {
 	result := make(SecretList, len(l))
 	for i, s := range l {
+		if s == nil {
+			continue
+		}
 		result[i] = s.AsPlaintext()
 	}
 	return result
@@ -217,6 +220,9 @@ func (l SecretList) AsPlaintext() SecretList {
 func (l SecretList) AsObfuscatedText() SecretList {
 	result := make(SecretList, len(l))
 	for i, s := range l {
+		if s == nil {
+			continue
+		}
 		result[i] = s.AsObfuscatedText()
 	}
 	return result
@@ -225,6 +231,9 @@ func (l SecretList) AsObfuscatedText() SecretList {
 func (l SecretList) YAML() (string, error) {
 	scrts := make([]enrichedSecret, 0, len(l))
 	for _, s := range l {
+		if s == nil {
+			continue
+		}
 		scrts = append(scrts, toEnrichedSecret(s))
 	}
 	enriched := enrichedSecretList{Secrets: scrts}
@@ -238,6 +247,9 @@ func (l SecretList) YAML() (string, error) {
 func (l SecretList) JSON() (string, error) {
 	scrts := make([]enrichedSecret, 0, len(l))
 	for _, s := range l {
+		if s == nil {
+			continue
+		}
 		scrts = append(scrts, toEnrichedSecret(s))
 	}
 	enriched := enrichedSecretList{Secrets: scrts}
@@ -252,6 +264,9 @@ func (l SecretList) JSON() (string, error) {
 func (l SecretList) YAMLWithMode(plaintext bool) (string, error) {
 	scrts := make([]enrichedSecret, 0, len(l))
 	for _, s := range l {
+		if s == nil {
+			continue
+		}
 		scrts = append(scrts, toEnrichedSecretWithMode(s, plaintext))
 	}
 	enriched := enrichedSecretList{Secrets: scrts}
@@ -266,6 +281,9 @@ func (l SecretList) YAMLWithMode(plaintext bool) (string, error) {
 func (l SecretList) JSONWithMode(plaintext bool) (string, error) {
 	scrts := make([]enrichedSecret, 0, len(l))
 	for _, s := range l {
+		if s == nil {
+			continue
+		}
 		scrts = append(scrts, toEnrichedSecretWithMode(s, plaintext))
 	}
 	enriched := enrichedSecretList{Secrets: scrts}

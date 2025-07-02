@@ -95,7 +95,6 @@ func registerSetSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 		Aliases: []string{"new", "create", "update"},
 		Short:   "Set a secret in the current vault. If no value is provided, you will be prompted to enter one.",
 		Args:    cobra.MinimumNArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setSecretFunc(ctx, cmd, args) },
 	}
 	secretCmd.AddCommand(setCmd)
@@ -193,18 +192,26 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		}
 	} else {
 		name := currentVault(ctx.Config)
+		interactiveUI := TUIEnabled(ctx, cmd)
+
 		_, v, err := vaultV2.VaultFromName(name)
-		defer v.Close()
+		defer func() {
+			// Don't close the vault prematurely if we're in interactive mode
+			go func() {
+				if interactiveUI {
+					ctx.TUIContainer.WaitForExit()
+				}
+				_ = v.Close()
+			}()
+		}()
 
 		if err != nil {
 			logger.FatalErr(err)
 		}
 
-		interactiveUI := TUIEnabled(ctx, cmd)
 		if interactiveUI {
 			view := secretV2.NewSecretListView(ctx, v, asPlainText)
 			SetView(ctx, cmd, view)
-
 		} else {
 			secretV2.PrintSecrets(ctx, name, v, outputFormat, asPlainText)
 		}

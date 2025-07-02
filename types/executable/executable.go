@@ -503,7 +503,7 @@ func MustParseExecutableID(id string) (workspace, namespace, name string) {
 			return parts[0], subparts[0], subparts[1]
 		}
 	}
-	panic(fmt.Sprintf("invalid executable Ref: %s", id))
+	panic(fmt.Sprintf("invalid executable ID: %s", id))
 }
 
 func NewExecutableID(workspace, namespace, name string) string {

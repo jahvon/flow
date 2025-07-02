@@ -6,7 +6,7 @@ import (
 	"github.com/jahvon/flow/internal/io/common"
 )
 
-func PrintVault(logger tuikitIO.Logger, vaultName, format string) {
+func PrintVault(logger tuikitIO.Logger, format, vaultName string) {
 	if vaultName == "" {
 		logger.Fatalf("Vault name was not provided")
 	}
@@ -35,10 +35,6 @@ func PrintVault(logger tuikitIO.Logger, vaultName, format string) {
 }
 
 func PrintVaultList(logger tuikitIO.Logger, format string, vaultNames []string) {
-	if len(vaultNames) == 0 {
-		logger.Fatalf("No vault names were provided")
-	}
-
 	vaults := vaultCollection{Vaults: make([]*vaultEntity, len(vaultNames))}
 	for _, name := range vaultNames {
 		vault, err := vaultFromName(name)

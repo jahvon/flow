@@ -2,11 +2,13 @@ package vault
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/jahvon/tuikit"
 	"github.com/jahvon/tuikit/types"
 	"github.com/jahvon/tuikit/views"
 	extVault "github.com/jahvon/vault"
+	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/vault/v2"
@@ -44,8 +46,10 @@ func (v *vaultEntity) Markdown() string {
 
 	if v.Data != nil {
 		md += "## Data\n\n"
-		for key, value := range v.Data {
-			md += fmt.Sprintf("**%s:** %v\n\n", key, value)
+		keys := maps.Keys(v.Data)
+		slices.Sort(keys)
+		for _, key := range keys {
+			md += fmt.Sprintf("**%s:** %v\n\n", key, v.Data[key])
 		}
 	}
 
@@ -82,6 +86,7 @@ func (vc *vaultCollection) Items() []*types.EntityInfo {
 		items[i] = &types.EntityInfo{
 			Header:    v.Name,
 			SubHeader: v.Path,
+			ID:        v.Name,
 		}
 	}
 	return items

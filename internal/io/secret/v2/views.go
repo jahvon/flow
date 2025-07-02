@@ -172,13 +172,16 @@ func NewSecretListView(
 		var secret vault.Secret
 		var found bool
 		for _, s := range secrets {
+			if s == nil {
+				continue
+			}
 			if string(s.Ref()) == filterVal {
 				secret = s
 				found = true
 				break
 			}
 		}
-		if !found {
+		if !found || secret == nil {
 			return fmt.Errorf("secret not found")
 		}
 
