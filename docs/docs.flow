@@ -35,7 +35,6 @@ executables:
   - verb: start
     name: site
     description: Run the documentation site locally
-    timeout: 0s # no timeout
     exec:
       dir: //
       cmd: docsify serve docs --open

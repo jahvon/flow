@@ -15,6 +15,7 @@ import (
 
 const (
 	DefaultVaultKeyEnv      = "FLOW_VAULT_KEY"
+	DefaultVaultIdentityEnv = "FLOW_VAULT_IDENTITY"
 	LegacyVaultReservedName = "legacy"
 
 	v2CacheDataDir = "vaults"
@@ -116,8 +117,8 @@ func NewAgeVault(logger io.Logger, name, storagePath, recipients, identityKey, i
 	}
 
 	if identityKey == "" && identityFile == "" {
-		logger.Debugf("no Age identity provided, using default environment variable %s", DefaultVaultKeyEnv)
-		opts = append(opts, vault.WithAgeIdentityFromEnv(DefaultVaultKeyEnv))
+		logger.Debugf("no Age identity provided, using default environment variable %s", DefaultVaultIdentityEnv)
+		opts = append(opts, vault.WithAgeIdentityFromEnv(DefaultVaultIdentityEnv))
 	}
 
 	v, cfg, err := vault.New(name, opts...)
