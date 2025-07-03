@@ -68,6 +68,7 @@ func newDemoVaultConfig() *VaultConfig {
 	return &VaultConfig{ID: DemoVaultReservedName, Type: "demo"}
 }
 
+//nolint:lll
 func demoData() map[string]string {
 	return map[string]string{
 		// Basic secrets (common use cases)
@@ -81,15 +82,14 @@ func demoData() map[string]string {
 
 		// Long secrets (testing edge cases)
 		"rsa-private-key": `-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN
+DEMOdATAAAKCAQEA1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN
 OPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQR
 STUVWXYZabcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuv
 wxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890
 -----END RSA PRIVATE KEY-----`,
-
 		"long-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkRlbW8gVXNlciIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjo5OTk5OTk5OTk5LCJyb2xlcyI6WyJhZG1pbiIsInVzZXIiLCJkZW1vIl0sInBlcm1pc3Npb25zIjpbInJlYWQiLCJ3cml0ZSIsImRlbGV0ZSJdLCJjdXN0b21fZGF0YSI6eyJkZW1vIjp0cnVlLCJlbnZpcm9ubWVudCI6InRlc3RpbmciLCJ2ZXJzaW9uIjoiMS4wLjAifX0.demo-signature-not-real",
 
-		// JSON/structured data (testing complex values)
+		// JSON/structured data
 		"config-json": `{
   "environment": "demo",
   "debug": true,
@@ -102,7 +102,6 @@ wxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890
     "max_file_size": "10MB"
   }
 }`,
-
 		"env-vars": `NODE_ENV=development
 DEBUG=flow:*
 DATABASE_URL=postgres://demo:password@localhost/flowdb

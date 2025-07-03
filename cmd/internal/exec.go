@@ -400,7 +400,7 @@ func applyParameterOverrides(overrides []string, envMap map[string]string) {
 var (
 	//nolint:lll
 	execDocumentation = `
-Execute an executable where EXECUTABLE_ID is the target executable's Ref in the form of 'ws/ns:name'.
+Execute an executable where EXECUTABLE_ID is the target executable's ID in the form of 'ws/ns:name'.
 The flow subcommand used should match the target executable's verb or one of its aliases.
 
 If the target executable accept arguments, they can be passed in the form of flag or positional arguments.

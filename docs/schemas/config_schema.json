@@ -89,6 +89,10 @@
       "type": "string",
       "default": ""
     },
+    "currentVault": {
+      "description": "The name of the current vault. This should match a key in the `vaults` map.",
+      "type": "string"
+    },
     "currentWorkspace": {
       "description": "The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.",
       "type": "string",
@@ -127,6 +131,13 @@
         "dracula",
         "tokyo-night"
       ]
+    },
+    "vaults": {
+      "description": "A map of vault names to their paths. The path should be a valid absolute path to the vault file created by flow.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "workspaceMode": {
       "description": "The mode of the workspace. This can be either `fixed` or `dynamic`.\nIn `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.\nIn `dynamic` mode, the current workspace used at runtime is determined by the current directory.\nIf the current directory is within a workspace, that workspace is used.\n",

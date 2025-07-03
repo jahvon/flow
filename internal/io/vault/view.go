@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"encoding/json"
 	"fmt"
 	"slices"
 
@@ -61,7 +62,7 @@ func NewVaultView(
 	vaultName string,
 ) tuikit.View {
 	v, err := vaultFromName(vaultName)
-	if err != nil {
+	if err != nil || v == nil {
 		container.HandleError(fmt.Errorf("failed to load vault: %w", err))
 		return nil
 	}
@@ -81,7 +82,7 @@ func (vc *vaultCollection) Plural() string {
 }
 
 func (vc *vaultCollection) Items() []*types.EntityInfo {
-	items := make([]*types.EntityInfo, len(vc.Vaults))
+	items := make([]*types.EntityInfo, 0, len(vc.Vaults))
 	for i, v := range vc.Vaults {
 		items[i] = &types.EntityInfo{
 			Header:    v.Name,
@@ -101,7 +102,7 @@ func (vc *vaultCollection) YAML() (string, error) {
 }
 
 func (vc *vaultCollection) JSON() (string, error) {
-	data, err := yaml.Marshal(vc)
+	data, err := json.MarshalIndent(vc, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal vaults: %w", err)
 	}
@@ -117,6 +118,8 @@ func NewVaultListView(
 		v, err := vaultFromName(name)
 		if err != nil {
 			container.HandleError(fmt.Errorf("failed to load vault %s: %w", name, err))
+			continue
+		} else if v == nil {
 			continue
 		}
 		vaults.Vaults = append(vaults.Vaults, v)

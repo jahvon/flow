@@ -20,7 +20,13 @@ import (
 // - relative path -> fallbackPath (directory portion) + path
 // - ${envVar} -> expanded to the value from env map.
 func ExpandPath(logger io.Logger, path, fallbackPath string, env map[string]string) string {
-	fallbackDir := filepath.Dir(fallbackPath)
+	// turn the fallbackPath into a directory if it isn't already
+	var fallbackDir string
+	if filepath.Ext(fallbackPath) == "" {
+		fallbackDir = fallbackPath
+	} else {
+		fallbackDir = filepath.Dir(fallbackPath)
+	}
 	var targetPath string
 	switch {
 	case path == "":
@@ -71,7 +77,7 @@ func ExpandPath(logger io.Logger, path, fallbackPath string, env map[string]stri
 // If the input contains a filename, returns just the directory portion.
 func ExpandDirectory(logger io.Logger, dir, wsPath, execPath string, env map[string]string) string {
 	var expandedPath string
-	if strings.HasPrefix(dir, "//") {
+	if wsPath != "" && strings.HasPrefix(dir, "//") {
 		expandedPath = strings.Replace(dir, "//", wsPath+"/", 1)
 	} else {
 		expandedPath = ExpandPath(logger, dir, execPath, env)

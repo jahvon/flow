@@ -28,7 +28,7 @@ var _ = Describe("Utils", func() {
 	var (
 		mockLogger        *mocks.MockLogger
 		testWorkingDir, _ = os.UserConfigDir()
-		execPath          = filepath.Join(execDir, "exec")
+		execPath          = filepath.Join(execDir, "exec.flow")
 	)
 
 	type testObj struct{}

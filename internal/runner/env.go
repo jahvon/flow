@@ -62,6 +62,7 @@ func ResolveParameterValue(
 		}
 		return val, nil
 	case param.SecretRef != "":
+		//nolint:nestif
 		if currentVault == "" {
 			if err := vault.ValidateReference(param.SecretRef); err != nil {
 				return "", err

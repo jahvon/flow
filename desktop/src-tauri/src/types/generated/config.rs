@@ -175,6 +175,10 @@ impl ColorPalette {
 #[doc = "      \"default\": \"\","]
 #[doc = "      \"type\": \"string\""]
 #[doc = "    },"]
+#[doc = "    \"currentVault\": {"]
+#[doc = "      \"description\": \"The name of the current vault. This should match a key in the `vaults` map.\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
 #[doc = "    \"currentWorkspace\": {"]
 #[doc = "      \"description\": \"The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.\","]
 #[doc = "      \"default\": \"\","]
@@ -214,6 +218,13 @@ impl ColorPalette {
 #[doc = "        \"tokyo-night\""]
 #[doc = "      ]"]
 #[doc = "    },"]
+#[doc = "    \"vaults\": {"]
+#[doc = "      \"description\": \"A map of vault names to their paths. The path should be a valid absolute path to the vault file created by flow.\","]
+#[doc = "      \"type\": \"object\","]
+#[doc = "      \"additionalProperties\": {"]
+#[doc = "        \"type\": \"string\""]
+#[doc = "      }"]
+#[doc = "    },"]
 #[doc = "    \"workspaceMode\": {"]
 #[doc = "      \"description\": \"The mode of the workspace. This can be either `fixed` or `dynamic`.\\nIn `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.\\nIn `dynamic` mode, the current workspace used at runtime is determined by the current directory.\\nIf the current directory is within a workspace, that workspace is used.\\n\","]
 #[doc = "      \"default\": \"dynamic\","]
@@ -246,6 +257,13 @@ pub struct Config {
     #[doc = "The name of the current namespace.\n\nNamespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.\nIf the namespace is not set, only executables defined without a namespace will be discovered.\n"]
     #[serde(rename = "currentNamespace", default)]
     pub current_namespace: ::std::string::String,
+    #[doc = "The name of the current vault. This should match a key in the `vaults` map."]
+    #[serde(
+        rename = "currentVault",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub current_vault: ::std::option::Option<::std::string::String>,
     #[doc = "The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map."]
     #[serde(rename = "currentWorkspace")]
     pub current_workspace: ::std::string::String,
@@ -272,6 +290,12 @@ pub struct Config {
     #[doc = "The theme of the interactive UI."]
     #[serde(default = "defaults::config_theme")]
     pub theme: ConfigTheme,
+    #[doc = "A map of vault names to their paths. The path should be a valid absolute path to the vault file created by flow."]
+    #[serde(
+        default,
+        skip_serializing_if = ":: std :: collections :: HashMap::is_empty"
+    )]
+    pub vaults: ::std::collections::HashMap<::std::string::String, ::std::string::String>,
     #[doc = "The mode of the workspace. This can be either `fixed` or `dynamic`.\nIn `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.\nIn `dynamic` mode, the current workspace used at runtime is determined by the current directory.\nIf the current directory is within a workspace, that workspace is used.\n"]
     #[serde(rename = "workspaceMode", default = "defaults::config_workspace_mode")]
     pub workspace_mode: ConfigWorkspaceMode,
@@ -804,6 +828,10 @@ pub mod builder {
             ::std::string::String,
         >,
         current_namespace: ::std::result::Result<::std::string::String, ::std::string::String>,
+        current_vault: ::std::result::Result<
+            ::std::option::Option<::std::string::String>,
+            ::std::string::String,
+        >,
         current_workspace: ::std::result::Result<::std::string::String, ::std::string::String>,
         default_log_mode: ::std::result::Result<::std::string::String, ::std::string::String>,
         default_timeout: ::std::result::Result<::std::string::String, ::std::string::String>,
@@ -814,6 +842,10 @@ pub mod builder {
             ::std::string::String,
         >,
         theme: ::std::result::Result<super::ConfigTheme, ::std::string::String>,
+        vaults: ::std::result::Result<
+            ::std::collections::HashMap<::std::string::String, ::std::string::String>,
+            ::std::string::String,
+        >,
         workspace_mode: ::std::result::Result<super::ConfigWorkspaceMode, ::std::string::String>,
         workspaces: ::std::result::Result<
             ::std::collections::HashMap<::std::string::String, ::std::string::String>,
@@ -825,12 +857,14 @@ pub mod builder {
             Self {
                 color_override: Ok(Default::default()),
                 current_namespace: Ok(Default::default()),
+                current_vault: Ok(Default::default()),
                 current_workspace: Err("no value supplied for current_workspace".to_string()),
                 default_log_mode: Ok(super::defaults::config_default_log_mode()),
                 default_timeout: Ok(super::defaults::config_default_timeout()),
                 interactive: Ok(Default::default()),
                 templates: Ok(Default::default()),
                 theme: Ok(super::defaults::config_theme()),
+                vaults: Ok(Default::default()),
                 workspace_mode: Ok(super::defaults::config_workspace_mode()),
                 workspaces: Err("no value supplied for workspaces".to_string()),
             }
@@ -858,6 +892,16 @@ pub mod builder {
                     e
                 )
             });
+            self
+        }
+        pub fn current_vault<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<::std::string::String>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.current_vault = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for current_vault: {}", e));
             self
         }
         pub fn current_workspace<T>(mut self, value: T) -> Self
@@ -928,6 +972,18 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for theme: {}", e));
             self
         }
+        pub fn vaults<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<
+                ::std::collections::HashMap<::std::string::String, ::std::string::String>,
+            >,
+            T::Error: ::std::fmt::Display,
+        {
+            self.vaults = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for vaults: {}", e));
+            self
+        }
         pub fn workspace_mode<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<super::ConfigWorkspaceMode>,
@@ -957,12 +1013,14 @@ pub mod builder {
             Ok(Self {
                 color_override: value.color_override?,
                 current_namespace: value.current_namespace?,
+                current_vault: value.current_vault?,
                 current_workspace: value.current_workspace?,
                 default_log_mode: value.default_log_mode?,
                 default_timeout: value.default_timeout?,
                 interactive: value.interactive?,
                 templates: value.templates?,
                 theme: value.theme?,
+                vaults: value.vaults?,
                 workspace_mode: value.workspace_mode?,
                 workspaces: value.workspaces?,
             })
@@ -973,12 +1031,14 @@ pub mod builder {
             Self {
                 color_override: Ok(value.color_override),
                 current_namespace: Ok(value.current_namespace),
+                current_vault: Ok(value.current_vault),
                 current_workspace: Ok(value.current_workspace),
                 default_log_mode: Ok(value.default_log_mode),
                 default_timeout: Ok(value.default_timeout),
                 interactive: Ok(value.interactive),
                 templates: Ok(value.templates),
                 theme: Ok(value.theme),
+                vaults: Ok(value.vaults),
                 workspace_mode: Ok(value.workspace_mode),
                 workspaces: Ok(value.workspaces),
             }

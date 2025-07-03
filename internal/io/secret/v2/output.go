@@ -28,12 +28,12 @@ func PrintSecrets(ctx *context.Context, vaultName string, vlt vaultV2.Vault, for
 		if err != nil {
 			logger.Fatalf("Failed to marshal secrets - %v", err)
 		}
-		_, _ = fmt.Fprint(ctx.StdOut(), string(str))
+		_, _ = fmt.Fprint(ctx.StdOut(), str)
 	case common.JSONFormat:
 		str, err := secrets.JSON()
 		if err != nil {
 			logger.Fatalf("Failed to marshal secrets - %v", err)
 		}
-		_, _ = fmt.Fprint(ctx.StdOut(), string(str))
+		_, _ = fmt.Fprint(ctx.StdOut(), str)
 	}
 }

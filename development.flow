@@ -7,8 +7,8 @@ executables:
     parallel:
       failFast: true
       execs:
-        - ref: generate code
-        - ref: generate docs
+          - ref: generate code
+          - ref: generate docs
 
   - verb: validate
     description: |
@@ -101,11 +101,11 @@ executables:
         echo "installing cobra-cli..."
         go install github.com/spf13/cobra-cli@v1.3.0
         echo "installing golangci-lint..."
-        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.1.6
         echo "installing ginkgo..."
         go install github.com/onsi/ginkgo/v2/ginkgo@v2.20.2
         echo "installing goreleaser..."
-        go install github.com/goreleaser/goreleaser@latest
+        go install github.com/goreleaser/goreleaser@v2.2.0
 
   - verb: update
     name: modules

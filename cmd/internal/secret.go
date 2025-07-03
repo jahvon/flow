@@ -177,6 +177,7 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 	asPlainText := flags.ValueFor[bool](ctx, cmd, *flags.OutputSecretAsPlainTextFlag, false)
 	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
 
+	//nolint:nestif
 	if currentVault(ctx.Config) == vaultV2.LegacyVaultReservedName {
 		v := vault.NewVault(logger)
 		secrets, err := v.GetAllSecrets()

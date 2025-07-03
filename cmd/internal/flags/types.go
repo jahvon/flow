@@ -209,7 +209,7 @@ var VaultKeyEnvFlag = &Metadata{
 
 var VaultKeyFileFlag = &Metadata{
 	Name:     "key-file",
-	Usage:    "File path for the vault encryption key. Only used for AES256 vaults.",
+	Usage:    "File path for the vault encryption key. An absolute path is recommended. Only used for AES256 vaults.",
 	Default:  "",
 	Required: false,
 }
@@ -230,7 +230,7 @@ var VaultIdentityEnvFlag = &Metadata{
 
 var VaultIdentityFileFlag = &Metadata{
 	Name:     "identity-file",
-	Usage:    "File path for the Age vault identity. Only used for Age vaults.",
+	Usage:    "File path for the Age vault identity. An absolute path is recommended. Only used for Age vaults.",
 	Default:  "",
 	Required: false,
 }

@@ -35,11 +35,11 @@ func PrintVault(logger tuikitIO.Logger, format, vaultName string) {
 }
 
 func PrintVaultList(logger tuikitIO.Logger, format string, vaultNames []string) {
-	vaults := vaultCollection{Vaults: make([]*vaultEntity, len(vaultNames))}
+	vaults := vaultCollection{Vaults: make([]*vaultEntity, 0, len(vaultNames))}
 	for _, name := range vaultNames {
 		vault, err := vaultFromName(name)
 		if err != nil {
-			logger.Fatalf("Failed to get vault %s - %v", name, err)
+			logger.Fatalf("Vault error %s - %v", name, err)
 		}
 		vaults.Vaults = append(vaults.Vaults, vault)
 	}

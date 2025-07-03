@@ -26,6 +26,10 @@ export interface Config {
    */
   currentNamespace?: string;
   /**
+   * The name of the current vault. This should match a key in the `vaults` map.
+   */
+  currentVault?: string;
+  /**
    * The name of the current workspace. This should match a key in the `workspaces` or `remoteWorkspaces` map.
    */
   currentWorkspace: string;
@@ -57,6 +61,12 @@ export interface Config {
    * The theme of the interactive UI.
    */
   theme?: 'default' | 'everforest' | 'dark' | 'light' | 'dracula' | 'tokyo-night';
+  /**
+   * A map of vault names to their paths. The path should be a valid absolute path to the vault file created by flow.
+   */
+  vaults?: {
+    [k: string]: string;
+  };
   /**
    * The mode of the workspace. This can be either `fixed` or `dynamic`.
    * In `fixed` mode, the current workspace used at runtime is always the one set in the currentWorkspace config field.

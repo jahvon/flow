@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/vault"
 	"github.com/jahvon/flow/tests/utils"
 )
 
@@ -34,7 +33,8 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 	When("creating a new vault (flow vault create)", func() {
 		It("should return the generated key", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx.Context, "vault", "create", "test")).To(Succeed())
+			keyEnv := "FLOW_TEST_VAULT_KEY"
+			Expect(run.Run(ctx.Context, "vault", "create", "test", "--key-env", keyEnv)).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 
@@ -43,7 +43,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 			parts := strings.Split(strings.TrimSpace(lines[0]), ":")
 			Expect(parts).To(HaveLen(2))
 			encryptionKey := strings.TrimSpace(parts[1])
-			Expect(os.Setenv(vault.EncryptionKeyEnvVar, encryptionKey)).To(Succeed())
+			Expect(os.Setenv(keyEnv, encryptionKey)).To(Succeed())
 		})
 
 		It("should create vault with custom path", func() {
@@ -65,7 +65,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 		_, err = writer.Write([]byte("yes\n"))
 		Expect(err).ToNot(HaveOccurred())
 
-		ctx.Context.SetIO(reader, ctx.StdOut())
+		ctx.SetIO(reader, ctx.StdOut())
 		Expect(run.Run(ctx.Context, "vault", "remove", "test2")).To(Succeed())
 		out, err := readFileContent(ctx.StdOut())
 		Expect(err).NotTo(HaveOccurred())
@@ -103,20 +103,20 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 	})
 	When("setting a secret (flow secret set)", func() {
 		It("should save into the vault", func() {
-			Expect(run.Run(ctx.Context, "secret", "set", "my-secret", "my-value")).To(Succeed())
+			Expect(run.Run(ctx.Context, "secret", "set", "message", "my-value")).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
-			Expect(out).To(ContainSubstring("Secret my-secret set in vault"))
+			Expect(out).To(ContainSubstring("Secret message set in vault"))
 		})
 	})
 
 	When("getting a secret (flow secret get)", func() {
 		It("should return the secret value", func() {
 			stdOut := ctx.StdOut()
-			Expect(run.Run(ctx.Context, "secret", "get", "my-secret", "--plaintext")).To(Succeed())
+			Expect(run.Run(ctx.Context, "secret", "get", "message", "--plaintext")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(out).To(ContainSubstring("my-value"))
+			Expect(out).To(ContainSubstring("Thanks for trying flow!"))
 		})
 	})
 
@@ -126,7 +126,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 			Expect(run.Run(ctx.Context, "secret", "list")).To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(out).To(ContainSubstring("my-secret"))
+			Expect(out).To(ContainSubstring("message"))
 		})
 	})
 
@@ -138,10 +138,10 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			ctx.SetIO(reader, ctx.StdOut())
-			Expect(run.Run(ctx.Context, "secret", "remove", "my-secret")).To(Succeed())
+			Expect(run.Run(ctx.Context, "secret", "remove", "message")).To(Succeed())
 			out, err := readFileContent(ctx.StdOut())
 			Expect(err).NotTo(HaveOccurred())
-			Expect(out).To(ContainSubstring("Secret 'my-secret' deleted from vault"))
+			Expect(out).To(ContainSubstring("Secret 'message' deleted from vault"))
 		})
 	})
 })

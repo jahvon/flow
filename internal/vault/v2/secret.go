@@ -186,7 +186,7 @@ func NewSecretList(vaultName string, v Vault) (SecretList, error) {
 		return nil, err
 	}
 
-	result := make(SecretList, len(secrets))
+	result := make(SecretList, 0, len(secrets))
 	for _, key := range secrets {
 		s, _ := v.GetSecret(key)
 		if s == nil {
@@ -207,7 +207,7 @@ type enrichedSecretList struct {
 }
 
 func (l SecretList) AsPlaintext() SecretList {
-	result := make(SecretList, len(l))
+	result := make(SecretList, 0, len(l))
 	for i, s := range l {
 		if s == nil {
 			continue

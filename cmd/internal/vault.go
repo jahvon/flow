@@ -16,6 +16,7 @@ import (
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io"
 	vaultIO "github.com/jahvon/flow/internal/io/vault"
+	"github.com/jahvon/flow/internal/utils"
 	"github.com/jahvon/flow/internal/vault"
 	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
 	"github.com/jahvon/flow/types/config"
@@ -98,6 +99,12 @@ func createVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	if ctx.Config.Vaults == nil {
 		ctx.Config.Vaults = make(map[string]string)
 	}
+
+	curWs := ctx.Config.CurrentWorkspace
+	vaultPath = utils.ExpandDirectory(
+		logger, vaultPath, ctx.Config.Workspaces[curWs], vaultV2.CacheDirectory(vaultName), nil,
+	)
+
 	ctx.Config.Vaults[vaultName] = vaultPath
 	if err := filesystem.WriteConfig(ctx.Config); err != nil {
 		logger.FatalErr(fmt.Errorf("unable to save user configuration: %w", err))
