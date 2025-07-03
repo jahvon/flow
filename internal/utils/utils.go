@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/jahvon/tuikit/io"
@@ -26,13 +27,10 @@ func ExpandPath(logger io.Logger, path, fallbackDir string, env map[string]strin
 		targetPath = fallbackDir
 	case path == "." || strings.HasPrefix(path, "./"):
 		wd, err := os.Getwd()
-		switch {
-		case err != nil:
+		if err != nil {
 			logger.Warnx("unable to get working directory for relative path expansion", "err", err)
 			targetPath = filepath.Join(fallbackDir, path)
-		case path == ".":
-			targetPath = wd
-		case strings.HasPrefix(path, "./"):
+		} else {
 			targetPath = filepath.Join(wd, path[1:])
 		}
 	case strings.HasPrefix(path, "~/"):
@@ -79,11 +77,18 @@ func ExpandDirectory(logger io.Logger, dir, wsPath, execPath string, env map[str
 		expandedPath = ExpandPath(logger, dir, filepath.Dir(execPath), env)
 	}
 
-	if filepath.Ext(expandedPath) != "" {
+	if ext := filepath.Ext(expandedPath); ext != "" && !isHiddenDir(expandedPath) {
 		return filepath.Dir(expandedPath)
 	}
 
 	return expandedPath
+}
+
+func isHiddenDir(path string) bool {
+	// Regex to match hidden directories like .config
+	// This assumes that filenames starting with a dot (.) are hidden directories - this may not be universally true
+	hiddenDirRegex := regexp.MustCompile(`(^|/)\.[^/]+$`)
+	return hiddenDirRegex.MatchString(path)
 }
 
 // validateSecurePath checks if a path is safe to use
