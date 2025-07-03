@@ -26,12 +26,13 @@ func ExpandPath(logger io.Logger, path, fallbackDir string, env map[string]strin
 		targetPath = fallbackDir
 	case path == "." || strings.HasPrefix(path, "./"):
 		wd, err := os.Getwd()
-		if err != nil {
+		switch {
+		case err != nil:
 			logger.Warnx("unable to get working directory for relative path expansion", "err", err)
 			targetPath = filepath.Join(fallbackDir, path)
-		} else if path == "." {
+		case path == ".":
 			targetPath = wd
-		} else {
+		case strings.HasPrefix(path, "./"):
 			targetPath = filepath.Join(wd, path[1:])
 		}
 	case strings.HasPrefix(path, "~/"):
