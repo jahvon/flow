@@ -29,6 +29,8 @@ func ExpandPath(logger io.Logger, path, fallbackDir string, env map[string]strin
 		if err != nil {
 			logger.Warnx("unable to get working directory for relative path expansion", "err", err)
 			targetPath = filepath.Join(fallbackDir, path)
+		} else if path == "." {
+			targetPath = wd
 		} else {
 			targetPath = filepath.Join(wd, path[1:])
 		}
