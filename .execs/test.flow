@@ -45,6 +45,7 @@ executables:
     name: unit
     description: Run unit tests with coverage
     serial:
+      dir: //
       execs:
         - cmd: |
             pwd
@@ -52,7 +53,6 @@ executables:
             echo "Running Go unit tests with coverage..."
             go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=unit ./...
             echo "Unit tests completed"
-          dir: //
           retries: 3
 
 
@@ -60,6 +60,7 @@ executables:
     name: e2e
     description: Run E2E tests with instrumented binary and coverage
     serial:
+      dir: //
       execs:
         - cmd: |
             pwd
@@ -67,7 +68,6 @@ executables:
             echo "Running Go E2E tests..."
             go test -race -coverprofile=unit-coverage.out -covermode=atomic -coverpkg=./... -tags=e2e ./tests/...
             echo "E2E tests completed"
-          dir: //
           retries: 1
 
   - verb: test

@@ -36,6 +36,7 @@ executables:
     tags: [go]
     description: Run linters and formatters
     parallel:
+      dir: //
       execs:
         - cmd: go fmt ./...
           dir: //
@@ -49,7 +50,6 @@ executables:
             fi
             
             golangci-lint run ./... --fix --output.sarif.path lint.sarif
-          dir: //
 
   - verb: lint
     name: ts
