@@ -26,7 +26,7 @@ jobs:
           executable: 'build container'
           timeout: '20m'
           continue-on-error: true
-          flow-version: 'v1.0.0-beta2'
+          flow-version: 'main'
         id: container
       - name: Check container build
         run: |
