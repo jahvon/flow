@@ -67,7 +67,18 @@ executables:
     description: Generate TypeScript types for the Tauri's frontend.
     exec:
       dir: //desktop
-      cmd: npm run generate-types
+      cmd: |
+        if ! command -v npm &> /dev/null; then
+          echo "npm is not installed. Please install Node.js and npm."
+          exit 1
+        fi
+        if [ ! -d "node_modules" ]; then
+          echo "Installing npm dependencies..."
+          npm install
+        else
+          echo "npm dependencies already installed"
+        fi
+        npm run generate-types
 
   - verb: generate
     name: backend
