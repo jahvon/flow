@@ -47,6 +47,8 @@ executables:
     serial:
       execs:
         - cmd: |
+            pwd
+            ls
             echo "Running Go unit tests with coverage..."
             go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=unit ./...
             echo "Unit tests completed"
@@ -60,6 +62,8 @@ executables:
     serial:
       execs:
         - cmd: |
+            pwd
+            ls
             echo "Running Go E2E tests..."
             go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=e2e ./tests/...
             echo "E2E tests completed"

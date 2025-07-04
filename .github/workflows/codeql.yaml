@@ -1,4 +1,4 @@
-name: Analyze
+name: CodeQL
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     - cron: "00 5 * * SAT"
 
 jobs:
-  codeql:
+  analyze:
     permissions:
       actions: read
       contents: read

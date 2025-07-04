@@ -44,6 +44,7 @@ executables:
             if ! command -v golangci-lint &> /dev/null; then
               echo "Installing golangci-lint..."
               curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.1.6
+              export PATH="$PATH:./bin"
             fi
             
             golangci-lint run ./... --fix --output.sarif.path lint.sarif
