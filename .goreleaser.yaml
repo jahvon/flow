@@ -26,10 +26,10 @@ builds:
       -X "github.com/jahvon/flow/cmd/internal/version.buildDate={{ .Date }}"
 
 gomod:
-  proxy: true
+  proxy: false
 
 archives:
-  - format: tar.gz
+  - formats: [ 'tar.gz' ]
     files:
       - LICENSE
       - README.md
@@ -44,7 +44,6 @@ brews:
   - name: flow
     homepage: https://flowexec.io
     license: Apache-2.0
-    directory: Formula
     repository:
       owner: jahvon
       name: homebrew-tap
