@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+tags: [development, setup]
+executables:
+  - verb: setup
+    name: dev
+    description: Setup development environment
+    serial:
+      execs:
+        - ref: install tools
+        - ref: generate
+        - cmd: echo "✅ flow development environment ready"
+
+  - verb: install
+    name: gopath
+    aliases: [local, cli]
+    description: Install the Go CLI to the GOPATH from local source
+    exec:
+      dir: //
+      cmd: go install ./...
+
+  - verb: install
+    name: npm
+    aliases: [node, modules]
+    tags: [npm, desktop]
+    exec:
+      dir: //desktop
+      cmd: npm install
+
+  - verb: start
+    name: site
+    aliases: [docs]
+    description: Run the documentation site locally
+    exec:
+      dir: //
+      cmd: docsify serve docs --open
+
+  - verb: start
+    name: recording
+    aliases: [vhs]
+    description: Record a demo of the Flow CLI and save it
+    tags: [vhs]
+    exec:
+      params:
+        - envKey: OUTPUT
+          text: docs/_media/demo.gif
+      dir: //
+      cmd: vhs -o $OUTPUT docs/demo.tape
+
+  - verb: start
+    name: tauri
+    aliases: [desktop]
+    tags: [desktop]
+    description: Start the Tauri desktop app in development mode.
+    timeout: "24h"
+    exec:
+      dir: //desktop
+      cmd: npm run tauri dev
+
+  - verb: start
+    name: storybook
+    tags: [desktop]
+    description: Start the Tauri desktop app's Storybook server.
+    timeout: "24h"
+    exec:
+      dir: //desktop
+      cmd: npm run storybook

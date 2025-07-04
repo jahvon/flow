@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+visibility: public
+tags: [docs]
+executables:
+  - verb: show
+    name: flowfile
+    aliases: [executables, exec, executable]
+    description: Render the FlowFile reference documentation
+    render:
+      dir: //docs/types
+      templateFile: flowfile.md
+
+  - verb: show
+    name: ws
+    aliases: [workspace]
+    description: Render the Flow Workspace reference documentation
+    render:
+      dir: //docs/types
+      templateFile: workspace.md
+
+  - verb: show
+    name: cfg
+    aliases: [config]
+    description: Render the flow user configuration reference documentation
+    render:
+      dir: //docs/types
+      templateFile: config.md

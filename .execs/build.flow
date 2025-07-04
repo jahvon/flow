@@ -1,0 +1,88 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+visibility: private
+tags: [development]
+executables:
+  - verb: generate
+    description: Generate code and documentation for the project.
+    serial:
+      failFast: false
+      execs:
+        - ref: generate code
+        - ref: generate docs
+        - ref: generate frontend
+        - ref: generate backend
+
+  - verb: build
+    name: binary
+    aliases: [bin, flow]
+    description: Build the flow binary.
+    exec:
+      dir: //
+      args:
+        - envKey: BIN_PATH
+          default: .bin
+          pos: 1
+          required: false
+      params:
+        - envKey: BIN_NAME
+          text: flow
+      cmd: |
+        go build -o ${BIN_PATH}/${BIN_NAME}
+        echo "flow built at ${BIN_PATH}/${BIN_NAME}"
+
+  - verb: generate
+    name: docs
+    aliases: [documentation]
+    serial:
+      dir: //
+      execs:
+        - cmd: ./scripts/completions.sh
+        - cmd: go run ./tools/docsgen/.
+
+  - verb: generate
+    name: code
+    serial:
+      dir: //
+      execs:
+        - cmd: |
+            echo "Generating go CLI code..."
+            go generate ./...
+            echo "All go code generated successfully"
+        - ref: generate frontend
+        - ref: generate backend
+
+  - verb: generate
+    name: tauri
+    description: Generate code for the Tauri frontend and backend.
+    parallel:
+      execs:
+        - ref: generate frontend
+        - ref: generate backend
+
+  - verb: generate
+    name: frontend
+    aliases: [ts]
+    description: Generate TypeScript types for the Tauri's frontend.
+    exec:
+      dir: //desktop
+      cmd: npm run generate-types
+
+  - verb: generate
+    name: backend
+    aliases: [rust]
+    description: Generate code for the Tauri desktop app's backend.
+    exec:
+      dir: //desktop
+      cmd: ./scripts/generate-rust-types.sh
+
+  - verb: update
+    name: modules
+    description: Update project dependencies
+    tags: [go]
+    aliases: [gomod, deps]
+    exec:
+      dir: //
+      cmd: |
+        echo "updating go modules..."
+        go get -u ./...
+        go mod tidy

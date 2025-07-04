@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+tags: [development, container]
+executables:
+  - verb: build
+    name: container
+    description: Build the flow container image
+    aliases: [docker, image]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "building go binary..."
+        GOOS=linux GOARCH=amd64 go build -o flow
+        echo "building container image..."
+        $BUILDER build -t $IMAGE_REPO:$IMAGE_TAG .
+
+  - verb: run
+    name: container
+    description: Run the flow container image
+    aliases: [image, docker]
+    exec:
+      dir: //
+      logMode: text
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+        - envKey: WORKSPACE
+          default: active
+          flag: workspace
+        - envKey: GIT_REPO
+          default: https://github.com/jahvon/flow.git
+          flag: repo
+        - envKey: BRANCH
+          default: main
+          flag: branch
+        - envKey: CONTAINER_CMD
+          default: "get workspace"
+          flag: cmd
+      cmd: |
+        echo "running container image..."
+        $BUILDER run -it -e GIT_REPO=$GIT_REPO \
+          -e BRANCH=$BRANCH \
+          -e WORKSPACE=$WORKSPACE \
+          -t $IMAGE_REPO:$IMAGE_TAG \
+          $CONTAINER_CMD
+
+  - verb: push
+    name: container
+    description: Push the flow container image to the registry
+    aliases: [image, docker]
+    exec:
+      dir: //
+      args:
+        - envKey: BUILDER
+          default: docker
+          flag: builder
+        - envKey: IMAGE_REPO
+          default: jahvon/flow
+          flag: repo
+        - envKey: IMAGE_TAG
+          default: latest
+          flag: tag
+      cmd: |
+        echo "pushing container image..."
+        $BUILDER push $IMAGE_REPO:$IMAGE_TAG

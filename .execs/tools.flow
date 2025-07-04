@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+tags: [development, tools]
+executables:
+  - verb: install
+    name: tools
+    description: Install project Go tools
+    tags: [go, cli]
+    parallel:
+      dir: //
+      failFast: false
+      maxThreads: 3
+      execs:
+        - cmd: |
+            if ! command -v go &> /dev/null; then
+              echo "Go is not installed. Please install Go first."
+              exit 1
+            fi
+        - cmd: |
+            if ! command -v cobra-cli &> /dev/null; then
+              echo "cobra-cli is not installed. Installing..."
+              go install github.com/spf13/cobra-cli@v1.3.0
+            fi
+        - cmd: |
+            if ! command -v goreleaser &> /dev/null; then
+              echo "goreleaser is not installed. Installing..."
+              go install github.com/goreleaser/goreleaser@v2.2.0
+            fi
+        - cmd: |
+            if ! command -v golangci-lint &> /dev/null; then
+              echo "golangci-lint is not installed. Installing..."
+              go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.1.6
+            fi
+        - cmd: |
+            if ! command -v ginkgo &> /dev/null; then
+              echo "ginkgo is not installed. Installing..."
+              go install github.com/onsi/ginkgo/v2/ginkgo@v2.20.2
+            fi
+        - cmd: |
+            if ! command -v mockgen &> /dev/null; then
+              echo "mockgen is not installed. Installing..."
+              go install go.uber.org/mock/mockgen@v0.4.0
+            fi
+
+  - verb: install
+    name: docsify
+    aliases: [deps]
+    tags: [docs, npm]
+    description: Install the documentation site dependencies with node (globally)
+    exec:
+      cmd: |
+        if ! command -v docsify-cli &> /dev/null; then
+          echo "docsify-cli is not installed. Installing..."
+          npm i docsify-cli -g
+        fi

@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+tags: [development, test]
+executables:
+  - verb: create
+    name: snapshot
+    description: Create a snapshot release
+    aliases: [release, snap]
+    exec:
+      dir: //
+      cmd: |
+        if ! command -v goreleaser &> /dev/null; then
+          echo "goreleaser is not installed. Please install it first."
+          exit 1
+        fi
+        
+        echo "creating snapshot release..."
+        goreleaser release --snapshot --clean

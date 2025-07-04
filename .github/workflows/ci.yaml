@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read # for actions/checkout to fetch code
+  security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.24"
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'lint go'
+          timeout: '5m'
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: lint.sarif
+          category: golangci-lint
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.24"
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'test unit'
+          timeout: '5m'
+        id: unit-tests
+      - name: Upload unit test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage
+          path: unit-coverage.out
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.24"
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'test e2e'
+          timeout: '10m'
+          secrets: |
+            {
+              "test-secret": "test-value-from-action",
+              "another-secret": "another-test-value"
+            }
+        id: e2e-tests
+      - name: Upload E2E test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-coverage
+          path: e2e-coverage.out
+
+  coverage:
+    needs: [unit-tests, e2e-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'transform coverage'
+          timeout: '5m'
+
+      - name: Upload to codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: merged-coverage.out
+          flags: combined
+          name: flow-coverage
+          fail_ci_if_error: false
+
+  validate-generated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.24"
+      - name: Install mockgen
+        run: go install go.uber.org/mock/mockgen@v0.4.0
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'generate'
+          timeout: '10m'
+      - name: Check for uncommitted changes
+        uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'validate generated'
+          timeout: '2m'
+
+  build-matrix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'build binary'
+          timeout: '10m'
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'test binary'
+          timeout: '5m'
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jahvon/flow-action@v1.1
+        with:
+          executable: 'scan security'
+          timeout: '10m'
+      - name: Upload gosec SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: gosec.sarif
+      - name: Upload govuln SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: govuln.sarif

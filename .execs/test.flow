@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+tags: [development, test]
+executables:
+  - verb: test
+    name: all
+    description: Run all Go tests (unit + e2e) in parallel
+    parallel:
+      failFast: false
+      maxThreads: 2
+      execs:
+        - ref: test unit
+        - ref: test e2e
+
+  - verb: test
+    name: binary
+    aliases: [cli]
+    tags: [go, cli]
+    description: Test that the built binary works correctly
+    exec:
+      dir: //
+      args:
+        - envKey: BIN_PATH
+          default: .bin
+          pos: 1
+          required: false
+      params:
+        - envKey: BIN_NAME
+          text: flow
+      cmd: |
+        echo "Testing flow binary installation..."
+        
+        if [ -f "${BIN_PATH}/${BIN_NAME}" ]; then
+          echo "Testing basic commands..."
+          "${BIN_PATH}/${BIN_NAME}" --version
+          "${BIN_PATH}/${BIN_NAME}" --help
+          "${BIN_PATH}/${BIN_NAME}" exec --help
+          "${BIN_PATH}/${BIN_NAME}" browse --help
+          echo "✅ Binary installation test passed"
+        else
+          echo "❌ flow binary not found"
+          exit 1
+        fi
+
+  - verb: test
+    name: unit
+    description: Run unit tests with coverage
+    exec:
+      dir: //
+      cmd: |
+        echo "Running Go unit tests with coverage..."
+        go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=unit ./...
+        echo "Unit tests completed"
+
+
+  - verb: test
+    name: e2e
+    description: Run E2E tests with instrumented binary and coverage
+    exec:
+      dir: //
+      cmd: |
+        echo "Running Go E2E tests..."
+        go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=e2e ./tests/...
+        echo "E2E tests completed"
+
+  - verb: test
+    name: desktop
+    tags: [desktop]
+    description: Run desktop application tests
+    exec:
+      dir: //desktop
+      cmd: |
+        echo "Running Tauri desktop tests..."
+        npm test
+        echo "Desktop tests completed"
+
+  - verb: transform
+    name: coverage
+    tags: [codecov]
+    description: Combine Go coverage reports
+    exec:
+      dir: //
+      cmd: |
+        echo "Combining coverage reports..."
+        
+        echo "mode: atomic" > merged-coverage.out
+        
+        if [ -f "unit-coverage.out" ]; then
+          tail -n +2 unit-coverage.out >> merged-coverage.out
+          echo "Added unit coverage"
+        fi
+        
+        if [ -f "e2e-coverage.out" ]; then
+          tail -n +2 e2e-coverage.out >> merged-coverage.out
+          echo "Added E2E coverage"
+        fi
+        
+        echo "Coverage reports combined into merged-coverage.out"
+
+  - verb: test
+    name: form-demo
+    visibility: internal
+    description: Test executable to demonstrate the new form functionality with parameters and arguments.
+    exec:
+      dir: //
+      cmd: echo "Testing form functionality"
+      params:
+        - prompt: "What is your name?"
+          envKey: "USER_NAME"
+        - prompt: "What is your favorite color?"
+          envKey: "FAVORITE_COLOR"
+        - text: "demo"
+          envKey: "DEMO_MODE"
+      args:
+        - pos: 1
+          envKey: "MESSAGE"
+          required: true
+          type: "string"
+        - flag: "verbose"
+          envKey: "VERBOSE"
+          type: "bool"
+          default: "false"
+        - flag: "count"
+          envKey: "COUNT"
+          type: "int"
+          default: "1"
