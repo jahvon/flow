@@ -9,8 +9,6 @@ executables:
       execs:
         - ref: generate code
         - ref: generate docs
-        - ref: generate frontend
-        - ref: generate backend
 
   - verb: build
     name: binary

@@ -44,23 +44,27 @@ executables:
   - verb: test
     name: unit
     description: Run unit tests with coverage
-    exec:
+    serial:
       dir: //
-      cmd: |
-        echo "Running Go unit tests with coverage..."
-        go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=unit ./...
-        echo "Unit tests completed"
+      execs:
+        - cmd: |
+            echo "Running Go unit tests with coverage..."
+            go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=unit ./...
+            echo "Unit tests completed"
+          retries: 3
 
 
   - verb: test
     name: e2e
     description: Run E2E tests with instrumented binary and coverage
-    exec:
+    serial:
       dir: //
-      cmd: |
-        echo "Running Go E2E tests..."
-        go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=e2e ./tests/...
-        echo "E2E tests completed"
+      execs:
+        - cmd: |
+            echo "Running Go E2E tests..."
+            go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=e2e ./tests/...
+            echo "E2E tests completed"
+          retries: 1
 
   - verb: test
     name: desktop

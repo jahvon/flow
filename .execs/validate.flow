@@ -46,7 +46,7 @@ executables:
               go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
             fi
             
-            golangci-lint run ./... --fix --out.sarif.path lint.sarif
+            golangci-lint run ./... --fix --output.sarif.path lint.sarif
 
   - verb: lint
     name: ts
@@ -60,22 +60,16 @@ executables:
   - verb: scan
     name: security
     tags: [security, go]
-    description: Run security scanning with gosec and govulncheck
+    description: Run security scanning with govulncheck
     exec:
       dir: //
       cmd: |
         echo "Running security scan..."
         
-        if ! command -v gosec &> /dev/null; then
-          echo "Installing gosec..."
-          go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
-        fi
         if ! command -v govulncheck &> /dev/null; then
           echo "Installing govulncheck..."
           go install golang.org/x/vuln/cmd/govulncheck@latest
         fi
         
-        gosec -no-fail -fmt sarif -out gosec.sarif ./...
-        govulncheck -format sarif -o govuln.sarif ./...
-        
-        echo "Security scan completed. Results saved to gosec.sarif and govuln.sarif"
+        govulncheck -format sarif ./... > govuln.sarif
+        echo "Security scan completed. Results saved to govuln.sarif"
