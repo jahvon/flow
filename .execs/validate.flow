@@ -36,10 +36,11 @@ executables:
     tags: [go]
     description: Run linters and formatters
     parallel:
-      dir: //
       execs:
-        - cmd: go fmt ./... 2>/dev/null || true
+        - cmd: go fmt ./...
+          dir: //
         - cmd: go mod tidy
+          dir: //
         - cmd: |
             if ! command -v golangci-lint &> /dev/null; then
               echo "Installing golangci-lint..."
@@ -48,6 +49,7 @@ executables:
             fi
             
             golangci-lint run ./... --fix --output.sarif.path lint.sarif
+          dir: //
 
   - verb: lint
     name: ts
