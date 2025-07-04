@@ -8,6 +8,7 @@ executables:
       failFast: false
       execs:
         - ref: generate cli
+        - ref: generate completions
         - ref: generate docs
         - ref: generate frontend
         - ref: generate backend
@@ -31,14 +32,19 @@ executables:
         echo "flow built at ${BIN_PATH}/${BIN_NAME}"
 
   - verb: generate
+    name: completions
+    tags: [docs]
+    exec:
+      dir: //
+      cmd: ./scripts/completions.sh
+
+  - verb: generate
     name: docs
     aliases: [documentation]
     tags: [docs]
-    serial:
+    exec:
       dir: //
-      execs:
-        - cmd: ./scripts/completions.sh
-        - cmd: go run ./tools/docsgen/.
+      cmd: go run ./tools/docsgen/.
 
   - verb: generate
     name: cli
