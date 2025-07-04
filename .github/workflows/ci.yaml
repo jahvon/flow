@@ -98,10 +98,12 @@ jobs:
           flow-version: 'main'
       - name: Upload to codecov
         uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           file: merged-coverage.out
           flags: combined
-          name: flow-coverage
+          name: cli-coverage
           fail_ci_if_error: false
 
   validate-generated:
