@@ -61,7 +61,7 @@ func (r *parallelRunner) Exec(
 	return fmt.Errorf("no parallel executables to run")
 }
 
-//nolint:funlen
+//nolint:funlen,gocognit
 func handleExec(
 	ctx *context.Context, parent *executable.Executable,
 	eng engine.Engine,
@@ -117,21 +117,23 @@ func handleExec(
 			maps.Copy(execPromptedEnv, a)
 		}
 
-		var dir executable.Directory
 		switch {
 		case exec.Exec != nil:
 			fields := map[string]interface{}{"step": exec.ID()}
 			exec.Exec.SetLogFields(fields)
-			dir = exec.Exec.Dir
-		case parent.Parallel != nil:
-			dir = exec.Parallel.Dir
-		case parent.Serial != nil:
-			dir = exec.Serial.Dir
+			if parallelSpec.Dir != "" && exec.Exec.Dir == "" {
+				exec.Exec.Dir = parallelSpec.Dir
+			}
+		case exec.Parallel != nil:
+			if parallelSpec.Dir != "" && exec.Parallel.Dir == "" {
+				exec.Parallel.Dir = parallelSpec.Dir
+			}
+		case exec.Serial != nil:
+			if parallelSpec.Dir != "" && exec.Serial.Dir == "" {
+				exec.Serial.Dir = parallelSpec.Dir
+			}
 		}
-		if dir == "" {
-			dir = parent.Parallel.Dir
-		}
-		exec.Exec.Dir = dir
+
 		runExec := func() error {
 			err := runner.Exec(ctx, exec, eng, execPromptedEnv)
 			if err != nil {
