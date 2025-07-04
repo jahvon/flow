@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Test container build
-        uses: jahvon/flow-action@v0.1.0beta1
+        uses: jahvon/flow-action@v0.1.0beta2
         with:
           executable: 'build container'
           timeout: '20m'
