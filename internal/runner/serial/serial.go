@@ -42,7 +42,7 @@ func (r *serialRunner) Exec(
 	inputEnv map[string]string,
 ) error {
 	serialSpec := e.Serial
-	if err := runner.SetEnv(ctx.Logger, e.Env(), inputEnv); err != nil {
+	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 

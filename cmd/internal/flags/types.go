@@ -183,3 +183,54 @@ var ParameterValueFlag = &Metadata{
 		"This will override any existing parameter values defined for the executable.",
 	Default: []string{},
 }
+
+var VaultTypeFlag = &Metadata{
+	Name:      "type",
+	Shorthand: "t",
+	Usage:     "Vault type. Either age or aes256",
+	Default:   "aes256",
+	Required:  false,
+}
+
+var VaultPathFlag = &Metadata{
+	Name:      "path",
+	Shorthand: "p",
+	Usage:     "Directory that the vault will use to store its data. If not set, the vault will be stored in the flow cache directory.",
+	Default:   "",
+	Required:  false,
+}
+
+var VaultKeyEnvFlag = &Metadata{
+	Name:     "key-env",
+	Usage:    "Environment variable name for the vault encryption key. Only used for AES256 vaults.",
+	Default:  "",
+	Required: false,
+}
+
+var VaultKeyFileFlag = &Metadata{
+	Name:     "key-file",
+	Usage:    "File path for the vault encryption key. An absolute path is recommended. Only used for AES256 vaults.",
+	Default:  "",
+	Required: false,
+}
+
+var VaultRecipientsFlag = &Metadata{
+	Name:     "recipients",
+	Usage:    "Comma-separated list of recipient keys for the vault. Only used for Age vaults.",
+	Default:  "",
+	Required: false,
+}
+
+var VaultIdentityEnvFlag = &Metadata{
+	Name:     "identity-env",
+	Usage:    "Environment variable name for the Age vault identity. Only used for Age vaults.",
+	Default:  "",
+	Required: false,
+}
+
+var VaultIdentityFileFlag = &Metadata{
+	Name:     "identity-file",
+	Usage:    "File path for the Age vault identity. An absolute path is recommended. Only used for Age vaults.",
+	Default:  "",
+	Required: false,
+}

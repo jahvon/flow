@@ -1,1 +1,1 @@
-echo "Hello $NAME!"
+echo "$MESSAGE"

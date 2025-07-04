@@ -92,7 +92,7 @@ linters:
         text: G115
       - linters:
           - staticcheck
-        text: SA5011
+        text: (SA5011|SA5001)
       - path: (.+)\.go$
         text: declaration of "(err|ctx)" shadows declaration at
     paths:

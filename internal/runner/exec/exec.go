@@ -35,11 +35,11 @@ func (r *execRunner) Exec(
 ) error {
 	execSpec := e.Exec
 	defaultEnv := runner.DefaultEnv(ctx, e)
-	envMap, err := runner.BuildEnvMap(ctx.Logger, e.Env(), inputEnv, defaultEnv)
+	envMap, err := runner.BuildEnvMap(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envList, err := runner.BuildEnvList(ctx.Logger, e.Env(), inputEnv, defaultEnv)
+	envList, err := runner.BuildEnvList(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}

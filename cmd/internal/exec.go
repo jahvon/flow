@@ -26,6 +26,7 @@ import (
 	"github.com/jahvon/flow/internal/services/store"
 	argUtils "github.com/jahvon/flow/internal/utils/args"
 	"github.com/jahvon/flow/internal/vault"
+	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
 	"github.com/jahvon/flow/types/executable"
 )
 
@@ -156,7 +157,9 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		}
 	}
 
-	setAuthEnv(ctx, cmd, e)
+	if ctx.Config.CurrentVault == nil || *ctx.Config.CurrentVault == vaultV2.LegacyVaultReservedName {
+		setAuthEnv(ctx, cmd, e, false)
+	}
 	startTime := time.Now()
 	eng := engine.NewExecEngine()
 	if err := runner.Exec(ctx, e, eng, envMap); err != nil {
@@ -215,8 +218,8 @@ func runByRef(ctx *context.Context, cmd *cobra.Command, argsStr string) error {
 	return nil
 }
 
-func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.Executable) {
-	if authRequired(ctx, executable) {
+func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.Executable, force bool) {
+	if authRequired(ctx, executable) || force {
 		form, err := views.NewForm(
 			io.Theme(ctx.Config.Theme.String()),
 			ctx.StdIn(),

@@ -92,7 +92,6 @@ func registerSetNamespaceCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Aliases: []string{"ns"},
 		Short:   "Change the current namespace.",
 		Args:    cobra.ExactArgs(1),
-		PreRun:  func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:     func(cmd *cobra.Command, args []string) { setNamespaceFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(namespaceCmd)
@@ -115,7 +114,6 @@ func registerSetWorkspaceModeCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Short:     "Switch between fixed and dynamic workspace modes.",
 		Args:      cobra.ExactArgs(1),
 		ValidArgs: []string{"fixed", "dynamic"},
-		PreRun:    func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:       func(cmd *cobra.Command, args []string) { setWorkspaceModeFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(workspaceModeCmd)
@@ -142,7 +140,6 @@ func registerSetLogModeCmd(ctx *context.Context, setCmd *cobra.Command) {
 		Short:     "Set the default log mode.",
 		Args:      cobra.ExactArgs(1),
 		ValidArgs: []string{"logfmt", "json", "text", "hidden"},
-		PreRun:    func(cmd *cobra.Command, args []string) { printContext(ctx, cmd) },
 		Run:       func(cmd *cobra.Command, args []string) { setLogModeFunc(ctx, cmd, args) },
 	}
 	setCmd.AddCommand(logModeCmd)

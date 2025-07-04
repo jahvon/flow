@@ -82,6 +82,9 @@ type Config struct {
 	//
 	CurrentNamespace string `json:"currentNamespace,omitempty" yaml:"currentNamespace,omitempty" mapstructure:"currentNamespace,omitempty"`
 
+	// The name of the current vault. This should match a key in the `vaults` map.
+	CurrentVault *string `json:"currentVault,omitempty" yaml:"currentVault,omitempty" mapstructure:"currentVault,omitempty"`
+
 	// The name of the current workspace. This should match a key in the `workspaces`
 	// or `remoteWorkspaces` map.
 	CurrentWorkspace string `json:"currentWorkspace" yaml:"currentWorkspace" mapstructure:"currentWorkspace"`
@@ -110,6 +113,10 @@ type Config struct {
 	// The theme of the interactive UI.
 	Theme ConfigTheme `json:"theme,omitempty" yaml:"theme,omitempty" mapstructure:"theme,omitempty"`
 
+	// A map of vault names to their paths. The path should be a valid absolute path
+	// to the vault file created by flow.
+	Vaults ConfigVaults `json:"vaults,omitempty" yaml:"vaults,omitempty" mapstructure:"vaults,omitempty"`
+
 	// The mode of the workspace. This can be either `fixed` or `dynamic`.
 	// In `fixed` mode, the current workspace used at runtime is always the one set in
 	// the currentWorkspace config field.
@@ -136,6 +143,10 @@ const ConfigThemeDracula ConfigTheme = "dracula"
 const ConfigThemeEverforest ConfigTheme = "everforest"
 const ConfigThemeLight ConfigTheme = "light"
 const ConfigThemeTokyoNight ConfigTheme = "tokyo-night"
+
+// A map of vault names to their paths. The path should be a valid absolute path to
+// the vault file created by flow.
+type ConfigVaults map[string]string
 
 type ConfigWorkspaceMode string
 

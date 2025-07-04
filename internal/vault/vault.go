@@ -23,6 +23,8 @@ const (
 	cacheDirName = "vault"
 )
 
+// Deprecated: Use the github.com/jahvon/vault package instead.
+// This vault will be removed in a future release.
 type Vault struct {
 	cachedEncryptionKey string
 	cachedData          *data

@@ -39,6 +39,7 @@ func (r *launchRunner) Exec(
 	launchSpec := e.Launch
 	envMap, err := runner.BuildEnvMap(
 		ctx.Logger,
+		ctx.Config.CurrentVaultName(),
 		e.Env(),
 		inputEnv,
 		runner.DefaultEnv(ctx, e),
@@ -46,7 +47,7 @@ func (r *launchRunner) Exec(
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	if err := runner.SetEnv(ctx.Logger, e.Env(), envMap); err != nil {
+	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), envMap); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	launchSpec.URI = os.ExpandEnv(launchSpec.URI)

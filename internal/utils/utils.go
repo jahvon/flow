@@ -5,57 +5,124 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/jahvon/tuikit/io"
 	"github.com/pkg/errors"
 )
 
-// ExpandDirectory expands the directory field of an executable to an absolute path.
+// ExpandPath expands a general path to an absolute path with security validation.
 // The following transformations are applied:
-// - empty dir -> execPath
-// - // -> wsPath + dir path
-// - . -> current working directory + dir path
-// - relative path -> execPath + dir path
+// - empty path -> fallbackPath (directory portion)
+// - ~/path -> home directory + path
+// - ./path or . -> current working directory + path
+// - /path -> absolute path
+// - relative path -> fallbackPath (directory portion) + path
 // - ${envVar} -> expanded to the value from env map.
-func ExpandDirectory(logger io.Logger, dir, wsPath, execPath string, env map[string]string) string {
-	execDir := filepath.Dir(execPath)
-	var targetDir string
+func ExpandPath(logger io.Logger, path, fallbackDir string, env map[string]string) string {
+	var targetPath string
 	switch {
-	case dir == "":
-		targetDir = execDir
-	case strings.HasPrefix(dir, "//"):
-		targetDir = strings.Replace(dir, "//", wsPath+"/", 1)
-	case dir == "." || strings.HasPrefix(dir, "./"):
+	case path == "":
+		targetPath = fallbackDir
+	case path == "." || strings.HasPrefix(path, "./"):
 		wd, err := os.Getwd()
 		if err != nil {
 			logger.Warnx("unable to get working directory for relative path expansion", "err", err)
-			targetDir = filepath.Join(execDir, dir)
+			targetPath = filepath.Join(fallbackDir, path)
 		} else {
-			targetDir = filepath.Join(wd, dir[1:])
+			targetPath = filepath.Join(wd, path[1:])
 		}
-	case strings.HasPrefix(dir, "~/"):
+	case strings.HasPrefix(path, "~/"):
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			logger.Warnx("unable to get user home directory for relative path expansion", "err", err)
-			targetDir = filepath.Join(execDir, dir)
+			targetPath = filepath.Join(fallbackDir, path)
 		} else {
-			targetDir = filepath.Join(homeDir, dir[2:])
+			targetPath = filepath.Join(homeDir, path[2:])
 		}
-	case strings.HasPrefix(dir, "/"):
-		targetDir = dir
+	case strings.HasPrefix(path, "/"):
+		targetPath = path
 	default:
-		targetDir = execDir + "/" + dir
+		targetPath = filepath.Join(fallbackDir, path)
 	}
 
-	targetDir = os.Expand(targetDir, func(key string) string {
+	targetPath = os.Expand(targetPath, func(key string) string {
 		val, found := env[key]
 		if !found {
-			logger.Warnx("unable to find env key in directory for expansion", "key", key)
+			logger.Warnx("unable to find env key in path expansion", "key", key)
 		}
 		return val
 	})
-	return filepath.Clean(targetDir)
+
+	if err := validateSecurePath(targetPath); err != nil {
+		logger.Fatalx("path failed security validation", "path", targetPath, "err", err)
+		return "" // Shouldn't get here with fatal logger, but just in case
+	}
+
+	return filepath.Clean(targetPath)
+}
+
+// ExpandDirectory expands the directory field of an executable to an absolute path.
+// The following transformations are applied:
+// - empty dir -> execPath (directory portion)
+// - // -> wsPath + dir path (workspace-specific)
+// - all other paths -> delegated to ExpandPath
+// If the input contains a filename, returns just the directory portion.
+func ExpandDirectory(logger io.Logger, dir, wsPath, execPath string, env map[string]string) string {
+	var expandedPath string
+	if wsPath != "" && strings.HasPrefix(dir, "//") {
+		expandedPath = strings.Replace(dir, "//", wsPath+"/", 1)
+	} else {
+		expandedPath = ExpandPath(logger, dir, filepath.Dir(execPath), env)
+	}
+
+	if ext := filepath.Ext(expandedPath); ext != "" && !isHiddenDir(expandedPath) {
+		return filepath.Dir(expandedPath)
+	}
+
+	return expandedPath
+}
+
+func isHiddenDir(path string) bool {
+	// Regex to match hidden directories like .config
+	// This assumes that filenames starting with a dot (.) are hidden directories - this may not be universally true
+	hiddenDirRegex := regexp.MustCompile(`(^|/)\.[^/]+$`)
+	return hiddenDirRegex.MatchString(path)
+}
+
+// validateSecurePath checks if a path is safe to use
+func validateSecurePath(path string) error {
+	if path == "" {
+		return fmt.Errorf("path cannot be empty")
+	}
+
+	// Check for directory traversal attempts
+	cleanPath := filepath.Clean(path)
+	if strings.Contains(cleanPath, "..") {
+		return fmt.Errorf("path contains directory traversal")
+	}
+
+	// Check for null bytes
+	if strings.Contains(path, "\x00") {
+		return fmt.Errorf("path contains null bytes")
+	}
+
+	// Ensure the path is absolute after expansion
+	absPath, err := filepath.Abs(cleanPath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path: %w", err)
+	}
+
+	// Basic check that we're not accessing sensitive system directories
+	systemDirs := []string{"/etc", "/sys", "/proc", "/dev"}
+	for _, sysDir := range systemDirs {
+		if strings.HasPrefix(absPath, sysDir) {
+			return fmt.Errorf("path accesses sensitive system directory")
+		}
+	}
+
+	return nil
 }
 
 func PathFromWd(path string) (string, error) {

@@ -48,10 +48,12 @@ func (r *renderRunner) Exec(
 	}
 
 	renderSpec := e.Render
-	if err := runner.SetEnv(ctx.Logger, e.Env(), inputEnv); err != nil {
+	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envMap, err := runner.BuildEnvMap(ctx.Logger, e.Env(), inputEnv, runner.DefaultEnv(ctx, e))
+	envMap, err := runner.BuildEnvMap(
+		ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv, runner.DefaultEnv(ctx, e),
+	)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}

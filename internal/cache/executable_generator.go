@@ -25,7 +25,7 @@ func generatedExecutables(
 	files := flowFile.FromFile
 
 	for _, file := range files {
-		expandedFile := utils.ExpandDirectory(logger, file, wsPath, flowFilePath, nil)
+		expandedFile := utils.ExpandPath(logger, file, filepath.Dir(flowFilePath), nil)
 		exec, err := executablesFromFile(logger, file, expandedFile)
 		if err != nil {
 			return nil, err

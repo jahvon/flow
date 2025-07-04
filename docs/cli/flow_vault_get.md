@@ -1,15 +1,15 @@
-## flow vault list
+## flow vault get
 
-List all available vaults.
+Get the details of a vault.
 
 ```
-flow vault list [flags]
+flow vault get NAME [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for list
+  -h, --help            help for get
   -o, --output string   Output format. One of: yaml, json, or tui. (default "tui")
 ```
 

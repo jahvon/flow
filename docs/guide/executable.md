@@ -140,8 +140,10 @@ executables:
       file: "dev-deploy.sh"
       params:
         # secret param
-        - secretRef: "dev-api-token"
+        - secretRef: "dev/api-token"
           envKey: "API_TOKEN"
+        - secretRef: "admin-user"
+          envKey: "ADMIN_USER"
         # prompt / form param
         - prompt: "What application are you deploying?"
           envKey: "APP_NAME"
@@ -150,7 +152,7 @@ executables:
           envKey: "DRY_RUN"
 ```
 
-In the example above, the `devbox` executable has three parameters: `API_TOKEN`, `APP_NAME`, and `PORT`.
+In the example above, the `devbox` executable has four parameters: `API_TOKEN`, `ADMIN_USER` ,`APP_NAME`, and `PORT`.
 The `secretRef` parameter type is used to reference a secret stored in the vault (see the [secret vault](secret.md) guide 
 for more information). The `prompt` parameter type prompts the user for input when the executable is run. The `text`
 parameter type sets a static value for the environment variable.
