@@ -23,14 +23,7 @@ brew install jahvon/tap/flow
 go install github.com/jahvon/flow@latest
 ```
 
-### Docker (experimental)
-
-You can also run flow in a Docker container. This is useful if you want to run flow in a CI/CD pipeline or in a containerized environment.
-The `GIT_REPO`, `BRANCH`, and `WORKSPACE` environment variables are optional and can be used to clone a specific flow workspace.
-
-```shell
-docker run -it --rm -t ghcr.io/jahvon/flow -e GIT_REPO=$GIT_REPO -e BRANCH=$BRANCH -e WORKSPACE=$WORKSPACE
-```
+For CI/CD integrations and containerized environments, see the [integrations guide](guide/integrations.md).
 
 ### Autocompletion
 

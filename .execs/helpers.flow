@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+tags: [development, helper]
+executables:
+  - verb: clean
+    name: ci
+    aliases: [codecov]
+    tags: [coverage, ci]
+    description: Clean up coverage files
+    exec:
+      dir: //
+      cmd: |
+        echo "Cleaning CI temp files..."
+        rm -f *.sarif *.out

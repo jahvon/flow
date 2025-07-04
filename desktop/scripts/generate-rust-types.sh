@@ -16,6 +16,11 @@ generate_schema() {
         return 1
     fi
 
+    if ! cargo typify --version &>/dev/null; then
+        echo -e "Installing cargo-typify..."
+        cargo install cargo-typify
+    fi
+
     if cargo typify "$schema_path" --output "$output_file"; then
         echo -e "Generated rust types for ${schema_name}"
     else

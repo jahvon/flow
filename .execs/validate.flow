@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+tags: [development, validate]
+executables:
+  - verb: validate
+    description: Run all development checks
+    serial:
+      execs:
+        - ref: generate
+        - ref: lint go
+        - ref: test all
+        - ref: validate generated
+        - cmd: echo "✅ All development checks passed"
+
+  - verb: validate
+    name: generated
+    description: Check for uncommitted generated files
+    exec:
+      dir: //
+      cmd: |
+        echo "Checking for uncommitted generated files..."
+
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "❌ Generated files are not up to date!"
+          echo "Please run 'flow generate' and commit the changes."
+          echo ""
+          echo "Uncommitted changes:"
+          git status --porcelain
+          exit 1
+        else
+          echo "✅ All generated files are up to date"
+        fi
+
+  - verb: lint
+    name: go
+    aliases: [cli]
+    tags: [go]
+    description: Run linters and formatters
+    parallel:
+      dir: //
+      execs:
+        - cmd: go fmt ./...
+          dir: //
+        - cmd: go mod tidy
+          dir: //
+        - cmd: |
+            if ! command -v golangci-lint &> /dev/null; then
+              echo "Installing golangci-lint..."
+              curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.1.6
+              export PATH="$PATH:./bin"
+            fi
+            
+            golangci-lint run ./... --fix --output.sarif.path lint.sarif
+
+  - verb: lint
+    name: ts
+    aliases: [frontend]
+    tags: [npm, desktop]
+    description: Run eslint on the Tauri desktop app's frontend.
+    exec:
+      dir: //desktop
+      cmd: npm run lint
+
+  - verb: scan
+    name: security
+    tags: [security, go]
+    description: Run security scanning with govulncheck
+    exec:
+      dir: //
+      cmd: |
+        echo "Running security scan..."
+        
+        if ! command -v govulncheck &> /dev/null; then
+          echo "Installing govulncheck..."
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+        fi
+        
+        govulncheck -format sarif ./... > govuln.sarif
+        echo "Security scan completed. Results saved to govuln.sarif"

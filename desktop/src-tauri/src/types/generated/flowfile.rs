@@ -731,6 +731,10 @@ impl ExecutableLaunchExecutableType {
 #[doc = "    \"args\": {"]
 #[doc = "      \"$ref\": \"#/definitions/ExecutableArgumentList\""]
 #[doc = "    },"]
+#[doc = "    \"dir\": {"]
+#[doc = "      \"default\": \"\","]
+#[doc = "      \"$ref\": \"#/definitions/ExecutableDirectory\""]
+#[doc = "    },"]
 #[doc = "    \"execs\": {"]
 #[doc = "      \"description\": \"A list of executables to run in parallel.\\nEach executable can be a command or a reference to another executable.\\n\","]
 #[doc = "      \"$ref\": \"#/definitions/ExecutableParallelRefConfigList\""]
@@ -755,6 +759,8 @@ impl ExecutableLaunchExecutableType {
 pub struct ExecutableParallelExecutableType {
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub args: ::std::option::Option<ExecutableArgumentList>,
+    #[serde(default = "defaults::executable_parallel_executable_type_dir")]
+    pub dir: ExecutableDirectory,
     #[doc = "A list of executables to run in parallel.\nEach executable can be a command or a reference to another executable.\n"]
     pub execs: ExecutableParallelRefConfigList,
     #[doc = "End the parallel execution as soon as an exec exits with a non-zero status. This is the default behavior.\nWhen set to false, all execs will be run regardless of the exit status of parallel execs.\n"]
@@ -1524,6 +1530,10 @@ impl ::std::default::Default for ExecutableRequestResponseFileSaveAs {
 #[doc = "    \"args\": {"]
 #[doc = "      \"$ref\": \"#/definitions/ExecutableArgumentList\""]
 #[doc = "    },"]
+#[doc = "    \"dir\": {"]
+#[doc = "      \"default\": \"\","]
+#[doc = "      \"$ref\": \"#/definitions/ExecutableDirectory\""]
+#[doc = "    },"]
 #[doc = "    \"execs\": {"]
 #[doc = "      \"description\": \"A list of executables to run in serial.\\nEach executable can be a command or a reference to another executable.\\n\","]
 #[doc = "      \"$ref\": \"#/definitions/ExecutableSerialRefConfigList\""]
@@ -1543,6 +1553,8 @@ impl ::std::default::Default for ExecutableRequestResponseFileSaveAs {
 pub struct ExecutableSerialExecutableType {
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub args: ::std::option::Option<ExecutableArgumentList>,
+    #[serde(default = "defaults::executable_serial_executable_type_dir")]
+    pub dir: ExecutableDirectory,
     #[doc = "A list of executables to run in serial.\nEach executable can be a command or a reference to another executable.\n"]
     pub execs: ExecutableSerialRefConfigList,
     #[doc = "End the serial execution as soon as an exec exits with a non-zero status. This is the default behavior.\nWhen set to false, all execs will be run regardless of the exit status of the previous exec.\n"]
@@ -2919,6 +2931,7 @@ pub mod builder {
             ::std::option::Option<super::ExecutableArgumentList>,
             ::std::string::String,
         >,
+        dir: ::std::result::Result<super::ExecutableDirectory, ::std::string::String>,
         execs: ::std::result::Result<super::ExecutableParallelRefConfigList, ::std::string::String>,
         fail_fast: ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
         max_threads: ::std::result::Result<i64, ::std::string::String>,
@@ -2931,6 +2944,7 @@ pub mod builder {
         fn default() -> Self {
             Self {
                 args: Ok(Default::default()),
+                dir: Ok(super::defaults::executable_parallel_executable_type_dir()),
                 execs: Err("no value supplied for execs".to_string()),
                 fail_fast: Ok(Default::default()),
                 max_threads: Ok(super::defaults::default_u64::<i64, 5>()),
@@ -2947,6 +2961,16 @@ pub mod builder {
             self.args = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for args: {}", e));
+            self
+        }
+        pub fn dir<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::ExecutableDirectory>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.dir = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for dir: {}", e));
             self
         }
         pub fn execs<T>(mut self, value: T) -> Self
@@ -2999,6 +3023,7 @@ pub mod builder {
         ) -> ::std::result::Result<Self, super::error::ConversionError> {
             Ok(Self {
                 args: value.args?,
+                dir: value.dir?,
                 execs: value.execs?,
                 fail_fast: value.fail_fast?,
                 max_threads: value.max_threads?,
@@ -3012,6 +3037,7 @@ pub mod builder {
         fn from(value: super::ExecutableParallelExecutableType) -> Self {
             Self {
                 args: Ok(value.args),
+                dir: Ok(value.dir),
                 execs: Ok(value.execs),
                 fail_fast: Ok(value.fail_fast),
                 max_threads: Ok(value.max_threads),
@@ -3592,6 +3618,7 @@ pub mod builder {
             ::std::option::Option<super::ExecutableArgumentList>,
             ::std::string::String,
         >,
+        dir: ::std::result::Result<super::ExecutableDirectory, ::std::string::String>,
         execs: ::std::result::Result<super::ExecutableSerialRefConfigList, ::std::string::String>,
         fail_fast: ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
         params: ::std::result::Result<
@@ -3603,6 +3630,7 @@ pub mod builder {
         fn default() -> Self {
             Self {
                 args: Ok(Default::default()),
+                dir: Ok(super::defaults::executable_serial_executable_type_dir()),
                 execs: Err("no value supplied for execs".to_string()),
                 fail_fast: Ok(Default::default()),
                 params: Ok(Default::default()),
@@ -3618,6 +3646,16 @@ pub mod builder {
             self.args = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for args: {}", e));
+            self
+        }
+        pub fn dir<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::ExecutableDirectory>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.dir = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for dir: {}", e));
             self
         }
         pub fn execs<T>(mut self, value: T) -> Self
@@ -3660,6 +3698,7 @@ pub mod builder {
         ) -> ::std::result::Result<Self, super::error::ConversionError> {
             Ok(Self {
                 args: value.args?,
+                dir: value.dir?,
                 execs: value.execs?,
                 fail_fast: value.fail_fast?,
                 params: value.params?,
@@ -3672,6 +3711,7 @@ pub mod builder {
         fn from(value: super::ExecutableSerialExecutableType) -> Self {
             Self {
                 args: Ok(value.args),
+                dir: Ok(value.dir),
                 execs: Ok(value.execs),
                 fail_fast: Ok(value.fail_fast),
                 params: Ok(value.params),
@@ -3942,6 +3982,9 @@ pub mod defaults {
     pub(super) fn executable_exec_executable_type_log_mode() -> ::std::string::String {
         "logfmt".to_string()
     }
+    pub(super) fn executable_parallel_executable_type_dir() -> super::ExecutableDirectory {
+        super::ExecutableDirectory("".to_string())
+    }
     pub(super) fn executable_parallel_ref_config_ref() -> super::ExecutableRef {
         super::ExecutableRef("".to_string())
     }
@@ -3961,6 +4004,9 @@ pub mod defaults {
     pub(super) fn executable_request_response_file_save_as(
     ) -> super::ExecutableRequestResponseFileSaveAs {
         super::ExecutableRequestResponseFileSaveAs::Raw
+    }
+    pub(super) fn executable_serial_executable_type_dir() -> super::ExecutableDirectory {
+        super::ExecutableDirectory("".to_string())
     }
     pub(super) fn executable_serial_ref_config_ref() -> super::ExecutableRef {
         super::ExecutableRef("".to_string())
