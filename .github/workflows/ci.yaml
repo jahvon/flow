@@ -26,7 +26,7 @@ jobs:
         with:
           executable: 'lint go'
           timeout: '5m'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
@@ -45,7 +45,7 @@ jobs:
         with:
           executable: 'test unit'
           timeout: '5m'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
         id: unit-tests
       - name: Upload unit test coverage
         uses: actions/upload-artifact@v4
@@ -65,7 +65,7 @@ jobs:
         with:
           executable: 'test e2e'
           timeout: '10m'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
           secrets: |
             {
               "test-secret": "test-value-from-action",
@@ -87,7 +87,7 @@ jobs:
         with:
           executable: 'transform coverage'
           timeout: '5m'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
 
       - name: Upload to codecov
         uses: codecov/codecov-action@v3
@@ -111,13 +111,13 @@ jobs:
         with:
           executable: 'generate'
           timeout: '10m'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
       - name: Check for uncommitted changes
         uses: jahvon/flow-action@v0.1.0beta2
         with:
           executable: 'validate generated'
           timeout: '2m'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
 
   build-matrix:
     strategy:
@@ -133,12 +133,12 @@ jobs:
       - uses: jahvon/flow-action@v0.1.0beta2
         with:
           executable: 'build binary'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
           timeout: '10m'
       - uses: jahvon/flow-action@v0.1.0beta2
         with:
           executable: 'test binary'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
           timeout: '5m'
 
   security:
@@ -149,7 +149,7 @@ jobs:
         with:
           executable: 'scan security'
           timeout: '10m'
-          flow-version: 'v1.0.0-beta1'
+          flow-version: 'v1.0.0-beta2'
       - name: Upload gosec SARIF file
         uses: github/codeql-action/upload-sarif@v3
         with:
