@@ -60,8 +60,8 @@ executables:
             echo "Generating go CLI code..."
             go generate ./...
             echo "All go code generated successfully"
-        - ref: generate frontend
-        - ref: generate backend
+#        - ref: generate frontend
+#        - ref: generate backend
 
   - verb: run
     name: linters

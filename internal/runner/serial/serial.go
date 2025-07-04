@@ -60,6 +60,7 @@ func (r *serialRunner) Exec(
 	return fmt.Errorf("no serial executables to run")
 }
 
+//nolint:funlen
 func handleExec(
 	ctx *context.Context,
 	parent *executable.Executable,
@@ -111,10 +112,22 @@ func handleExec(
 			}
 			maps.Copy(execPromptedEnv, a)
 		}
-		fields := map[string]interface{}{"step": exec.ID()}
-		if exec.Exec != nil {
+
+		var dir executable.Directory
+		switch {
+		case exec.Exec != nil:
+			fields := map[string]interface{}{"step": exec.ID()}
 			exec.Exec.SetLogFields(fields)
+			dir = exec.Exec.Dir
+		case parent.Parallel != nil:
+			dir = exec.Parallel.Dir
+		case parent.Serial != nil:
+			dir = exec.Serial.Dir
 		}
+		if dir == "" {
+			dir = parent.Serial.Dir
+		}
+		exec.Exec.Dir = dir
 
 		runExec := func() error {
 			return runSerialExecFunc(ctx, i, refConfig, exec, eng, execPromptedEnv, serialSpec)

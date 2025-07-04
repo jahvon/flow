@@ -190,6 +190,9 @@ type ParallelExecutableType struct {
 	// Args corresponds to the JSON schema field "args".
 	Args ArgumentList `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
 
+	// Dir corresponds to the JSON schema field "dir".
+	Dir Directory `json:"dir,omitempty" yaml:"dir,omitempty" mapstructure:"dir,omitempty"`
+
 	// A list of executables to run in parallel.
 	// Each executable can be a command or a reference to another executable.
 	//
@@ -385,6 +388,9 @@ const RequestResponseFileSaveAsYml RequestResponseFileSaveAs = "yml"
 type SerialExecutableType struct {
 	// Args corresponds to the JSON schema field "args".
 	Args ArgumentList `json:"args,omitempty" yaml:"args,omitempty" mapstructure:"args,omitempty"`
+
+	// Dir corresponds to the JSON schema field "dir".
+	Dir Directory `json:"dir,omitempty" yaml:"dir,omitempty" mapstructure:"dir,omitempty"`
 
 	// A list of executables to run in serial.
 	// Each executable can be a command or a reference to another executable.

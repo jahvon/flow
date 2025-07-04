@@ -385,6 +385,9 @@ definitions:
     type: object
     required: [execs]
     properties:
+      dir:
+        $ref: '#/definitions/Directory'
+        default: ""
       params:
         $ref: '#/definitions/ParameterList'
       args:
@@ -565,6 +568,9 @@ definitions:
     required: [execs]
     description: Executes a list of executables in serial.
     properties:
+      dir:
+        $ref: '#/definitions/Directory'
+        default: ""
       params:
         $ref: '#/definitions/ParameterList'
       args:
