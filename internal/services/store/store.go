@@ -47,7 +47,7 @@ func NewStore(dbPath string) (Store, error) {
 	if dbPath == "" {
 		dbPath = Path()
 	}
-	db, err := bolt.Open(dbPath, 0666, &bolt.Options{Timeout: 5 * time.Second})
+	db, err := bolt.Open(dbPath, 0666, &bolt.Options{Timeout: 30 * time.Second})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
