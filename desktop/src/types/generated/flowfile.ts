@@ -364,6 +364,16 @@ export interface ExecutableLaunchExecutableType {
 }
 export interface ExecutableParallelExecutableType {
   args?: ExecutableArgumentList;
+  /**
+   * The directory to execute the command in.
+   * If unset, the directory of the flow file will be used.
+   * If set to `f:tmp`, a temporary directory will be created for the process.
+   * If prefixed with `./`, the path will be relative to the current working directory.
+   * If prefixed with `//`, the path will be relative to the workspace root.
+   * Environment variables in the path will be expended at runtime.
+   *
+   */
+  dir?: string;
   execs: ExecutableParallelRefConfigList;
   /**
    * End the parallel execution as soon as an exec exits with a non-zero status. This is the default behavior.
@@ -527,6 +537,16 @@ export interface ExecutableRequestResponseFile {
  */
 export interface ExecutableSerialExecutableType {
   args?: ExecutableArgumentList;
+  /**
+   * The directory to execute the command in.
+   * If unset, the directory of the flow file will be used.
+   * If set to `f:tmp`, a temporary directory will be created for the process.
+   * If prefixed with `./`, the path will be relative to the current working directory.
+   * If prefixed with `//`, the path will be relative to the workspace root.
+   * Environment variables in the path will be expended at runtime.
+   *
+   */
+  dir?: string;
   execs: ExecutableSerialRefConfigList;
   /**
    * End the serial execution as soon as an exec exits with a non-zero status. This is the default behavior.

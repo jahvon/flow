@@ -7,8 +7,10 @@ executables:
     serial:
       failFast: false
       execs:
-        - ref: generate code
+        - ref: generate cli
         - ref: generate docs
+        - ref: generate frontend
+        - ref: generate backend
 
   - verb: build
     name: binary
@@ -31,6 +33,7 @@ executables:
   - verb: generate
     name: docs
     aliases: [documentation]
+    tags: [docs]
     serial:
       dir: //
       execs:
@@ -38,19 +41,20 @@ executables:
         - cmd: go run ./tools/docsgen/.
 
   - verb: generate
-    name: code
-    serial:
+    name: cli
+    aliases: [go]
+    tags: [go, cli]
+    exec:
       dir: //
-      execs:
-        - cmd: |
-            echo "Generating go CLI code..."
-            go generate ./...
-            echo "All go code generated successfully"
-        - ref: generate frontend
-        - ref: generate backend
+      cmd: |
+        echo "Generating go CLI code..."
+        go generate ./...
+        echo "All go code generated successfully"
 
   - verb: generate
     name: tauri
+    aliases: [desktop]
+    tags: [desktop]
     description: Generate code for the Tauri frontend and backend.
     parallel:
       execs:
