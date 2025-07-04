@@ -2,28 +2,12 @@
 tags: [development, helper]
 executables:
   - verb: clean
-    name: coverage
+    name: ci
     aliases: [codecov]
     tags: [coverage, ci]
     description: Clean up coverage files
     exec:
       dir: //
       cmd: |
-        echo "Cleaning coverage files..."
-        rm -f *.out *.coverage
-        echo "Coverage files cleaned"
-
-  - verb: show
-    name: summary
-    tags: [ci, report]
-    description: Generate CI summary report
-    exec:
-      dir: //
-      cmd: |
-        echo "=== CI Summary ==="
-        echo "Build: ✅"
-        echo "Tests: $([ -f "unit-coverage.out" ] && echo "✅" || echo "❌")"
-        echo "Coverage: $([ -f "merged-coverage.out" ] && echo "✅" || echo "❌")"
-        echo "GoSec Security: $([ -f "results.sarif" ] && echo "✅" || echo "❌")"
-        echo "Govulncheck: $([ -f "results_vuln.sarif" ] && echo "✅" || echo "❌")"
-        echo "=================="
+        echo "Cleaning CI temp files..."
+        rm -f *.sarif *.out
