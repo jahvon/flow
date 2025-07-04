@@ -26,10 +26,10 @@ builds:
       -X "github.com/jahvon/flow/cmd/internal/version.buildDate={{ .Date }}"
 
 gomod:
-  proxy: true
+  proxy: false
 
 archives:
-  - format: tar.gz
+  - formats: [ 'tar.gz' ]
     files:
       - LICENSE
       - README.md
@@ -40,25 +40,29 @@ archives:
       {{- .Os }}_
       {{- .Arch }}
 
-brews:
+homebrew_casks:
   - name: flow
+    binary: flow
+    conflicts:
+      - formula: flow
     homepage: https://flowexec.io
     license: Apache-2.0
-    directory: Formula
     repository:
       owner: jahvon
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_FLOW_GITHUB_TOKEN }}"
+    completions:
+      bash: completions/flow.bash
+      zsh: completions/flow.zsh
+      fish: completions/flow.fish
     dependencies:
-      - name: xclip
-        os: linux
-    install: |
-      bin.install "flow"
-      bash_completion.install "completions/flow.bash"
-      zsh_completion.install "completions/flow.zsh"
-      fish_completion.install "completions/flow.fish"
-    test: |
-      system "#{bin}/flow --version"
+      - cask: xclip # Required for clipboard support, only linux, so I need to figure out to get this to skip macOS
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/flow"]
+          end
   
 dockers:
   - image_templates:

@@ -164,10 +164,12 @@ func runExecutables(
 			}
 			maps.Copy(execEnv, a)
 		}
-		exec.Exec.SetLogFields(map[string]interface{}{
-			"stage": stage,
-			"step":  i + 1,
-		})
+		if exec.Exec != nil {
+			exec.Exec.SetLogFields(map[string]interface{}{
+				"stage": stage,
+				"step":  i + 1,
+			})
+		}
 		if err := runner.Exec(ctx, exec, engine.NewExecEngine(), execEnv); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("unable to execute %s executable %d", stage, i))
 		}

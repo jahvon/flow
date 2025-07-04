@@ -112,7 +112,9 @@ func handleExec(
 			maps.Copy(execPromptedEnv, a)
 		}
 		fields := map[string]interface{}{"step": exec.ID()}
-		exec.Exec.SetLogFields(fields)
+		if exec.Exec != nil {
+			exec.Exec.SetLogFields(fields)
+		}
 
 		runExec := func() error {
 			return runSerialExecFunc(ctx, i, refConfig, exec, eng, execPromptedEnv, serialSpec)
