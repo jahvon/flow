@@ -145,6 +145,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.24"
       - uses: jahvon/flow-action@v0.1.0beta2
         with:
           executable: 'scan security'

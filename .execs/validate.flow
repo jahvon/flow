@@ -46,7 +46,7 @@ executables:
               go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
             fi
             
-            golangci-lint run ./... --fix --out-format sarif --output lint.sarif
+            golangci-lint run ./... --fix --out.sarif.path lint.sarif
 
   - verb: lint
     name: ts
