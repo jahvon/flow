@@ -28,7 +28,7 @@ executables:
         - cmd: |
             if ! command -v golangci-lint &> /dev/null; then
               echo "golangci-lint is not installed. Installing..."
-              go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.1.6
+              curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.2.1
             fi
         - cmd: |
             if ! command -v ginkgo &> /dev/null; then
