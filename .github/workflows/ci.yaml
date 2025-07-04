@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "^1.24"
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'lint go'
           timeout: '5m'
@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "^1.24"
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'test unit'
           timeout: '5m'
@@ -59,7 +59,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "^1.24"
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'test e2e'
           timeout: '10m'
@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'transform coverage'
           timeout: '5m'
@@ -103,12 +103,12 @@ jobs:
           go-version: "^1.24"
       - name: Install mockgen
         run: go install go.uber.org/mock/mockgen@v0.4.0
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'generate'
           timeout: '10m'
       - name: Check for uncommitted changes
-        uses: jahvon/flow-action@v1.1
+        uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'validate generated'
           timeout: '2m'
@@ -120,11 +120,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'build binary'
           timeout: '10m'
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'test binary'
           timeout: '5m'
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jahvon/flow-action@v1.1
+      - uses: jahvon/flow-action@v0.1.0beta1
         with:
           executable: 'scan security'
           timeout: '10m'
