@@ -120,6 +120,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.24"
       - uses: jahvon/flow-action@v0.1.0beta2
         with:
           executable: 'build binary'
@@ -138,10 +142,10 @@ jobs:
           executable: 'scan security'
           timeout: '10m'
       - name: Upload gosec SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: gosec.sarif
       - name: Upload govuln SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: govuln.sarif
