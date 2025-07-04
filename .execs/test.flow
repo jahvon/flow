@@ -64,7 +64,7 @@ executables:
         - cmd: |
             set -e
             echo "Running Go E2E tests..."
-            go test -race -coverprofile=unit-coverage.out -covermode=atomic -coverpkg=./... -tags=e2e ./tests/...
+            go test -race -coverprofile=e2e-coverage.out -covermode=atomic -coverpkg=./... -tags=e2e ./tests/...
             echo "E2E tests completed"
           retries: 1
 
