@@ -51,29 +51,32 @@ func (r *serialRunner) Exec(
 		if err != nil {
 			return err
 		}
-		defer str.Close()
 		if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
 			return err
 		}
-		return handleExec(ctx, e, eng, serialSpec, inputEnv, str)
+		cacheData, err := str.GetAll()
+		if err != nil {
+			return err
+		}
+		if err := str.Close(); err != nil {
+			ctx.Logger.Error(err, "unable to close store")
+		}
+
+		return handleExec(ctx, e, eng, serialSpec, inputEnv, cacheData)
 	}
 	return fmt.Errorf("no serial executables to run")
 }
 
-//nolint:funlen,gocognit
+//nolint:gocognit
 func handleExec(
 	ctx *context.Context,
 	parent *executable.Executable,
 	eng engine.Engine,
 	serialSpec *executable.SerialExecutableType,
 	promptedEnv map[string]string,
-	str store.Store,
+	cacheData map[string]string,
 ) error {
-	dm, err := str.GetAll()
-	if err != nil {
-		return err
-	}
-	dataMap := expr.ExpressionEnv(ctx, parent, dm, promptedEnv)
+	dataMap := expr.ExpressionEnv(ctx, parent, cacheData, promptedEnv)
 
 	var execs []engine.Exec
 	for i, refConfig := range serialSpec.Execs {
