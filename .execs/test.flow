@@ -49,8 +49,13 @@ executables:
       execs:
         - cmd: |
             set -e
-            echo "Running Go unit tests with coverage..."
-            go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=unit ./...
+            echo "Running Go unit tests..."
+            if [ "$CI" = "true" ]; then
+              echo "Running Go unit tests with coverage..."
+              go test -race -coverprofile=unit-coverage.out -covermode=atomic -tags=unit ./...
+            else
+              go test -race -tags=unit ./...
+            fi
             echo "Unit tests completed"
           retries: 3
 
@@ -64,7 +69,12 @@ executables:
         - cmd: |
             set -e
             echo "Running Go E2E tests..."
-            go test -race -coverprofile=e2e-coverage.out -covermode=atomic -coverpkg=./... -tags=e2e ./tests/...
+            if [ "$CI" = "true" ]; then
+              echo "Running Go E2E tests with coverage..."
+              go test -race -coverprofile=e2e-coverage.out -covermode=atomic -coverpkg=./... -tags=e2e ./tests/...
+            else
+              go test -race -tags=e2e ./tests/...
+            fi
             echo "E2E tests completed"
           retries: 1
 

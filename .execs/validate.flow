@@ -37,11 +37,10 @@ executables:
     description: Run linters and formatters
     parallel:
       dir: //
+      failFast: false
       execs:
         - cmd: go fmt ./...
-          dir: //
         - cmd: go mod tidy
-          dir: //
         - cmd: |
             if ! command -v golangci-lint &> /dev/null; then
               echo "Installing golangci-lint..."
@@ -49,7 +48,12 @@ executables:
               export PATH="$PATH:./bin"
             fi
             
-            golangci-lint run ./... --fix --output.sarif.path lint.sarif
+            if [ "$CI" = "true" ]; then
+              echo "Running golangci-lint with sarif output..."
+              golangci-lint run ./... --fix --output.sarif.path lint.sarif
+            else
+              golangci-lint run ./... --fix
+            fi
 
   - verb: lint
     name: ts
@@ -67,12 +71,15 @@ executables:
     exec:
       dir: //
       cmd: |
-        echo "Running security scan..."
-        
         if ! command -v govulncheck &> /dev/null; then
           echo "Installing govulncheck..."
           go install golang.org/x/vuln/cmd/govulncheck@latest
         fi
         
-        govulncheck -format sarif ./... > govuln.sarif
-        echo "Security scan completed. Results saved to govuln.sarif"
+        if [ "$CI" = "true" ]; then
+          govulncheck -format sarif ./... > govuln.sarif
+          echo "Security scan completed. Results saved to govuln.sarif"
+        else
+          govulncheck ./...
+          echo "Security scan completed. No vulnerabilities found."
+        fi

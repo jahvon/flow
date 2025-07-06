@@ -2,12 +2,14 @@
 tags: [development, helper]
 executables:
   - verb: clean
-    name: ci
-    aliases: [codecov]
-    tags: [coverage, ci]
-    description: Clean up coverage files
+    name: tmp
+    aliases: [artifacts, ci]
+    description: Remove the temporary files created by executable runs
     exec:
       dir: //
       cmd: |
-        echo "Cleaning CI temp files..."
-        rm -f *.sarif *.out
+        echo "Cleaning coverage files..."
+        rm -f *.sarif *.out || true
+        echo "Clearing the bin directory..."
+        rm -rf .bin || true
+        rm ./flow || true

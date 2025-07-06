@@ -8,10 +8,8 @@ executables:
       failFast: false
       execs:
         - ref: generate cli
-        - ref: generate completions
         - ref: generate docs
-        - ref: generate frontend
-        - ref: generate backend
+        - ref: generate tauri
 
   - verb: build
     name: binary
@@ -32,19 +30,16 @@ executables:
         echo "flow built at ${BIN_PATH}/${BIN_NAME}"
 
   - verb: generate
-    name: completions
-    tags: [docs]
-    exec:
-      dir: //
-      cmd: ./scripts/completions.sh
-
-  - verb: generate
     name: docs
     aliases: [documentation]
+    description: Generate docsify documentation for the project.
     tags: [docs]
-    exec:
+    parallel:
+      failFast: false
       dir: //
-      cmd: go run ./tools/docsgen/.
+      execs:
+        - cmd: go run ./tools/docsgen/.
+        - cmd: ./scripts/completions.sh
 
   - verb: generate
     name: cli
@@ -63,6 +58,7 @@ executables:
     tags: [desktop]
     description: Generate code for the Tauri frontend and backend.
     parallel:
+      failFast: false
       execs:
         - ref: generate frontend
         - ref: generate backend

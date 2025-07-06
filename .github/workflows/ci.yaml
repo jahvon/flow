@@ -24,7 +24,7 @@ jobs:
           go-version: "^1.24"
       - uses: jahvon/flow-action@v1.0.0-beta1
         with:
-          executable: 'lint go'
+          executable: 'lint go --param CI=true'
           timeout: '5m'
           flow-version: 'main'
       - name: Upload SARIF file
@@ -43,7 +43,7 @@ jobs:
           go-version: "^1.24"
       - uses: jahvon/flow-action@v1.0.0-beta1
         with:
-          executable: 'test unit'
+          executable: 'test unit --param CI=true'
           timeout: '5m'
           flow-version: 'main'
         id: unit-tests
@@ -63,7 +63,7 @@ jobs:
           go-version: "^1.24"
       - uses: jahvon/flow-action@v1.0.0-beta1
         with:
-          executable: 'test e2e'
+          executable: 'test e2e --param CI=true'
           timeout: '10m'
           flow-version: 'main'
           secrets: |
