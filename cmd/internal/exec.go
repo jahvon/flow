@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gen2brain/beeep"
+	tuikitIO "github.com/jahvon/tuikit/io"
 	"github.com/jahvon/tuikit/views"
 	"github.com/spf13/cobra"
 
@@ -55,6 +56,10 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			return execIDs, cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
+			logMode := flags.ValueFor[string](ctx, cmd, *flags.LogModeFlag, false)
+			if err := tuikitIO.LogMode(logMode).Validate(); err != nil {
+				ctx.Logger.FatalErr(err)
+			}
 			execPreRun(ctx, cmd, args)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
@@ -64,6 +69,7 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		},
 	}
 	RegisterFlag(ctx, subCmd, *flags.ParameterValueFlag)
+	RegisterFlag(ctx, subCmd, *flags.LogModeFlag)
 	rootCmd.AddCommand(subCmd)
 }
 
@@ -81,6 +87,11 @@ func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 //nolint:funlen,gocognit
 func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, args []string) {
 	logger := ctx.Logger
+	logMode := flags.ValueFor[string](ctx, cmd, *flags.LogModeFlag, false)
+	if logMode != "" {
+		logger.SetMode(tuikitIO.LogMode(logMode))
+	}
+
 	if err := verb.Validate(); err != nil {
 		logger.FatalErr(err)
 	}

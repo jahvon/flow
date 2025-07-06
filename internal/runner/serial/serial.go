@@ -118,7 +118,7 @@ func handleExec(
 
 		switch {
 		case exec.Exec != nil:
-			fields := map[string]interface{}{"step": exec.ID()}
+			fields := map[string]interface{}{"step": exec.Ref().String()}
 			exec.Exec.SetLogFields(fields)
 			if serialSpec.Dir != "" && exec.Exec.Dir == "" {
 				exec.Exec.Dir = serialSpec.Dir

@@ -19,7 +19,7 @@ func ExecutableForRef(ctx *context.Context, ref executable.Ref) (*executable.Exe
 
 	if exec.Exec != nil {
 		fields := map[string]interface{}{
-			"executable": exec.ID(),
+			"executable": exec.Ref().String(),
 		}
 		exec.Exec.SetLogFields(fields)
 	}
@@ -27,17 +27,17 @@ func ExecutableForRef(ctx *context.Context, ref executable.Ref) (*executable.Exe
 	return exec, nil
 }
 
-func ExecutableForCmd(parent *executable.Executable, cmd string, id int) *executable.Executable {
+func ExecutableForCmd(parent *executable.Executable, cmd string, _ int) *executable.Executable {
 	vis := executable.ExecutableVisibility(common.VisibilityInternal)
 	exec := &executable.Executable{
-		Verb:       "exec",
-		Name:       fmt.Sprintf("%s-cmd-%d", parent.Name, id),
+		Verb:       parent.Verb,
+		Name:       parent.Name,
 		Visibility: &vis,
 		Exec: &executable.ExecExecutableType{
 			Cmd: cmd,
 		},
 	}
-	fields := map[string]interface{}{"executable": exec.ID()}
+	fields := map[string]interface{}{"executable": exec.Ref().String()}
 	exec.Exec.SetLogFields(fields)
 	exec.SetContext(parent.Workspace(), parent.WorkspacePath(), parent.Namespace(), parent.FlowFilePath())
 	return exec

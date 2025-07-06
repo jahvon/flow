@@ -23,6 +23,14 @@ var LogLevel = &Metadata{
 	Required:  false,
 }
 
+var LogModeFlag = &Metadata{
+	Name:      "log-mode",
+	Shorthand: "m",
+	Usage:     "Log mode (text, logfmt, json, hidden)",
+	Default:   "logfmt",
+	Required:  false,
+}
+
 var SyncCacheFlag = &Metadata{
 	Name:     "sync",
 	Usage:    "Sync flow cache and workspaces",

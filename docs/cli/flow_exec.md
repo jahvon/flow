@@ -51,6 +51,7 @@ flow exec EXECUTABLE_ID [args...] [flags]
 
 ```
   -h, --help                help for exec
+  -m, --log-mode string     Log mode (text, logfmt, json, hidden) (default "logfmt")
   -p, --param stringArray   Set a parameter value by env key. (i.e. KEY=value) Use multiple times to set multiple parameters.This will override any existing parameter values defined for the executable.
 ```
 

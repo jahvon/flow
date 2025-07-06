@@ -8,12 +8,23 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jahvon/tuikit/io"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
-
-	"github.com/jahvon/tuikit/io"
 )
+
+func init() {
+	if _, exists := os.LookupEnv("TERM"); !exists {
+		_ = os.Setenv("TERM", "xterm-256color")
+	}
+	if _, exists := os.LookupEnv("FORCE_COLOR"); !exists {
+		_ = os.Setenv("FORCE_COLOR", "1")
+	}
+	if _, exists := os.LookupEnv("CLICOLOR_FORCE"); !exists {
+		_ = os.Setenv("CLICOLOR_FORCE", "1")
+	}
+}
 
 // RunCmd executes a command in the current shell in a specific directory.
 func RunCmd(
