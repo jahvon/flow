@@ -518,15 +518,14 @@ func NewExecutableID(workspace, namespace, name string) string {
 	switch {
 	case ws == "":
 		return "" // TODO: return error or log warning
+	case ns == "" && name == "":
+		return ws + "/" // nameless executable
 	case ns != "" && name == "":
 		return fmt.Sprintf("%s:", ns)
 	case ns != "":
 		return fmt.Sprintf("%s/%s:%s", ws, ns, name)
-	case name != "":
+	default:
 		return fmt.Sprintf("%s/%s", ws, name)
-	default: // ws != "" && ns == "" && name == ""
-		// for now, exclude the workspace from the string (until we can indicate that it's root / not named in the tui)
-		return ""
 	}
 }
 
