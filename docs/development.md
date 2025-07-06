@@ -27,17 +27,20 @@ The `flow` project contains a few development executables that can be run locall
 workspace, you can run the following commands:
 
 ```sh
-# Install local dependencies
-flow install deps
+# Install Go tool dependencies
+flow install tools
 
-# Build the project
+# Build the CLI binary
 flow build binary <output-path>
 
 # Validate code changes (runs tests, linters, codegen, etc)
 flow validate
 
-# Run only tests
-flow run tests
+# Only generate code
+flow generate
+
+# Only run tests
+flow test all
 ```
 
 ### Working with generated types
