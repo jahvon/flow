@@ -51,11 +51,18 @@ func (r *parallelRunner) Exec(
 		if err != nil {
 			return err
 		}
-		defer str.Close()
 		if err := str.CreateBucket(store.EnvironmentBucket()); err != nil {
 			return err
 		}
-		return handleExec(ctx, e, eng, parallelSpec, inputEnv, str)
+		cacheData, err := str.GetAll()
+		if err != nil {
+			return err
+		}
+		if err := str.Close(); err != nil {
+			ctx.Logger.Error(err, "unable to close store")
+		}
+
+		return handleExec(ctx, e, eng, parallelSpec, inputEnv, cacheData)
 	}
 
 	return fmt.Errorf("no parallel executables to run")
@@ -65,8 +72,9 @@ func (r *parallelRunner) Exec(
 func handleExec(
 	ctx *context.Context, parent *executable.Executable,
 	eng engine.Engine,
-	parallelSpec *executable.ParallelExecutableType, promptedEnv map[string]string,
-	str store.Store,
+	parallelSpec *executable.ParallelExecutableType,
+	promptedEnv map[string]string,
+	cacheData map[string]string,
 ) error {
 	groupCtx, cancel := stdCtx.WithCancel(ctx.Ctx)
 	defer cancel()
@@ -77,11 +85,7 @@ func handleExec(
 	}
 	group.SetLimit(limit)
 
-	dm, err := str.GetAll()
-	if err != nil {
-		return err
-	}
-	dataMap := expr.ExpressionEnv(ctx, parent, dm, promptedEnv)
+	dataMap := expr.ExpressionEnv(ctx, parent, cacheData, promptedEnv)
 
 	var execs []engine.Exec
 	for i, refConfig := range parallelSpec.Execs {
