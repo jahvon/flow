@@ -82,7 +82,7 @@ func (vc *vaultCollection) Plural() string {
 }
 
 func (vc *vaultCollection) Items() []*types.EntityInfo {
-	items := make([]*types.EntityInfo, 0, len(vc.Vaults))
+	items := make([]*types.EntityInfo, len(vc.Vaults))
 	for i, v := range vc.Vaults {
 		items[i] = &types.EntityInfo{
 			Header:    v.Name,

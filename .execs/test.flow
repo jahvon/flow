@@ -139,3 +139,15 @@ executables:
           envKey: "COUNT"
           type: "int"
           default: "1"
+
+  - verb: test
+    name: colored-output
+    visibility: internal
+    description: Test executable to demonstrate colored output in the terminal.
+    exec:
+      dir: //
+      cmd: |
+        echo -e "\033[32mThis is green text\033[0m"
+        echo -e "\033[31mThis is red text\033[0m"
+        echo -e "\033[34mThis is blue text\033[0m"
+        echo -e "\033[33mThis is yellow text\033[0m"
