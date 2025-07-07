@@ -2,6 +2,7 @@ package utils
 
 import (
 	stdCtx "context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -49,12 +50,13 @@ func NewContext(ctx stdCtx.Context, t ginkgo.FullGinkgoTInterface) *Context {
 		tuikitIO.WithOutput(stdOut),
 		tuikitIO.WithTheme(io.Theme("")),
 		tuikitIO.WithMode(tuikitIO.Text),
-		tuikitIO.WithExitFunc(func() {
+		tuikitIO.WithExitFunc(func(msg string, args ...any) {
+			msg = fmt.Sprintf(msg, args...)
 			_, file, line, ok := runtime.Caller(3)
 			if ok {
-				t.Fatalf("logger exit called from %s:%d", file, line)
+				t.Fatalf("logger exit called from %s:%d - %s", file, line, msg)
 			} else {
-				t.Fatalf("logger exit called")
+				t.Fatalf("logger exit called - %s", msg)
 			}
 		}),
 	)
@@ -123,12 +125,13 @@ func ResetTestContext(ctx *Context, t ginkgo.FullGinkgoTInterface) {
 		tuikitIO.WithOutput(stdOut),
 		tuikitIO.WithTheme(io.Theme("")),
 		tuikitIO.WithMode(tuikitIO.Text),
-		tuikitIO.WithExitFunc(func() {
+		tuikitIO.WithExitFunc(func(msg string, args ...any) {
+			msg = fmt.Sprintf(msg, args...)
 			_, file, line, ok := runtime.Caller(3)
 			if ok {
-				t.Fatalf("logger exit called from %s:%d", file, line)
+				t.Fatalf("logger exit called from %s:%d - %s", file, line, msg)
 			} else {
-				t.Fatalf("logger exit called")
+				t.Fatalf("logger exit called - %s", msg)
 			}
 		}),
 	)
