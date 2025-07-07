@@ -12,7 +12,7 @@ require (
 	github.com/gen2brain/beeep v0.11.1
 	github.com/jahvon/glamour v0.8.1-patch3
 	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
-	github.com/jahvon/tuikit v0.1.3
+	github.com/jahvon/tuikit v0.1.4
 	github.com/jahvon/vault v0.1.1
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -95,5 +95,3 @@ require (
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
 )
-
-replace github.com/jahvon/tuikit => ../tuikit
