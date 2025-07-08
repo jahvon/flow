@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/jahvon/tuikit/io"
+	"github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
@@ -23,7 +23,7 @@ const (
 	cacheDirName = "vault"
 )
 
-// Deprecated: Use the github.com/jahvon/vault package instead.
+// Deprecated: Use the github.com/flowexec/vault package instead.
 // This vault will be removed in a future release.
 type Vault struct {
 	cachedEncryptionKey string

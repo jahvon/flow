@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	tuikitIO "github.com/jahvon/tuikit/io"
-	tuikitIOMocks "github.com/jahvon/tuikit/io/mocks"
+	tuikitIO "github.com/flowexec/tuikit/io"
+	tuikitIOMocks "github.com/flowexec/tuikit/io/mocks"
 	"github.com/onsi/ginkgo/v2"
 	"go.uber.org/mock/gomock"
 	"gopkg.in/yaml.v3"

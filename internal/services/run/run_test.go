@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	tuikitIO "github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/io/mocks"
+	tuikitIO "github.com/flowexec/tuikit/io"
+	"github.com/flowexec/tuikit/io/mocks"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"

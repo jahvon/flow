@@ -79,6 +79,10 @@ github.com/esiqveland/notify v0.13.3 h1:QCMw6o1n+6rl+oLUfg8P1IIDSFsDEb2WlXvVvIJb
 github.com/esiqveland/notify v0.13.3/go.mod h1:hesw/IRYTO0x99u1JPweAl4+5mwXJibQVUcP0Iu5ORE=
 github.com/expr-lang/expr v1.17.5 h1:i1WrMvcdLF249nSNlpQZN1S6NXuW9WaOfF5tPi3aw3k=
 github.com/expr-lang/expr v1.17.5/go.mod h1:8/vRC7+7HBzESEqt5kKpYXxrxkr31SaO8r40VO/1IT4=
+github.com/flowexec/tuikit v0.2.0 h1:VUceZWwWEbq4UtDtawb2ZbVeMR7ULDYQy4og5f4PKP4=
+github.com/flowexec/tuikit v0.2.0/go.mod h1:fjMwEM7FkxbP7bIV4CfEjsixgjicgQqPrejoBZAHf5s=
+github.com/flowexec/vault v0.1.2 h1:INQ/w81piKRM+zqPBQpxFYl1iK8dI3APIHZ1F1Jm7CA=
+github.com/flowexec/vault v0.1.2/go.mod h1:nxoGHIVjwSgg1o6DoTmj5NCJtubu71SvS883LPUXuvg=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/gen2brain/beeep v0.11.1 h1:EbSIhrQZFDj1K2fzlMpAYlFOzV8YuNe721A58XcCTYI=
@@ -115,10 +119,6 @@ github.com/jahvon/glamour v0.8.1-patch3 h1:LfyMACZavV8yxK4UsPENNQQOqafWuq4ZdLuEA
 github.com/jahvon/glamour v0.8.1-patch3/go.mod h1:30MVJwG3rcEHrN277NrA4DKzndSL9lBtEmpcfOygwCQ=
 github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef h1:4PS/MNVT6Rsv15x5Rtwaw971e6kFvNUAf9nvUsZ5hcc=
 github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef/go.mod h1:dUmuT5CN6osIeLSRtTPJOf0Yz+qAbcyU6omnCzI+ZfQ=
-github.com/jahvon/tuikit v0.1.4 h1:hdIMwyZRYYVeEkzI2cPDnMcy1RKdTTpQG/nvIJ2K2bc=
-github.com/jahvon/tuikit v0.1.4/go.mod h1:s9fRhgO1IlMLzkY/KGikBrqGm41Fn0QOQNHLwQvrDbE=
-github.com/jahvon/vault v0.1.1 h1:qzfRh/+yoRR44MhfmiVyMIXAalKPNN+DRgeTQ1frC9A=
-github.com/jahvon/vault v0.1.1/go.mod h1:1StJR/E0WSXPKsgMs1t68N0g3gjIOwSo97Zsb56Ll28=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=

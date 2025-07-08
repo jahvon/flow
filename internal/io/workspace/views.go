@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/themes"
-	"github.com/jahvon/tuikit/types"
-	"github.com/jahvon/tuikit/views"
+	"github.com/flowexec/tuikit"
+	"github.com/flowexec/tuikit/themes"
+	"github.com/flowexec/tuikit/types"
+	"github.com/flowexec/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/filesystem"

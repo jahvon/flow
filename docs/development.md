@@ -61,7 +61,7 @@ Contributions to the components and helpers in `tuikit` are welcome.
 _You should test all tuikit changes with a local flow build before submitting a PR._
     
 ```sh
-  go mod edit -replace github.com/jahvon/tuikit=../tuikit
+  go mod edit -replace github.com/flowexec/tuikit=../tuikit
 ```
 
 ## Development Tools

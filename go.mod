@@ -9,11 +9,11 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/expr-lang/expr v1.17.5
+	github.com/flowexec/tuikit v0.2.0
+	github.com/flowexec/vault v0.1.2
 	github.com/gen2brain/beeep v0.11.1
 	github.com/jahvon/glamour v0.8.1-patch3
 	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
-	github.com/jahvon/tuikit v0.1.4
-	github.com/jahvon/vault v0.1.1
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0

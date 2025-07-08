@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jahvon/tuikit/io"
-	"github.com/jahvon/vault"
+	"github.com/flowexec/tuikit/io"
+	"github.com/flowexec/vault"
 
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/utils"

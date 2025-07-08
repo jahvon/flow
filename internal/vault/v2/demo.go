@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jahvon/vault"
+	"github.com/flowexec/vault"
 )
 
 const DemoVaultReservedName = "demo"

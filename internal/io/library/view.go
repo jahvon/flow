@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/flowexec/tuikit/themes"
 	"github.com/jahvon/glamour"
-	"github.com/jahvon/tuikit/themes"
 
 	"github.com/jahvon/flow/types/common"
 	"github.com/jahvon/flow/types/workspace"

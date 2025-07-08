@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	tuikitIO "github.com/jahvon/tuikit/io"
+	tuikitIO "github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 

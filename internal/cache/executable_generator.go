@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jahvon/tuikit/io"
+	"github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 
 	"github.com/jahvon/flow/internal/fileparser"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	tuikitIO "github.com/jahvon/tuikit/io"
+	tuikitIO "github.com/flowexec/tuikit/io"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 )

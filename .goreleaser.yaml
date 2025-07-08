@@ -48,7 +48,7 @@ homebrew_casks:
     homepage: https://flowexec.io
     license: Apache-2.0
     repository:
-      owner: jahvon
+      owner: flowexec
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_FLOW_GITHUB_TOKEN }}"
     completions:

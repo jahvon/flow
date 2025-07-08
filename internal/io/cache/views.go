@@ -3,9 +3,9 @@ package cache
 import (
 	"encoding/json"
 
-	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/types"
-	"github.com/jahvon/tuikit/views"
+	"github.com/flowexec/tuikit"
+	"github.com/flowexec/tuikit/types"
+	"github.com/flowexec/tuikit/views"
 	"gopkg.in/yaml.v3"
 )
 

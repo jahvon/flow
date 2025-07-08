@@ -1,6 +1,6 @@
 package io
 
-import "github.com/jahvon/tuikit/themes"
+import "github.com/flowexec/tuikit/themes"
 
 func Theme(name string) themes.Theme {
 	theme := themes.EverforestTheme()

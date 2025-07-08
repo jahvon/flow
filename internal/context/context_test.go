@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/jahvon/tuikit/themes"
+	"github.com/flowexec/tuikit/themes"
 	"github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 

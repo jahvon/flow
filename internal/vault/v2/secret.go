@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/jahvon/tuikit/types"
-	"github.com/jahvon/vault"
+	"github.com/flowexec/tuikit/types"
+	"github.com/flowexec/vault"
 	"gopkg.in/yaml.v3"
 )
 

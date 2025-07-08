@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/atotto/clipboard"
-	"github.com/jahvon/tuikit/views"
+	"github.com/flowexec/tuikit/views"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"

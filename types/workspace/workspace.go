@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jahvon/tuikit/types"
+	"github.com/flowexec/tuikit/types"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/utils"
