@@ -3,7 +3,7 @@
 package executable
 
 import "github.com/jahvon/flow/types/common"
-import "github.com/jahvon/tuikit/io"
+import "github.com/flowexec/tuikit/io"
 import "time"
 
 type Argument struct {

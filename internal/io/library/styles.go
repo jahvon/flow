@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/jahvon/tuikit/themes"
+	"github.com/flowexec/tuikit/themes"
 	"github.com/mattn/go-runewidth"
 
 	"github.com/jahvon/flow/types/executable"

@@ -2,7 +2,7 @@
 
 package config
 
-import "github.com/jahvon/tuikit/io"
+import "github.com/flowexec/tuikit/io"
 import "time"
 
 // The color palette for the interactive UI.

@@ -3,7 +3,7 @@ package runner_test
 import (
 	"os"
 
-	"github.com/jahvon/tuikit/io/mocks"
+	"github.com/flowexec/tuikit/io/mocks"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"

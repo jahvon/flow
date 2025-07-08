@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jahvon/tuikit/types"
+	"github.com/flowexec/tuikit/types"
 	"gopkg.in/yaml.v3"
 )
 

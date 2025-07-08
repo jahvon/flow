@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/types"
+	"github.com/flowexec/tuikit/io"
+	"github.com/flowexec/tuikit/types"
 	"gopkg.in/yaml.v3"
 
 	"github.com/jahvon/flow/internal/errors"

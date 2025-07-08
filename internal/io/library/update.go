@@ -8,7 +8,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/jahvon/tuikit/themes"
+	"github.com/flowexec/tuikit/themes"
 
 	"github.com/jahvon/flow/internal/filesystem"
 	"github.com/jahvon/flow/internal/io/common"

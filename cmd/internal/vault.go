@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	io2 "github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/views"
-	extvault "github.com/jahvon/vault"
+	io2 "github.com/flowexec/tuikit/io"
+	"github.com/flowexec/tuikit/views"
+	extvault "github.com/flowexec/vault"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 

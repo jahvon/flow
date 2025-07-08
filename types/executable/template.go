@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jahvon/tuikit/types"
+	"github.com/flowexec/tuikit/types"
 	"gopkg.in/yaml.v3"
 )
 

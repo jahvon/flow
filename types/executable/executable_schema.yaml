@@ -296,7 +296,7 @@ definitions:
         type: string
         goJSONSchema:
           type: io.LogMode
-          imports: ["github.com/jahvon/tuikit/io"]
+          imports: ["github.com/flowexec/tuikit/io"]
         description: |
           The log mode to use when running the executable.
           This can either be `hidden`, `json`, `logfmt` or `text`

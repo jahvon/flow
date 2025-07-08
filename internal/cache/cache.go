@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/jahvon/tuikit/io"
+	"github.com/flowexec/tuikit/io"
 )
 
 func UpdateAll(logger io.Logger) error {

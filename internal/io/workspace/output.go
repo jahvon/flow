@@ -1,7 +1,7 @@
 package workspace
 
 import (
-	tuikitIO "github.com/jahvon/tuikit/io"
+	tuikitIO "github.com/flowexec/tuikit/io"
 
 	"github.com/jahvon/flow/internal/io/common"
 	"github.com/jahvon/flow/types/workspace"

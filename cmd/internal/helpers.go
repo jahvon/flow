@@ -4,7 +4,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jahvon/tuikit"
+	"github.com/flowexec/tuikit"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"

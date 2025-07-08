@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	tuikitIO "github.com/jahvon/tuikit/io"
+	tuikitIO "github.com/flowexec/tuikit/io"
 
 	"github.com/jahvon/flow/types/executable"
 )

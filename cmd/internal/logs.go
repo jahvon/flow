@@ -3,8 +3,8 @@ package internal
 import (
 	"fmt"
 
-	tuikitIO "github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/views"
+	tuikitIO "github.com/flowexec/tuikit/io"
+	"github.com/flowexec/tuikit/views"
 	"github.com/spf13/cobra"
 
 	"github.com/jahvon/flow/cmd/internal/flags"

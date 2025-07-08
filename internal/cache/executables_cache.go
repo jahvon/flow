@@ -3,7 +3,7 @@ package cache
 import (
 	"fmt"
 
-	"github.com/jahvon/tuikit/io"
+	"github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 

@@ -3,7 +3,7 @@ package templates
 import (
 	"fmt"
 
-	"github.com/jahvon/tuikit/views"
+	"github.com/flowexec/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/internal/io"

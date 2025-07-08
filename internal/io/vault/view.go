@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/types"
-	"github.com/jahvon/tuikit/views"
-	extVault "github.com/jahvon/vault"
+	"github.com/flowexec/tuikit"
+	"github.com/flowexec/tuikit/types"
+	"github.com/flowexec/tuikit/views"
+	extVault "github.com/flowexec/vault"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v3"
 

@@ -10,7 +10,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/jahvon/tuikit/views"
+	"github.com/flowexec/tuikit/views"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 

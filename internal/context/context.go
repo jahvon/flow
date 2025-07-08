@@ -8,9 +8,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/io"
-	"github.com/jahvon/tuikit/themes"
+	"github.com/flowexec/tuikit"
+	"github.com/flowexec/tuikit/io"
+	"github.com/flowexec/tuikit/themes"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 

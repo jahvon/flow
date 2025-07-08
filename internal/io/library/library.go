@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/viewport"
-	"github.com/jahvon/tuikit"
-	"github.com/jahvon/tuikit/themes"
-	"github.com/jahvon/tuikit/views"
+	"github.com/flowexec/tuikit"
+	"github.com/flowexec/tuikit/themes"
+	"github.com/flowexec/tuikit/views"
 
 	"github.com/jahvon/flow/internal/context"
 	"github.com/jahvon/flow/types/common"

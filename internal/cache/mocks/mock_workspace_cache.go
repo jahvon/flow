@@ -14,7 +14,7 @@ import (
 
 	cache "github.com/jahvon/flow/internal/cache"
 	workspace "github.com/jahvon/flow/types/workspace"
-	io "github.com/jahvon/tuikit/io"
+	io "github.com/flowexec/tuikit/io"
 	gomock "go.uber.org/mock/gomock"
 )
 
