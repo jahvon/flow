@@ -286,6 +286,7 @@ func setTestEnv(t ginkgo.FullGinkgoTInterface, configDir, cacheDir string) {
 	t.Setenv(filesystem.FlowConfigDirEnvVar, configDir)
 	t.Setenv(filesystem.FlowCacheDirEnvVar, cacheDir)
 	t.Setenv(store.BucketEnv, "")
+	t.Setenv("NO_COLOR", "1")
 }
 
 func expectInternalMockLoggerCalls(logger *tuikitIOMocks.MockLogger) {

@@ -27,7 +27,7 @@ var LogModeFlag = &Metadata{
 	Name:      "log-mode",
 	Shorthand: "m",
 	Usage:     "Log mode (text, logfmt, json, hidden)",
-	Default:   "logfmt",
+	Default:   "",
 	Required:  false,
 }
 

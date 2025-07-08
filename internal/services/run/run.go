@@ -15,15 +15,7 @@ import (
 )
 
 func init() {
-	if _, exists := os.LookupEnv("TERM"); !exists {
-		_ = os.Setenv("TERM", "xterm-256color")
-	}
-	if _, exists := os.LookupEnv("FORCE_COLOR"); !exists {
-		_ = os.Setenv("FORCE_COLOR", "1")
-	}
-	if _, exists := os.LookupEnv("CLICOLOR_FORCE"); !exists {
-		_ = os.Setenv("CLICOLOR_FORCE", "1")
-	}
+	setupColorEnvironment()
 }
 
 // RunCmd executes a command in the current shell in a specific directory.
@@ -143,4 +135,27 @@ func stdOutWriter(mode io.LogMode, logger io.Logger, logFields ...any) stdio.Wri
 
 func stdErrWriter(mode io.LogMode, logger io.Logger, logFields ...any) stdio.Writer {
 	return io.StdErrWriter{LogFields: logFields, Logger: logger, LogMode: &mode}
+}
+
+func setupColorEnvironment() {
+	hasColorPreference := os.Getenv("NO_COLOR") != "" ||
+		os.Getenv("FORCE_COLOR") != "" ||
+		os.Getenv("CLICOLOR_FORCE") != ""
+
+	if !hasColorPreference {
+		isCI := os.Getenv("CI") != "" || os.Getenv("GITHUB_ACTIONS") != ""
+		isTesting := strings.HasSuffix(os.Args[0], ".test")
+
+		if isCI || isTesting {
+			_ = os.Setenv("NO_COLOR", "1")
+		} else {
+			_ = os.Setenv("FORCE_COLOR", "1")
+			_ = os.Setenv("CLICOLOR_FORCE", "1")
+		}
+	}
+
+	// Always ensure TERM is set if colors might be used
+	if os.Getenv("NO_COLOR") == "" && os.Getenv("TERM") == "" {
+		_ = os.Setenv("TERM", "xterm-256color")
+	}
 }
