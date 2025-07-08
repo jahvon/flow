@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	internalUtils "github.com/jahvon/flow/internal/utils"
 	"github.com/jahvon/flow/tests/utils"
 )
 
@@ -45,7 +44,7 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 			Expect(lines).ToNot(BeEmpty())
 			parts := strings.Split(strings.TrimSpace(lines[0]), ":")
 			Expect(parts).To(HaveLen(2))
-			encryptionKey := strings.TrimSpace(internalUtils.StripAnsi(parts[1]))
+			encryptionKey := strings.TrimSpace(parts[1])
 			Expect(os.Setenv(keyEnv, encryptionKey)).To(Succeed())
 		})
 
