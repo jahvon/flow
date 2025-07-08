@@ -11,15 +11,15 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 
-	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/io"
-	vaultIO "github.com/jahvon/flow/internal/io/vault"
-	"github.com/jahvon/flow/internal/utils"
-	"github.com/jahvon/flow/internal/vault"
-	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
-	"github.com/jahvon/flow/types/config"
+	"github.com/flowexec/flow/cmd/internal/flags"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/io"
+	vaultIO "github.com/flowexec/flow/internal/io/vault"
+	"github.com/flowexec/flow/internal/utils"
+	"github.com/flowexec/flow/internal/vault"
+	vaultV2 "github.com/flowexec/flow/internal/vault/v2"
+	"github.com/flowexec/flow/types/config"
 )
 
 func RegisterVaultCmd(ctx *context.Context, rootCmd *cobra.Command) {

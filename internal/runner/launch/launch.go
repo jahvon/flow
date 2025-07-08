@@ -5,12 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/runner"
-	"github.com/jahvon/flow/internal/runner/engine"
-	"github.com/jahvon/flow/internal/services/open"
-	"github.com/jahvon/flow/internal/utils"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/runner"
+	"github.com/flowexec/flow/internal/runner/engine"
+	"github.com/flowexec/flow/internal/services/open"
+	"github.com/flowexec/flow/internal/utils"
+	"github.com/flowexec/flow/types/executable"
 )
 
 type launchRunner struct{}

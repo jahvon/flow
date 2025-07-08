@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/services/store"
+	"github.com/flowexec/flow/internal/services/store"
 )
 
 func TestStore(t *testing.T) {

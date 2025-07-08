@@ -1,8 +1,8 @@
 <p align="center"><img src="_media/logo.png" alt="flow" width="300"/></p>
 
 <p align="center">
-  <a href="https://img.shields.io/github/v/release/jahvon/flow"><img src="https://img.shields.io/github/v/release/jahvon/flow" alt="GitHub release"></a>
-  <a href="https://pkg.go.dev/github.com/jahvon/flow"><img src="https://pkg.go.dev/badge/github.com/jahvon/flow.svg" alt="Go Reference"></a>
+  <a href="https://img.shields.io/github/v/release/flowexec/flow"><img src="https://img.shields.io/github/v/release/flowexec/flow" alt="GitHub release"></a>
+  <a href="https://pkg.go.dev/github.com/flowexec/flow"><img src="https://pkg.go.dev/badge/github.com/flowexec/flow.svg" alt="Go Reference"></a>
 </p>
 
 flow is a customizable and interactive CLI tool designed to streamline how you manage and run local development and 

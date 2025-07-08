@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/types/config"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/types/config"
 )
 
 var _ = Describe("FlowFile", func() {

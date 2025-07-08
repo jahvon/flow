@@ -1,5 +1,5 @@
 $schema: "http://json-schema.org/draft-07/schema#"
-$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/config/schema.yaml"
+$id: "https://raw.githubusercontent.com/flowexec/flow/HEAD/types/config/schema.yaml"
 
 title: Config
 description: |

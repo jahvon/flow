@@ -8,10 +8,10 @@ import (
 	"github.com/flowexec/tuikit/themes"
 	"github.com/flowexec/tuikit/views"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/types/common"
-	"github.com/jahvon/flow/types/executable"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 const (

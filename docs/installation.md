@@ -5,10 +5,10 @@
 Run the following command to install the latest version of flow:
 
 ```shell
-curl -sSL https://raw.githubusercontent.com/jahvon/flow/main/scripts/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/flowexec/flow/main/scripts/install.sh | bash
 ```
 
-Alternatively, you can download the latest release from the [releases page](https://github.com/jahvon/flow/releases) and 
+Alternatively, you can download the latest release from the [releases page](https://github.com/flowexec/flow/releases) and 
 add the binary to your `$PATH`. A checksum is provided for each release to verify the download.
 
 ### Homebrew
@@ -20,7 +20,7 @@ brew install jahvon/tap/flow
 ### Go
 
 ```bash
-go install github.com/jahvon/flow@latest
+go install github.com/flowexec/flow@latest
 ```
 
 For CI/CD integrations and containerized environments, see the [integrations guide](guide/integrations.md).

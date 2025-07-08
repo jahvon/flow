@@ -1,5 +1,5 @@
 $schema: "http://json-schema.org/draft-07/schema#"
-$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/executable/flowfile_schema.yaml"
+$id: "https://raw.githubusercontent.com/flowexec/flow/HEAD/types/executable/flowfile_schema.yaml"
 
 title: FlowFile
 description: |
@@ -21,7 +21,7 @@ properties:
     $ref: '../common/schema.yaml#/definitions/Visibility'
     goJSONSchema:
       type: "common.Visibility"
-      imports: ["github.com/jahvon/flow/types/common"]
+      imports: ["github.com/flowexec/flow/types/common"]
   fromFile:
     $ref: '#/definitions/FromFile'
     default: []

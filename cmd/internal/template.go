@@ -5,13 +5,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/io/executable"
-	"github.com/jahvon/flow/internal/runner"
-	"github.com/jahvon/flow/internal/runner/exec"
-	"github.com/jahvon/flow/internal/templates"
+	"github.com/flowexec/flow/cmd/internal/flags"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/io/executable"
+	"github.com/flowexec/flow/internal/runner"
+	"github.com/flowexec/flow/internal/runner/exec"
+	"github.com/flowexec/flow/internal/templates"
 )
 
 func RegisterTemplateCmd(ctx *context.Context, rootCmd *cobra.Command) {

@@ -3,8 +3,8 @@ package executable
 import (
 	tuikitIO "github.com/flowexec/tuikit/io"
 
-	"github.com/jahvon/flow/internal/io/common"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/io/common"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func PrintExecutableList(logger tuikitIO.Logger, format string, executables executable.ExecutableList) {

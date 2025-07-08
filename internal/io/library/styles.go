@@ -9,7 +9,7 @@ import (
 	"github.com/flowexec/tuikit/themes"
 	"github.com/mattn/go-runewidth"
 
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func renderSelection(s string, theme themes.Theme) string {

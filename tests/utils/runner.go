@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/jahvon/flow/cmd"
-	"github.com/jahvon/flow/internal/context"
+	"github.com/flowexec/flow/cmd"
+	"github.com/flowexec/flow/internal/context"
 )
 
 type CommandRunner struct{}

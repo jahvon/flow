@@ -9,8 +9,8 @@ import (
 	"github.com/flowexec/tuikit/types"
 	"github.com/flowexec/tuikit/views"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/vault/v2"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/vault/v2"
 )
 
 func NewSecretView(

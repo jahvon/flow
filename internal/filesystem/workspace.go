@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 const WorkspaceConfigFileName = "flow.yaml"

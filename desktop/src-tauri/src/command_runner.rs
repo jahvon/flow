@@ -68,7 +68,7 @@ impl CommandRunner {
 
     fn build_base_command(&self) -> Command {
         // TODO: Make this configurable / use the main flow binary
-        let mut cmd = Command::new("/Users/jahvon/workspaces/github.com/jahvon/flow/.bin/flow");
+        let mut cmd = Command::new("/Users/jahvon/workspaces/github.com/flowexec/flow/.bin/flow");
         cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
         cmd
@@ -185,7 +185,7 @@ impl CommandRunner {
         cmd_args.extend(args.iter().map(|&s| s.to_string()));
 
         let mut cmd =
-            TokioCommand::new("/Users/jahvon/workspaces/github.com/jahvon/flow/.bin/flow");
+            TokioCommand::new("/Users/jahvon/workspaces/github.com/flowexec/flow/.bin/flow");
 
         if let Some(params) = params {
             for (key, value) in params {

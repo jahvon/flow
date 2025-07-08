@@ -10,7 +10,7 @@ your flow executables directly within your CI/CD pipelines.
 #### Quick Start
 
 ```yaml
-- uses: jahvon/flow-action@v1.0.0-beta1
+- uses: flowexec/action@v1
   with:
     executable: 'build app'
 ```
@@ -24,7 +24,7 @@ flow can run in containerized environments, making it useful for CI/CD pipelines
 #### Basic Usage
 
 ```shell
-docker run -it --rm ghcr.io/jahvon/flow
+docker run -it --rm ghcr.io/flowexec/flow
 ```
 
 This runs the container with the default flow workspace and shows the version.
@@ -38,7 +38,7 @@ docker run -it --rm \
   -e REPO=https://github.com/your-org/your-workspace \
   -e BRANCH=main \
   -e WORKSPACE=my-workspace \
-  ghcr.io/jahvon/flow exec "your-executable"
+  ghcr.io/flowexec/flow exec "your-executable"
 ```
 
 #### Environment Variables
@@ -56,5 +56,5 @@ docker run -it --rm \
   -v $(pwd):/workspaces/my-workspace \
   -w /workspaces/my-workspace \
   -e WORKSPACE=my-workspace \
-  ghcr.io/jahvon/flow "exec your-executable"
+  ghcr.io/flowexec/flow "exec your-executable"
 ```

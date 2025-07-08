@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/types/executable"
 )
 
 const (

@@ -11,8 +11,8 @@ import (
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func IsTruthy(ex string, env any) (bool, error) {

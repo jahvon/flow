@@ -3,7 +3,7 @@ package crypto_test
 import (
 	"testing"
 
-	"github.com/jahvon/flow/internal/crypto"
+	"github.com/flowexec/flow/internal/crypto"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

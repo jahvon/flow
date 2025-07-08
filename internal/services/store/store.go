@@ -11,7 +11,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 	boltErrors "go.etcd.io/bbolt/errors"
 
-	"github.com/jahvon/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/filesystem"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 	storeFileName = "store.db"
 )
 
-//go:generate mockgen -destination=mocks/mock_store.go -package=mocks github.com/jahvon/flow/internal/services/store Store
+//go:generate mockgen -destination=mocks/mock_store.go -package=mocks github.com/flowexec/flow/internal/services/store Store
 type Store interface {
 	CreateBucket(id string) error
 	CreateAndSetBucket(id string) (string, error)

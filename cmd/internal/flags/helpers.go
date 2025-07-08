@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/jahvon/flow/internal/context"
+	"github.com/flowexec/flow/internal/context"
 )
 
 //nolint:errcheck

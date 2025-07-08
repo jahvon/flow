@@ -52,7 +52,7 @@ and then echo that color back to the console.
 If you're new to flow, try adding the `flow` workspace and explore the executables it contains.
 
 ```shell
-git clone github.com/jahvon/flow
+git clone github.com/flowexec/flow
 flow workspace add flow flow
 ```
 

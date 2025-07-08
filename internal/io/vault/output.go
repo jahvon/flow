@@ -3,7 +3,7 @@ package vault
 import (
 	tuikitIO "github.com/flowexec/tuikit/io"
 
-	"github.com/jahvon/flow/internal/io/common"
+	"github.com/flowexec/flow/internal/io/common"
 )
 
 func PrintVault(logger tuikitIO.Logger, format, vaultName string) {

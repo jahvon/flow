@@ -10,9 +10,9 @@ import (
 	tuikitIO "github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/services/expr"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/services/expr"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func copyAllArtifacts(

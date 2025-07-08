@@ -2,7 +2,7 @@
 
 Contributions are welcome!
 
-Looking for a place to start? Check out the [issues](https://github.com/jahvon/flow/issues) for ideas. Be
+Looking for a place to start? Check out the [issues](https://github.com/flowexec/flow/issues) for ideas. Be
 sure to read the contribution guidelines below!
 
 ## How We Develop
@@ -19,7 +19,7 @@ By participating in this project, you agree to abide our [code of conduct](CODE_
 We use GitHub issues to track public bugs and feature requests. Please fill out as much as you can in the issue template, 
 and provide as much additional context as possible. 
 
-When creating an issue, add any [labels](https://github.com/jahvon/flow/labels) that may be relevant.
+When creating an issue, add any [labels](https://github.com/flowexec/flow/labels) that may be relevant.
 The `triage` label will be added automatically and will be removed once the issue has been reviewed by a maintainer.
 
 ### Submitting Pull Requests

@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/utils/args"
+	"github.com/flowexec/flow/internal/utils/args"
 )
 
 func TestParseArgs(t *testing.T) {

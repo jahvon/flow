@@ -7,14 +7,14 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/types/common"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/executable"
 )
 
 const execCacheKey = "executables"
 
-//go:generate mockgen -destination=mocks/mock_executable_cache.go -package=mocks github.com/jahvon/flow/internal/cache ExecutableCache
+//go:generate mockgen -destination=mocks/mock_executable_cache.go -package=mocks github.com/flowexec/flow/internal/cache ExecutableCache
 type ExecutableCache interface {
 	Update(logger io.Logger) error
 	GetExecutableByRef(logger io.Logger, ref executable.Ref) (*executable.Executable, error)

@@ -10,9 +10,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/flowexec/tuikit/themes"
 
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/io/common"
-	"github.com/jahvon/flow/internal/services/open"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/io/common"
+	"github.com/flowexec/flow/internal/services/open"
 )
 
 func (l *Library) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

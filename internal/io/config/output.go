@@ -3,8 +3,8 @@ package config
 import (
 	tuikitIO "github.com/flowexec/tuikit/io"
 
-	"github.com/jahvon/flow/internal/io/common"
-	"github.com/jahvon/flow/types/config"
+	"github.com/flowexec/flow/internal/io/common"
+	"github.com/flowexec/flow/types/config"
 )
 
 func PrintUserConfig(logger tuikitIO.Logger, format string, userConfig *config.Config) {

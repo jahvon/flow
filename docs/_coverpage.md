@@ -7,5 +7,5 @@
 - Define your _executables_ in YAML
 - Run and manage them from the TUI
 
-[GitHub](https://github.com/jahvon/flow)
+[GitHub](https://github.com/flowexec/flow)
 [Get Started](README.md)

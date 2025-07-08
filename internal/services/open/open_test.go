@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/services/open"
+	"github.com/flowexec/flow/internal/services/open"
 )
 
 func TestOpen(t *testing.T) {

@@ -4,7 +4,7 @@ package flags
 import (
 	"fmt"
 
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/types/executable"
 )
 
 type Metadata struct {

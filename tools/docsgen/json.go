@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/jahvon/flow/tools/docsgen/schema"
+	"github.com/flowexec/flow/tools/docsgen/schema"
 )
 
 const (

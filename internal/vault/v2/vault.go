@@ -9,8 +9,8 @@ import (
 	"github.com/flowexec/tuikit/io"
 	"github.com/flowexec/vault"
 
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/utils"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/utils"
 )
 
 const (

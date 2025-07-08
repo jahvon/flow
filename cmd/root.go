@@ -6,11 +6,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal"
-	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/cmd/internal/version"
-	"github.com/jahvon/flow/internal/cache"
-	"github.com/jahvon/flow/internal/context"
+	"github.com/flowexec/flow/cmd/internal"
+	"github.com/flowexec/flow/cmd/internal/flags"
+	"github.com/flowexec/flow/cmd/internal/version"
+	"github.com/flowexec/flow/internal/cache"
+	"github.com/flowexec/flow/internal/context"
 )
 
 func NewRootCmd(ctx *context.Context) *cobra.Command {

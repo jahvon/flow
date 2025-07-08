@@ -8,11 +8,11 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/runner"
-	"github.com/jahvon/flow/types/config"
-	"github.com/jahvon/flow/types/executable"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/runner"
+	"github.com/flowexec/flow/types/config"
+	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 var _ = Describe("Env", func() {

@@ -12,7 +12,7 @@ executables:
           default: docker
           flag: builder
         - envKey: IMAGE_REPO
-          default: jahvon/flow
+          default: flowexec/flow
           flag: repo
         - envKey: IMAGE_TAG
           default: latest
@@ -36,7 +36,7 @@ executables:
           default: docker
           flag: builder
         - envKey: IMAGE_REPO
-          default: jahvon/flow
+          default: flowexec/flow
           flag: repo
         - envKey: IMAGE_TAG
           default: latest
@@ -72,7 +72,7 @@ executables:
           default: docker
           flag: builder
         - envKey: IMAGE_REPO
-          default: jahvon/flow
+          default: flowexec/flow
           flag: repo
         - envKey: IMAGE_TAG
           default: latest
