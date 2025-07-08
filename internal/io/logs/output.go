@@ -7,8 +7,8 @@ import (
 	"github.com/flowexec/tuikit/io"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io/common"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/io/common"
 )
 
 type entry struct {

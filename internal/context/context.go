@@ -14,12 +14,12 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 
-	"github.com/jahvon/flow/internal/cache"
-	"github.com/jahvon/flow/internal/filesystem"
-	flowIO "github.com/jahvon/flow/internal/io"
-	"github.com/jahvon/flow/types/config"
-	"github.com/jahvon/flow/types/executable"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/cache"
+	"github.com/flowexec/flow/internal/filesystem"
+	flowIO "github.com/flowexec/flow/internal/io"
+	"github.com/flowexec/flow/types/config"
+	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 const (

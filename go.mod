@@ -1,4 +1,4 @@
-module github.com/jahvon/flow
+module github.com/flowexec/flow
 
 go 1.24
 

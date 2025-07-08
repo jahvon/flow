@@ -10,12 +10,12 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/cache"
-	cacheMocks "github.com/jahvon/flow/internal/cache/mocks"
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/types/common"
-	"github.com/jahvon/flow/types/executable"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/cache"
+	cacheMocks "github.com/flowexec/flow/internal/cache/mocks"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 var _ = Describe("ExecutableCacheImpl", func() {

@@ -9,11 +9,11 @@ import (
 	"github.com/flowexec/tuikit/types"
 	"github.com/flowexec/tuikit/views"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/io/common"
-	"github.com/jahvon/flow/internal/services/open"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/io/common"
+	"github.com/flowexec/flow/internal/services/open"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 func NewWorkspaceView(

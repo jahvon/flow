@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/utils"
+	"github.com/flowexec/flow/internal/utils"
 )
 
 func TestUtils(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/internal/context"
+	"github.com/flowexec/flow/cmd/internal/flags"
+	"github.com/flowexec/flow/internal/context"
 )
 
 func TestFlags(t *testing.T) {

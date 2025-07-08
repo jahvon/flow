@@ -6,10 +6,10 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/jahvon/flow/internal/runner/engine/retry"
+	"github.com/flowexec/flow/internal/runner/engine/retry"
 )
 
-//go:generate mockgen -destination=mocks/mock_engine.go -package=mocks github.com/jahvon/flow/internal/runner/engine Engine
+//go:generate mockgen -destination=mocks/mock_engine.go -package=mocks github.com/flowexec/flow/internal/runner/engine Engine
 
 type Result struct {
 	ID      string

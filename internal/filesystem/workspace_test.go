@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 var _ = Describe("Workspace", func() {

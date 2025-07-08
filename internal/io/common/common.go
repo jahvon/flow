@@ -8,7 +8,7 @@ import (
 
 	"github.com/flowexec/tuikit/io"
 
-	"github.com/jahvon/flow/internal/services/open"
+	"github.com/flowexec/flow/internal/services/open"
 )
 
 const HeaderContextKey = "ctx"

@@ -4,7 +4,7 @@ ENV DISABLE_FLOW_INTERACTIVE="true"
 
 # TODO: replace with examples repo
 ENV WORKSPACE="flow"
-ENV REPO="https://github.com/jahvon/flow.git"
+ENV REPO="https://github.com/flowexec/flow.git"
 ENV BRANCH=""
 
 WORKDIR /workspaces

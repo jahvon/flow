@@ -5,13 +5,13 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 const wsCacheKey = "workspace"
 
-//go:generate mockgen -destination=mocks/mock_workspace_cache.go -package=mocks github.com/jahvon/flow/internal/cache WorkspaceCache
+//go:generate mockgen -destination=mocks/mock_workspace_cache.go -package=mocks github.com/flowexec/flow/internal/cache WorkspaceCache
 type WorkspaceCache interface {
 	Update(logger io.Logger) error
 	GetData() *WorkspaceCacheData

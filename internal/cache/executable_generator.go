@@ -8,9 +8,9 @@ import (
 	"github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 
-	"github.com/jahvon/flow/internal/fileparser"
-	"github.com/jahvon/flow/internal/utils"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/fileparser"
+	"github.com/flowexec/flow/internal/utils"
+	"github.com/flowexec/flow/types/executable"
 )
 
 const generatedTag = "generated"

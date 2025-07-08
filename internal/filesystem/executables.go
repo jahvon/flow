@@ -12,8 +12,8 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/types/executable"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 func EnsureExecutableDir(workspacePath, subPath string) error {

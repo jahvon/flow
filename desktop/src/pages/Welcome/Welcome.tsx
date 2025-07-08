@@ -47,7 +47,7 @@ export function Welcome({ welcomeMessage }: WelcomeProps) {
             </Button>
           </Anchor>
           <Anchor
-            href="https://github.com/jahvon/flow"
+            href="https://github.com/flowexec/flow"
             target="_blank"
             underline="never"
           >

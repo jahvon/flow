@@ -12,15 +12,15 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 
-	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/internal/cache"
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/io"
-	workspaceIO "github.com/jahvon/flow/internal/io/workspace"
-	"github.com/jahvon/flow/types/common"
-	"github.com/jahvon/flow/types/config"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/cmd/internal/flags"
+	"github.com/flowexec/flow/internal/cache"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/io"
+	workspaceIO "github.com/flowexec/flow/internal/io/workspace"
+	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/config"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 func RegisterWorkspaceCmd(ctx *context.Context, rootCmd *cobra.Command) {

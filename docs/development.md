@@ -1,9 +1,9 @@
 # flow Development
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/jahvon/flow)](https://goreportcard.com/report/github.com/jahvon/flow)
-[![Go Reference](https://pkg.go.dev/badge/github.com/jahvon/flow.svg)](https://pkg.go.dev/github.com/jahvon/flow)
-[![GitHub branch status](https://img.shields.io/github/checks-status/jahvon/flow/main)](https://github.com/jahvon/flow/actions?query=branch%3Amain)
-[![Codecov](https://img.shields.io/codecov/c/github/jahvon/flow)](https://app.codecov.io/gh/jahvon/flow)
+[![Go Report Card](https://goreportcard.com/badge/github.com/flowexec/flow)](https://goreportcard.com/report/github.com/flowexec/flow)
+[![Go Reference](https://pkg.go.dev/badge/github.com/flowexec/flow.svg)](https://pkg.go.dev/github.com/flowexec/flow)
+[![GitHub branch status](https://img.shields.io/github/checks-status/flowexec/flow/main)](https://github.com/flowexec/flow/actions?query=branch%3Amain)
+[![Codecov](https://img.shields.io/codecov/c/github/flowexec/flow)](https://app.codecov.io/gh/flowexec/flow)
 
 Before getting started, please read the [Code of Conduct](../.github/CODE_OF_CONDUCT.md) and [Contributing Guidelines](../.github/CONTRIBUTING.md).
 

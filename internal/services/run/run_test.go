@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/services/run"
+	"github.com/flowexec/flow/internal/services/run"
 )
 
 func TestRun(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 	"github.com/flowexec/tuikit/types"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/internal/utils"
-	"github.com/jahvon/flow/types/common"
+	"github.com/flowexec/flow/internal/utils"
+	"github.com/flowexec/flow/types/common"
 )
 
 //go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p workspace -o workspace.gen.go schema.yaml

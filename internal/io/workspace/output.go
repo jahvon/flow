@@ -3,8 +3,8 @@ package workspace
 import (
 	tuikitIO "github.com/flowexec/tuikit/io"
 
-	"github.com/jahvon/flow/internal/io/common"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/internal/io/common"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 func PrintWorkspaceList(logger tuikitIO.Logger, format string, workspaces workspace.WorkspaceList) {

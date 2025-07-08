@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
-	"github.com/jahvon/flow/types/config"
+	"github.com/flowexec/flow/types/config"
 )
 
 const FlowConfigDirEnvVar = "FLOW_CONFIG_DIR"

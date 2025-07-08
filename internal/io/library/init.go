@@ -9,8 +9,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/flowexec/tuikit/types"
 
-	"github.com/jahvon/flow/types/executable"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 func (l *Library) Init() tea.Cmd {

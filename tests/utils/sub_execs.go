@@ -1,8 +1,8 @@
 package utils
 
 import (
-	execUtils "github.com/jahvon/flow/internal/utils/executables"
-	"github.com/jahvon/flow/types/executable"
+	execUtils "github.com/flowexec/flow/internal/utils/executables"
+	"github.com/flowexec/flow/types/executable"
 )
 
 // FindSubExecs returns a list of sub-executables for the given root executable.

@@ -78,7 +78,7 @@ func demoData() map[string]string {
 		"webhook-secret": "webhook-secret-abcdef123456",
 		"jwt-secret":     "super-secret-jwt-key-for-demo-only",
 		"slack-webhook":  "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX",
-		"message":        "Thanks for trying flow! Report bugs at github.com/jahvon/flow",
+		"message":        "Thanks for trying flow! Report bugs at github.com/flowexec/flow",
 
 		// Long secrets (testing edge cases)
 		"rsa-private-key": `-----BEGIN RSA PRIVATE KEY-----

@@ -7,10 +7,10 @@ import (
 	"github.com/flowexec/tuikit/views"
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/io/logs"
+	"github.com/flowexec/flow/cmd/internal/flags"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/io/logs"
 )
 
 func RegisterLogsCmd(ctx *context.Context, rootCmd *cobra.Command) {

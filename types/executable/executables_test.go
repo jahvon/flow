@@ -8,8 +8,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/types/common"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func TestExecutable(t *testing.T) {

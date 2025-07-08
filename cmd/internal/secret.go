@@ -9,14 +9,14 @@ import (
 	"github.com/flowexec/tuikit/views"
 	"github.com/spf13/cobra"
 
-	"github.com/jahvon/flow/cmd/internal/flags"
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/io"
-	"github.com/jahvon/flow/internal/io/secret"
-	secretV2 "github.com/jahvon/flow/internal/io/secret/v2"
-	"github.com/jahvon/flow/internal/vault"
-	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
-	"github.com/jahvon/flow/types/config"
+	"github.com/flowexec/flow/cmd/internal/flags"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/io"
+	"github.com/flowexec/flow/internal/io/secret"
+	secretV2 "github.com/flowexec/flow/internal/io/secret/v2"
+	"github.com/flowexec/flow/internal/vault"
+	vaultV2 "github.com/flowexec/flow/internal/vault/v2"
+	"github.com/flowexec/flow/types/config"
 )
 
 func RegisterSecretCmd(ctx *context.Context, rootCmd *cobra.Command) {

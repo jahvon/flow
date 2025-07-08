@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/jahvon/flow/internal/services/expr"
+	"github.com/flowexec/flow/internal/services/expr"
 )
 
 func TestExpr(t *testing.T) {

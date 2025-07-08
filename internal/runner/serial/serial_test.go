@@ -9,13 +9,13 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/runner"
-	"github.com/jahvon/flow/internal/runner/engine"
-	"github.com/jahvon/flow/internal/runner/engine/mocks"
-	"github.com/jahvon/flow/internal/runner/serial"
-	testUtils "github.com/jahvon/flow/tests/utils"
-	"github.com/jahvon/flow/tools/builder"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/runner"
+	"github.com/flowexec/flow/internal/runner/engine"
+	"github.com/flowexec/flow/internal/runner/engine/mocks"
+	"github.com/flowexec/flow/internal/runner/serial"
+	testUtils "github.com/flowexec/flow/tests/utils"
+	"github.com/flowexec/flow/tools/builder"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func TestSerialRunner(t *testing.T) {

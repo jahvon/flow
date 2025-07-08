@@ -3,9 +3,9 @@ package executables
 import (
 	"fmt"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/types/common"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func ExecutableForRef(ctx *context.Context, ref executable.Ref) (*executable.Executable, error) {

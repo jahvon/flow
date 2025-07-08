@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func ParseArgs(args []string) (flagArgs map[string]string, posArgs []string) {

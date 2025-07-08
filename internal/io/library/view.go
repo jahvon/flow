@@ -12,8 +12,8 @@ import (
 	"github.com/flowexec/tuikit/themes"
 	"github.com/jahvon/glamour"
 
-	"github.com/jahvon/flow/types/common"
-	"github.com/jahvon/flow/types/workspace"
+	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 const (

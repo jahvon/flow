@@ -8,11 +8,11 @@ import (
 
 	"github.com/flowexec/tuikit/io"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/filesystem"
-	"github.com/jahvon/flow/internal/vault"
-	vaultV2 "github.com/jahvon/flow/internal/vault/v2"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/vault"
+	vaultV2 "github.com/flowexec/flow/internal/vault/v2"
+	"github.com/flowexec/flow/types/executable"
 )
 
 func SetEnv(

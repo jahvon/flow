@@ -1,5 +1,5 @@
 $schema: "http://json-schema.org/draft-07/schema#"
-$id: "https://raw.githubusercontent.com/jahvon/flow/HEAD/types/executable/template_schema.yaml"
+$id: "https://raw.githubusercontent.com/flowexec/flow/HEAD/types/executable/template_schema.yaml"
 
 title: Template
 description: Configuration for a flowfile template; templates can be used to generate flow files.

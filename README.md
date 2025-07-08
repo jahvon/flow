@@ -3,8 +3,8 @@
 <br>
 
 <p align="center">
-    <a href="https://img.shields.io/github/v/release/jahvon/flow"><img src="https://img.shields.io/github/v/release/jahvon/flow" alt="GitHub release"></a>
-    <a href="https://pkg.go.dev/github.com/jahvon/flow"><img src="https://pkg.go.dev/badge/github.com/jahvon/flow.svg" alt="Go Reference"></a>
+    <a href="https://img.shields.io/github/v/release/flowexec/flow"><img src="https://img.shields.io/github/v/release/flowexec/flow" alt="GitHub release"></a>
+    <a href="https://pkg.go.dev/github.com/flowexec/flow"><img src="https://pkg.go.dev/badge/github.com/flowexec/flow.svg" alt="Go Reference"></a>
 </p>
 
 <p align="center">

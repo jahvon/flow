@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 
-	"github.com/jahvon/flow/internal/fileparser"
+	"github.com/flowexec/flow/internal/fileparser"
 )
 
 func TestFileParser(t *testing.T) {

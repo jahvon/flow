@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jahvon/flow/internal/context"
-	"github.com/jahvon/flow/internal/runner/engine"
-	"github.com/jahvon/flow/types/executable"
+	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/runner/engine"
+	"github.com/flowexec/flow/types/executable"
 )
 
-//go:generate mockgen -destination=mocks/mock_runner.go -package=mocks github.com/jahvon/flow/internal/runner Runner
+//go:generate mockgen -destination=mocks/mock_runner.go -package=mocks github.com/flowexec/flow/internal/runner Runner
 type Runner interface {
 	Name() string
 	Exec(ctx *context.Context, e *executable.Executable, eng engine.Engine, inputEnv map[string]string) error

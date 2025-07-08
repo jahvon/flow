@@ -2,7 +2,7 @@
 
 package executable
 
-import "github.com/jahvon/flow/types/common"
+import "github.com/flowexec/flow/types/common"
 
 // Configuration for a group of Flow CLI executables. The file must have the
 // extension `.flow`, `.flow.yaml`, or `.flow.yml`
