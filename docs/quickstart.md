@@ -22,7 +22,7 @@ workspace's configurations. For more information on workspaces see the [workspac
 
 **Create an executable**
 
-Executables are the core of flow. Each executable is driven by its definition within a flow file (`*.flow`).
+Executables are the core of flow. Each executable is driven by its definition within a flow file (`*.flow`, `*.flow.yaml`, or `*.flow.yml`).
 There are several types of executables that can be defined. For more information on executables and the flow file, see the [executable guide](guide/executable.md).
 
 To get started, create a new flow file in the workspace directory.

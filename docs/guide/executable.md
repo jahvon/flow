@@ -71,7 +71,7 @@ flow build my-project/
 ## Flowfile
 
 The flowfile is the primary configuration file that defines what an executable should do. The file is written in YAML but
-should have a `.flow` extension.
+should have a `.flow`, `.flow.yaml`, or `.flow.yml` extension.
 
 The [flow sync](../cli/flow_sync.md) command is used to trigger a discovery of executables within workspaces. This 
 command should be run whenever an executable is created, moved, or deleted from a flowfile.

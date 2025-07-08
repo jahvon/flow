@@ -2,9 +2,9 @@
 
 # FlowFile
 
-Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered 
-by the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).
-A workspace can have multiple flow files located anywhere in the workspace directory
+Configuration for a group of Flow CLI executables. The file must have the extension `.flow`, `.flow.yaml`, or `.flow.yml` 
+in order to be discovered by the CLI. It's configuration is used to define a group of executables with shared metadata 
+(namespace, tags, etc). A workspace can have multiple flow files located anywhere in the workspace directory
 
 
 ## Properties

@@ -116,7 +116,7 @@ func findFlowFiles(logger io.Logger, workspaceCfg *workspace.Workspace) ([]strin
 				return filepath.SkipDir
 			}
 
-			if filepath.Ext(entry.Name()) == executable.FlowFileExt {
+			if executable.HasFlowFileExt(entry.Name()) {
 				cfgPaths = append(cfgPaths, path)
 			}
 		}

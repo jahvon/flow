@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://flowexec.io/schemas/flowfile_schema.json",
   "title": "FlowFile",
-  "description": "Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered \nby the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).\nA workspace can have multiple flow files located anywhere in the workspace directory\n",
+  "description": "Configuration for a group of Flow CLI executables. The file must have the extension `.flow`, `.flow.yaml`, or `.flow.yml` \nin order to be discovered by the CLI. It's configuration is used to define a group of executables with shared metadata \n(namespace, tags, etc). A workspace can have multiple flow files located anywhere in the workspace directory\n",
   "type": "object",
   "definitions": {
     "CommonAliases": {

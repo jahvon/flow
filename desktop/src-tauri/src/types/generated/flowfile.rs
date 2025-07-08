@@ -2182,7 +2182,7 @@ impl ::std::default::Default for ExecutableVerb {
         ExecutableVerb::Exec
     }
 }
-#[doc = "Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered \nby the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).\nA workspace can have multiple flow files located anywhere in the workspace directory\n"]
+#[doc = "Configuration for a group of Flow CLI executables. The file must have the extension `.flow`, `.flow.yaml`, or `.flow.yml` \nin order to be discovered by the CLI. It's configuration is used to define a group of executables with shared metadata \n(namespace, tags, etc). A workspace can have multiple flow files located anywhere in the workspace directory\n"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
 #[doc = r""]
@@ -2190,7 +2190,7 @@ impl ::std::default::Default for ExecutableVerb {
 #[doc = "{"]
 #[doc = "  \"$id\": \"https://flowexec.io/schemas/flowfile_schema.json\","]
 #[doc = "  \"title\": \"FlowFile\","]
-#[doc = "  \"description\": \"Configuration for a group of Flow CLI executables. The file must have the extension `.flow` in order to be discovered \\nby the CLI. It's configuration is used to define a group of executables with shared metadata (namespace, tags, etc).\\nA workspace can have multiple flow files located anywhere in the workspace directory\\n\","]
+#[doc = "  \"description\": \"Configuration for a group of Flow CLI executables. The file must have the extension `.flow`, `.flow.yaml`, or `.flow.yml` \\nin order to be discovered by the CLI. It's configuration is used to define a group of executables with shared metadata \\n(namespace, tags, etc). A workspace can have multiple flow files located anywhere in the workspace directory\\n\","]
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"description\": {"]

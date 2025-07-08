@@ -16,4 +16,4 @@ You can add the following comment to the top of your flow files to enable this:
 
 See the [schemas directory on GitHub](https://github.com/jahvon/flow/tree/main/docs/schemas) for all available schemas.
 
-Note: If using the flow file schema, you will need to make sure your IDE is configured to treat `*.flow` files as YAML files.
+Note: If using the flow file schema, you will need to make sure your IDE is configured to treat `*.flow`, `*.flow.yaml`, and `*.flow.yml` files as YAML files.
