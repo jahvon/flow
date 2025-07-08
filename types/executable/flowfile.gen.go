@@ -5,11 +5,11 @@ package executable
 import "github.com/jahvon/flow/types/common"
 
 // Configuration for a group of Flow CLI executables. The file must have the
-// extension `.flow` in order to be discovered
-// by the CLI. It's configuration is used to define a group of executables with
-// shared metadata (namespace, tags, etc).
-// A workspace can have multiple flow files located anywhere in the workspace
-// directory
+// extension `.flow`, `.flow.yaml`, or `.flow.yml`
+// in order to be discovered by the CLI. It's configuration is used to define a
+// group of executables with shared metadata
+// (namespace, tags, etc). A workspace can have multiple flow files located
+// anywhere in the workspace directory
 type FlowFile struct {
 	// configPath corresponds to the JSON schema field "configPath".
 	configPath string `json:"configPath,omitempty" yaml:"configPath,omitempty" mapstructure:"configPath,omitempty"`
