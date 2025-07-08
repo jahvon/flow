@@ -12,9 +12,9 @@ package mocks
 import (
 	reflect "reflect"
 
-	io "github.com/flowexec/tuikit/io"
 	cache "github.com/flowexec/flow/internal/cache"
 	workspace "github.com/flowexec/flow/types/workspace"
+	io "github.com/flowexec/tuikit/io"
 	gomock "go.uber.org/mock/gomock"
 )
 

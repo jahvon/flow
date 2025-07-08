@@ -12,8 +12,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	io "github.com/flowexec/tuikit/io"
 	executable "github.com/flowexec/flow/types/executable"
+	io "github.com/flowexec/tuikit/io"
 	gomock "go.uber.org/mock/gomock"
 )
 
