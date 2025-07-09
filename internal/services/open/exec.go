@@ -12,7 +12,7 @@ import (
 func open(uri string) *exec.Cmd {
 	switch {
 	case os.Getenv(DisabledEnvKey) != "":
-		fmt.Println(fmt.Sprintf("xdg-open %s", uri))
+		fmt.Printf("xdg-open %s\n", uri)
 		return nil
 	default:
 		return exec.Command("xdg-open", uri)
@@ -22,7 +22,7 @@ func open(uri string) *exec.Cmd {
 func openWith(input string, appName string) *exec.Cmd {
 	switch {
 	case os.Getenv(DisabledEnvKey) != "":
-		fmt.Println(fmt.Sprintf("%s %s", appName, input))
+		fmt.Printf("%s %s\n", appName, input)
 		return nil
 	default:
 		return exec.Command(appName, input)
