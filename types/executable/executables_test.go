@@ -316,6 +316,7 @@ var _ = DescribeTable("HasFlowFileExt", func(file string, expected bool) {
 	Entry("ends with .flow", "development.flow", true),
 	Entry("ends with .flow.yaml", "development.flow.yaml", true),
 	Entry("ends with .flow.yml", "development.flow.yml", true),
+	Entry("ends with .flow + something else", "development.flow.txt", false),
 	Entry("ends with something else", "development.txt", false),
 )
 
@@ -326,5 +327,6 @@ var _ = DescribeTable("HasFlowFileTemplateExt", func(file string, expected bool)
 	Entry("ends with .flow.tmpl.yaml", "development.flow.tmpl.yaml", true),
 	Entry("ends with .flow.tmpl.yml", "development.flow.tmpl.yml", true),
 	Entry("ends with .flow", "development.flow", false),
+	Entry("ends with .flow.tmpl + something else", "development.flow.tmpl.txt", false),
 	Entry("ends with something else", "development.flow.txt", false),
 )
