@@ -2,6 +2,7 @@ package launch
 
 import (
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -51,16 +52,19 @@ func (r *launchRunner) Exec(
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	launchSpec.URI = os.ExpandEnv(launchSpec.URI)
-	targetURI := utils.ExpandDirectory(
-		ctx.Logger,
-		launchSpec.URI,
-		e.WorkspacePath(),
-		e.FlowFilePath(),
-		envMap,
-	)
+	targetURI := launchSpec.URI
+	if !strings.HasPrefix(targetURI, "http") {
+		targetURI = utils.ExpandDirectory(
+			ctx.Logger,
+			launchSpec.URI,
+			e.WorkspacePath(),
+			e.FlowFilePath(),
+			envMap,
+		)
+	}
 
 	if launchSpec.App != "" {
-		return open.OpenWith(launchSpec.App, targetURI, launchSpec.Wait)
+		return open.OpenWith(launchSpec.App, targetURI)
 	}
-	return open.Open(targetURI, launchSpec.Wait)
+	return open.Open(targetURI)
 }

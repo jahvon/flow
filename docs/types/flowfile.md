@@ -172,7 +172,6 @@ Launches an application or opens a URI.
 | `args` |  | [ExecutableArgumentList](#ExecutableArgumentList) | <no value> |  |
 | `params` |  | [ExecutableParameterList](#ExecutableParameterList) | <no value> |  |
 | `uri` | The URI to launch. This can be a file path or a web URL. | `string` |  | ✘ |
-| `wait` | If set to true, the executable will wait for the launched application to exit before continuing. | `boolean` | false |  |
 
 ### ExecutableParallelExecutableType
 

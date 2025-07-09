@@ -1,4 +1,4 @@
-import { Badge, Card, Code, Group, Stack, Text, Title } from "@mantine/core";
+import { Card, Code, Group, Stack, Text, Title } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons-react";
 import { EnrichedExecutable } from "../../../types/executable";
 
@@ -36,14 +36,6 @@ export function ExecutableLaunchDetails({
               >
                 {executable.launch.uri}
               </Text>
-            </div>
-          )}
-          {executable.launch?.wait && (
-            <div>
-              <Title order={5}>Wait:</Title>
-              <Badge variant="light" color="blue">
-                enabled
-              </Badge>
             </div>
           )}
         </Stack>

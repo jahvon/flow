@@ -25,7 +25,7 @@ func NewWorkspaceView(
 		{
 			Key: "o", Label: "open",
 			Callback: func() error {
-				if err := open.Open(ws.Location(), false); err != nil {
+				if err := open.Open(ws.Location()); err != nil {
 					container.HandleError(fmt.Errorf("unable to open workspace: %w", err))
 				}
 				return nil

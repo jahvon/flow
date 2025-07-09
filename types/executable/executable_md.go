@@ -118,9 +118,6 @@ func launchExecMarkdown(e *ExecutableEnvironment, l *LaunchExecutableType) strin
 	if l.URI != "" {
 		mkdwn += fmt.Sprintf("**URI:** [%s](%s)\n", l.URI, l.URI)
 	}
-	if l.Wait {
-		mkdwn += "**Wait:** enabled\n"
-	}
 	mkdwn += execEnvTable(e)
 	return mkdwn
 }

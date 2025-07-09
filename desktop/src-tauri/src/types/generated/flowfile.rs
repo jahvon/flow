@@ -682,11 +682,6 @@ impl ExecutableExecExecutableType {
 #[doc = "      \"description\": \"The URI to launch. This can be a file path or a web URL.\","]
 #[doc = "      \"default\": \"\","]
 #[doc = "      \"type\": \"string\""]
-#[doc = "    },"]
-#[doc = "    \"wait\": {"]
-#[doc = "      \"description\": \"If set to true, the executable will wait for the launched application to exit before continuing.\","]
-#[doc = "      \"default\": false,"]
-#[doc = "      \"type\": \"boolean\""]
 #[doc = "    }"]
 #[doc = "  }"]
 #[doc = "}"]
@@ -703,9 +698,6 @@ pub struct ExecutableLaunchExecutableType {
     pub params: ::std::option::Option<ExecutableParameterList>,
     #[doc = "The URI to launch. This can be a file path or a web URL."]
     pub uri: ::std::string::String,
-    #[doc = "If set to true, the executable will wait for the launched application to exit before continuing."]
-    #[serde(default)]
-    pub wait: bool,
 }
 impl ::std::convert::From<&ExecutableLaunchExecutableType> for ExecutableLaunchExecutableType {
     fn from(value: &ExecutableLaunchExecutableType) -> Self {
@@ -2831,7 +2823,6 @@ pub mod builder {
             ::std::string::String,
         >,
         uri: ::std::result::Result<::std::string::String, ::std::string::String>,
-        wait: ::std::result::Result<bool, ::std::string::String>,
     }
     impl ::std::default::Default for ExecutableLaunchExecutableType {
         fn default() -> Self {
@@ -2840,7 +2831,6 @@ pub mod builder {
                 args: Ok(Default::default()),
                 params: Ok(Default::default()),
                 uri: Err("no value supplied for uri".to_string()),
-                wait: Ok(Default::default()),
             }
         }
     }
@@ -2885,16 +2875,6 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for uri: {}", e));
             self
         }
-        pub fn wait<T>(mut self, value: T) -> Self
-        where
-            T: ::std::convert::TryInto<bool>,
-            T::Error: ::std::fmt::Display,
-        {
-            self.wait = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for wait: {}", e));
-            self
-        }
     }
     impl ::std::convert::TryFrom<ExecutableLaunchExecutableType>
         for super::ExecutableLaunchExecutableType
@@ -2908,7 +2888,6 @@ pub mod builder {
                 args: value.args?,
                 params: value.params?,
                 uri: value.uri?,
-                wait: value.wait?,
             })
         }
     }
@@ -2921,7 +2900,6 @@ pub mod builder {
                 args: Ok(value.args),
                 params: Ok(value.params),
                 uri: Ok(value.uri),
-                wait: Ok(value.wait),
             }
         }
     }

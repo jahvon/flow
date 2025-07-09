@@ -18,7 +18,7 @@ var termEditors = []string{"vim", "nvim", "emacs", "nano"}
 func OpenInEditor(path string, stdIn, stdOut *os.File) error {
 	preferred := os.Getenv("EDITOR")
 	if preferred != "" && !slices.Contains(termEditors, preferred) {
-		return open.OpenWith(preferred, path, false)
+		return open.OpenWith(preferred, path)
 	}
 	if preferred == "" {
 		preferred = "vim"
