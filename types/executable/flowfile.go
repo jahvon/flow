@@ -13,7 +13,7 @@ import (
 
 const FlowFileExt = ".flow"
 
-var FlowFileExtRegex = regexp.MustCompile(fmt.Sprintf(`%s(\.yaml|\.yml)?`, regexp.QuoteMeta(FlowFileExt)))
+var FlowFileExtRegex = regexp.MustCompile(fmt.Sprintf(`%s(\.yaml|\.yml)?$`, regexp.QuoteMeta(FlowFileExt)))
 
 type FlowFileList []*FlowFile
 

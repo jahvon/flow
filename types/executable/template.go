@@ -17,7 +17,7 @@ import (
 const FlowFileTemplateExt = ".flow.tmpl"
 
 //nolint:lll
-var FlowFileTemplateExtRegex = regexp.MustCompile(fmt.Sprintf(`%s(\.yaml|\.yml)?`, regexp.QuoteMeta(FlowFileTemplateExt)))
+var FlowFileTemplateExtRegex = regexp.MustCompile(fmt.Sprintf(`%s(\.yaml|\.yml)?$`, regexp.QuoteMeta(FlowFileTemplateExt)))
 
 type TemplateList []*Template
 
