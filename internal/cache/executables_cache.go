@@ -90,8 +90,11 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 					continue
 				}
 				cacheData.ExecutableMap[e.Ref()] = flowFile.ConfigPath()
-				for _, ref := range enumerateExecutableAliasRefs(e) {
-					cacheData.AliasMap[ref] = e.Ref()
+				if wsCfg.VerbAliasEnabled == nil || *wsCfg.VerbAliasEnabled {
+					// TODO: allow specifying custom alias mappings
+					for _, ref := range enumerateExecutableAliasRefs(e) {
+						cacheData.AliasMap[ref] = e.Ref()
+					}
 				}
 				cacheData.ConfigMap[flowFile.ConfigPath()] = WorkspaceInfo{
 					WorkspaceName: wsCfg.AssignedName(),

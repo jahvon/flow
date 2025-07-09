@@ -31,6 +31,12 @@ export interface Workspace {
   displayName?: string;
   executables?: ExecutableFilter;
   tags?: CommonTags;
+  /**
+   * If true, the executables in the workspace can be referred to by their verb aliases.
+   * This allows you to use commands like `flow run` instead of `flow exec`.
+   *
+   */
+  verbAliasEnabled?: boolean;
   [k: string]: unknown;
 }
 export interface ExecutableFilter {

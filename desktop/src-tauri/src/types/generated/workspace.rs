@@ -154,6 +154,10 @@ impl ExecutableFilter {
 #[doc = "    \"tags\": {"]
 #[doc = "      \"default\": [],"]
 #[doc = "      \"$ref\": \"#/definitions/CommonTags\""]
+#[doc = "    },"]
+#[doc = "    \"verbAliasEnabled\": {"]
+#[doc = "      \"description\": \"If true, the executables in the workspace can be referred to by their verb aliases.\\nThis allows you to use commands like `flow run` instead of `flow exec`.\\n\","]
+#[doc = "      \"type\": \"boolean\""]
 #[doc = "    }"]
 #[doc = "  }"]
 #[doc = "}"]
@@ -174,6 +178,13 @@ pub struct Workspace {
     pub executables: ::std::option::Option<ExecutableFilter>,
     #[serde(default = "defaults::workspace_tags")]
     pub tags: CommonTags,
+    #[doc = "If true, the executables in the workspace can be referred to by their verb aliases.\nThis allows you to use commands like `flow run` instead of `flow exec`.\n"]
+    #[serde(
+        rename = "verbAliasEnabled",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub verb_alias_enabled: ::std::option::Option<bool>,
 }
 impl ::std::convert::From<&Workspace> for Workspace {
     fn from(value: &Workspace) -> Self {
@@ -188,6 +199,7 @@ impl ::std::default::Default for Workspace {
             display_name: Default::default(),
             executables: Default::default(),
             tags: defaults::workspace_tags(),
+            verb_alias_enabled: Default::default(),
         }
     }
 }
@@ -264,6 +276,8 @@ pub mod builder {
             ::std::string::String,
         >,
         tags: ::std::result::Result<super::CommonTags, ::std::string::String>,
+        verb_alias_enabled:
+            ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
     }
     impl ::std::default::Default for Workspace {
         fn default() -> Self {
@@ -273,6 +287,7 @@ pub mod builder {
                 display_name: Ok(Default::default()),
                 executables: Ok(Default::default()),
                 tags: Ok(super::defaults::workspace_tags()),
+                verb_alias_enabled: Ok(Default::default()),
             }
         }
     }
@@ -330,6 +345,19 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for tags: {}", e));
             self
         }
+        pub fn verb_alias_enabled<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<bool>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.verb_alias_enabled = value.try_into().map_err(|e| {
+                format!(
+                    "error converting supplied value for verb_alias_enabled: {}",
+                    e
+                )
+            });
+            self
+        }
     }
     impl ::std::convert::TryFrom<Workspace> for super::Workspace {
         type Error = super::error::ConversionError;
@@ -342,6 +370,7 @@ pub mod builder {
                 display_name: value.display_name?,
                 executables: value.executables?,
                 tags: value.tags?,
+                verb_alias_enabled: value.verb_alias_enabled?,
             })
         }
     }
@@ -353,6 +382,7 @@ pub mod builder {
                 display_name: Ok(value.display_name),
                 executables: Ok(value.executables),
                 tags: Ok(value.tags),
+                verb_alias_enabled: Ok(value.verb_alias_enabled),
             }
         }
     }

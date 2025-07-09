@@ -19,6 +19,7 @@ Every workspace has a workspace config file named `flow.yaml` in the root of the
 | `displayName` | The display name of the workspace. This is used in the interactive UI. | `string` |  |  |
 | `executables` |  | [ExecutableFilter](#ExecutableFilter) | <no value> |  |
 | `tags` |  | [CommonTags](#CommonTags) | [] |  |
+| `verbAliasEnabled` | If true, the executables in the workspace can be referred to by their verb aliases. This allows you to use commands like `flow run` instead of `flow exec`.  | `boolean` | <no value> |  |
 
 
 ## Definitions

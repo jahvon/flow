@@ -56,6 +56,10 @@
     "tags": {
       "$ref": "#/definitions/CommonTags",
       "default": []
+    },
+    "verbAliasEnabled": {
+      "description": "If true, the executables in the workspace can be referred to by their verb aliases.\nThis allows you to use commands like `flow run` instead of `flow exec`.\n",
+      "type": "boolean"
     }
   }
 }

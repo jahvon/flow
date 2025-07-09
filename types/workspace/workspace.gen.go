@@ -38,6 +38,12 @@ type Workspace struct {
 
 	// Tags corresponds to the JSON schema field "tags".
 	Tags WorkspaceTags `json:"tags,omitempty" yaml:"tags,omitempty" mapstructure:"tags,omitempty"`
+
+	// If true, the executables in the workspace can be referred to by their verb
+	// aliases.
+	// This allows you to use commands like `flow run` instead of `flow exec`.
+	//
+	VerbAliasEnabled *bool `json:"verbAliasEnabled,omitempty" yaml:"verbAliasEnabled,omitempty" mapstructure:"verbAliasEnabled,omitempty"`
 }
 
 type WorkspaceTags common.Tags

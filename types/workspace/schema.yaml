@@ -46,6 +46,11 @@ properties:
     type: string
     description: A path to a markdown file that contains the description of the workspace.
     default: ""
+  verbAliasEnabled:
+    type: boolean
+    description: |
+      If true, the executables in the workspace can be referred to by their verb aliases.
+      This allows you to use commands like `flow run` instead of `flow exec`.
   assignedName:
     type: string
     goJSONSchema:
