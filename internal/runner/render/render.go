@@ -91,6 +91,14 @@ func (r *renderRunner) Exec(
 
 	ctx.Logger.Infof("Rendering content from file %s", contentFile)
 	filename := filepath.Base(contentFile)
+
+	if err := ctx.TUIContainer.Start(); err != nil {
+		return errors.Wrapf(err, "unable to open viewer")
+	}
+	defer func() {
+		ctx.TUIContainer.WaitForExit()
+	}()
+
 	ctx.TUIContainer.SetState("file", filename)
 	return ctx.TUIContainer.SetView(views.NewMarkdownView(ctx.TUIContainer.RenderState(), buff.String()))
 }
