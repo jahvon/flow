@@ -79,8 +79,8 @@ github.com/esiqveland/notify v0.13.3 h1:QCMw6o1n+6rl+oLUfg8P1IIDSFsDEb2WlXvVvIJb
 github.com/esiqveland/notify v0.13.3/go.mod h1:hesw/IRYTO0x99u1JPweAl4+5mwXJibQVUcP0Iu5ORE=
 github.com/expr-lang/expr v1.17.5 h1:i1WrMvcdLF249nSNlpQZN1S6NXuW9WaOfF5tPi3aw3k=
 github.com/expr-lang/expr v1.17.5/go.mod h1:8/vRC7+7HBzESEqt5kKpYXxrxkr31SaO8r40VO/1IT4=
-github.com/flowexec/tuikit v0.2.0 h1:VUceZWwWEbq4UtDtawb2ZbVeMR7ULDYQy4og5f4PKP4=
-github.com/flowexec/tuikit v0.2.0/go.mod h1:fjMwEM7FkxbP7bIV4CfEjsixgjicgQqPrejoBZAHf5s=
+github.com/flowexec/tuikit v0.2.1 h1:jsW5PrBiem4as3KWmhOB/7OS0LYB0voQnKXvAG0OsPU=
+github.com/flowexec/tuikit v0.2.1/go.mod h1:fjMwEM7FkxbP7bIV4CfEjsixgjicgQqPrejoBZAHf5s=
 github.com/flowexec/vault v0.1.2 h1:INQ/w81piKRM+zqPBQpxFYl1iK8dI3APIHZ1F1Jm7CA=
 github.com/flowexec/vault v0.1.2/go.mod h1:nxoGHIVjwSgg1o6DoTmj5NCJtubu71SvS883LPUXuvg=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
