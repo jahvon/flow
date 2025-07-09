@@ -356,10 +356,6 @@ export interface ExecutableLaunchExecutableType {
    * The URI to launch. This can be a file path or a web URL.
    */
   uri: string;
-  /**
-   * If set to true, the executable will wait for the launched application to exit before continuing.
-   */
-  wait?: boolean;
   [k: string]: unknown;
 }
 export interface ExecutableParallelExecutableType {

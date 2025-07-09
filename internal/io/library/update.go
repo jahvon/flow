@@ -123,7 +123,7 @@ func (l *Library) updateWsPane(msg tea.Msg) (viewport.Model, tea.Cmd) {
 				break
 			}
 
-			if err := open.Open(curWsCfg.Location(), false); err != nil {
+			if err := open.Open(curWsCfg.Location()); err != nil {
 				l.ctx.Logger.Error(err, "unable to open workspace")
 				l.SetNotice("unable to open workspace", themes.OutputLevelError)
 			}

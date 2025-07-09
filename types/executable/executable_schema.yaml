@@ -328,10 +328,6 @@ definitions:
         type: string
         description: The URI to launch. This can be a file path or a web URL.
         default: ""
-      wait:
-        type: boolean
-        description: If set to true, the executable will wait for the launched application to exit before continuing.
-        default: false
 
   ParallelRefConfig:
     type: object

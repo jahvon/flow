@@ -1,6 +1,6 @@
 module github.com/flowexec/flow
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
@@ -13,7 +13,6 @@ require (
 	github.com/flowexec/vault v0.1.2
 	github.com/gen2brain/beeep v0.11.1
 	github.com/jahvon/glamour v0.8.1-patch3
-	github.com/jahvon/open-golang v0.0.0-20240522004812-68511c3bc9ef
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0

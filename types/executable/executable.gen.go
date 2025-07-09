@@ -180,10 +180,6 @@ type LaunchExecutableType struct {
 
 	// The URI to launch. This can be a file path or a web URL.
 	URI string `json:"uri" yaml:"uri" mapstructure:"uri"`
-
-	// If set to true, the executable will wait for the launched application to exit
-	// before continuing.
-	Wait bool `json:"wait,omitempty" yaml:"wait,omitempty" mapstructure:"wait,omitempty"`
 }
 
 type ParallelExecutableType struct {
