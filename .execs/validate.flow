@@ -50,7 +50,7 @@ executables:
             
             if [ "$CI" = "true" ]; then
               echo "Running golangci-lint with sarif output..."
-              golangci-lint run ./... --fix --output.sarif.path lint.sarif
+              golangci-lint run ./... --fix --output.sarif.path lint.sarif --output.text.path stdout
             else
               golangci-lint run ./... --fix
             fi
