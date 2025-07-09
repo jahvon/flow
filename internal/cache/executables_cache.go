@@ -10,6 +10,7 @@ import (
 	"github.com/flowexec/flow/internal/filesystem"
 	"github.com/flowexec/flow/types/common"
 	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 const execCacheKey = "executables"
@@ -90,11 +91,8 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 					continue
 				}
 				cacheData.ExecutableMap[e.Ref()] = flowFile.ConfigPath()
-				if wsCfg.VerbAliasEnabled == nil || *wsCfg.VerbAliasEnabled {
-					// TODO: allow specifying custom alias mappings
-					for _, ref := range enumerateExecutableAliasRefs(e) {
-						cacheData.AliasMap[ref] = e.Ref()
-					}
+				for _, ref := range enumerateExecutableAliasRefs(e, wsCfg.VerbAliases) {
+					cacheData.AliasMap[ref] = e.Ref()
 				}
 				cacheData.ConfigMap[flowFile.ConfigPath()] = WorkspaceInfo{
 					WorkspaceName: wsCfg.AssignedName(),
@@ -234,13 +232,32 @@ func (c *ExecutableCacheImpl) initExecutableCacheData(logger io.Logger) error {
 	return nil
 }
 
-func enumerateExecutableAliasRefs(exec *executable.Executable) executable.RefList {
+func enumerateExecutableAliasRefs(
+	exec *executable.Executable,
+	override workspace.WorkspaceVerbAliases,
+) executable.RefList {
 	refs := make(executable.RefList, 0)
 
-	for _, verb := range executable.RelatedVerbs(exec.Verb) {
-		refs = append(refs, executable.NewRef(exec.ID(), verb))
-		for _, id := range exec.AliasesIDs() {
-			refs = append(refs, executable.NewRef(id, verb))
+	if override == nil {
+		for _, verb := range executable.RelatedVerbs(exec.Verb) {
+			refs = append(refs, executable.NewRef(exec.ID(), verb))
+			for _, id := range exec.AliasesIDs() {
+				refs = append(refs, executable.NewRef(id, verb))
+			}
+		}
+	} else {
+		if verbs, found := override[exec.Verb.String()]; found {
+			for _, v := range verbs {
+				vv := executable.Verb(v)
+				if err := vv.Validate(); err != nil {
+					// If the verb is not valid, skip it
+					continue
+				}
+				refs = append(refs, executable.NewRef(exec.ID(), vv))
+				for _, id := range exec.AliasesIDs() {
+					refs = append(refs, executable.NewRef(id, vv))
+				}
+			}
 		}
 	}
 

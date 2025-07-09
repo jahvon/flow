@@ -32,11 +32,15 @@ export interface Workspace {
   executables?: ExecutableFilter;
   tags?: CommonTags;
   /**
-   * If true, the executables in the workspace can be referred to by their verb aliases.
-   * This allows you to use commands like `flow run` instead of `flow exec`.
+   * A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.
+   * Setting this will override all of the default flow command aliases. The verbs and it's mapped aliases must be valid flow verbs.
+   *
+   * If set to an empty object, verb aliases will be disabled.
    *
    */
-  verbAliasEnabled?: boolean;
+  verbAliases?: {
+    [k: string]: string[];
+  };
   [k: string]: unknown;
 }
 export interface ExecutableFilter {

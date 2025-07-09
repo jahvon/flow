@@ -155,9 +155,15 @@ impl ExecutableFilter {
 #[doc = "      \"default\": [],"]
 #[doc = "      \"$ref\": \"#/definitions/CommonTags\""]
 #[doc = "    },"]
-#[doc = "    \"verbAliasEnabled\": {"]
-#[doc = "      \"description\": \"If true, the executables in the workspace can be referred to by their verb aliases.\\nThis allows you to use commands like `flow run` instead of `flow exec`.\\n\","]
-#[doc = "      \"type\": \"boolean\""]
+#[doc = "    \"verbAliases\": {"]
+#[doc = "      \"description\": \"A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.\\nSetting this will override all of the default flow command aliases. The verbs and it's mapped aliases must be valid flow verbs.\\n\\nIf set to an empty object, verb aliases will be disabled.\\n\","]
+#[doc = "      \"type\": \"object\","]
+#[doc = "      \"additionalProperties\": {"]
+#[doc = "        \"type\": \"array\","]
+#[doc = "        \"items\": {"]
+#[doc = "          \"type\": \"string\""]
+#[doc = "        }"]
+#[doc = "      }"]
 #[doc = "    }"]
 #[doc = "  }"]
 #[doc = "}"]
@@ -178,13 +184,14 @@ pub struct Workspace {
     pub executables: ::std::option::Option<ExecutableFilter>,
     #[serde(default = "defaults::workspace_tags")]
     pub tags: CommonTags,
-    #[doc = "If true, the executables in the workspace can be referred to by their verb aliases.\nThis allows you to use commands like `flow run` instead of `flow exec`.\n"]
+    #[doc = "A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.\nSetting this will override all of the default flow command aliases. The verbs and it's mapped aliases must be valid flow verbs.\n\nIf set to an empty object, verb aliases will be disabled.\n"]
     #[serde(
-        rename = "verbAliasEnabled",
+        rename = "verbAliases",
         default,
-        skip_serializing_if = "::std::option::Option::is_none"
+        skip_serializing_if = ":: std :: collections :: HashMap::is_empty"
     )]
-    pub verb_alias_enabled: ::std::option::Option<bool>,
+    pub verb_aliases:
+        ::std::collections::HashMap<::std::string::String, ::std::vec::Vec<::std::string::String>>,
 }
 impl ::std::convert::From<&Workspace> for Workspace {
     fn from(value: &Workspace) -> Self {
@@ -199,7 +206,7 @@ impl ::std::default::Default for Workspace {
             display_name: Default::default(),
             executables: Default::default(),
             tags: defaults::workspace_tags(),
-            verb_alias_enabled: Default::default(),
+            verb_aliases: Default::default(),
         }
     }
 }
@@ -276,8 +283,13 @@ pub mod builder {
             ::std::string::String,
         >,
         tags: ::std::result::Result<super::CommonTags, ::std::string::String>,
-        verb_alias_enabled:
-            ::std::result::Result<::std::option::Option<bool>, ::std::string::String>,
+        verb_aliases: ::std::result::Result<
+            ::std::collections::HashMap<
+                ::std::string::String,
+                ::std::vec::Vec<::std::string::String>,
+            >,
+            ::std::string::String,
+        >,
     }
     impl ::std::default::Default for Workspace {
         fn default() -> Self {
@@ -287,7 +299,7 @@ pub mod builder {
                 display_name: Ok(Default::default()),
                 executables: Ok(Default::default()),
                 tags: Ok(super::defaults::workspace_tags()),
-                verb_alias_enabled: Ok(Default::default()),
+                verb_aliases: Ok(Default::default()),
             }
         }
     }
@@ -345,17 +357,19 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for tags: {}", e));
             self
         }
-        pub fn verb_alias_enabled<T>(mut self, value: T) -> Self
+        pub fn verb_aliases<T>(mut self, value: T) -> Self
         where
-            T: ::std::convert::TryInto<::std::option::Option<bool>>,
+            T: ::std::convert::TryInto<
+                ::std::collections::HashMap<
+                    ::std::string::String,
+                    ::std::vec::Vec<::std::string::String>,
+                >,
+            >,
             T::Error: ::std::fmt::Display,
         {
-            self.verb_alias_enabled = value.try_into().map_err(|e| {
-                format!(
-                    "error converting supplied value for verb_alias_enabled: {}",
-                    e
-                )
-            });
+            self.verb_aliases = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for verb_aliases: {}", e));
             self
         }
     }
@@ -370,7 +384,7 @@ pub mod builder {
                 display_name: value.display_name?,
                 executables: value.executables?,
                 tags: value.tags?,
-                verb_alias_enabled: value.verb_alias_enabled?,
+                verb_aliases: value.verb_aliases?,
             })
         }
     }
@@ -382,7 +396,7 @@ pub mod builder {
                 display_name: Ok(value.display_name),
                 executables: Ok(value.executables),
                 tags: Ok(value.tags),
-                verb_alias_enabled: Ok(value.verb_alias_enabled),
+                verb_aliases: Ok(value.verb_aliases),
             }
         }
     }

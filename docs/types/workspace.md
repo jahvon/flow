@@ -19,7 +19,7 @@ Every workspace has a workspace config file named `flow.yaml` in the root of the
 | `displayName` | The display name of the workspace. This is used in the interactive UI. | `string` |  |  |
 | `executables` |  | [ExecutableFilter](#ExecutableFilter) | <no value> |  |
 | `tags` |  | [CommonTags](#CommonTags) | [] |  |
-| `verbAliasEnabled` | If true, the executables in the workspace can be referred to by their verb aliases. This allows you to use commands like `flow run` instead of `flow exec`.  | `boolean` | <no value> |  |
+| `verbAliases` | A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace. Setting this will override all of the default flow command aliases. The verbs and it's mapped aliases must be valid flow verbs.  If set to an empty object, verb aliases will be disabled.  | `map` (`string` -> `array` (`string`)) | <no value> |  |
 
 
 ## Definitions
