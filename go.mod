@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/expr-lang/expr v1.17.5
-	github.com/flowexec/tuikit v0.2.0
+	github.com/flowexec/tuikit v0.2.1
 	github.com/flowexec/vault v0.1.2
 	github.com/gen2brain/beeep v0.11.1
 	github.com/jahvon/glamour v0.8.1-patch3

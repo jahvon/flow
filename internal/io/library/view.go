@@ -13,6 +13,7 @@ import (
 	"github.com/jahvon/glamour"
 
 	"github.com/flowexec/flow/types/common"
+	"github.com/flowexec/flow/types/executable"
 	"github.com/flowexec/flow/types/workspace"
 )
 
@@ -172,7 +173,14 @@ func (l *Library) paneOneContent() string {
 	}
 	for i, ex := range l.visibleExecutables {
 		if uint(i) == l.currentExecutable {
-			sb.WriteString(renderSelection("* "+truncateText(shortRef(ex.Ref(), curWs, curNs), paneWidth), l.theme))
+			indicator := "*"
+			if (l.ctx.CurrentWorkspace != nil && ex.Workspace() == l.ctx.CurrentWorkspace.AssignedName()) ||
+				(ex.Visibility != nil && *ex.Visibility == executable.ExecutableVisibility(common.VisibilityPublic)) {
+				// indicate if runnable from the current ctx
+				indicator = "▶"
+			}
+			refStr := indicator + " " + truncateText(shortRef(ex.Ref(), curWs, curNs), paneWidth)
+			sb.WriteString(renderSelection(refStr, l.theme))
 		} else {
 			sb.WriteString(renderInactive("  "+truncateText(shortRef(ex.Ref(), curWs, curNs), paneWidth), l.theme))
 		}
