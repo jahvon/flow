@@ -12,7 +12,7 @@ import (
 	"github.com/flowexec/flow/types/common"
 )
 
-//go:generate go run github.com/atombender/go-jsonschema@v0.16.0 -et --only-models -p workspace -o workspace.gen.go schema.yaml
+//go:generate go run github.com/atombender/go-jsonschema@v0.17.0 -et --only-models -p workspace -o workspace.gen.go schema.yaml
 
 type WorkspaceList []*Workspace
 

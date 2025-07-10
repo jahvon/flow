@@ -18,6 +18,27 @@ When a workspace is created, a [configuration](#workspace-configuration) file is
 
 The workspace configuration file is a YAML file that contains the configuration options for the workspace. This file is located in the root directory of the workspace and is named `flow.yaml`.
 
+```yaml
+# Example workspace configuration
+displayName: "My Project"
+description: "A sample Flow workspace"
+descriptionFile: README.md
+tags: ["development", "web"]
+verbAliases:
+  run: ["exec", "start"]
+  build: ["compile"]
+executables:
+  included: ["scripts/", "tools/"]
+  excluded: ["node_modules/", ".git/"]
+```
+
+**Key Configuration Options:**
+
+- **verbAliases**: Customize which verb aliases are available when running executables. Set to `{}` to disable all aliases. See [custom verb aliases](executable.md#custom-verb-aliases) for more details.
+- **executables**: Configure which directories to include or exclude when discovering executables.
+- **displayName**,  **description**, and **descriptionFile**: Used in the interactive UI and library views.
+- **tags**: Used for filtering workspaces.
+
 For more details about workspace configuration options, see [Workspace](../types/workspace.md).
 
 

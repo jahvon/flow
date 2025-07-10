@@ -10,6 +10,7 @@ import (
 	"github.com/flowexec/flow/internal/filesystem"
 	"github.com/flowexec/flow/types/common"
 	"github.com/flowexec/flow/types/executable"
+	"github.com/flowexec/flow/types/workspace"
 )
 
 const execCacheKey = "executables"
@@ -90,7 +91,7 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 					continue
 				}
 				cacheData.ExecutableMap[e.Ref()] = flowFile.ConfigPath()
-				for _, ref := range enumerateExecutableAliasRefs(e) {
+				for _, ref := range enumerateExecutableAliasRefs(e, wsCfg.VerbAliases) {
 					cacheData.AliasMap[ref] = e.Ref()
 				}
 				cacheData.ConfigMap[flowFile.ConfigPath()] = WorkspaceInfo{
@@ -129,9 +130,12 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 		return exec, nil
 	}
 
+	var primaryRef executable.Ref
 	cfgPath, found := c.Data.ExecutableMap[ref]
+	//nolint:nestif
 	if !found {
-		if primaryRef, aliasFound := c.Data.AliasMap[ref]; aliasFound {
+		if aliasedPrimaryRef, aliasFound := c.Data.AliasMap[ref]; aliasFound {
+			primaryRef = aliasedPrimaryRef
 			cfgPath, found = c.Data.ExecutableMap[primaryRef]
 			if !found {
 				return nil, NewExecutableNotFoundError(ref.String())
@@ -139,7 +143,10 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 		} else {
 			return nil, NewExecutableNotFoundError(ref.String())
 		}
+	} else {
+		primaryRef = ref
 	}
+
 	cfg, err := filesystem.LoadFlowFile(cfgPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to load executable config")
@@ -164,7 +171,7 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 	cfg.Executables = append(cfg.Executables, generated...)
 
 	execs := cfg.Executables
-	exec, err := execs.FindByVerbAndID(ref.Verb(), ref.ID())
+	exec, err := execs.FindByVerbAndID(primaryRef.Verb(), primaryRef.ID())
 	if err != nil {
 		return nil, err
 	} else if exec == nil {
@@ -231,13 +238,39 @@ func (c *ExecutableCacheImpl) initExecutableCacheData(logger io.Logger) error {
 	return nil
 }
 
-func enumerateExecutableAliasRefs(exec *executable.Executable) executable.RefList {
+func enumerateExecutableAliasRefs(
+	exec *executable.Executable,
+	override *workspace.WorkspaceVerbAliases,
+) executable.RefList {
 	refs := make(executable.RefList, 0)
 
-	for _, verb := range executable.RelatedVerbs(exec.Verb) {
-		refs = append(refs, executable.NewRef(exec.ID(), verb))
-		for _, id := range exec.AliasesIDs() {
-			refs = append(refs, executable.NewRef(id, verb))
+	switch {
+	case override == nil:
+		// use default aliases
+		for _, verb := range executable.RelatedVerbs(exec.Verb) {
+			refs = append(refs, executable.NewRef(exec.ID(), verb))
+			for _, id := range exec.AliasesIDs() {
+				refs = append(refs, executable.NewRef(id, verb))
+			}
+		}
+	case len(*override) == 0:
+		// disable all aliases if override is set but empty
+		return refs
+	default:
+		// use overrides if provided
+		o := *override
+		if verbs, found := o[exec.Verb.String()]; found {
+			for _, v := range verbs {
+				vv := executable.Verb(v)
+				if err := vv.Validate(); err != nil {
+					// If the verb is not valid, skip it
+					continue
+				}
+				refs = append(refs, executable.NewRef(exec.ID(), vv))
+				for _, id := range exec.AliasesIDs() {
+					refs = append(refs, executable.NewRef(id, vv))
+				}
+			}
 		}
 	}
 

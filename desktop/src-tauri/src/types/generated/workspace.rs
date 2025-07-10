@@ -122,6 +122,64 @@ impl ExecutableFilter {
         Default::default()
     }
 }
+#[doc = "A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.\nSetting this will override all of the default flow command aliases. The verbs and its mapped aliases must be valid flow verbs.\n\nIf set to an empty object, verb aliases will be disabled.\n"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.\\nSetting this will override all of the default flow command aliases. The verbs and its mapped aliases must be valid flow verbs.\\n\\nIf set to an empty object, verb aliases will be disabled.\\n\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"additionalProperties\": {"]
+#[doc = "    \"type\": \"array\","]
+#[doc = "    \"items\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
+#[serde(transparent)]
+pub struct VerbAliases(
+    pub ::std::collections::HashMap<::std::string::String, ::std::vec::Vec<::std::string::String>>,
+);
+impl ::std::ops::Deref for VerbAliases {
+    type Target =
+        ::std::collections::HashMap<::std::string::String, ::std::vec::Vec<::std::string::String>>;
+    fn deref(
+        &self,
+    ) -> &::std::collections::HashMap<::std::string::String, ::std::vec::Vec<::std::string::String>>
+    {
+        &self.0
+    }
+}
+impl ::std::convert::From<VerbAliases>
+    for ::std::collections::HashMap<::std::string::String, ::std::vec::Vec<::std::string::String>>
+{
+    fn from(value: VerbAliases) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<&VerbAliases> for VerbAliases {
+    fn from(value: &VerbAliases) -> Self {
+        value.clone()
+    }
+}
+impl
+    ::std::convert::From<
+        ::std::collections::HashMap<::std::string::String, ::std::vec::Vec<::std::string::String>>,
+    > for VerbAliases
+{
+    fn from(
+        value: ::std::collections::HashMap<
+            ::std::string::String,
+            ::std::vec::Vec<::std::string::String>,
+        >,
+    ) -> Self {
+        Self(value)
+    }
+}
 #[doc = "Configuration for a workspace in the Flow CLI.\nThis configuration is used to define the settings for a workspace.\nEvery workspace has a workspace config file named `flow.yaml` in the root of the workspace directory.\n"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -154,6 +212,9 @@ impl ExecutableFilter {
 #[doc = "    \"tags\": {"]
 #[doc = "      \"default\": [],"]
 #[doc = "      \"$ref\": \"#/definitions/CommonTags\""]
+#[doc = "    },"]
+#[doc = "    \"verbAliases\": {"]
+#[doc = "      \"$ref\": \"#/definitions/VerbAliases\""]
 #[doc = "    }"]
 #[doc = "  }"]
 #[doc = "}"]
@@ -174,6 +235,12 @@ pub struct Workspace {
     pub executables: ::std::option::Option<ExecutableFilter>,
     #[serde(default = "defaults::workspace_tags")]
     pub tags: CommonTags,
+    #[serde(
+        rename = "verbAliases",
+        default,
+        skip_serializing_if = "::std::option::Option::is_none"
+    )]
+    pub verb_aliases: ::std::option::Option<VerbAliases>,
 }
 impl ::std::convert::From<&Workspace> for Workspace {
     fn from(value: &Workspace) -> Self {
@@ -188,6 +255,7 @@ impl ::std::default::Default for Workspace {
             display_name: Default::default(),
             executables: Default::default(),
             tags: defaults::workspace_tags(),
+            verb_aliases: Default::default(),
         }
     }
 }
@@ -264,6 +332,8 @@ pub mod builder {
             ::std::string::String,
         >,
         tags: ::std::result::Result<super::CommonTags, ::std::string::String>,
+        verb_aliases:
+            ::std::result::Result<::std::option::Option<super::VerbAliases>, ::std::string::String>,
     }
     impl ::std::default::Default for Workspace {
         fn default() -> Self {
@@ -273,6 +343,7 @@ pub mod builder {
                 display_name: Ok(Default::default()),
                 executables: Ok(Default::default()),
                 tags: Ok(super::defaults::workspace_tags()),
+                verb_aliases: Ok(Default::default()),
             }
         }
     }
@@ -330,6 +401,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for tags: {}", e));
             self
         }
+        pub fn verb_aliases<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::option::Option<super::VerbAliases>>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.verb_aliases = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for verb_aliases: {}", e));
+            self
+        }
     }
     impl ::std::convert::TryFrom<Workspace> for super::Workspace {
         type Error = super::error::ConversionError;
@@ -342,6 +423,7 @@ pub mod builder {
                 display_name: value.display_name?,
                 executables: value.executables?,
                 tags: value.tags?,
+                verb_aliases: value.verb_aliases?,
             })
         }
     }
@@ -353,6 +435,7 @@ pub mod builder {
                 display_name: Ok(value.display_name),
                 executables: Ok(value.executables),
                 tags: Ok(value.tags),
+                verb_aliases: Ok(value.verb_aliases),
             }
         }
     }
