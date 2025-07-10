@@ -23,6 +23,17 @@ definitions:
           type: string
         description: A list of directories to exclude from the executable search.
         default: []
+  VerbAliases:
+    type: object
+    description: |
+      A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.
+      Setting this will override all of the default flow command aliases. The verbs and its mapped aliases must be valid flow verbs.
+      
+      If set to an empty object, verb aliases will be disabled.
+    additionalProperties:
+      type: array
+      items:
+          type: string
 
 type: object
 properties:
@@ -47,16 +58,10 @@ properties:
     description: A path to a markdown file that contains the description of the workspace.
     default: ""
   verbAliases:
-    type: object
-    description: |
-      A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.
-      Setting this will override all of the default flow command aliases. The verbs and it's mapped aliases must be valid flow verbs.
-      
-      If set to an empty object, verb aliases will be disabled.
-    additionalProperties:
-      type: array
-      items:
-          type: string
+    $ref: '#/definitions/VerbAliases'
+    goJSONSchema:
+      type: "map[string][]string"
+      nillable: false
   assignedName:
     type: string
     goJSONSchema:

@@ -142,4 +142,160 @@ var _ = Describe("ExecutableCacheImpl", func() {
 			Expect(readData.Ref()).To(Equal(ref))
 		})
 	})
+
+	Describe("Verb aliases behavior", func() {
+		BeforeEach(func() {
+			v := executable.FlowFileVisibility(common.VisibilityPrivate)
+			execCfg := &executable.FlowFile{
+				Namespace:  "testdata",
+				Visibility: &v,
+				Executables: executable.ExecutableList{
+					{Verb: "run", Name: "test-alias", Aliases: []string{"alias1"}},
+				},
+			}
+			execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "aliases-test"+executable.FlowFileExt))
+
+			err := filesystem.WriteFlowFile(execCfg.ConfigPath(), execCfg)
+			Expect(err).NotTo(HaveOccurred())
+
+			wsCache = cacheMocks.NewMockWorkspaceCache(gomock.NewController(GinkgoT()))
+			execCache.WorkspaceCache = wsCache
+		})
+
+		Context("when workspace has no verbAliases configured (nil)", func() {
+			It("should allow access via default verb aliases", func() {
+				wsConfig := &workspace.Workspace{VerbAliases: nil}
+				wsConfig.SetContext(wsName, wsPath)
+				wsCache.EXPECT().GetLatestData(gomock.Any()).Return(&cache.WorkspaceCacheData{
+					Workspaces:         map[string]*workspace.Workspace{wsName: wsConfig},
+					WorkspaceLocations: map[string]string{wsName: wsPath},
+				}, nil).AnyTimes()
+
+				logger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				logger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				Expect(execCache.Update(logger)).To(Succeed())
+
+				// Should be able to access via default verb "run"
+				runRef := executable.Ref("run test/testdata:test-alias")
+				exec, err := execCache.GetExecutableByRef(logger, runRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exec).NotTo(BeNil())
+				Expect(exec.Name).To(Equal("test-alias"))
+
+				// Should also be able to access via default verb alias "exec"
+				execRef := executable.Ref("exec test/testdata:test-alias")
+				exec, err = execCache.GetExecutableByRef(logger, execRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exec).NotTo(BeNil())
+				Expect(exec.Name).To(Equal("test-alias"))
+
+				// Should also be able to access via alias
+				aliasRef := executable.Ref("exec test/testdata:alias1")
+				execFromAlias, err := execCache.GetExecutableByRef(logger, aliasRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(execFromAlias).NotTo(BeNil())
+				Expect(execFromAlias.Name).To(Equal("test-alias"))
+			})
+		})
+
+		Context("when workspace has empty verbAliases map", func() {
+			It("should disable all verb aliases", func() {
+				emptyAliases := &workspace.WorkspaceVerbAliases{}
+				wsConfig := &workspace.Workspace{VerbAliases: emptyAliases}
+				wsConfig.SetContext(wsName, wsPath)
+				wsCache.EXPECT().GetLatestData(gomock.Any()).Return(&cache.WorkspaceCacheData{
+					Workspaces:         map[string]*workspace.Workspace{wsName: wsConfig},
+					WorkspaceLocations: map[string]string{wsName: wsPath},
+				}, nil).AnyTimes()
+
+				logger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				logger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				Expect(execCache.Update(logger)).To(Succeed())
+
+				// Should NOT be able to access via default aliases like "exec"
+				execRef := executable.Ref("exec test/testdata:test-alias")
+				_, err := execCache.GetExecutableByRef(logger, execRef)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("unable to find executable"))
+
+				// Should still be able to access via primary verb "run"
+				runRef := executable.Ref("run test/testdata:test-alias")
+				exec, err := execCache.GetExecutableByRef(logger, runRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exec).NotTo(BeNil())
+				Expect(exec.Name).To(Equal("test-alias"))
+			})
+		})
+
+		Context("when workspace has custom verbAliases", func() {
+			It("should only allow access via custom aliases", func() {
+				customAliases := &workspace.WorkspaceVerbAliases{"run": {"exec", "start"}}
+				wsConfig := &workspace.Workspace{VerbAliases: customAliases}
+				wsConfig.SetContext(wsName, wsPath)
+				wsCache.EXPECT().GetLatestData(gomock.Any()).Return(&cache.WorkspaceCacheData{
+					Workspaces:         map[string]*workspace.Workspace{wsName: wsConfig},
+					WorkspaceLocations: map[string]string{wsName: wsPath},
+				}, nil).AnyTimes()
+
+				logger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				logger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				Expect(execCache.Update(logger)).To(Succeed())
+
+				// Should be able to access via custom aliases
+				execAliasRef := executable.Ref("exec test/testdata:test-alias")
+				exec, err := execCache.GetExecutableByRef(logger, execAliasRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exec).NotTo(BeNil())
+				Expect(exec.Name).To(Equal("test-alias"))
+
+				startRef := executable.Ref("start test/testdata:test-alias")
+				exec, err = execCache.GetExecutableByRef(logger, startRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exec).NotTo(BeNil())
+				Expect(exec.Name).To(Equal("test-alias"))
+
+				// Should also work with executable aliases
+				aliasExecRef := executable.Ref("exec test/testdata:alias1")
+				execFromAlias, err := execCache.GetExecutableByRef(logger, aliasExecRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(execFromAlias).NotTo(BeNil())
+				Expect(execFromAlias.Name).To(Equal("test-alias"))
+
+				// Should NOT be able to access via default aliases like "execute"
+				executeRef := executable.Ref("execute test/testdata:test-alias")
+				_, err = execCache.GetExecutableByRef(logger, executeRef)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("unable to find executable"))
+			})
+		})
+
+		Context("when workspace has custom verbAliases for different verb", func() {
+			It("should not provide any aliases for unmatched verbs", func() {
+				customAliases := &workspace.WorkspaceVerbAliases{"view": {"show", "display"}}
+				wsConfig := &workspace.Workspace{VerbAliases: customAliases}
+				wsConfig.SetContext(wsName, wsPath)
+				wsCache.EXPECT().GetLatestData(gomock.Any()).Return(&cache.WorkspaceCacheData{
+					Workspaces:         map[string]*workspace.Workspace{wsName: wsConfig},
+					WorkspaceLocations: map[string]string{wsName: wsPath},
+				}, nil).AnyTimes()
+
+				logger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				logger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				Expect(execCache.Update(logger)).To(Succeed())
+
+				// Should NOT be able to access via any aliases since no aliases are configured for "run"
+				execRef := executable.Ref("exec test/testdata:test-alias")
+				_, err := execCache.GetExecutableByRef(logger, execRef)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("unable to find executable"))
+
+				// Should still be able to access via primary verb "run"
+				runRef := executable.Ref("run test/testdata:test-alias")
+				exec, err := execCache.GetExecutableByRef(logger, runRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exec).NotTo(BeNil())
+				Expect(exec.Name).To(Equal("test-alias"))
+			})
+		})
+	})
 })

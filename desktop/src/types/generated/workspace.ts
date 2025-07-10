@@ -31,16 +31,7 @@ export interface Workspace {
   displayName?: string;
   executables?: ExecutableFilter;
   tags?: CommonTags;
-  /**
-   * A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.
-   * Setting this will override all of the default flow command aliases. The verbs and it's mapped aliases must be valid flow verbs.
-   *
-   * If set to an empty object, verb aliases will be disabled.
-   *
-   */
-  verbAliases?: {
-    [k: string]: string[];
-  };
+  verbAliases?: VerbAliases;
   [k: string]: unknown;
 }
 export interface ExecutableFilter {
@@ -53,4 +44,14 @@ export interface ExecutableFilter {
    */
   included?: string[];
   [k: string]: unknown;
+}
+/**
+ * A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.
+ * Setting this will override all of the default flow command aliases. The verbs and its mapped aliases must be valid flow verbs.
+ *
+ * If set to an empty object, verb aliases will be disabled.
+ *
+ */
+export interface VerbAliases {
+  [k: string]: string[];
 }

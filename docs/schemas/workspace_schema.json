@@ -32,6 +32,16 @@
           }
         }
       }
+    },
+    "VerbAliases": {
+      "description": "A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.\nSetting this will override all of the default flow command aliases. The verbs and its mapped aliases must be valid flow verbs.\n\nIf set to an empty object, verb aliases will be disabled.\n",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
     }
   },
   "properties": {
@@ -58,14 +68,7 @@
       "default": []
     },
     "verbAliases": {
-      "description": "A map of executable verbs to valid aliases. This allows you to use custom aliases for exec commands in the workspace.\nSetting this will override all of the default flow command aliases. The verbs and it's mapped aliases must be valid flow verbs.\n\nIf set to an empty object, verb aliases will be disabled.\n",
-      "type": "object",
-      "additionalProperties": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      }
+      "$ref": "#/definitions/VerbAliases"
     }
   }
 }
