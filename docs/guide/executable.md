@@ -41,6 +41,27 @@ For instance, `flow test my-app` is equivalent to `flow validate my-app`. This a
 interaction with the CLI, making it easier to remember and use. 
 *See the [verb reference](../types/flowfile.md#verb-groups) for a list all verbs and their synonyms.*
 
+**Custom Verb Aliases**
+
+You can customize which verb aliases are available in your workspace by configuring `verbAliases` in your [workspace configuration](workspace.md#workspace-configuration). This allows you to:
+
+- **Use custom aliases**: Define your own preferred aliases for verbs
+- **Disable default aliases**: Set an empty map `{}` to disable all verb aliases
+- **Selective aliases**: Only enable specific aliases for certain verbs
+
+```yaml
+# In your workspace flow.yaml
+verbAliases:
+  run: ["exec", "start"]    # `run` executables can be called with `exec` or `start` 
+  build: ["compile"]        # `build` executables can be called with `compile`
+  # No entry for `test` means no aliases for test executables
+
+# To disable all verb aliases:
+verbAliases: {}
+```
+
+With the above configuration, `flow start my-app` would run a `run` executable, but `flow execute my-app` would fail because `execute` is no longer a valid alias.
+
 > [!TIP]
 > Create shell aliases for commonly used verbs to make running executables easier. For example:
 > ```shell
