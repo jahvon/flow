@@ -24,7 +24,7 @@ get_latest_version() {
     curl -s "https://api.github.com/repos/$OWNER/$NAME/releases/latest" | grep -o '"tag_name": ".*"' | sed 's/"tag_name": "//;s/"//'
 }
 
-OWNER="jahvon"
+OWNER="flowexec"
 NAME="flow"
 BINARY="flow"
 
