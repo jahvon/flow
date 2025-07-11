@@ -55,8 +55,8 @@ homebrew_casks:
       bash: completions/flow.bash
       zsh: completions/flow.zsh
       fish: completions/flow.fish
-    dependencies:
-      - cask: xclip # Required for clipboard support, only linux, so I need to figure out to get this to skip macOS
+#    dependencies:
+#      - cask: xclip # Required for clipboard support, only linux, so I need to figure out to get this to skip macOS
     hooks:
       post:
         install: |
