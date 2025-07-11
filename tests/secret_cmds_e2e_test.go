@@ -36,15 +36,12 @@ var _ = Describe("vault/secrets e2e", Ordered, func() {
 		It("should return the generated key", func() {
 			stdOut := ctx.StdOut()
 			keyEnv := "FLOW_TEST_VAULT_KEY"
-			Expect(run.Run(ctx.Context, "vault", "create", "test", "--key-env", keyEnv)).To(Succeed())
+			Expect(run.Run(ctx.Context, "vault", "create", "test", "--key-env", keyEnv, "--log-level", "fatal")).
+				To(Succeed())
 			out, err := readFileContent(stdOut)
 			Expect(err).NotTo(HaveOccurred())
 
-			lines := strings.Split(strings.TrimSpace(out), "\n")
-			Expect(lines).ToNot(BeEmpty())
-			parts := strings.Split(strings.TrimSpace(lines[0]), ":")
-			Expect(parts).To(HaveLen(2))
-			encryptionKey := strings.TrimSpace(parts[1])
+			encryptionKey := strings.TrimSpace(strings.TrimSpace(out))
 			Expect(os.Setenv(keyEnv, encryptionKey)).To(Succeed())
 		})
 

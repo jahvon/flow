@@ -16,6 +16,7 @@ flow vault create NAME [flags]
       --key-file string        File path for the vault encryption key. An absolute path is recommended. Only used for AES256 vaults.
   -p, --path string            Directory that the vault will use to store its data. If not set, the vault will be stored in the flow cache directory.
       --recipients string      Comma-separated list of recipient keys for the vault. Only used for Age vaults.
+  -s, --set                    Set the newly created vault as the current vault
   -t, --type string            Vault type. Either age or aes256 (default "aes256")
 ```
 

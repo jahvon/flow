@@ -192,6 +192,13 @@ var ParameterValueFlag = &Metadata{
 	Default: []string{},
 }
 
+var VaultSetFlag = &Metadata{
+	Name:      "set",
+	Shorthand: "s",
+	Usage:     "Set the newly created vault as the current vault",
+	Default:   false,
+}
+
 var VaultTypeFlag = &Metadata{
 	Name:      "type",
 	Shorthand: "t",

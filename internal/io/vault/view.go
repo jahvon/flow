@@ -63,8 +63,7 @@ func NewVaultView(
 ) tuikit.View {
 	v, err := vaultFromName(vaultName)
 	if err != nil || v == nil {
-		container.HandleError(fmt.Errorf("failed to load vault: %w", err))
-		return nil
+		return views.NewErrorView(err, container.RenderState().Theme)
 	}
 	return views.NewEntityView(container.RenderState(), v, types.EntityFormatDocument)
 }
@@ -116,17 +115,16 @@ func NewVaultListView(
 	vaults := &vaultCollection{Vaults: make([]*vaultEntity, 0, len(vaultNames))}
 	for _, name := range vaultNames {
 		v, err := vaultFromName(name)
-		if err != nil {
-			container.HandleError(fmt.Errorf("failed to load vault %s: %w", name, err))
-			continue
-		} else if v == nil {
-			continue
+		if err != nil || v == nil {
+			return views.NewErrorView(
+				fmt.Errorf("vault '%s' error: %w", name, err),
+				container.RenderState().Theme,
+			)
 		}
 		vaults.Vaults = append(vaults.Vaults, v)
 	}
 	if len(vaults.Vaults) == 0 {
-		container.HandleError(fmt.Errorf("no vaults found"))
-		return nil
+		return views.NewErrorView(fmt.Errorf("no vaults found"), container.RenderState().Theme)
 	}
 
 	selectFunc := func(filterVal string) error {

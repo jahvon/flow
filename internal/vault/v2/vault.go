@@ -75,7 +75,9 @@ func NewAES256Vault(logger io.Logger, name, storagePath, keyEnv, keyFile, logLev
 		logger.FatalErr(fmt.Errorf("unable to save vault config: %w", err))
 	}
 
-	logger.PlainTextSuccess(fmt.Sprintf("Vault '%s' with AES256 encryption created successfully", v.ID()))
+	if logLevel != "fatal" {
+		logger.PlainTextSuccess(fmt.Sprintf("Vault '%s' with AES256 encryption created successfully", v.ID()))
+	}
 }
 
 func generateAESKey(logger io.Logger, keyEnv, logLevel string) string {
@@ -93,7 +95,8 @@ func generateAESKey(logger io.Logger, keyEnv, logLevel string) string {
 		)
 		logger.PlainTextInfo(newKeyMsg)
 	} else {
-		logger.PlainTextSuccess(fmt.Sprintf("Encryption key: %s", key))
+		// just print the key without additional info
+		logger.Print(key)
 	}
 	return key
 }
@@ -173,7 +176,7 @@ func ConfigFilePath(vaultName string) string {
 
 func writeKeyToFile(logger io.Logger, key, filePath string) error {
 	if key == "" {
-		return fmt.Errorf("no key provided to write to file")
+		return nil
 	}
 	if filePath == "" {
 		return fmt.Errorf("no file path provided to write key")
