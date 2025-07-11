@@ -63,6 +63,7 @@ func registerCreateVaultCmd(ctx *context.Context, vaultCmd *cobra.Command) {
 
 	RegisterFlag(ctx, createCmd, *flags.VaultTypeFlag)
 	RegisterFlag(ctx, createCmd, *flags.VaultPathFlag)
+	RegisterFlag(ctx, createCmd, *flags.VaultSetFlag)
 	// AES flags
 	RegisterFlag(ctx, createCmd, *flags.VaultKeyEnvFlag)
 	RegisterFlag(ctx, createCmd, *flags.VaultKeyFileFlag)
@@ -80,6 +81,7 @@ func createVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	vaultName := args[0]
 	vaultType := flags.ValueFor[string](ctx, cmd, *flags.VaultTypeFlag, false)
 	vaultPath := flags.ValueFor[string](ctx, cmd, *flags.VaultPathFlag, false)
+	setVault := flags.ValueFor[bool](ctx, cmd, *flags.VaultSetFlag, false)
 
 	switch strings.ToLower(vaultType) {
 	case "aes256":
@@ -106,6 +108,10 @@ func createVaultFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	)
 
 	ctx.Config.Vaults[vaultName] = vaultPath
+	if setVault {
+		ctx.Config.CurrentVault = &vaultName
+		logger.Infof("Vault '%s' set as current vault", vaultName)
+	}
 	if err := filesystem.WriteConfig(ctx.Config); err != nil {
 		logger.FatalErr(fmt.Errorf("unable to save user configuration: %w", err))
 	}

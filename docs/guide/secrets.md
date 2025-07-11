@@ -8,8 +8,8 @@ Whether you're managing API keys, database passwords, or deployment tokens, the 
 Create your first vault and add a secret:
 
 ```shell
-# Create a vault (generates a key and shows it in output)
-flow vault create my-vault
+# Create a vault and set it as current (generates a key and shows it in output)
+flow vault create my-vault --set
 
 # Set the generated key in the default environment variable
 export FLOW_VAULT_KEY="<key-from-output>"
@@ -257,6 +257,8 @@ Switch between vaults for different projects or environments:
 
 ```shell
 # List all vaults
+# Authentication for the created vaults must be resolvable by the environment variable or file you
+# specified during vault creation in order to list them.
 flow vault list
 
 # Switch to a different vault

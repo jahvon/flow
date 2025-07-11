@@ -91,11 +91,8 @@ You'll see each step run in sequence. This is your first multi-step workflow!
 Real deployments need configuration. Let's add some secrets:
 
 ```shell
-# Create a vault for this project
-flow vault create tutorial-vault
-
-# Set the generated key in the default environment variable
-export FLOW_VAULT_KEY="<key-from-output>"
+# Create a vault for this project and set the generated key in the default environment variable
+export FLOW_VAULT_KEY="$(flow vault create tutorial-vault --set --log-level fatal)"
 
 # Add some deployment secrets
 flow secret set server-url "https://my-server.com"
