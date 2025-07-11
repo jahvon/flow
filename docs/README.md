@@ -3,24 +3,34 @@
 <p align="center">
   <a href="https://img.shields.io/github/v/release/flowexec/flow"><img src="https://img.shields.io/github/v/release/flowexec/flow" alt="GitHub release"></a>
   <a href="https://pkg.go.dev/github.com/flowexec/flow"><img src="https://pkg.go.dev/badge/github.com/flowexec/flow.svg" alt="Go Reference"></a>
+  <a href="https://discord.gg/CtByNKNMxM"><img src="https://img.shields.io/badge/discord-join%20community-7289da?logo=discord&logoColor=white" alt="Join Discord"></a>
+  <a href="https://github.com/flowexec/flow"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/flowexec/flow"></a>
 </p>
 
-flow is a customizable and interactive CLI tool designed to streamline how you manage and run local development and 
-operations workflows.
+flow is your personal **workflow hub** - organize automation across all your projects with built-in secrets, templates, 
+and cross-project composition. Go beyond task running to workflow management that scales with your development ecosystem.
 
-**This project is currently in beta and documentation is a work in progress.** Contributions and feedback are welcome.
+#### _Why flow?_ <!-- {docsify-ignore} -->
 
-#### _Features_ <!-- {docsify-ignore} -->
+- **Unified automation hub**: Organize workflows across all your projects in one place
+- **Built-in security**: Encrypted vaults keep your secrets safe and shareable
+- **Cross-project power**: Reference workflows from other projects and share common tools
+- **Template-driven**: Generate new projects and workflows from reusable templates
+- **Visual discovery**: Browse and search workflows across your entire development ecosystem
 
-- **Task Runner**: Easily define, manage, and run your tasks (called [executables](guide/executable.md)) from the command line.
-- **Secret Vault**: Store sensitive secrets in a secure local [vault](guide/secret.md#vault-setup).
-- **Template Generator**: Generate executables and workspace scaffolding with [flow file templates](guide/templating.md).
-- **TUI Library**: Explore and run executables from the interactive and searchable TUI [library](cli/flow_browse.md).
-- **Executable Organizer**: Group, reference, and search for executables by workspace, namespace, verbs, and tags.
-- **Input Handler**: Pass values into executables with environment variables defined by secrets, command-line args, or interactive prompts.
-- **Customizable TUI**: Personalize your [TUI experience](guide/interactive.md) with settings for log formatting, log archiving, and execution notifications, and more.
+#### _Core Capabilities_ <!-- {docsify-ignore} -->
+
+- **Workflow Management**: Define, organize, and run workflows across multiple projects
+- **Secure Secret Storage**: Built-in encrypted vaults with multiple backend options
+- **Project Generation**: Create new projects and workflows from customizable templates
+- **Cross-Project Composition**: Reference and share workflows between different projects
+- **Visual Workflow Browser**: Discover and run workflows with powerful filtering and search
+- **Flexible Configuration**: YAML-based definitions with arguments, secrets, and conditional logic
+
+**Ready to organize your automation?** → [Install flow](installation.md) → [Quick start guide](quickstart.md)
 
 ---
 
 <p align="center"><img src="_media/demo.gif" width="1600"></p>
 
+Browse examples in the [examples repo](https://github.com/flowexec/examples) and [flow project](https://github.com/flowexec/flow/tree/main/.execs)

@@ -1,92 +1,218 @@
-## Interactive Configurations
+# Interactive UI
 
-The interactive TUI can be customized in the [flow config file](../types/config.md). Additionally,
-there are several [flow config commands](../cli/flow_config.md) that can be used to change the TUI settings.
+flow provides both a powerful terminal user interface (TUI) and flexible command-line options to fit your workflow. 
+This guide covers using the interactive browser, customizing the experience, and working with different output formats.
 
-> [!TIP]
-> You can view your current settings with the config view command:
-> ```shell
-> flow config get
-> ```
+## Using the TUI Browser
 
-### Changing the TUI theme
+The `flow browse` command launches an interactive browser for discovering and running executables.
 
-There are several themes available in the TUI:
-- `default` (everforest)
-- `light`
-- `dark`
-- `dracula`
-- `tokyo-night`
-
-Use the following command to change the theme:
+### Basic Navigation <!-- {docsify-ignore} -->
 
 ```shell
-flow config set theme (default|light|dark|dracula|tokyo-night)
+flow browse  # Launch the interactive browser
 ```
 
-**Overriding the theme's colors**
+**Keyboard shortcuts:**
+- <kbd>↑</kbd> / <kbd>↓</kbd> - Move up/down through the list
+- <kbd>←</kbd> / <kbd>→</kbd> - Navigate between panels (workspaces, executables)
+- <kbd>Enter</kbd> - Select the highlighted workspace or executable
+- <kbd>Space</kbd> - Toggle the namespace list for the selected workspace
+- <kbd>Tab</kbd> - Toggle the executable detail viewer
+- <kbd>R</kbd> - Run the selected executable (when applicable)
+- <kbd>H</kbd> - Show help menu with all shortcuts
+- <kbd>Q</kbd> - Quit the browser
 
-Additionally, you can override the theme colors by setting the `colorOverride` field in the config file. Any color not 
-set in the `colorOverride` field will use the default color for the set theme.
-See the [config file reference](../types/config.md#ColorPalette) for more information.
+### Filtering and Search <!-- {docsify-ignore} -->
 
-### Changing desktop notification settings
-
-Desktop notifications can be sent when executables are completed. Use the following command to enable or disable desktop notifications:
+Filter executables by various criteria:
 
 ```shell
-flow config set notifications (true|false) # --sound
+# Filter by workspace
+flow browse --workspace api-service
+
+# Filter by namespace
+flow browse --namespace deployment
+
+# Filter by verb
+flow browse --verb deploy
+
+# Filter by tags
+flow browse --tag production --tag critical
+
+# Search by name or description
+flow browse --filter "database backup"
+
+# Show executables from all namespaces (not just current)
+flow browse --all
 ```
 
-### Changing the log mode
+**Combine filters for precise results:**
+```shell
+flow browse --workspace api --verb deploy --tag production
+```
 
-There are 4 log modes available in the TUI:
-- `logfmt`: Includes the log level, timestamp, and log message.
-- `text`: Includes just the log message.
-- `json`: Includes the log level, timestamp, and log message in JSON format.
-- `hidden`: Hides the log messages.
+### Running Executables <!-- {docsify-ignore} -->
 
-The default log mode is `logfmt`. Use the following command to change the log mode:
+**From the browser:**
+- Select an executable and press <kbd>R</kbd> to run it
+- Arguments and prompts will be handled interactively
+
+**Direct execution:**
+```shell
+# View specific executable details
+flow browse deploy api:production
+
+# Run without browsing
+flow deploy api:production
+```
+
+## Output Formats
+
+Control how flow displays information with output format options.
+
+### TUI vs Non-Interactive <!-- {docsify-ignore} -->
 
 ```shell
-flow config set log-mode (logfmt|text|json|hidden)
+# Interactive TUI (default)
+flow browse
+flow workspace list
+flow secret list
+
+# Simple list output
+flow browse --output json 
+flow workspace list --output json
+flow secret list --output yaml
 ```
 
-`exec` executables can be also configured to use a specific log mode. See the [flowfile configuration](../types/flowfile.md#executableexecexecutabletype) for more information.
+### Disabling the TUI <!-- {docsify-ignore} -->
+
+For scripts, CI/CD, or personal preference:
+
+```shell
+# Permanently disable TUI
+flow config set tui false
+
+# Temporarily disable with environment variable
+DISABLE_FLOW_INTERACTIVE=true flow browse
+```
+
+## Customization
+
+### Themes <!-- {docsify-ignore} -->
+
+Choose from several built-in themes:
+
+```shell
+# Available themes
+flow config set theme default      # Everforest (default)
+flow config set theme light        # Light theme
+flow config set theme dark         # Dark theme  
+flow config set theme dracula      # Dracula
+flow config set theme tokyo-night  # Tokyo Night
+```
+
+### Custom Colors <!-- {docsify-ignore} -->
+
+Override theme colors by editing your config file:
 
 ```yaml
+# In your flow config file
+colorOverride:
+  primary: "#83C092"
+  secondary: "#D699B6"
+  background: "#2D353B"
+  border: "#7FBBB3"
+  # See config reference for all options
+```
+
+> **Complete reference**: See the [config file reference](../types/config.md#ColorPalette) for all color options.
+
+### Notifications <!-- {docsify-ignore} -->
+
+Get notified when long-running executables complete:
+
+```shell
+# Enable desktop notifications
+flow config set notifications true
+
+# Enable notification sound
+flow config set notifications true --sound
+
+# Disable notifications
+flow config set notifications false
+```
+
+### Log Display <!-- {docsify-ignore} -->
+
+Control how command output is displayed:
+
+```shell
+# Set global log mode
+flow config set log-mode logfmt    # Structured logs (default)
+flow config set log-mode text      # Plain text output
+flow config set log-mode json      # JSON format
+flow config set log-mode hidden    # Hide output
+```
+
+**Per-executable log modes:**
+```yaml
 executables:
-  - name: my-task
+  - name: debug-task
     exec:
-      logMode: text
-      cmd: echo "Hello, world!"
+      logMode: text  # Override global setting
+      cmd: echo "Debug output"
 ```
 
-Note: the [flow logs](../cli/flow_logs.md) command will always display logs in `json` mode.
+### Workspace Modes <!-- {docsify-ignore} -->
 
-### Changing the workspace mode
-
-There are 2 workspace modes available in the TUI:
-- `fixed`: The current workspace is fixed to the one you've set with [flow workspace set](../cli/flow_workspace_set.md).
-- `dynamic`: The current workspace is determined by your current working directory. If you're in a workspace directory, the TUI will automatically switch to that workspace. Otherwise, the TUI will use the workspace you've set with [flow workspace set](../cli/flow_workspace_set.md).
-
-See the [workspace guide](workspace.md) for more information on workspaces.
-
-### Changing the default executable timeout
-
-The global default executable timeout is 30 minutes. Use the following command to change the default executable timeout:
+Control how flow determines your current workspace:
 
 ```shell
-flow config set timeout <duration>
+# Dynamic mode - auto-switch based on directory
+flow config set workspace-mode dynamic
+
+# Fixed mode - always use set workspace
+flow config set workspace-mode fixed
 ```
 
-### Disable the TUI
+> **Learn more**: See the [Workspaces guide](workspaces.md) for detailed workspace mode explanations.
 
-In some cases, you may want to disable the interactive TUI (in CI/CD pipelines and containers, for example). 
-Use the following command will switch all TUI commands to their non-interactive counterparts:
+### Timeouts <!-- {docsify-ignore} -->
+
+Set default timeout for all executables:
 
 ```shell
-flow config set tui false
+# Set global timeout
+flow config set timeout 45m
+
+# Examples: 30s, 5m, 2h
+flow config set timeout 10m
 ```
 
-Alternatively, you can set the `DISABLE_FLOW_INTERACTIVE` environment variable to `true` to disable the TUI.
+## Configuration Management
+
+### View Current Settings <!-- {docsify-ignore} -->
+
+```shell
+# View all settings
+flow config get
+
+# View specific setting
+flow config get --output json | jq '.theme'
+```
+
+### Reset to Defaults <!-- {docsify-ignore} -->
+
+```shell
+# Reset all configuration
+flow config reset
+
+# Warning: This overwrites all customizations
+```
+
+### Configuration File Location <!-- {docsify-ignore} -->
+
+Your config is stored in:
+- **Linux**: `~/.config/flow/config.yaml`
+- **macOS**: `~/Library/Application Support/flow/config.yaml`

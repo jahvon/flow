@@ -1,93 +1,132 @@
+# Quick Start <!-- {docsify-ignore-all} -->
+
 > [!NOTE]
-> Before getting started, install the latest `flow` version using one of the methods described in the 
+> Before getting started, install the latest `flow` version using one of the methods described in the
 > [installation guide](installation.md).
 
-This guide will walk you through the basic steps of creating and running an executable with `flow`.
+This guide will walk you through creating your first workspace and executable with `flow` in about 5 minutes.
 
-**Create a new workspace**
+## 1. Create Your First Workspace
 
-A workspace can be created anywhere on your system but must be registered in order to have executables discovered by flow.
-
-To create a new workspace, run the following command in the directory where you want the workspace to be created:
+A workspace is where flow looks for your executables. Create one in any directory:
 
 ```shell
 flow workspace add my-workspace . --set
 ```
 
-You can replace `my-workspace` with any name you want to give your workspace and `.` with the path to the root directory 
-of the new workspace.
+This registers the workspace and creates a `flow.yaml` config file. The `--set` flag makes it your current workspace.
 
-This command will register the workspace and create a `flow.yaml` file in the root directory. This file contains the new 
-workspace's configurations. For more information on workspaces see the [workspace guide](guide/workspace.md).
+## 2. Create Your First Executable
 
-**Create an executable**
+Executables are defined in flow files (`.flow`, `.flow.yaml`, or `.flow.yml`). Let's create one:
 
-Executables are the core of flow. Each executable is driven by its definition within a flow file (`*.flow`, `*.flow.yaml`, or `*.flow.yml`).
-There are several types of executables that can be defined. For more information on executables and the flow file, see the [executable guide](guide/executable.md).
-
-To get started, create a new flow file in the workspace directory.
-    
 ```shell
-touch executables.flow
+touch hello.flow
 ```
 
-Open the file in your favorite text editor and add the following content:
+Open the file and add this content:
 
 ```yaml
 executables:
   - verb: run
-    name: my-task
+    name: hello
     exec:
       params:
-      - prompt: What is your favorite color?
-        envKey: COLOR
-      cmd: echo "Your favorite color is $COLOR"
+      - prompt: What is your name?
+        envKey: NAME
+      cmd: echo "Hello, $NAME! Welcome to flow 🎉"
 ```
 
-This flow file defines a single executable named `my-task`. When run, it will prompt the user for their favorite color 
-and then echo that color back to the console.
+This creates an executable that prompts for your name and greets you.
 
-**Add another workspace**
+## 3. Sync and Run
 
-If you're new to flow, try adding the `flow` workspace and explore the executables it contains.
-
-```shell
-git clone github.com/flowexec/flow
-flow workspace add flow flow
-```
-
-When you have multiple workspaces, you can switch between them using a command like the following:
-
-```shell
-flow workspace set flow
-```
-
-**Running an executable**
-
-Whenever you create, move, or delete executables and flow files, you will need to update the index of executables before running them.
+Update flow's index of executables:
 
 ```shell
 flow sync
 ```
 
-The main command for running executables is `flow exec`. This command will execute the workflow with the provided
-executable ID. `exec` can be replaced with any verb known to flow but should match the verb defined in the flow file
-configurations or an alias of that verb.
-
-In our case, we will use the `run` verb:
+Now run your executable:
 
 ```shell
-flow run my-task
+flow run hello
 ```
 
-> [!TIP]
-> You can also run the executable by its full name, `run my-workspace/my-task` or an alias if one is defined.
+You'll be prompted for your name, then see your personalized greeting!
 
-Try adding more executables to the workspace! You can create multiple flow files anywhere in the workspace. As you add more
-executables, try viewing them from the interactive UI:
+## 4. Try the Interactive Browser
+
+flow's TUI makes it easy to discover and run executables:
 
 ```shell
 flow browse
 ```
 
-When in the library, you can press the <kbd>R</kbd> key on a selected executable to run it.
+Use arrow keys to navigate press <kbd>R</kbd> to run an executable that you have selected.
+
+## 5. Add More Executables
+
+Try adding different types of executables to your `hello.flow` file:
+
+```yaml
+executables:
+  - verb: run
+    name: hello
+    exec:
+      params:
+      - prompt: What is your name?
+        envKey: NAME
+      cmd: echo "Hello, $NAME! Welcome to flow 🎉"
+  
+  - verb: open
+    name: docs
+    launch:
+      uri: https://flowexec.io
+  
+  - verb: test
+    name: system
+    exec:
+      cmd: |
+        echo "Testing system info..."
+        echo "OS: $(uname -s)"
+        echo "User: $(whoami)"
+        echo "Date: $(date)"
+```
+
+Run `flow sync` then try:
+- `flow open docs` - Opens the flow documentation
+- `flow test system` - Shows system information
+
+## 6. Explore a Real Workspace
+
+Want to see more examples? Add the flow project itself as a workspace:
+
+```shell
+git clone https://github.com/flowexec/flow.git
+flow workspace add flow flow
+flow workspace switch flow
+```
+
+Then browse the executables:
+
+```shell
+flow browse
+```
+
+You'll see real-world examples of builds, tests, and development workflows used for developing flow.
+
+## What's Next?
+
+Now that you've got the basics:
+
+- **Learn the fundamentals** → [Core concepts](guide/concepts.md)
+- **Secure your workflows** → [Working with secrets](guide/secrets.md)
+- **Build complex automations** → [Advanced workflows](guide/advanced.md)
+- **Customize your experience** → [Interactive UI](guide/interactive.md)
+
+## Getting Help
+
+- **Browse the docs** → Explore the guides and reference sections
+- **Join the community** → [Discord server](https://discord.gg/CtByNKNMxM)
+- **Report issues** → [GitHub issues](https://github.com/flowexec/flow/issues)
