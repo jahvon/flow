@@ -1,15 +1,13 @@
-- [Home](../README.md "flow documentation")
-- [Install](../installation.md "Installation guide")
-- [Quick Start](../quickstart.md "Quick start guide")
+- [← Back to Home](../README.md "flow documentation")
 
-- Reference
-    - [CLI commands](README.md "Command line interface reference")
+- CLI Reference
+    - [flow](README.md "Command line interface reference")
         - [flow exec](flow_exec.md)
-        - [flow library](flow_library.md)
+        - [flow browse](flow_browse.md)
         - [flow template](flow_template.md)
         - [flow config](flow_config.md)
         - [flow workspace](flow_workspace.md)
         - [flow secret](flow_secret.md)
+        - [flow vault](flow_vault.md)
         - [flow sync](flow_sync.md)
         - [flow logs](flow_logs.md)
-    - [Configuration files](../types/README.md "Configuration file reference")

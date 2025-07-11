@@ -1,76 +1,135 @@
-# flow Development
+# Contributing to flow
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/flowexec/flow)](https://goreportcard.com/report/github.com/flowexec/flow)
 [![Go Reference](https://pkg.go.dev/badge/github.com/flowexec/flow.svg)](https://pkg.go.dev/github.com/flowexec/flow)
-[![GitHub branch status](https://img.shields.io/github/checks-status/flowexec/flow/main)](https://github.com/flowexec/flow/actions?query=branch%3Amain)
+[![GitHub branch check runs](https://img.shields.io/github/check-runs/flowexec/flow/main)](https://github.com/flowexec/flow/actions?query=branch%3Amain)
 [![Codecov](https://img.shields.io/codecov/c/github/flowexec/flow)](https://app.codecov.io/gh/flowexec/flow)
 
-Before getting started, please read the [Code of Conduct](../.github/CODE_OF_CONDUCT.md) and [Contributing Guidelines](../.github/CONTRIBUTING.md).
+This document provides an overview of how to contribute to the flow project, including setting up your development environment, understanding the project structure, and running tests.
 
-flow is written in [Go](https://golang.org/). See the [go.mod](../go.mod) file for the current Go version used in 
-building the project.
+Before getting started, please read our [Code of Conduct](https://github.com/flowexec/flow/blob/main/.github/CODE_OF_CONDUCT.md) and [Contributing Guidelines](https://github.com/flowexec/flow/blob/main/.github/CONTRIBUTING.md).
 
-## Getting Started
+**Ways to Contribute**
 
-Before developing on this project, you will need to make sure you have the latest `flow` version installed.
-Refer to the [Installation](installation.md) section for more information.
+- **Report bugs** - [Open an issue](https://github.com/flowexec/flow/issues/new) with reproduction steps
+- **Suggest features** - Share ideas for new functionality
+- **Improve documentation** - Fix typos, add examples, or clarify explanations
+- **Write code** - Fix bugs, implement features, or optimize performance
+- **Share examples** - Contribute to the [examples repository](https://github.com/flowexec/examples)
 
-After cloning the repository, you can start using the below commands after registering the repo workspace:
+## Quick Start 
 
-```sh
-flow workspace create flow <repo-path>
-```
+**Prerequisites**
 
-### Development Executables
-
-The `flow` project contains a few development executables that can be run locally. After registering the repo
-workspace, you can run the following commands:
+- **Go** - See [go.mod](https://github.com/flowexec/flow/blob/main/go.mod) for the required version
+- **flow CLI** - Install the [latest version](installation.md) before developing
 
 ```sh
-# Install Go tool dependencies
+# Clone and set up the repository
+git clone https://github.com/flowexec/flow.git
+cd flow
+
+# Register the repo as a flow workspace
+flow workspace add flow . --set
+
+# Install development dependencies
 flow install tools
 
-# Build the CLI binary
-flow build binary <output-path>
-
-# Validate code changes (runs tests, linters, codegen, etc)
+# Verify everything works
 flow validate
-
-# Only generate code
-flow generate
-
-# Only run tests
-flow test all
 ```
 
-### Working with generated types
+## Development Executables
 
-The `flow` project uses [go-jsonschema](github.com/atombender/go-jsonschema) with [go generate](https://blog.golang.org/generate) 
-to generate Go types from JSON schema files (defined in YAML). If you need to make changes to the generated types 
-(found in the `types` package), you should update the associated `*schema.yaml` file and run the flow `run generate` executable
-or go generate directly.
+The flow project uses flow itself for development! Here are the key commands:
 
-Note that go generate alone does not update generated documentation. 
-Be sure to regenerate the JSON schema files and markdown documentation before submitting a PR.
-
-### Working with tuikit
-
-The `flow` project uses the [tuikit](tuikit.md) framework for building the terminal UI.
-Contributions to the components and helpers in `tuikit` are welcome.
-
-_You should test all tuikit changes with a local flow build before submitting a PR._
-    
 ```sh
-  go mod edit -replace github.com/flowexec/tuikit=../tuikit
+# Build the CLI binary
+flow build binary ./bin/flow
+
+# Run all validation (tests, linting, code generation)
+flow validate
+
+# Run specific checks
+flow test all             # All tests
+flow generate             # Code generation
+flow run lint             # Linting only
+
+# Install/update Go tools
+flow install tools
+```
+
+## Project Structure
+
+```
+flow/
+├── .execs/             # Development workflows
+├── cmd/                # CLI entry point
+├── docs/               # Documentation
+├── internal/           # Core application logic
+│   ├── cache/          # Executable and workspace caching logic
+│   ├── context/        # Global application context
+│   ├── io/             # Terminal user interface and I/O
+│   ├── runner/         # Executable execution engine
+│   ├── services/       # Business logic services
+│   ├── templates/      # Templating system for workflows
+│   └── vault/          # Secret management
+├── tests/              # CLI end-to-end test suite
+└── types/              # Generated types from schemas
+```
+
+_Some directories are omitted for brevity._
+
+## Working with Generated Code
+
+flow uses code generation extensively:
+
+### Go CLI Type Generation <!-- {docsify-ignore} -->
+
+Types are generated from YAML schemas using [go-jsonschema](https://github.com/atombender/go-jsonschema):
+
+```sh
+# Regenerate types after schema changes
+flow generate cli
+```
+
+**Important**: When modifying types, edit the `schemas/*.yaml` files, not the generated Go files in `types/`.
+
+### Documentation Generation <!-- {docsify-ignore} -->
+
+CLI and type documentation is generated automatically:
+
+```sh
+# Updates both CLI docs and type reference docs
+flow generate docs
+```
+
+## TUI Development
+
+flow uses [tuikit](tuikit.md) for terminal interface development:
+
+**Local Development**
+
+```sh
+# Link to local tuikit for development
+go mod edit -replace github.com/flowexec/tuikit=../tuikit
+
+# Test TUI changes
+flow build binary ./bin/flow-dev
+./bin/flow-dev browse
 ```
 
 ## Development Tools
 
-Required tools for development:
+### Required Tools <!-- {docsify-ignore} -->
 
-- [mockgen](https://github.com/uber-go/mock) for generating test mocks
-- [golangci-lint](https://golangci-lint.run/) for linting
+These are installed automatically by `flow install tools`:
 
-Other tools used in the project:
-- [goreleaser](https://goreleaser.com/) for releasing the project
-- [ginkgo](https://onsi.github.io/ginkgo/) and [gomega](https://onsi.github.io/gomega/) for testing
+- [mockgen](https://github.com/uber-go/mock) - Generate test mocks
+- [golangci-lint](https://golangci-lint.run/) - Code linting
+- [go-jsonschema](https://github.com/atombender/go-jsonschema) - Generate Go types from YAML schemas
+
+### Additional Tools <!-- {docsify-ignore} -->
+
+- [goreleaser](https://goreleaser.com/) - Release automation
+- [ginkgo](https://onsi.github.io/ginkgo/) - BDD testing framework

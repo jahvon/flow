@@ -1,16 +1,16 @@
-- [Home](../README.md "flow documentation")
-- [Install](../installation.md "Installation guide")
+- [← Back to Home](../README.md "flow documentation")
 
 - Getting Started
-    - [Quick start](../quickstart.md "Quick start guide")
-    - [Workspaces](workspace.md "Managing workspaces")
-    - [Executables](executable.md "Managing executables")
-    - [Secrets vault](secret.md "Using the secrets vault")
+  - [Core Concepts](concepts.md "Understand workspaces, executables, and vaults")
+  - [Your First Workflow](first-workflow.md "Build a complete automation from scratch")
 
-- Advanced Features
-    - [Templating](templating.md "Using flowfile templates")
-    - [Managing state](state.md "Managing executable state")
-    - [Conditional execution](conditional.md "Conditional execution")
-    - [Customizing the TUI](interactive.md "Customizing the interactive UI")
-    - [Integrations](integrations.md "Integration")
+- Essentials
+  - [Workspaces](workspaces.md "Organize your automation across projects")
+  - [Executables](executables.md "Complete reference for all executable types")
+  - [Working with Secrets](secrets.md "Secure your workflows with encrypted vaults")
 
+- Advanced
+  - [Templates & Workflow Generation](templating.md "Generate workflows and project scaffolding")
+  - [Advanced Workflows](advanced.md "Complex automation with conditionals and state")
+  - [Interactive UI](interactive.md "Customize and use the terminal interface")
+  - [Integrations](integrations.md "Run flow in CI/CD and containerized environments")

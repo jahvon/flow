@@ -1,35 +1,61 @@
-> **System Requirements:** At this time, flow is only supported on Linux and MacOS systems. On Linux, you will need `xclip` installed to use the clipboard feature.
+# Installation <!-- {docsify-ignore-all} -->
 
-### Pre-compiled binary
+> **System Requirements:** flow supports Linux and macOS systems. On Linux, you'll need `xclip` installed to use clipboard features.
 
-Run the following command to install the latest version of flow:
+## Quick Install
+
+Run this command to install the latest version of flow:
 
 ```shell
 curl -sSL https://raw.githubusercontent.com/flowexec/flow/main/scripts/install.sh | bash
 ```
 
-Alternatively, you can download the latest release from the [releases page](https://github.com/flowexec/flow/releases) and 
-add the binary to your `$PATH`. A checksum is provided for each release to verify the download.
+## Alternative Install Methods
 
-### Homebrew
+### Homebrew (macOS/Linux)
 
 ```shell
-brew install jahvon/tap/flow
+brew install flowexec/tap/flow
 ```
 
-### Go
+### Go Install
 
 ```bash
 go install github.com/flowexec/flow@latest
 ```
 
-For CI/CD integrations and containerized environments, see the [integrations guide](guide/integrations.md).
+### Manual Download
 
-### Autocompletion
+Download the latest release from the [releases page](https://github.com/flowexec/flow/releases) and add the binary to your `$PATH`.
+Each release includes checksums for verification.
 
-flow supports autocompletion for bash, zsh, and fish shells. Setup depends on the shell you are using. For instance, if
-you are using zsh with oh-my-zsh, you can run the following command to generate the autocompletion script:
+## Verify Installation
+
+Check that flow is installed correctly:
+
+```shell
+flow --version
+```
+
+## Shell Completion
+
+Enable tab completion for your shell:
 
 ```bash
+# Bash
+flow completion bash > /etc/bash_completion.d/flow
+
+# Zsh (oh-my-zsh)
 flow completion zsh > ~/.oh-my-zsh/completions/_flow
+
+# Fish
+flow completion fish > ~/.config/fish/completions/flow.fish
 ```
+
+## Next Steps
+
+Ready to start automating? → [Quick start guide](quickstart.md)
+
+## CI/CD & Containers
+
+For GitHub Actions, Docker, and other integrations, see the [integrations guide](guide/integrations.md).
