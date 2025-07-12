@@ -47,7 +47,7 @@ var _ = Describe("browse TUI", func() {
 	})
 
 	Specify("narrow snapshot", func() {
-		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 80))
+		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 25))
 		// container.Program().SetTeaProgram(tm.GetProgram())
 		container.SetSendFunc(tm.Send)
 
@@ -74,7 +74,7 @@ var _ = Describe("browse TUI", func() {
 	})
 
 	Specify("wide snapshot", func() {
-		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(200, 80))
+		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(150, 25))
 		container.SetSendFunc(tm.Send)
 
 		wsList, err := ctx.WorkspacesCache.GetWorkspaceConfigList(ctx.Logger)
@@ -100,7 +100,7 @@ var _ = Describe("browse TUI", func() {
 	})
 
 	Specify("list snapshot", func() {
-		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 80))
+		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 25))
 		container.SetSendFunc(tm.Send)
 
 		execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
@@ -126,7 +126,7 @@ var _ = Describe("browse TUI", func() {
 		}
 		exec.SetContext("default", ctx.WorkspaceDir(), "", path)
 
-		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 80))
+		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 25))
 		container.SetSendFunc(tm.Send)
 
 		execView := execIO.NewExecutableView(ctx.Context, exec, runFunc)
