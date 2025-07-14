@@ -37,11 +37,11 @@ func NormalizeTmpDirs(input string) string {
 	}
 	tmpDirPattern := regexp.QuoteMeta(tmpDir)
 	// Match temp dir followed by any path plus any trailing whitespace
-	re := regexp.MustCompile(tmpDirPattern + `[^\s\x00-\x1F]+\s*`)
+	re := regexp.MustCompile(tmpDirPattern + `[^\s\x00-\x1F]+`)
 	result := re.ReplaceAllStringFunc(input, func(m string) string {
 		pathAfterTmp := m[len(tmpDir):]
 		// Trim whitespace from the captured path
-		pathAfterTmp = strings.TrimSpace(pathAfterTmp)
+		// pathAfterTmp = strings.TrimSpace(pathAfterTmp)
 		parts := strings.Split(pathAfterTmp, "/")
 		if len(parts) >= 2 {
 			// Keep only the last meaningful part

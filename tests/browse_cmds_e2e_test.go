@@ -4,6 +4,7 @@ package tests_test
 
 import (
 	stdCtx "context"
+	"fmt"
 	stdIO "io"
 	"path/filepath"
 	"time"
@@ -48,7 +49,7 @@ var _ = Describe("browse TUI", func() {
 
 	Specify("narrow snapshot", func() {
 		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 25))
-		// container.Program().SetTeaProgram(tm.GetProgram())
+		container.Program().SetTeaProgram(tm.GetProgram())
 		container.SetSendFunc(tm.Send)
 
 		wsList, err := ctx.WorkspacesCache.GetWorkspaceConfigList(ctx.Logger)
@@ -75,6 +76,7 @@ var _ = Describe("browse TUI", func() {
 
 	Specify("wide snapshot", func() {
 		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(150, 25))
+		container.Program().SetTeaProgram(tm.GetProgram())
 		container.SetSendFunc(tm.Send)
 
 		wsList, err := ctx.WorkspacesCache.GetWorkspaceConfigList(ctx.Logger)
@@ -101,7 +103,9 @@ var _ = Describe("browse TUI", func() {
 
 	Specify("list snapshot", func() {
 		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 25))
+		container.Program().SetTeaProgram(tm.GetProgram())
 		container.SetSendFunc(tm.Send)
+		fmt.Println("Running executable list snapshot test...")
 
 		execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
 		Expect(err).NotTo(HaveOccurred())
@@ -127,6 +131,7 @@ var _ = Describe("browse TUI", func() {
 		exec.SetContext("default", ctx.WorkspaceDir(), "", path)
 
 		tm := teatest.NewTestModel(GinkgoTB(), container, teatest.WithInitialTermSize(80, 25))
+		container.Program().SetTeaProgram(tm.GetProgram())
 		container.SetSendFunc(tm.Send)
 
 		execView := execIO.NewExecutableView(ctx.Context, exec, runFunc)
