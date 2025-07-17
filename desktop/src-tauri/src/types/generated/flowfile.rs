@@ -2203,6 +2203,11 @@ impl ::std::default::Default for ExecutableVerb {
 #[doc = "      }"]
 #[doc = "    },"]
 #[doc = "    \"fromFile\": {"]
+#[doc = "      \"description\": \"DEPRECATED: Use `imports` instead\","]
+#[doc = "      \"default\": [],"]
+#[doc = "      \"$ref\": \"#/definitions/FromFile\""]
+#[doc = "    },"]
+#[doc = "    \"imports\": {"]
 #[doc = "      \"default\": [],"]
 #[doc = "      \"$ref\": \"#/definitions/FromFile\""]
 #[doc = "    },"]
@@ -2236,8 +2241,11 @@ pub struct FlowFile {
     pub description_file: ::std::string::String,
     #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
     pub executables: ::std::vec::Vec<Executable>,
+    #[doc = "DEPRECATED: Use `imports` instead"]
     #[serde(rename = "fromFile", default = "defaults::flow_file_from_file")]
     pub from_file: FromFile,
+    #[serde(default = "defaults::flow_file_imports")]
+    pub imports: FromFile,
     #[doc = "The namespace to be given to all executables in the flow file.\nIf not set, the executables in the file will be grouped into the root (*) namespace. \nNamespaces can be reused across multiple flow files.\n\nNamespaces are used to reference executables in the CLI using the format `workspace:namespace/name`.\n"]
     #[serde(default)]
     pub namespace: ::std::string::String,
@@ -2259,6 +2267,7 @@ impl ::std::default::Default for FlowFile {
             description_file: Default::default(),
             executables: Default::default(),
             from_file: defaults::flow_file_from_file(),
+            imports: defaults::flow_file_imports(),
             namespace: Default::default(),
             tags: Default::default(),
             visibility: Default::default(),
@@ -3813,6 +3822,7 @@ pub mod builder {
         executables:
             ::std::result::Result<::std::vec::Vec<super::Executable>, ::std::string::String>,
         from_file: ::std::result::Result<super::FromFile, ::std::string::String>,
+        imports: ::std::result::Result<super::FromFile, ::std::string::String>,
         namespace: ::std::result::Result<::std::string::String, ::std::string::String>,
         tags: ::std::result::Result<::std::vec::Vec<::std::string::String>, ::std::string::String>,
         visibility: ::std::result::Result<
@@ -3827,6 +3837,7 @@ pub mod builder {
                 description_file: Ok(Default::default()),
                 executables: Ok(Default::default()),
                 from_file: Ok(super::defaults::flow_file_from_file()),
+                imports: Ok(super::defaults::flow_file_imports()),
                 namespace: Ok(Default::default()),
                 tags: Ok(Default::default()),
                 visibility: Ok(Default::default()),
@@ -3877,6 +3888,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for from_file: {}", e));
             self
         }
+        pub fn imports<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<super::FromFile>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.imports = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for imports: {}", e));
+            self
+        }
         pub fn namespace<T>(mut self, value: T) -> Self
         where
             T: ::std::convert::TryInto<::std::string::String>,
@@ -3916,6 +3937,7 @@ pub mod builder {
                 description_file: value.description_file?,
                 executables: value.executables?,
                 from_file: value.from_file?,
+                imports: value.imports?,
                 namespace: value.namespace?,
                 tags: value.tags?,
                 visibility: value.visibility?,
@@ -3929,6 +3951,7 @@ pub mod builder {
                 description_file: Ok(value.description_file),
                 executables: Ok(value.executables),
                 from_file: Ok(value.from_file),
+                imports: Ok(value.imports),
                 namespace: Ok(value.namespace),
                 tags: Ok(value.tags),
                 visibility: Ok(value.visibility),
@@ -3990,6 +4013,9 @@ pub mod defaults {
         super::ExecutableRef("".to_string())
     }
     pub(super) fn flow_file_from_file() -> super::FromFile {
+        super::FromFile(vec![])
+    }
+    pub(super) fn flow_file_imports() -> super::FromFile {
         super::FromFile(vec![])
     }
 }

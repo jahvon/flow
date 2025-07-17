@@ -356,16 +356,30 @@ Current time: {{ .timestamp }}
 - `templateFile`: Markdown template file (required)
 - `templateDataFile`: JSON/YAML data file
 
-## Generated Executables
+## Importing Executables
 
-Generate executables from shell scripts with special comments:
+Generate executables from shell scripts, Makefiles, package.json scripts, or docker-compose services:
 
 ```yaml
 # In flowfile
-fromFile:
+imports:
   - "scripts/deploy.sh"
   - "scripts/backup.sh"
+  - "Makefile"
+  - "frontend/package.json"
+  - "docker-compose.yaml"
 ```
+
+All imported executables are automatically tagged with `generated` and their file type (e.g., `docker-compose`, `makefile`, `package.json`).
+
+
+<!-- tabs:start -->
+
+#### **Shell Scripts (.sh files)**
+
+Shell scripts are imported as single executables with the script's filename as the name and `exec` as the default verb.
+
+You can use special comments to override executable metadata:
 
 ```bash
 #!/bin/bash
@@ -393,6 +407,81 @@ kubectl apply -f k8s/
 # and uploads it to S3 storage
 # <f|description>
 ```
+
+#### **Makefiles**
+
+Makefile targets are imported as executables with a verb and name that best represents the target.
+
+```makefile
+# Makefile
+
+# f:name=app f:verb=build f:description="Build the application"
+build:
+	go build -o bin/app ./cmd/app
+
+# Run all tests
+test:
+	go test ./...
+
+# f:visibility=internal
+clean:
+	rm -rf bin/
+```
+
+The same comment parsing syntax works in Makefiles - use `# f:key=value` to override executable configuration.
+
+#### **Package.json Scripts**
+
+NPM scripts from package.json are imported as executables with a verb and name that best represents the script name.
+
+```json
+{
+  "scripts": {
+    "build": "webpack --mode production",
+    "test": "jest",
+    "dev": "webpack-dev-server --mode development",
+    "lint": "eslint src/"
+  }
+}
+```
+
+This creates executables like:
+- `build` - Runs the build script
+- `test` - Runs the test script
+- `start dev` - Runs the development server
+- `lint` - Runs the linter
+
+#### **Docker Compose Services**
+
+Docker Compose files are imported to create executables for managing services:
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+  
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: myapp
+  
+  redis:
+    image: redis:6
+```
+
+This creates executables like:
+- `start app` - Start the app service
+- `start db` - Start the database service
+- `start redis` - Start the Redis service
+- `start` (alias: all, services) - Start all services
+- `stop` (alias: all, services) - Stop all services
+- `build app` - Build the app service (if build config exists)
+
+<!-- tabs:end -->
 
 ## Executable References
 

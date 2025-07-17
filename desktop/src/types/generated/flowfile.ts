@@ -39,9 +39,13 @@ export type CommonTags = string[];
  */
 export type CommonVisibility = 'public' | 'private' | 'internal' | 'hidden';
 /**
- * A list of `.sh` files to convert into generated executables in the file's executable group.
+ * DEPRECATED: Use `imports` instead
  */
 export type FromFile = string[];
+/**
+ * A list of `.sh` files to convert into generated executables in the file's executable group.
+ */
+export type FromFile1 = string[];
 
 /**
  * Configuration for a group of Flow CLI executables. The file must have the extension `.flow`, `.flow.yaml`, or `.flow.yml`
@@ -62,6 +66,7 @@ export interface FlowFile {
   descriptionFile?: string;
   executables?: Executable[];
   fromFile?: FromFile;
+  imports?: FromFile1;
   /**
    * The namespace to be given to all executables in the flow file.
    * If not set, the executables in the file will be grouped into the root (*) namespace.

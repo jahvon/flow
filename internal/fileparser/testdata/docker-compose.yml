@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    ports: ["3000:3000"]
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: myapp
+  redis:
+    image: redis:alpine

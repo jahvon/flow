@@ -629,6 +629,11 @@
     },
     "fromFile": {
       "$ref": "#/definitions/FromFile",
+      "description": "DEPRECATED: Use `imports` instead",
+      "default": []
+    },
+    "imports": {
+      "$ref": "#/definitions/FromFile",
       "default": []
     },
     "namespace": {
