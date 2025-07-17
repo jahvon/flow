@@ -27,8 +27,11 @@ type FlowFile struct {
 	// Executables corresponds to the JSON schema field "executables".
 	Executables ExecutableList `json:"executables,omitempty" yaml:"executables,omitempty" mapstructure:"executables,omitempty"`
 
-	// FromFile corresponds to the JSON schema field "fromFile".
+	// DEPRECATED: Use `imports` instead
 	FromFile FromFile `json:"fromFile,omitempty" yaml:"fromFile,omitempty" mapstructure:"fromFile,omitempty"`
+
+	// Imports corresponds to the JSON schema field "imports".
+	Imports FromFile `json:"imports,omitempty" yaml:"imports,omitempty" mapstructure:"imports,omitempty"`
 
 	// The namespace to be given to all executables in the flow file.
 	// If not set, the executables in the file will be grouped into the root (*)
