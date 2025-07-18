@@ -387,8 +387,7 @@ You can use special comments to override executable metadata:
 
 # f:name=production f:verb=deploy
 # f:description="Deploy to production environment"
-# f:tags=production,critical
-# f:aliases=prod-deploy
+# f:tag=production f:tag=critical
 # f:visibility=internal
 # f:timeout=10m
 
@@ -396,17 +395,7 @@ echo "Deploying to production..."
 kubectl apply -f k8s/
 ```
 
-**Supported comment keys:**
-- `name`, `verb`, `description`, `tags`, `aliases`, `visibility`, `timeout`
-
-**Multi-line descriptions:**
-```bash
-# f:name=backup f:verb=run
-# <f|description>
-# Creates a backup of the database
-# and uploads it to S3 storage
-# <f|description>
-```
+See the [generated configuration reference](generated-config.md) for more details.
 
 #### **Makefiles**
 
@@ -428,7 +417,7 @@ clean:
 	rm -rf bin/
 ```
 
-The same comment parsing syntax works in Makefiles - use `# f:key=value` to override executable configuration.
+See the [generated configuration reference](generated-config.md) for more details on overriding executable configuration.
 
 #### **Package.json Scripts**
 

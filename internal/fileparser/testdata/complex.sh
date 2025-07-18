@@ -8,10 +8,10 @@
 # unrelated text
 # f:desc="second line"
 #
-# f:desc="third line with \'quotes\'\, and commas"
+# f:desc="third line with \'quotes\', and commas"
 # f:description=closin'
 
-# f:name=name followed by unrelated text
+# f:name=name
 
 echo "Hello, world!"
 
