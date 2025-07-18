@@ -52,8 +52,7 @@ function AppContent() {
         title: "Unexpected error",
         message: hasError.message || "An error occurred",
         type: NotificationType.Error,
-        autoClose: true,
-        autoCloseDelay: 6000,
+        autoClose: false,
       });
     }
   }, [hasError]);

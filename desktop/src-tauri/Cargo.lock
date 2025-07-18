@@ -731,9 +731,11 @@ dependencies = [
 name = "desktop"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "cmd_lib",
  "directories",
  "dirs 5.0.1",
+ "log",
  "notify",
  "serde",
  "serde_json",

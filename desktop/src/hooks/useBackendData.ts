@@ -5,7 +5,7 @@ import { EnrichedExecutable } from "../types/executable";
 import { Config } from "../types/generated/config";
 import { EnrichedWorkspace } from "../types/workspace";
 
-export function useConfig() {
+export function useConfig(enabled: boolean = true) {
   const queryClient = useQueryClient();
 
   const {
@@ -17,6 +17,7 @@ export function useConfig() {
     queryFn: async () => {
       return await invoke<Config>("get_config");
     },
+    enabled,
   });
 
   const refreshConfig = () => {
@@ -31,7 +32,7 @@ export function useConfig() {
   };
 }
 
-export function useWorkspaces() {
+export function useWorkspaces(enabled: boolean = true) {
   const queryClient = useQueryClient();
 
   const {
@@ -44,6 +45,7 @@ export function useWorkspaces() {
       const response = await invoke<EnrichedWorkspace[]>("list_workspaces");
       return response;
     },
+    enabled,
   });
 
   const refreshWorkspaces = () => {
@@ -137,8 +139,34 @@ export function useExecutables(selectedWorkspace: string | null) {
   };
 }
 
+// Hook to check if flow binary is available
+export function useFlowBinaryCheck() {
+  const { data: isFlowBinaryAvailable, isLoading: isCheckingBinary, error: binaryCheckError } = useQuery({
+    queryKey: ["flowBinaryCheck"],
+    queryFn: async () => {
+      try {
+        await invoke("check_flow_binary");
+        return true;
+      } catch (error) {
+        console.error(error);
+        throw new Error("flow CLI not found or not executable");
+      }
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    isFlowBinaryAvailable,
+    isCheckingBinary,
+    binaryCheckError,
+  };
+}
+
 // Composite hook that combines all data sources
 export function useBackendData(selectedWorkspace: string | null) {
+  const { isCheckingBinary, binaryCheckError } = useFlowBinaryCheck();
+  
   const { config, isConfigLoading, configError, refreshConfig } = useConfig();
   const {
     workspaces,
@@ -152,6 +180,36 @@ export function useBackendData(selectedWorkspace: string | null) {
     executablesError,
     refreshExecutables,
   } = useExecutables(selectedWorkspace);
+
+  // If flow binary is not available, return early with error state
+  if (binaryCheckError) {
+    return {
+      config: null,
+      workspaces: [],
+      executables: [],
+      isLoading: false,
+      hasError: binaryCheckError,
+      refreshAll: () => {},
+      refreshConfig: () => {},
+      refreshWorkspaces: () => {},
+      refreshExecutables: () => {},
+    };
+  }
+
+  // If still checking binary, show loading state
+  if (isCheckingBinary) {
+    return {
+      config: null,
+      workspaces: [],
+      executables: [],
+      isLoading: true,
+      hasError: null,
+      refreshAll: () => {},
+      refreshConfig: () => {},
+      refreshWorkspaces: () => {},
+      refreshExecutables: () => {},
+    };
+  }
 
   const isLoading =
     isConfigLoading || isWorkspacesLoading || isExecutablesLoading;
