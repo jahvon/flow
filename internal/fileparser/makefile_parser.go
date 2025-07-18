@@ -76,17 +76,15 @@ func ExecutablesFromMakefile(wsPath, path string) (executable.ExecutableList, er
 			},
 		}
 
-		configMap, err := ExtractExecConfigMap(t.description, "")
+		cfg, err := ExtractExecConfig(t.description, "")
 		if err != nil {
 			return nil, err
 		}
 
-		if len(configMap) != 0 {
+		if len(cfg.SimpleFields) > 0 || len(cfg.Params) > 0 || len(cfg.Args) > 0 {
 			e.Description = ""
-			for key, value := range configMap {
-				if err := applyConfig(e, key, value); err != nil {
-					return nil, err
-				}
+			if err := ApplyExecConfig(e, cfg); err != nil {
+				return nil, err
 			}
 		}
 

@@ -25,15 +25,12 @@ func ExecutablesFromShFile(wsPath, filePath string) (*executable.Executable, err
 	if err != nil {
 		return nil, err
 	}
-	configMap, err := ExtractExecConfigMap(string(fileBytes), "# ")
+	cfg, err := ExtractExecConfig(string(fileBytes), "# ")
 	if err != nil {
 		return nil, err
 	}
-
-	for key, value := range configMap {
-		if err := applyConfig(exec, key, value); err != nil {
-			return nil, err
-		}
+	if err := ApplyExecConfig(exec, cfg); err != nil {
+		return nil, err
 	}
 
 	exec.Tags = append(exec.Tags, generatedTag)
