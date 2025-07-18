@@ -25,6 +25,10 @@ properties:
   fromFile:
     $ref: '#/definitions/FromFile'
     default: []
+    description: "DEPRECATED: Use `imports` instead"
+  imports:
+    $ref: '#/definitions/FromFile'
+    default: []
   namespace:
     type: string
     description: |

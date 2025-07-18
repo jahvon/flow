@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "dev": "vite dev --host",
+    "build": "vite build && tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --fix",
+    "preview": "vite preview"
+  }
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
+	"github.com/flowexec/flow/internal/fileparser"
 	"github.com/flowexec/flow/internal/filesystem"
 	"github.com/flowexec/flow/types/common"
 	"github.com/flowexec/flow/types/executable"
@@ -69,8 +70,8 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 			continue
 		}
 		for _, flowFile := range flowFiles {
-			if len(flowFile.FromFile) > 0 {
-				generated, err := generatedExecutables(logger, name, flowFile)
+			if len(flowFile.FromFile) > 0 || len(flowFile.Imports) > 0 {
+				generated, err := fileparser.ExecutablesFromImports(logger, name, flowFile)
 				if err != nil {
 					logger.Errorx(
 						"failed to generate executables from files",
@@ -160,7 +161,7 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 	cfg.SetDefaults()
 	cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
-	generated, err := generatedExecutables(logger, wsInfo.WorkspaceName, cfg)
+	generated, err := fileparser.ExecutablesFromImports(logger, wsInfo.WorkspaceName, cfg)
 	if err != nil {
 		logger.Warnx(
 			"failed to generate executables from files",
@@ -206,7 +207,7 @@ func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (executable.Ex
 		cfg.SetDefaults()
 		cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
-		generated, err := generatedExecutables(logger, wsInfo.WorkspaceName, cfg)
+		generated, err := fileparser.ExecutablesFromImports(logger, wsInfo.WorkspaceName, cfg)
 		if err != nil {
 			logger.Warnx(
 				"failed to generate executables from files",
