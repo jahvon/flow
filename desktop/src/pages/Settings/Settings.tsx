@@ -1,63 +1,303 @@
-import { Card, Select, Stack, Text, TextInput, Title } from "@mantine/core";
+import { 
+  Select, 
+  Stack,
+  TextInput, 
+  Title,
+  LoadingOverlay,
+  Alert,
+  Paper
+} from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
+import { useConfig } from "../../hooks/useBackendData";
 import { useSettings } from "../../hooks/useSettings";
+import { useNotifier } from "../../hooks/useNotifier";
 import { ThemeName } from "../../theme/types";
+import { NotificationType } from "../../types/notification";
+import { SettingRow, SettingSection } from "../../components/Settings";
 import styles from "./Settings.module.css";
 
 const themeOptions = [
-  { value: "everforest", label: "Everforest" },
+  { value: "everforest", label: "Default" },
   { value: "dark", label: "Dark" },
   { value: "dracula", label: "Dracula" },
   { value: "light", label: "Light" },
   { value: "tokyo-night", label: "Tokyo Night" },
 ];
 
+const workspaceModeOptions = [
+  { value: "fixed", label: "Fixed" },
+  { value: "dynamic", label: "Dynamic" },
+];
+
+const logModeOptions = [
+  { value: "hidden", label: "Hidden" },
+  { value: "json", label: "JSON" },
+  { value: "logfmt", label: "Log Format" },
+  { value: "text", label: "Text" },
+];
+
 export function Settings() {
   const { settings, updateWorkspaceApp, updateExecutableApp, updateTheme } =
-    useSettings();
+      useSettings();
+  const {
+    config,
+    isConfigLoading,
+    refreshConfig,
+    configError,
+    updateTheme: updateConfigTheme,
+    updateWorkspaceMode,
+    updateLogMode,
+    updateNamespace,
+    updateCurrentWorkspace,
+    updateDefaultTimeout,
+  } = useConfig();
+  const { setNotification } = useNotifier();
+
+  if (configError) {
+    return (
+      <div className={styles.settings}>
+        <Title order={2} mb="md">Settings</Title>
+        <Alert variant="light" color="red" icon={<IconInfoCircle />}>
+          Error loading configuration: {configError.message}
+        </Alert>
+      </div>
+    );
+  }
+
+  function handleThemeChange(value: string): Promise<void> {
+    updateTheme(value as ThemeName);
+    return updateConfigTheme(value).then(() => {
+      refreshConfig();
+      setNotification({
+        type: NotificationType.Success,
+        title: 'Theme updated',
+        message: 'Theme has been successfully updated',
+        autoClose: true,
+      });
+    }).catch((error) => {
+      setNotification({
+        type: NotificationType.Error,
+        title: 'Error updating theme',
+        message: error.message,
+        autoClose: true,
+      });
+    });
+  }
+
+  function handleLogModeChange(value: string): Promise<void> {
+    return updateLogMode(value).then(() => {
+      refreshConfig();
+      setNotification({
+        type: NotificationType.Success,
+        title: 'Log mode updated',
+        message: 'Log mode has been successfully updated',
+        autoClose: true,
+      });
+    }).catch((error) => {
+      setNotification({
+        type: NotificationType.Error,
+        title: 'Error updating log mode',
+        message: error.message,
+        autoClose: true,
+      });
+    });
+  }
+
+  function handleDefaultTimeoutChange(value: string): Promise<void> {
+    return updateDefaultTimeout(value).then(() => {
+      refreshConfig();
+      setNotification({
+        type: NotificationType.Success,
+        title: 'Default timeout updated',
+        message: 'Default timeout has been successfully updated',
+        autoClose: true,
+      });
+    }).catch((error) => {
+      setNotification({
+        type: NotificationType.Error,
+        title: 'Error updating default timeout',
+        message: error.message,
+        autoClose: true,
+      });
+    });
+  }
+
+  function handleCurrentWorkspaceChange(value: string): Promise<void> {
+    return updateCurrentWorkspace(value).then(() => {
+      refreshConfig();
+      setNotification({
+        type: NotificationType.Success,
+        title: 'Current workspace updated',
+        message: 'Current workspace has been successfully updated',
+        autoClose: true,
+      });
+    }).catch((error) => {
+      setNotification({
+        type: NotificationType.Error,
+        title: 'Error updating current workspace',
+        message: error.message,
+        autoClose: true,
+      });
+    });
+  }
+
+  function handleWorkspaceModeChange(value: string): Promise<void> {
+    return updateWorkspaceMode(value).then(() => {
+      refreshConfig();
+      setNotification({
+        type: NotificationType.Success,
+        title: 'Workspace mode updated',
+        message: 'Workspace mode has been successfully updated',
+        autoClose: true,
+      });
+    }).catch((error) => {
+      setNotification({
+        type: NotificationType.Error,
+        title: 'Error updating workspace mode',
+        message: error.message,
+        autoClose: true,
+      });
+    });
+  }
+
+  function handleNamespaceChange(value: string): Promise<void> {
+    return updateNamespace(value).then(() => {
+      refreshConfig();
+      setNotification({
+        type: NotificationType.Success,
+        title: 'Namespace updated',
+        message: 'Namespace has been successfully updated',
+        autoClose: true,
+      });
+    }).catch((error) => {
+      setNotification({
+        type: NotificationType.Error,
+        title: 'Error updating namespace',
+        message: error.message,
+        autoClose: true,
+      });
+    });
+  }
 
   return (
     <div className={styles.settings}>
-      <Title order={2} mb="md">
+      <LoadingOverlay visible={isConfigLoading} />
+      
+      <Title order={2} mb="xl">
         Settings
       </Title>
 
-      <Stack gap="sm">
-        <Card className={styles.settings__section}>
-          <Text size="lg" fw={500} mb="md">
-            Appearance
-          </Text>
-          <Select
-            label="Theme"
-            description="Choose your preferred theme"
-            value={settings.theme}
-            onChange={(value) => value && updateTheme(value as ThemeName)}
-            data={themeOptions}
-          />
-        </Card>
+      <Stack gap={0}>
+        <Paper className={styles.settingCard} mb="lg">
+          <SettingRow 
+            label="Theme" 
+            description="Choose your preferred color theme"
+          >
+            <Select
+              size="sm"
+              value={config?.theme || "everforest"}
+              onChange={(value) => value && handleThemeChange(value)}
+              data={themeOptions}
+              variant="filled"
+            />
+          </SettingRow>
 
-        <Card className={styles.settings__section}>
-          <Text size="lg" fw={500} mb="md">
-            Application Configuration
-          </Text>
-          <Stack gap="md">
+          <SettingRow 
+            label="Default Log Mode" 
+            description="Default logging format for executable runs"
+          >
+            <Select
+              size="sm"
+              value={config?.defaultLogMode || "text"}
+              onChange={(value) => value && handleLogModeChange(value)}
+              data={logModeOptions}
+              variant="filled"
+            />
+          </SettingRow>
+          
+          <SettingRow 
+            label="Default Timeout" 
+            description="Default timeout for executable runs"
+          >
             <TextInput
-              label="Workspace Command"
-              description="Command to use when opening workspace directories. Leave empty to use system default."
+              size="sm"
+              value={config?.defaultTimeout || ""}
+              onChange={(e) => handleDefaultTimeoutChange(e.currentTarget.value)}
+              placeholder="e.g., 30s, 5m, 1h"
+              variant="filled"
+            />
+          </SettingRow>
+        </Paper>
+
+        <SettingSection title="Workspace">
+          <SettingRow 
+            label="Current Workspace" 
+            description="The currently active workspace"
+          >
+            <Select
+              size="sm"
+              value={config?.currentWorkspace || ""}
+              onChange={(value) => value && handleCurrentWorkspaceChange(value)}
+              data={Object.keys(config?.workspaces || {}).map(name => ({ value: name, label: name }))}
+              placeholder="Select workspace"
+              variant="filled"
+            />
+          </SettingRow>
+          
+          <SettingRow 
+            label="Workspace Mode" 
+            description="Dynamic mode changes global workspace when switching in sidebar"
+          >
+            <Select
+              size="sm"
+              value={config?.workspaceMode || "dynamic"}
+              onChange={(value) => value && handleWorkspaceModeChange(value)}
+              data={workspaceModeOptions}
+              variant="filled"
+            />
+          </SettingRow>
+
+          <SettingRow 
+            label="Current Namespace" 
+            description="Active namespace for executable discovery"
+          >
+            <TextInput
+              size="sm"
+              value={config?.currentNamespace || ""}
+              onChange={(e) => handleNamespaceChange(e.currentTarget.value)}
+              placeholder="Enter namespace"
+              variant="filled"
+            />
+          </SettingRow>
+        </SettingSection>
+
+        <SettingSection title="External Applications">
+          <SettingRow 
+            label="Workspace Command" 
+            description="Command to open workspace directories"
+          >
+            <TextInput
+              size="sm"
               value={settings.workspaceApp}
-              onChange={(event) =>
-                updateWorkspaceApp(event.currentTarget.value)
-              }
+              onChange={(event) => updateWorkspaceApp(event.currentTarget.value)}
+              placeholder="System default"
+              variant="filled"
             />
+          </SettingRow>
+          
+          <SettingRow 
+            label="Executable Command" 
+            description="Command to open flow files"
+          >
             <TextInput
-              label="Executable Command"
-              description="Command to use when opening flow files. Leave empty to use system default."
+              size="sm"
               value={settings.executableApp}
-              onChange={(event) =>
-                updateExecutableApp(event.currentTarget.value)
-              }
+              onChange={(event) => updateExecutableApp(event.currentTarget.value)}
+              placeholder="System default"
+              variant="filled"
             />
-          </Stack>
-        </Card>
+          </SettingRow>
+        </SettingSection>
       </Stack>
     </div>
   );

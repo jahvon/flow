@@ -27,6 +27,84 @@ async fn get_config() -> Result<crate::types::generated::config::Config, String>
 }
 
 #[tauri::command]
+async fn update_config_theme(theme: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.set_theme(&theme).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_config_workspace_mode(mode: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.set_workspace_mode(&mode).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_config_log_mode(mode: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.set_log_mode(&mode).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_config_namespace(namespace: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.set_namespace(&namespace).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_config_current_workspace(workspace: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.set_current_workspace(&workspace).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_config_current_vault(vault: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.set_current_vault(&vault).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn update_config_default_timeout(timeout: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.set_default_timeout(&timeout).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn add_config_workspace(name: String, path: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.add_workspace(&name, &path).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn remove_config_workspace(name: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.remove_workspace(&name).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn add_config_vault(name: String, path: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.add_vault(&name, &path).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn remove_config_vault(name: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.remove_vault(&name).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn add_config_template(name: String, path: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.add_template(&name, &path).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn remove_config_template(name: String) -> Result<(), String> {
+    let runner = cli_runners();
+    runner.cmd.config.remove_template(&name).await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn get_workspace(name: String) -> Result<enriched::Workspace, String> {
     let runner = cli_runners();
     runner.cmd.workspace.get(&name).await.map_err(|e| e.to_string())
@@ -102,6 +180,19 @@ pub fn run() {
             list_workspaces,
             get_config,
             reload_window,
+            update_config_theme,
+            update_config_workspace_mode,
+            update_config_log_mode,
+            update_config_namespace,
+            update_config_current_workspace,
+            update_config_current_vault,
+            update_config_default_timeout,
+            add_config_workspace,
+            remove_config_workspace,
+            add_config_vault,
+            remove_config_vault,
+            add_config_template,
+            remove_config_template,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
