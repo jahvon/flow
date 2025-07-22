@@ -1,5 +1,8 @@
 import { ComboboxItem, Group, OptionsFilter, Select } from "@mantine/core";
+import { useConfig } from "../../../hooks/useBackendData";
+import { useNotifier } from "../../../hooks/useNotifier";
 import { EnrichedWorkspace } from "../../../types/workspace";
+import { NotificationType } from "../../../types/notification";
 
 interface WorkspaceSelectorProps {
   workspaces: EnrichedWorkspace[];
@@ -13,7 +16,7 @@ const filter: OptionsFilter = ({ options, search }) => {
   );
 
   filtered.sort((a, b) => a.label.localeCompare(b.label));
-  return options;
+  return filtered;
 };
 
 export function WorkspaceSelector({
@@ -21,6 +24,32 @@ export function WorkspaceSelector({
   selectedWorkspace,
   onSelectWorkspace,
 }: WorkspaceSelectorProps) {
+  const { config, updateCurrentWorkspace } = useConfig();
+  const { setNotification } = useNotifier();
+
+  const handleWorkspaceChange = async (workspaceName: string) => {
+    onSelectWorkspace(workspaceName);
+
+    if (config?.workspaceMode === 'dynamic') {
+      try {
+        await updateCurrentWorkspace(workspaceName);
+        setNotification({
+          type: NotificationType.Success,
+          title: 'Workspace switched',
+          message: `Switched to workspace: ${workspaceName}`,
+          autoClose: true,
+        });
+      } catch (error) {
+        setNotification({
+          type: NotificationType.Error,
+          title: 'Error switching workspace',
+          message: error instanceof Error ? error.message : 'An unknown error occurred',
+          autoClose: true,
+        });
+      }
+    }
+  };
+
   return (
     <>
       <Group gap="xs" align="center" wrap="nowrap">
@@ -28,7 +57,7 @@ export function WorkspaceSelector({
           value={selectedWorkspace}
           onChange={(value) => {
             if (value && workspaces.find((w) => w.name === value)) {
-              onSelectWorkspace(value);
+              handleWorkspaceChange(value);
             }
           }}
           data={workspaces.map((workspace) => ({

@@ -18,35 +18,38 @@ impl<E: CommandExecutor + 'static> WorkspaceCommands<E> {
     }
 
     pub async fn list(&self) -> CommandResult<Vec<Workspace>> {
-        let response: WorkspaceResponse = self.executor
-            .execute(&["workspace", "list", "--output", "json"]).await?;
+        let response: WorkspaceResponse =
+            self.executor.execute_json(&["workspace", "list"]).await?;
         Ok(response.workspaces)
     }
 
     pub async fn get(&self, workspace: &str) -> CommandResult<Workspace> {
         self.executor
-            .execute(&["workspace", "get", workspace, "--output", "json"]).await
+            .execute_json(&["workspace", "get", workspace])
+            .await
     }
 
-    pub async fn add(&self, name: &str, path: &str, set_current: bool) -> CommandResult<()> {
+    pub async fn add(&self, name: &str, path: &str, set_current: bool) -> CommandResult<String> {
         let mut args = vec!["workspace", "add", name, path];
         if set_current {
             args.push("--set");
         }
         let args_ref: Vec<&str> = args.iter().map(|s| *s).collect();
-        self.executor.execute(&args_ref).await
+        self.executor.execute::<()>(&args_ref).await
     }
 
-    pub async fn switch(&self, name: &str, fixed: bool) -> CommandResult<()> {
+    pub async fn switch(&self, name: &str, fixed: bool) -> CommandResult<String> {
         let mut args = vec!["workspace", "switch", name];
         if fixed {
             args.push("--fixed");
         }
         let args_ref: Vec<&str> = args.iter().map(|s| *s).collect();
-        self.executor.execute(&args_ref).await
+        self.executor.execute::<()>(&args_ref).await
     }
 
-    pub async fn remove(&self, name: &str) -> CommandResult<()> {
-        self.executor.execute(&["workspace", "remove", name]).await
+    pub async fn remove(&self, name: &str) -> CommandResult<String> {
+        self.executor
+            .execute::<()>(&["workspace", "remove", name])
+            .await
     }
 }

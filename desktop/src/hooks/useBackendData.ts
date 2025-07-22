@@ -24,11 +24,71 @@ export function useConfig(enabled: boolean = true) {
     queryClient.invalidateQueries({ queryKey: ["config"] });
   };
 
+  const updateTheme = async (theme: string) => {
+    try {
+      await invoke("set_config_theme", { theme });
+      refreshConfig();
+    } catch (error) {
+      throw new Error(`Failed to update theme: ${error}`);
+    }
+  };
+
+  const updateWorkspaceMode = async (mode: string) => {
+    try {
+      await invoke("set_config_workspace_mode", { mode });
+      refreshConfig();
+    } catch (error) {
+      throw new Error(`Failed to update workspace mode: ${error}`);
+    }
+  };
+
+  const updateLogMode = async (mode: string) => {
+    try {
+      await invoke("set_config_log_mode", { mode });
+      refreshConfig();
+    } catch (error) {
+      throw new Error(`Failed to update log mode: ${error}`);
+    }
+  };
+
+  const updateNamespace = async (namespace: string) => {
+    try {
+      await invoke("set_config_namespace", { namespace });
+      refreshConfig();
+    } catch (error) {
+      throw new Error(`Failed to update namespace: ${error}`);
+    }
+  };
+
+  const updateCurrentWorkspace = async (workspace: string) => {
+    try {
+      await invoke("set_workspace", { name: workspace, fixed: false });
+      refreshConfig();
+    } catch (error) {
+      throw new Error(`Failed to update current workspace: ${error}`);
+    }
+  };
+
+  const updateDefaultTimeout = async (timeout: string) => {
+    try {
+      await invoke("set_config_timeout", { timeout });
+      refreshConfig();
+    } catch (error) {
+      throw new Error(`Failed to update default timeout: ${error}`);
+    }
+  };
+
   return {
     config,
     isConfigLoading,
     configError,
     refreshConfig,
+    updateTheme,
+    updateWorkspaceMode,
+    updateLogMode,
+    updateNamespace,
+    updateCurrentWorkspace,
+    updateDefaultTimeout,
   };
 }
 
@@ -104,7 +164,7 @@ export function useExecutable(executableRef: string) {
   };
 }
 
-export function useExecutables(selectedWorkspace: string | null) {
+export function useExecutables(selectedWorkspace: string | null, enabled: boolean = true) {
   const queryClient = useQueryClient();
 
   const {
@@ -120,7 +180,7 @@ export function useExecutables(selectedWorkspace: string | null) {
       });
       return response;
     },
-    enabled: !!selectedWorkspace, // Only run when workspace is selected
+    enabled: enabled && !!selectedWorkspace, // Only run when workspace is selected AND enabled
   });
 
   const refreshExecutables = () => {
@@ -167,19 +227,22 @@ export function useFlowBinaryCheck() {
 export function useBackendData(selectedWorkspace: string | null) {
   const { isCheckingBinary, binaryCheckError } = useFlowBinaryCheck();
   
-  const { config, isConfigLoading, configError, refreshConfig } = useConfig();
+  // Only enable other queries if flow binary is available
+  const enabled = !binaryCheckError && !isCheckingBinary;
+  
+  const { config, isConfigLoading, configError, refreshConfig } = useConfig(enabled);
   const {
     workspaces,
     isWorkspacesLoading,
     workspacesError,
     refreshWorkspaces,
-  } = useWorkspaces();
+  } = useWorkspaces(enabled);
   const {
     executables,
     isExecutablesLoading,
     executablesError,
     refreshExecutables,
-  } = useExecutables(selectedWorkspace);
+  } = useExecutables(selectedWorkspace, enabled);
 
   // If flow binary is not available, return early with error state
   if (binaryCheckError) {

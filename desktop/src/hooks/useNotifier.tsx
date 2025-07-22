@@ -16,7 +16,7 @@ export function NotifierProvider({ children }: { children: React.ReactNode }) {
     if (notification?.autoClose) {
       setTimeout(() => {
         setNotification(null);
-      }, notification.autoCloseDelay || 6000);
+      }, notification.autoCloseDelay || 10000);
     }
   }, [notification]);
 
