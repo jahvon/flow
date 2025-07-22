@@ -130,6 +130,9 @@ type Executable struct {
 	// Parallel corresponds to the JSON schema field "parallel".
 	Parallel *ParallelExecutableType `json:"parallel,omitempty" yaml:"parallel,omitempty" mapstructure:"parallel,omitempty"`
 
+	// Plugin corresponds to the JSON schema field "plugin".
+	Plugin *PluginExecutableType `json:"plugin,omitempty" yaml:"plugin,omitempty" mapstructure:"plugin,omitempty"`
+
 	// Render corresponds to the JSON schema field "render".
 	Render *RenderExecutableType `json:"render,omitempty" yaml:"render,omitempty" mapstructure:"render,omitempty"`
 
@@ -267,6 +270,11 @@ type Parameter struct {
 }
 
 type ParameterList []Parameter
+
+type PluginExecutableType struct {
+	// Data corresponds to the JSON schema field "data".
+	Data *string `json:"data,omitempty" yaml:"data,omitempty" mapstructure:"data,omitempty"`
+}
 
 // A reference to an executable.
 // The format is `<verb> <workspace>/<namespace>:<executable name>`.

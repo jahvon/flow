@@ -2,6 +2,11 @@
 visibility: private
 tags: [development]
 executables:
+  - verb: test
+    name: wasm
+    plugin:
+      data: Hello world
+
   - verb: generate
     description: Generate code and documentation for the project.
     serial:

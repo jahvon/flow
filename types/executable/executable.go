@@ -263,6 +263,7 @@ func (e *Executable) Validate() error {
 		e.Render,
 		e.Serial,
 		e.Parallel,
+		e.Plugin,
 	)
 	if err != nil {
 		return err

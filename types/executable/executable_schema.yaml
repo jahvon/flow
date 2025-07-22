@@ -269,6 +269,12 @@ definitions:
     default: ""
 
 ### Executable Types
+  PluginExecutableType:
+    type: object
+    properties:
+      data:
+        type: string
+
   ExecExecutableType:
     type: object
     description: Standard executable type. Runs a command/file in a subprocess.
@@ -666,3 +672,5 @@ properties:
     $ref: '#/definitions/SerialExecutableType'
   parallel:
     $ref: '#/definitions/ParallelExecutableType'
+  plugin:
+    $ref: '#/definitions/PluginExecutableType'

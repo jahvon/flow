@@ -21,6 +21,7 @@ import (
 	"github.com/flowexec/flow/internal/runner/exec"
 	"github.com/flowexec/flow/internal/runner/launch"
 	"github.com/flowexec/flow/internal/runner/parallel"
+	"github.com/flowexec/flow/internal/runner/plugin"
 	"github.com/flowexec/flow/internal/runner/render"
 	"github.com/flowexec/flow/internal/runner/request"
 	"github.com/flowexec/flow/internal/runner/serial"
@@ -80,6 +81,7 @@ func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 	runner.RegisterRunner(render.NewRunner())
 	runner.RegisterRunner(serial.NewRunner())
 	runner.RegisterRunner(parallel.NewRunner())
+	runner.RegisterRunner(plugin.NewRunner())
 }
 
 // TODO: refactor this function to simplify the logic
