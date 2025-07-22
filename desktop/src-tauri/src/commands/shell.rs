@@ -14,7 +14,6 @@ impl Shell {
             return Self::from_path(&shell_path);
         }
 
-
         Shell::Bash
     }
 
@@ -34,9 +33,10 @@ impl Shell {
 
     pub fn command_args(&self, command: &str) -> (String, Vec<String>) {
         match self {
-            Shell::Bash | Shell::Zsh | Shell::Fish => {
-                (self.executable(), vec!["-c".to_string(), command.to_string()])
-            }
+            Shell::Bash | Shell::Zsh | Shell::Fish => (
+                self.executable(),
+                vec!["-c".to_string(), command.to_string()],
+            ),
             Shell::Unknown(path) => {
                 // Assume POSIX-like behavior
                 (path.clone(), vec!["-c".to_string(), command.to_string()])
@@ -55,9 +55,14 @@ impl Shell {
 
     pub fn source_profile_command(&self) -> Option<String> {
         match self {
-            Shell::Bash => Some("source ~/.bashrc 2>/dev/null || source ~/.bash_profile 2>/dev/null || true".to_string()),
+            Shell::Bash => Some(
+                "source ~/.bashrc 2>/dev/null || source ~/.bash_profile 2>/dev/null || true"
+                    .to_string(),
+            ),
             Shell::Zsh => Some("source ~/.zshrc 2>/dev/null || true".to_string()),
-            Shell::Fish => Some("source ~/.config/fish/config.fish 2>/dev/null || true".to_string()),
+            Shell::Fish => {
+                Some("source ~/.config/fish/config.fish 2>/dev/null || true".to_string())
+            }
             Shell::Unknown(_) => None,
         }
     }

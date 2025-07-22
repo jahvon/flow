@@ -26,7 +26,7 @@ export function useConfig(enabled: boolean = true) {
 
   const updateTheme = async (theme: string) => {
     try {
-      await invoke("update_config_theme", { theme });
+      await invoke("set_config_theme", { theme });
       refreshConfig();
     } catch (error) {
       throw new Error(`Failed to update theme: ${error}`);
@@ -35,7 +35,7 @@ export function useConfig(enabled: boolean = true) {
 
   const updateWorkspaceMode = async (mode: string) => {
     try {
-      await invoke("update_config_workspace_mode", { mode });
+      await invoke("set_config_workspace_mode", { mode });
       refreshConfig();
     } catch (error) {
       throw new Error(`Failed to update workspace mode: ${error}`);
@@ -44,7 +44,7 @@ export function useConfig(enabled: boolean = true) {
 
   const updateLogMode = async (mode: string) => {
     try {
-      await invoke("update_config_log_mode", { mode });
+      await invoke("set_config_log_mode", { mode });
       refreshConfig();
     } catch (error) {
       throw new Error(`Failed to update log mode: ${error}`);
@@ -53,7 +53,7 @@ export function useConfig(enabled: boolean = true) {
 
   const updateNamespace = async (namespace: string) => {
     try {
-      await invoke("update_config_namespace", { namespace });
+      await invoke("set_config_namespace", { namespace });
       refreshConfig();
     } catch (error) {
       throw new Error(`Failed to update namespace: ${error}`);
@@ -62,82 +62,19 @@ export function useConfig(enabled: boolean = true) {
 
   const updateCurrentWorkspace = async (workspace: string) => {
     try {
-      await invoke("update_config_current_workspace", { workspace });
+      await invoke("set_workspace", { name: workspace, fixed: false });
       refreshConfig();
     } catch (error) {
       throw new Error(`Failed to update current workspace: ${error}`);
     }
   };
 
-  const updateCurrentVault = async (vault: string) => {
-    try {
-      await invoke("update_config_current_vault", { vault });
-      refreshConfig();
-    } catch (error) {
-      throw new Error(`Failed to update current vault: ${error}`);
-    }
-  };
-
   const updateDefaultTimeout = async (timeout: string) => {
     try {
-      await invoke("update_config_default_timeout", { timeout });
+      await invoke("set_config_timeout", { timeout });
       refreshConfig();
     } catch (error) {
       throw new Error(`Failed to update default timeout: ${error}`);
-    }
-  };
-
-  const addWorkspace = async (name: string, path: string) => {
-    try {
-      await invoke("add_config_workspace", { name, path });
-      refreshConfig();
-    } catch (error) {
-      throw new Error(`Failed to add workspace: ${error}`);
-    }
-  };
-
-  const removeWorkspace = async (name: string) => {
-    try {
-      await invoke("remove_config_workspace", { name });
-      refreshConfig();
-    } catch (error) {
-      throw new Error(`Failed to remove workspace: ${error}`);
-    }
-  };
-
-  const addVault = async (name: string, path: string) => {
-    try {
-      await invoke("add_config_vault", { name, path });
-      refreshConfig();
-    } catch (error) {
-      throw new Error(`Failed to add vault: ${error}`);
-    }
-  };
-
-  const removeVault = async (name: string) => {
-    try {
-      await invoke("remove_config_vault", { name });
-      refreshConfig();
-    } catch (error) {
-      throw new Error(`Failed to remove vault: ${error}`);
-    }
-  };
-
-  const addTemplate = async (name: string, path: string) => {
-    try {
-      await invoke("add_config_template", { name, path });
-      refreshConfig();
-    } catch (error) {
-      throw new Error(`Failed to add template: ${error}`);
-    }
-  };
-
-  const removeTemplate = async (name: string) => {
-    try {
-      await invoke("remove_config_template", { name });
-      refreshConfig();
-    } catch (error) {
-      throw new Error(`Failed to remove template: ${error}`);
     }
   };
 
@@ -151,14 +88,7 @@ export function useConfig(enabled: boolean = true) {
     updateLogMode,
     updateNamespace,
     updateCurrentWorkspace,
-    updateCurrentVault,
     updateDefaultTimeout,
-    addWorkspace,
-    removeWorkspace,
-    addVault,
-    removeVault,
-    addTemplate,
-    removeTemplate,
   };
 }
 

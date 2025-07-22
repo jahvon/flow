@@ -43,7 +43,7 @@ export function WorkspaceSelector({
         setNotification({
           type: NotificationType.Error,
           title: 'Error switching workspace',
-          message: error.message,
+          message: error instanceof Error ? error.message : 'An unknown error occurred',
           autoClose: true,
         });
       }

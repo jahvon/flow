@@ -5,7 +5,7 @@ import {
   Title,
   LoadingOverlay,
   Alert,
-  Paper
+  Paper,
 } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { useConfig } from "../../hooks/useBackendData";
@@ -15,6 +15,7 @@ import { ThemeName } from "../../theme/types";
 import { NotificationType } from "../../types/notification";
 import { SettingRow, SettingSection } from "../../components/Settings";
 import styles from "./Settings.module.css";
+import { useState, useEffect } from "react";
 
 const themeOptions = [
   { value: "everforest", label: "Default" },
@@ -52,6 +53,13 @@ export function Settings() {
     updateDefaultTimeout,
   } = useConfig();
   const { setNotification } = useNotifier();
+  const [namespaceInput, setNamespaceInput] = useState<string>('');
+
+  useEffect(() => {
+    if (config) {
+      setNamespaceInput(config.currentNamespace || '');
+    }
+  }, [config]);
 
   if (configError) {
     return (
@@ -64,7 +72,7 @@ export function Settings() {
     );
   }
 
-  function handleThemeChange(value: string): Promise<void> {
+  async function handleThemeChange(value: string) {
     updateTheme(value as ThemeName);
     return updateConfigTheme(value).then(() => {
       refreshConfig();
@@ -84,7 +92,7 @@ export function Settings() {
     });
   }
 
-  function handleLogModeChange(value: string): Promise<void> {
+  async function handleLogModeChange(value: string) {
     return updateLogMode(value).then(() => {
       refreshConfig();
       setNotification({
@@ -103,7 +111,7 @@ export function Settings() {
     });
   }
 
-  function handleDefaultTimeoutChange(value: string): Promise<void> {
+  async function handleDefaultTimeoutChange(value: string){
     return updateDefaultTimeout(value).then(() => {
       refreshConfig();
       setNotification({
@@ -122,7 +130,7 @@ export function Settings() {
     });
   }
 
-  function handleCurrentWorkspaceChange(value: string): Promise<void> {
+  async function handleCurrentWorkspaceChange(value: string){
     return updateCurrentWorkspace(value).then(() => {
       refreshConfig();
       setNotification({
@@ -141,7 +149,7 @@ export function Settings() {
     });
   }
 
-  function handleWorkspaceModeChange(value: string): Promise<void> {
+  async function handleWorkspaceModeChange(value: string){
     return updateWorkspaceMode(value).then(() => {
       refreshConfig();
       setNotification({
@@ -160,7 +168,7 @@ export function Settings() {
     });
   }
 
-  function handleNamespaceChange(value: string): Promise<void> {
+  async function handleNamespaceChange(value: string){
     return updateNamespace(value).then(() => {
       refreshConfig();
       setNotification({
@@ -177,6 +185,12 @@ export function Settings() {
         autoClose: true,
       });
     });
+  }
+
+  function handleNamespaceSubmit() {
+    if (namespaceInput !== (config?.currentNamespace || '')) {
+      handleNamespaceChange(namespaceInput);
+    }
   }
 
   return (
@@ -263,10 +277,17 @@ export function Settings() {
           >
             <TextInput
               size="sm"
-              value={config?.currentNamespace || ""}
-              onChange={(e) => handleNamespaceChange(e.currentTarget.value)}
+              value={namespaceInput}
+              onChange={(e) => setNamespaceInput(e.currentTarget.value)}
+              onBlur={handleNamespaceSubmit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleNamespaceSubmit();
+                }
+              }}
               placeholder="Enter namespace"
               variant="filled"
+              spellCheck={false}
             />
           </SettingRow>
         </SettingSection>
@@ -282,6 +303,7 @@ export function Settings() {
               onChange={(event) => updateWorkspaceApp(event.currentTarget.value)}
               placeholder="System default"
               variant="filled"
+              spellCheck={false}
             />
           </SettingRow>
           
@@ -295,6 +317,7 @@ export function Settings() {
               onChange={(event) => updateExecutableApp(event.currentTarget.value)}
               placeholder="System default"
               variant="filled"
+              spellCheck={false}
             />
           </SettingRow>
         </SettingSection>
