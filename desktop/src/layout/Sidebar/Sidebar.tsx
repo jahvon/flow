@@ -1,15 +1,16 @@
-import { Group, Image, NavLink, Stack } from "@mantine/core";
+import {Button, Group, Image, NavLink, Stack} from "@mantine/core";
 import { ExecutableTree } from "./ExecutableTree/ExecutableTree";
 import styles from "./Sidebar.module.css";
 import { WorkspaceSelector } from "./WorkspaceSelector/WorkspaceSelector";
 import iconImage from "/logo-dark.png";
 import {IconDatabase, IconFolders, IconLogs, IconSettings} from "@tabler/icons-react";
-import {Link, useLocation} from "react-router-dom";
+import {Link, NavLink as RouterNavLink, useLocation, useNavigate} from "react-router";
 import {useAppContext} from "../../hooks/useAppContext.tsx";
 
 export function Sidebar() {
   const location = useLocation();
   const { executables, selectedWorkspace } = useAppContext()
+  const navigate = useNavigate();
 
   return (
     <div className={styles.sidebar}>
@@ -24,10 +25,20 @@ export function Sidebar() {
         <WorkspaceSelector />
 
         <Group gap="xs" mt="md">
+          <Button onClick={() => {
+            try {
+              navigate('/')
+              console.log('navigating')
+              console.log(location.pathname)
+            } catch (e) {
+              console.error(e)
+            }
+
+          }}>Testing</Button>
           <NavLink
               label="Workspace"
               leftSection={<IconFolders size={16} />}
-              component={Link}
+              component={RouterNavLink}
               to={`/workspace/${selectedWorkspace}`}
               active={location.pathname.startsWith('/workspace')}
               variant="filled"
@@ -35,7 +46,7 @@ export function Sidebar() {
           <NavLink
               label="Logs"
               leftSection={<IconLogs size={16} />}
-              component={Link}
+              component={RouterNavLink}
               to={`/logs`}
               active={location.pathname.startsWith('/logs')}
               variant="filled"
@@ -46,13 +57,13 @@ export function Sidebar() {
               variant="filled"
               childrenOffset={28}
           >
-            <NavLink label="Cache" component={Link} to={`/cache`} variant="filled" active={location.pathname.startsWith('/cache')}/>
-            <NavLink label="Vault" component={Link} to={`/vault`} variant="filled" active={location.pathname.startsWith('/vault')}/>
+            <NavLink label="Cache" component={RouterNavLink} to={`/cache`} variant="filled" active={location.pathname.startsWith('/cache')}/>
+            <NavLink label="Vault" component={RouterNavLink} to={`/vault`} variant="filled" active={location.pathname.startsWith('/vault')}/>
           </NavLink>
           <NavLink
               label="Settings"
               leftSection={<IconSettings size={16} />}
-              component={Link}
+              component={RouterNavLink}
               to={`/settings`}
               active={location.pathname.startsWith('/settings')}
               variant="filled"

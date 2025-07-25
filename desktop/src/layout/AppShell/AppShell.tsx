@@ -11,7 +11,7 @@ import { Sidebar } from "../Sidebar/Sidebar";
 import styles from "./AppShell.module.css";
 import {useAppContext} from "../../hooks/useAppContext.tsx";
 import {useNotifier} from "../../hooks/useNotifier.tsx";
-import {Outlet, useLocation} from "react-router-dom";
+import {Outlet, useLocation} from "react-router";
 
 export function AppShell() {
   const { isLoading, hasError } = useAppContext();

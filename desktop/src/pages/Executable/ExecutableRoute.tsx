@@ -1,5 +1,5 @@
 import { Text, LoadingOverlay } from "@mantine/core";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { useExecutable } from "../../hooks/useExecutable";
 import { PageWrapper } from "../../components/PageWrapper.tsx";
 import { Welcome } from "../Welcome/Welcome";

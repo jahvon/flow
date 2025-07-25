@@ -38,7 +38,7 @@ import {
   ValidationVerbType,
 } from "../../../types/executable";
 import {useAppContext} from "../../../hooks/useAppContext.tsx";
-import {Link} from "react-router-dom";
+import {Link} from "react-router";
 
 interface CustomTreeNodeData extends TreeNodeData {
   isNamespace: boolean;

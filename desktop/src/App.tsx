@@ -1,6 +1,7 @@
 import "@mantine/core/styles.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {createHashRouter, Navigate, RouterProvider} from "react-router-dom";
+import {createHashRouter, Navigate} from "react-router";
+import {RouterProvider} from "react-router/dom";
 import "./App.css";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AppProvider } from "./hooks/useAppContext.tsx";
