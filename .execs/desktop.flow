@@ -1,0 +1,2 @@
+# yaml-language-server: $schema=https://flowexec.io/schemas/flowfile_schema.json
+imports: ["../desktop/package.json"]

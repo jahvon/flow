@@ -55,15 +55,6 @@ executables:
               golangci-lint run ./... --fix
             fi
 
-  - verb: lint
-    name: ts
-    aliases: [frontend]
-    tags: [npm, desktop]
-    description: Run eslint on the Tauri desktop app's frontend.
-    exec:
-      dir: //desktop
-      cmd: npm run lint
-
   - verb: scan
     name: security
     tags: [security, go]

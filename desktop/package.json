@@ -5,13 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "npx eslint src",
-    "lint:fix": "npx eslint src --fix",
+    "build-vite": "tsc && vite build",
+    "lint-ts": "npx eslint src",
+    "lint-ts:fix": "npx eslint src --fix",
     "prettier": "npx prettier src --check",
     "prettier:fix": "npx prettier src --write",
     "preview": "vite preview",
-    "tauri": "tauri",
+    "start-tauri": "tauri",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "generate-types": "tsx scripts/generate-ts-types.ts"
