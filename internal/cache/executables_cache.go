@@ -267,6 +267,16 @@ func enumerateExecutableAliasRefs(
 ) executable.RefList {
 	refs := make(executable.RefList, 0)
 
+	for _, v := range exec.VerbAliases {
+		if err := v.Validate(); err != nil {
+			continue
+		}
+		refs = append(refs, executable.NewRef(exec.ID(), v))
+		for _, id := range exec.AliasesIDs() {
+			refs = append(refs, executable.NewRef(id, v))
+		}
+	}
+
 	switch {
 	case override == nil:
 		// use default aliases

@@ -26,7 +26,7 @@ flow browse [EXECUTABLE-REFERENCE] [flags]
   -n, --namespace string   Filter executables by namespace.
   -o, --output string      Output format. One of: yaml, json, or tui. (default "tui")
   -t, --tag stringArray    Filter by tags.
-  -v, --verb string        Filter executables by verb. One of: [abort activate add analyze apply build bundle check clean clear compile create deactivate debug delete deploy destroy disable edit enable erase exec execute fetch fix generate get init inspect install kill launch lint modify monitor new open package patch pause profile publish purge push reboot refresh release reload remove request reset restart retrieve run scan send set setup show start stop teardown terminate test tidy trace track transform trigger undeploy uninstall unset update upgrade validate verify view watch]
+  -v, --verb string        Filter executables by verb.
   -w, --workspace string   Filter executables by workspace.
 ```
 
