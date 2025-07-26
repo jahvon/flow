@@ -9,6 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/expr"
@@ -42,7 +43,7 @@ func (r *parallelRunner) Exec(
 	inputEnv map[string]string,
 ) error {
 	parallelSpec := e.Parallel
-	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
+	if err := runner.SetEnv(ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
@@ -59,7 +60,7 @@ func (r *parallelRunner) Exec(
 			return err
 		}
 		if err := str.Close(); err != nil {
-			ctx.Logger.Error(err, "unable to close store")
+			logger.Log().Error(err, "unable to close store")
 		}
 
 		return handleExec(ctx, e, eng, parallelSpec, inputEnv, cacheData)
@@ -93,7 +94,7 @@ func handleExec(
 			if truthy, err := expr.IsTruthy(refConfig.If, &dataMap); err != nil {
 				return err
 			} else if !truthy {
-				ctx.Logger.Debugf("skipping execution %d/%d", i+1, len(parallelSpec.Execs))
+				logger.Log().Debugf("skipping execution %d/%d", i+1, len(parallelSpec.Execs))
 				continue
 			}
 		}
@@ -116,7 +117,7 @@ func handleExec(
 		if len(refConfig.Args) > 0 {
 			a, err := argUtils.ProcessArgs(exec, refConfig.Args, execPromptedEnv)
 			if err != nil {
-				ctx.Logger.Error(err, "unable to process arguments")
+				logger.Log().Error(err, "unable to process arguments")
 			}
 			maps.Copy(execPromptedEnv, a)
 		}

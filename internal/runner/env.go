@@ -6,8 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/flowexec/tuikit/io"
-
 	"github.com/flowexec/flow/internal/context"
 	"github.com/flowexec/flow/internal/filesystem"
 	"github.com/flowexec/flow/internal/vault"
@@ -16,14 +14,13 @@ import (
 )
 
 func SetEnv(
-	logger io.Logger,
 	currentVault string,
 	exec *executable.ExecutableEnvironment,
 	promptedEnv map[string]string,
 ) error {
 	var errs []error
 	for _, param := range exec.Params {
-		val, err := ResolveParameterValue(logger, currentVault, param, promptedEnv)
+		val, err := ResolveParameterValue(currentVault, param, promptedEnv)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -40,7 +37,6 @@ func SetEnv(
 }
 
 func ResolveParameterValue(
-	logger io.Logger,
 	currentVault string,
 	param executable.Parameter,
 	promptedEnv map[string]string,
@@ -67,7 +63,7 @@ func ResolveParameterValue(
 			if err := vault.ValidateReference(param.SecretRef); err != nil {
 				return "", err
 			}
-			v := vault.NewVault(logger)
+			v := vault.NewVault()
 			secret, err := v.GetSecret(param.SecretRef)
 			if err != nil {
 				return "", err
@@ -98,7 +94,6 @@ func ResolveParameterValue(
 }
 
 func BuildEnvList(
-	logger io.Logger,
 	currentVault string,
 	exec *executable.ExecutableEnvironment,
 	inputEnv map[string]string,
@@ -113,7 +108,7 @@ func BuildEnvList(
 		}
 	}
 	for _, param := range exec.Params {
-		val, err := ResolveParameterValue(logger, currentVault, param, inputEnv)
+		val, err := ResolveParameterValue(currentVault, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -131,7 +126,6 @@ func BuildEnvList(
 }
 
 func BuildEnvMap(
-	logger io.Logger,
 	currentVault string,
 	exec *executable.ExecutableEnvironment,
 	inputEnv map[string]string,
@@ -146,7 +140,7 @@ func BuildEnvMap(
 		}
 	}
 	for _, param := range exec.Params {
-		val, err := ResolveParameterValue(logger, currentVault, param, inputEnv)
+		val, err := ResolveParameterValue(currentVault, param, inputEnv)
 		if err != nil {
 			errs = append(errs, err)
 			continue

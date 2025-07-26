@@ -17,7 +17,7 @@ var _ = Describe("exec e2e", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = utils.NewContext(stdCtx.Background(), GinkgoT())
+		ctx = utils.NewContext(stdCtx.Background(), GinkgoTB())
 	})
 
 	AfterEach(func() {

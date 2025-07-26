@@ -39,7 +39,6 @@ func (r *launchRunner) Exec(
 ) error {
 	launchSpec := e.Launch
 	envMap, err := runner.BuildEnvMap(
-		ctx.Logger,
 		ctx.Config.CurrentVaultName(),
 		e.Env(),
 		inputEnv,
@@ -48,14 +47,13 @@ func (r *launchRunner) Exec(
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), envMap); err != nil {
+	if err := runner.SetEnv(ctx.Config.CurrentVaultName(), e.Env(), envMap); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	launchSpec.URI = os.ExpandEnv(launchSpec.URI)
 	targetURI := launchSpec.URI
 	if !strings.HasPrefix(targetURI, "http") {
 		targetURI = utils.ExpandDirectory(
-			ctx.Logger,
 			launchSpec.URI,
 			e.WorkspacePath(),
 			e.FlowFilePath(),

@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	tuikitIO "github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/flowexec/flow/internal/context"
 	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/expr"
@@ -31,7 +31,6 @@ func ProcessTemplate(
 	ws *workspace.Workspace,
 	flowfileName, flowfileDir string,
 ) error {
-	logger := ctx.Logger
 	if flowfileName == "" {
 		flowfileName = fmt.Sprintf("executables_%s", time.Now().Format("20060102150405"))
 	}
@@ -54,9 +53,9 @@ func ProcessTemplate(
 		pair := strings.SplitN(e, "=", 2)
 		envMap[pair[0]] = pair[1]
 	}
-	flowfileDir = utils.ExpandDirectory(logger, flowfileDir, ws.Location(), template.Location(), envMap)
+	flowfileDir = utils.ExpandDirectory(flowfileDir, ws.Location(), template.Location(), envMap)
 	fullPath := filepath.Join(flowfileDir, flowfileName)
-	logger.Debugx(
+	logger.Log().Debugx(
 		fmt.Sprintf("processing %s template", flowfileName),
 		"template", template.Location(), "output", fullPath,
 	)
@@ -73,7 +72,6 @@ func ProcessTemplate(
 		return err
 	}
 	if err := copyAllArtifacts(
-		logger,
 		template.Artifacts,
 		ws.Location(),
 		filepath.Dir(template.Location()),
@@ -91,7 +89,7 @@ func ProcessTemplate(
 
 		if _, e := os.Stat(fullPath); e == nil {
 			// TODO: Add a flag to overwrite existing files
-			logger.Warnx("Overwriting existing file", "dst", fullPath)
+			logger.Log().Warnx("Overwriting existing file", "dst", fullPath)
 		}
 
 		if err := filesystem.WriteFlowFile(fullPath, flowfile); err != nil {
@@ -113,7 +111,7 @@ func runExecutables(
 	execs []executable.TemplateRefConfig,
 	templateData expressionData,
 ) error {
-	ctx.Logger.Debugf("running %d %s executables", len(execs), stage)
+	logger.Log().Debugf("running %d %s executables", len(execs), stage)
 	for i, e := range execs {
 		if e.If != "" {
 			eval, err := expr.IsTruthy(e.If, templateData)
@@ -121,7 +119,7 @@ func runExecutables(
 				return errors.Wrap(err, "unable to evaluate if condition")
 			}
 			if !eval {
-				ctx.Logger.Debugf("skipping %s executable %d", stage, i)
+				logger.Log().Debugf("skipping %s executable %d", stage, i)
 				return nil
 			}
 		}
@@ -160,7 +158,7 @@ func runExecutables(
 			}
 			a, err := argUtils.ProcessArgs(exec, args, ee)
 			if err != nil {
-				ctx.Logger.Error(err, "unable to process arguments")
+				logger.Log().Error(err, "unable to process arguments")
 			}
 			maps.Copy(execEnv, a)
 		}
@@ -178,14 +176,13 @@ func runExecutables(
 }
 
 func parseSourcePath(
-	logger tuikitIO.Logger,
 	name, flowFileSrc, wsDir string,
 	artifact executable.Artifact,
 	templateData expressionData,
 ) (string, error) {
 	var err error
 	if artifact.SrcDir != "" {
-		flowFileSrc = utils.ExpandDirectory(logger, artifact.SrcDir, wsDir, flowFileSrc, expressionEnv(templateData))
+		flowFileSrc = utils.ExpandDirectory(artifact.SrcDir, wsDir, flowFileSrc, expressionEnv(templateData))
 	}
 	var sb *bytes.Buffer
 	sb, err = processAsGoTemplate(name, filepath.Join(flowFileSrc, artifact.SrcName), templateData)
@@ -196,14 +193,13 @@ func parseSourcePath(
 }
 
 func parseDestinationPath(
-	logger tuikitIO.Logger,
 	name, dstDir, flowFileSrc, wsDir string,
 	artifact executable.Artifact,
 	templateData expressionData,
 ) (string, error) {
 	var err error
 	if artifact.DstDir != "" {
-		dstDir = utils.ExpandDirectory(logger, artifact.DstDir, wsDir, flowFileSrc, expressionEnv(templateData))
+		dstDir = utils.ExpandDirectory(artifact.DstDir, wsDir, flowFileSrc, expressionEnv(templateData))
 	}
 	dstName := artifact.DstName
 	var db *bytes.Buffer

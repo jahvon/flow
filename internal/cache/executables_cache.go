@@ -3,12 +3,12 @@ package cache
 import (
 	"fmt"
 
-	"github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/flowexec/flow/internal/fileparser"
 	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/types/common"
 	"github.com/flowexec/flow/types/executable"
 	"github.com/flowexec/flow/types/workspace"
@@ -18,9 +18,9 @@ const execCacheKey = "executables"
 
 //go:generate mockgen -destination=mocks/mock_executable_cache.go -package=mocks github.com/flowexec/flow/internal/cache ExecutableCache
 type ExecutableCache interface {
-	Update(logger io.Logger) error
-	GetExecutableByRef(logger io.Logger, ref executable.Ref) (*executable.Executable, error)
-	GetExecutableList(logger io.Logger) (executable.ExecutableList, error)
+	Update() error
+	GetExecutableByRef(ref executable.Ref) (*executable.Executable, error)
+	GetExecutableList() (executable.ExecutableList, error)
 }
 type WorkspaceInfo struct {
 	WorkspaceName string `json:"workspaceName" yaml:"workspaceName"`
@@ -54,9 +54,9 @@ func NewExecutableCache(wsCache WorkspaceCache) ExecutableCache {
 	}
 }
 
-func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
-	logger.Debugf("Updating executable cache data")
-	wsCacheData, err := c.WorkspaceCache.GetLatestData(logger)
+func (c *ExecutableCacheImpl) Update() error { //nolint:gocognit
+	logger.Log().Debugf("Updating executable cache data")
+	wsCacheData, err := c.WorkspaceCache.GetLatestData()
 	if err != nil {
 		return fmt.Errorf("failed to get workspace cache data\n%w", err)
 	}
@@ -64,16 +64,16 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 	cacheData := c.Data
 	for name, wsCfg := range wsCacheData.Workspaces {
 		wsCfg.SetContext(name, wsCacheData.WorkspaceLocations[name])
-		flowFiles, err := filesystem.LoadWorkspaceFlowFiles(logger, wsCfg)
+		flowFiles, err := filesystem.LoadWorkspaceFlowFiles(wsCfg)
 		if err != nil {
-			logger.Errorx("failed to load workspace executable configs", "workspace", wsCfg.AssignedName(), "err", err)
+			logger.Log().Errorx("failed to load workspace executable configs", "workspace", wsCfg.AssignedName(), "err", err)
 			continue
 		}
 		for _, flowFile := range flowFiles {
 			if len(flowFile.FromFile) > 0 || len(flowFile.Imports) > 0 {
-				generated, err := fileparser.ExecutablesFromImports(logger, name, flowFile)
+				generated, err := fileparser.ExecutablesFromImports(name, flowFile)
 				if err != nil {
-					logger.Errorx(
+					logger.Log().Errorx(
 						"failed to generate executables from files",
 						"flowFilePath", flowFile.ConfigPath(),
 						"err", err,
@@ -93,7 +93,7 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 				}
 
 				if existingPath, exists := cacheData.ExecutableMap[e.Ref()]; exists && existingPath != flowFile.ConfigPath() {
-					logger.Warnx(
+					logger.Log().Warnx(
 						"duplicate executable found during cache update",
 						"ref", e.Ref().String(),
 						"conflictPath", existingPath,
@@ -106,7 +106,7 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 
 				for _, ref := range enumerateExecutableAliasRefs(e, wsCfg.VerbAliases) {
 					if existingPrimaryRef, exists := cacheData.AliasMap[ref]; exists && existingPrimaryRef != e.Ref() {
-						logger.Warnx(
+						logger.Log().Warnx(
 							"duplicate executable alias found during cache update",
 							"aliasRef", ref.String(),
 							"conflictRef", existingPrimaryRef.String(),
@@ -135,12 +135,12 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 		return errors.Wrap(err, "unable to write cache data")
 	}
 
-	logger.Debugx("Successfully updated executable cache data", "count", len(cacheData.ExecutableMap))
+	logger.Log().Debugx("Successfully updated executable cache data", "count", len(cacheData.ExecutableMap))
 	return nil
 }
 
-func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executable.Ref) (*executable.Executable, error) {
-	err := c.initExecutableCacheData(logger)
+func (c *ExecutableCacheImpl) GetExecutableByRef(ref executable.Ref) (*executable.Executable, error) {
+	err := c.initExecutableCacheData()
 	if err != nil {
 		return nil, err
 	} else if c.Data == nil {
@@ -183,9 +183,9 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 	cfg.SetDefaults()
 	cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
-	generated, err := fileparser.ExecutablesFromImports(logger, wsInfo.WorkspaceName, cfg)
+	generated, err := fileparser.ExecutablesFromImports(wsInfo.WorkspaceName, cfg)
 	if err != nil {
-		logger.Warnx(
+		logger.Log().Warnx(
 			"failed to generate executables from files",
 			"cfgPath", cfgPath,
 			"err", err,
@@ -206,8 +206,8 @@ func (c *ExecutableCacheImpl) GetExecutableByRef(logger io.Logger, ref executabl
 	return exec, nil
 }
 
-func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (executable.ExecutableList, error) {
-	err := c.initExecutableCacheData(logger)
+func (c *ExecutableCacheImpl) GetExecutableList() (executable.ExecutableList, error) {
+	err := c.initExecutableCacheData()
 	if err != nil {
 		return nil, err
 	} else if c.Data == nil {
@@ -218,20 +218,20 @@ func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (executable.Ex
 	for cfgPath := range c.Data.ConfigMap {
 		cfg, err := filesystem.LoadFlowFile(cfgPath)
 		if err != nil {
-			logger.Errorx("unable to load executable config", "cfgPath", cfgPath, "err", err)
+			logger.Log().Errorx("unable to load executable config", "cfgPath", cfgPath, "err", err)
 			continue
 		}
 		wsInfo, found := c.Data.ConfigMap[cfgPath]
 		if !found {
-			logger.Errorx("unable to find workspace info for config", "cfgPath", cfgPath)
+			logger.Log().Errorx("unable to find workspace info for config", "cfgPath", cfgPath)
 			continue
 		}
 		cfg.SetDefaults()
 		cfg.SetContext(wsInfo.WorkspaceName, wsInfo.WorkspacePath, cfgPath)
 
-		generated, err := fileparser.ExecutablesFromImports(logger, wsInfo.WorkspaceName, cfg)
+		generated, err := fileparser.ExecutablesFromImports(wsInfo.WorkspaceName, cfg)
 		if err != nil {
-			logger.Warnx(
+			logger.Log().Warnx(
 				"failed to generate executables from files",
 				"cfgPath", cfgPath,
 				"err", err,
@@ -244,12 +244,12 @@ func (c *ExecutableCacheImpl) GetExecutableList(logger io.Logger) (executable.Ex
 	return list, nil
 }
 
-func (c *ExecutableCacheImpl) initExecutableCacheData(logger io.Logger) error {
+func (c *ExecutableCacheImpl) initExecutableCacheData() error {
 	cacheData, err := filesystem.LoadLatestCachedData(execCacheKey)
 	if err != nil {
 		return errors.Wrap(err, "unable to load executable cache data")
 	} else if cacheData == nil {
-		if err := c.Update(logger); err != nil {
+		if err := c.Update(); err != nil {
 			return errors.Wrap(err, "unable to update executable cache data")
 		}
 	}

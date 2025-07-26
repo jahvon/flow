@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/run"
@@ -35,17 +36,16 @@ func (r *execRunner) Exec(
 ) error {
 	execSpec := e.Exec
 	defaultEnv := runner.DefaultEnv(ctx, e)
-	envMap, err := runner.BuildEnvMap(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
+	envMap, err := runner.BuildEnvMap(ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envList, err := runner.BuildEnvList(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
+	envList, err := runner.BuildEnvList(ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 
 	targetDir, isTmp, err := execSpec.Dir.ExpandDirectory(
-		ctx.Logger,
 		e.WorkspacePath(),
 		e.FlowFilePath(),
 		ctx.ProcessTmpDir,
@@ -66,9 +66,9 @@ func (r *execRunner) Exec(
 	case execSpec.Cmd != "" && execSpec.File != "":
 		return errors.New("cannot set both cmd and file")
 	case execSpec.Cmd != "":
-		return run.RunCmd(execSpec.Cmd, targetDir, envList, logMode, ctx.Logger, ctx.StdIn(), logFields)
+		return run.RunCmd(execSpec.Cmd, targetDir, envList, logMode, logger.Log(), ctx.StdIn(), logFields)
 	case execSpec.File != "":
-		return run.RunFile(execSpec.File, targetDir, envList, logMode, ctx.Logger, ctx.StdIn(), logFields)
+		return run.RunFile(execSpec.File, targetDir, envList, logMode, logger.Log(), ctx.StdIn(), logFields)
 	default:
 		return errors.New("unable to determine how e should be run")
 	}

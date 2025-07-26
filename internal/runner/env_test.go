@@ -9,6 +9,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/types/config"
 	"github.com/flowexec/flow/types/executable"
@@ -17,13 +18,14 @@ import (
 
 var _ = Describe("Env", func() {
 	var (
-		ctrl   *gomock.Controller
-		logger *mocks.MockLogger
+		ctrl       *gomock.Controller
+		mockLogger *mocks.MockLogger
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		logger = mocks.NewMockLogger(ctrl)
+		mockLogger = mocks.NewMockLogger(ctrl)
+		logger.Init(logger.InitOptions{Logger: mockLogger, TestingTB: GinkgoTB()})
 	})
 
 	AfterEach(func() {
@@ -41,7 +43,7 @@ var _ = Describe("Env", func() {
 				},
 			}
 			promptedEnv := make(map[string]string)
-			err := runner.SetEnv(logger, "", exec, promptedEnv)
+			err := runner.SetEnv("", exec, promptedEnv)
 			Expect(err).ToNot(HaveOccurred())
 			val, exists := os.LookupEnv("TEST_KEY")
 			Expect(exists).To(BeTrue())
@@ -53,7 +55,7 @@ var _ = Describe("Env", func() {
 		It("should return empty string when all parameter fields are empty", func() {
 			param := executable.Parameter{}
 			promptedEnv := make(map[string]string)
-			val, err := runner.ResolveParameterValue(logger, "", param, promptedEnv)
+			val, err := runner.ResolveParameterValue("", param, promptedEnv)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(val).To(Equal(""))
 		})
@@ -63,7 +65,7 @@ var _ = Describe("Env", func() {
 				Text: "test",
 			}
 			promptedEnv := make(map[string]string)
-			val, err := runner.ResolveParameterValue(logger, "", param, promptedEnv)
+			val, err := runner.ResolveParameterValue("", param, promptedEnv)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(val).To(Equal("test"))
 		})
@@ -74,7 +76,7 @@ var _ = Describe("Env", func() {
 				EnvKey: "TEST_KEY",
 			}
 			promptedEnv := make(map[string]string)
-			_, err := runner.ResolveParameterValue(logger, "", param, promptedEnv)
+			_, err := runner.ResolveParameterValue("", param, promptedEnv)
 			Expect(err).To(HaveOccurred())
 		})
 
@@ -86,7 +88,7 @@ var _ = Describe("Env", func() {
 			promptedEnv := map[string]string{
 				"TEST_KEY": "test",
 			}
-			val, err := runner.ResolveParameterValue(logger, "", param, promptedEnv)
+			val, err := runner.ResolveParameterValue("", param, promptedEnv)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(val).To(Equal("test"))
 		})
@@ -110,7 +112,7 @@ var _ = Describe("Env", func() {
 			}
 			inputEnv := make(map[string]string)
 			defaultEnv := make(map[string]string)
-			envList, err := runner.BuildEnvList(logger, "", exec, inputEnv, defaultEnv)
+			envList, err := runner.BuildEnvList("", exec, inputEnv, defaultEnv)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(envList).To(Equal([]string{"TEST_KEY=test", "TEST_KEY_2=test2"}))
 		})
@@ -132,7 +134,7 @@ var _ = Describe("Env", func() {
 			}
 			inputEnv := make(map[string]string)
 			defaultEnv := make(map[string]string)
-			envMap, err := runner.BuildEnvMap(logger, "", exec, inputEnv, defaultEnv)
+			envMap, err := runner.BuildEnvMap("", exec, inputEnv, defaultEnv)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(envMap).To(Equal(map[string]string{"TEST_KEY": "test", "TEST_KEY_2": "test2"}))
 		})
