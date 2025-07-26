@@ -9,12 +9,12 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
 	"github.com/flowexec/flow/internal/crypto"
 	"github.com/flowexec/flow/internal/filesystem"
+	"github.com/flowexec/flow/internal/logger"
 )
 
 const (
@@ -28,7 +28,6 @@ const (
 type Vault struct {
 	cachedEncryptionKey string
 	cachedData          *data
-	logger              io.Logger
 }
 
 // Represents the data stored in the vault data file.
@@ -58,12 +57,12 @@ func RegisterEncryptionKey(key string) error {
 	return nil
 }
 
-func NewVault(logger io.Logger) *Vault {
-	return &Vault{logger: logger}
+func NewVault() *Vault {
+	return &Vault{}
 }
 
 func (v *Vault) GetSecret(reference string) (SecretValue, error) {
-	v.logger.Debugf("getting secret with reference %s from vault", reference)
+	logger.Log().Debugf("getting secret with reference %s from vault", reference)
 	d, err := v.loadData()
 	if err != nil {
 		return "", err
@@ -79,7 +78,7 @@ func (v *Vault) GetSecret(reference string) (SecretValue, error) {
 }
 
 func (v *Vault) GetAllSecrets() (map[string]SecretValue, error) {
-	v.logger.Debugf("getting all secrets from vault")
+	logger.Log().Debugf("getting all secrets from vault")
 	d, err := v.loadData()
 	if err != nil {
 		return nil, err
@@ -90,7 +89,7 @@ func (v *Vault) GetAllSecrets() (map[string]SecretValue, error) {
 }
 
 func (v *Vault) SetSecret(reference string, secret SecretValue) error {
-	v.logger.Debugf("setting secret with reference %s in vault", reference)
+	logger.Log().Debugf("setting secret with reference %s in vault", reference)
 	if err := ValidateReference(reference); err != nil {
 		return err
 	}
@@ -109,7 +108,7 @@ func (v *Vault) SetSecret(reference string, secret SecretValue) error {
 }
 
 func (v *Vault) DeleteSecret(reference string) error {
-	v.logger.Debugf("deleting secret with reference %s from vault", reference)
+	logger.Log().Debugf("deleting secret with reference %s from vault", reference)
 	d, err := v.loadData()
 	if err != nil {
 		return err
@@ -121,7 +120,7 @@ func (v *Vault) DeleteSecret(reference string) error {
 }
 
 func (v *Vault) RenameSecret(oldRef string, newRef string) error {
-	v.logger.Debugf("renaming secret with reference %s in vault", oldRef)
+	logger.Log().Debugf("renaming secret with reference %s in vault", oldRef)
 
 	d, err := v.loadData()
 	if err != nil {

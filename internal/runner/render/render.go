@@ -15,6 +15,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/types/executable"
@@ -48,17 +49,16 @@ func (r *renderRunner) Exec(
 	}
 
 	renderSpec := e.Render
-	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
+	if err := runner.SetEnv(ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	envMap, err := runner.BuildEnvMap(
-		ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv, runner.DefaultEnv(ctx, e),
+		ctx.Config.CurrentVaultName(), e.Env(), inputEnv, runner.DefaultEnv(ctx, e),
 	)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
 	targetDir, isTmp, err := renderSpec.Dir.ExpandDirectory(
-		ctx.Logger,
 		e.WorkspacePath(),
 		e.FlowFilePath(),
 		ctx.ProcessTmpDir,
@@ -71,7 +71,7 @@ func (r *renderRunner) Exec(
 	}
 
 	contentFile := filepath.Clean(filepath.Join(targetDir, renderSpec.TemplateFile))
-	var templateData map[string]interface{}
+	var templateData interface{}
 	if renderSpec.TemplateDataFile != "" {
 		templateData, err = readDataFile(targetDir, renderSpec.TemplateDataFile)
 		if err != nil {
@@ -89,7 +89,7 @@ func (r *renderRunner) Exec(
 		return errors.Wrapf(err, "unable to execute template file %s", contentFile)
 	}
 
-	ctx.Logger.Infof("Rendering content from file %s", contentFile)
+	logger.Log().Infof("Rendering content from file %s", contentFile)
 	filename := filepath.Base(contentFile)
 
 	if err := ctx.TUIContainer.Start(); err != nil {
@@ -103,8 +103,8 @@ func (r *renderRunner) Exec(
 	return ctx.TUIContainer.SetView(views.NewMarkdownView(ctx.TUIContainer.RenderState(), buff.String()))
 }
 
-func readDataFile(dir, path string) (map[string]interface{}, error) {
-	templateData := map[string]interface{}{}
+func readDataFile(dir, path string) (interface{}, error) {
+	var templateData interface{}
 	dataFilePath := filepath.Clean(filepath.Join(dir, path))
 	if _, err := os.Stat(dataFilePath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("template data file %s does not exist", dataFilePath)

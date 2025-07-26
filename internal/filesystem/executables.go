@@ -8,10 +8,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/flowexec/tuikit/io"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/types/executable"
 	"github.com/flowexec/flow/types/workspace"
 )
@@ -61,10 +61,9 @@ func LoadFlowFile(cfgFile string) (*executable.FlowFile, error) {
 }
 
 func LoadWorkspaceFlowFiles(
-	logger io.Logger,
 	workspaceCfg *workspace.Workspace,
 ) (executable.FlowFileList, error) {
-	cfgFiles, err := findFlowFiles(logger, workspaceCfg)
+	cfgFiles, err := findFlowFiles(workspaceCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -73,14 +72,14 @@ func LoadWorkspaceFlowFiles(
 	for _, cfgFile := range cfgFiles {
 		cfg, err := LoadFlowFile(cfgFile)
 		if err != nil {
-			logger.Errorx("unable to load executable config file", "configFile", cfgFile, "err", err)
+			logger.Log().Errorx("unable to load executable config file", "configFile", cfgFile, "err", err)
 			continue
 		}
 		cfg.SetDefaults()
 		cfg.SetContext(workspaceCfg.AssignedName(), workspaceCfg.Location(), cfgFile)
 		cfgs = append(cfgs, cfg)
 	}
-	logger.Debugx(
+	logger.Log().Debugx(
 		fmt.Sprintf("loaded %d config files", len(cfgs)),
 		"workspace",
 		workspaceCfg.AssignedName(),
@@ -89,7 +88,7 @@ func LoadWorkspaceFlowFiles(
 	return cfgs, nil
 }
 
-func findFlowFiles(logger io.Logger, workspaceCfg *workspace.Workspace) ([]string, error) {
+func findFlowFiles(workspaceCfg *workspace.Workspace) ([]string, error) {
 	var includePaths, excludedPaths []string
 	if workspaceCfg.Executables != nil {
 		includePaths = workspaceCfg.Executables.Included
@@ -106,13 +105,13 @@ func findFlowFiles(logger io.Logger, workspaceCfg *workspace.Workspace) ([]strin
 	walkDirFunc := func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
-				logger.Debugx("cfg path does not exist", "path", path)
+				logger.Log().Debugx("cfg path does not exist", "path", path)
 				return nil
 			}
 			return err
 		}
-		if isPathIncluded(logger, path, workspaceCfg.Location(), includePaths) {
-			if isPathExcluded(logger, path, workspaceCfg.Location(), excludedPaths) {
+		if isPathIncluded(path, workspaceCfg.Location(), includePaths) {
+			if isPathExcluded(path, workspaceCfg.Location(), excludedPaths) {
 				return filepath.SkipDir
 			}
 
@@ -130,7 +129,7 @@ func findFlowFiles(logger io.Logger, workspaceCfg *workspace.Workspace) ([]strin
 }
 
 // IsPathIn returns true if the path is in any of the include paths.
-func isPathIncluded(logger io.Logger, path, basePath string, includePaths []string) bool {
+func isPathIncluded(path, basePath string, includePaths []string) bool {
 	if includePaths == nil {
 		return true
 	}
@@ -147,7 +146,7 @@ func isPathIncluded(logger io.Logger, path, basePath string, includePaths []stri
 
 		isMatch, err := regexp.MatchString(includePath, path)
 		if err != nil {
-			logger.Errorx(
+			logger.Log().Errorx(
 				"unable to regex match path against include path",
 				"path", path,
 				"includePath", includePath,
@@ -161,7 +160,7 @@ func isPathIncluded(logger io.Logger, path, basePath string, includePaths []stri
 }
 
 // IsPathExcluded returns true if the path is in any of the excluded paths.
-func isPathExcluded(logger io.Logger, path, basePath string, excludedPaths []string) bool {
+func isPathExcluded(path, basePath string, excludedPaths []string) bool {
 	if excludedPaths == nil {
 		return false
 	}
@@ -178,7 +177,7 @@ func isPathExcluded(logger io.Logger, path, basePath string, excludedPaths []str
 
 		isMatch, err := regexp.MatchString(excludedPath, path)
 		if err != nil {
-			logger.Errorx(
+			logger.Log().Errorx(
 				"unable to regex match path against excluded path",
 				"path", path,
 				"excludedPath", excludedPath,

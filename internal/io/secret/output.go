@@ -8,6 +8,7 @@ import (
 
 	"github.com/flowexec/flow/internal/context"
 	"github.com/flowexec/flow/internal/io/common"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/vault"
 )
 
@@ -19,7 +20,6 @@ func PrintSecrets(ctx *context.Context, secrets map[string]vault.SecretValue, fo
 	if secrets == nil {
 		return
 	}
-	logger := ctx.Logger
 	output := secretOutput{
 		Secrets: make(map[string]string, len(secrets)),
 	}
@@ -31,17 +31,17 @@ func PrintSecrets(ctx *context.Context, secrets map[string]vault.SecretValue, fo
 		}
 	}
 	// TODO: switch to using the SecretList type or something similar
-	switch common.NormalizeFormat(logger, format) {
+	switch common.NormalizeFormat(format) {
 	case common.YAMLFormat:
 		str, err := yaml.Marshal(output)
 		if err != nil {
-			logger.Fatalf("Failed to marshal secrets - %v", err)
+			logger.Log().Fatalf("Failed to marshal secrets - %v", err)
 		}
 		_, _ = fmt.Fprint(ctx.StdOut(), string(str))
 	case common.JSONFormat:
 		str, err := json.MarshalIndent(output, "", "  ")
 		if err != nil {
-			logger.Fatalf("Failed to marshal secrets - %v", err)
+			logger.Log().Fatalf("Failed to marshal secrets - %v", err)
 		}
 		_, _ = fmt.Fprint(ctx.StdOut(), string(str))
 	}

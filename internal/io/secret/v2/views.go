@@ -10,6 +10,7 @@ import (
 	"github.com/flowexec/tuikit/views"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/vault/v2"
 )
 
@@ -50,7 +51,7 @@ func NewSecretView(
 	loadSecretList := func() {
 		view := NewSecretListView(ctx, vlt, asPlainText)
 		if err := ctx.SetView(view); err != nil {
-			ctx.Logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 	}
 

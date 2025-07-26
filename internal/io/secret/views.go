@@ -9,6 +9,7 @@ import (
 	"github.com/flowexec/tuikit/views"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/vault"
 )
 
@@ -18,7 +19,7 @@ func NewSecretView(
 	asPlainText bool,
 ) tuikit.View {
 	container := ctx.TUIContainer
-	v := vault.NewVault(ctx.Logger)
+	v := vault.NewVault()
 	var secretKeyCallbacks = []types.KeyCallback{
 		{
 			Key: "r", Label: "rename",
@@ -128,10 +129,10 @@ func LoadSecretListView(
 	ctx *context.Context,
 	asPlainText bool,
 ) {
-	v := vault.NewVault(ctx.Logger)
+	v := vault.NewVault()
 	secrets, err := v.GetAllSecrets()
 	if err != nil {
-		ctx.Logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 	var secretList vault.SecretList
 	for name, secret := range secrets {
@@ -147,6 +148,6 @@ func LoadSecretListView(
 		asPlainText,
 	)
 	if err := ctx.SetView(view); err != nil {
-		ctx.Logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 }

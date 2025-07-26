@@ -14,6 +14,7 @@ import (
 	"github.com/flowexec/flow/internal/io"
 	"github.com/flowexec/flow/internal/io/secret"
 	secretV2 "github.com/flowexec/flow/internal/io/secret/v2"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/vault"
 	vaultV2 "github.com/flowexec/flow/internal/vault/v2"
 	"github.com/flowexec/flow/types/config"
@@ -44,7 +45,6 @@ func registerRemoveSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 }
 
 func removeSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
-	logger := ctx.Logger
 	reference := args[0]
 
 	form, err := views.NewForm(
@@ -57,36 +57,36 @@ func removeSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 			Title: fmt.Sprintf("Are you sure you want to remove the secret '%s'?", reference),
 		})
 	if err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 	if err := form.Run(ctx.Ctx); err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 	resp := form.FindByKey("confirm").Value()
 	if truthy, _ := strconv.ParseBool(resp); !truthy {
-		logger.Warnf("Aborting")
+		logger.Log().Warnf("Aborting")
 		return
 	}
 
 	if currentVault(ctx.Config) == vaultV2.LegacyVaultReservedName {
-		logger.Warnf("Using deprecated vault. Consider creating a new vault with 'flow vault create' command.")
-		v := vault.NewVault(logger)
+		logger.Log().Warnf("Using deprecated vault. Consider creating a new vault with 'flow vault create' command.")
+		v := vault.NewVault()
 		if err = v.DeleteSecret(reference); err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 	} else {
 		_, v, err := vaultV2.VaultFromName(currentVault(ctx.Config))
 		defer v.Close()
 
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		if err = v.DeleteSecret(reference); err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 	}
 
-	logger.PlainTextSuccess(fmt.Sprintf("Secret '%s' deleted from vault", reference))
+	logger.Log().PlainTextSuccess(fmt.Sprintf("Secret '%s' deleted from vault", reference))
 }
 
 func registerSetSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
@@ -101,7 +101,6 @@ func registerSetSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 }
 
 func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
-	logger := ctx.Logger
 	reference := args[0]
 
 	var value string
@@ -117,44 +116,44 @@ func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
 				Title: "Enter the secret value",
 			})
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		if err := form.Run(ctx.Ctx); err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		value = form.FindByKey("value").Value()
 	case len(args) == 2:
 		value = args[1]
 	default:
-		logger.Warnx("merging multiple arguments into a single value", "count", len(args))
+		logger.Log().Warnx("merging multiple arguments into a single value", "count", len(args))
 		value = strings.Join(args[1:], " ")
 	}
 
 	sv := vault.SecretValue(value)
 	vaultName := currentVault(ctx.Config)
 	if vaultName == vaultV2.LegacyVaultReservedName {
-		logger.Warnf(
+		logger.Log().Warnf(
 			"Using deprecated vault '%s'. Consider creating a new vault with 'flow vault create' command.",
 			vaultName,
 		)
-		v := vault.NewVault(logger)
+		v := vault.NewVault()
 		err := v.SetSecret(reference, sv)
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 	} else {
 		_, v, err := vaultV2.VaultFromName(vaultName)
 		defer v.Close()
 
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		if err = v.SetSecret(reference, vaultV2.NewSecretValue([]byte(value))); err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 	}
 
-	logger.PlainTextSuccess(fmt.Sprintf("Secret %s set in vault", reference))
+	logger.Log().PlainTextSuccess(fmt.Sprintf("Secret %s set in vault", reference))
 }
 
 func registerListSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
@@ -173,16 +172,15 @@ func registerListSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 }
 
 func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
-	logger := ctx.Logger
-	asPlainText := flags.ValueFor[bool](ctx, cmd, *flags.OutputSecretAsPlainTextFlag, false)
-	outputFormat := flags.ValueFor[string](ctx, cmd, *flags.OutputFormatFlag, false)
+	asPlainText := flags.ValueFor[bool](cmd, *flags.OutputSecretAsPlainTextFlag, false)
+	outputFormat := flags.ValueFor[string](cmd, *flags.OutputFormatFlag, false)
 
 	//nolint:nestif
 	if currentVault(ctx.Config) == vaultV2.LegacyVaultReservedName {
-		v := vault.NewVault(logger)
+		v := vault.NewVault()
 		secrets, err := v.GetAllSecrets()
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 
 		interactiveUI := TUIEnabled(ctx, cmd)
@@ -207,7 +205,7 @@ func listSecretFunc(ctx *context.Context, cmd *cobra.Command, _ []string) {
 		}()
 
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 
 		if interactiveUI {
@@ -233,37 +231,36 @@ func registerGetSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 }
 
 func getSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
-	logger := ctx.Logger
 	reference := args[0]
-	asPlainText := flags.ValueFor[bool](ctx, cmd, *flags.OutputSecretAsPlainTextFlag, false)
-	copyValue := flags.ValueFor[bool](ctx, cmd, *flags.CopyFlag, false)
+	asPlainText := flags.ValueFor[bool](cmd, *flags.OutputSecretAsPlainTextFlag, false)
+	copyValue := flags.ValueFor[bool](cmd, *flags.CopyFlag, false)
 
 	//nolint:nestif
 	if currentVault(ctx.Config) == vaultV2.LegacyVaultReservedName {
-		logger.Warnf("Using deprecated vault. Consider creating a new vault with 'flow vault create' command.")
-		v := vault.NewVault(logger)
+		logger.Log().Warnf("Using deprecated vault. Consider creating a new vault with 'flow vault create' command.")
+		v := vault.NewVault()
 		s, err := v.GetSecret(reference)
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 
 		if asPlainText {
-			logger.PlainTextInfo(s.PlainTextString())
+			logger.Log().PlainTextInfo(s.PlainTextString())
 		} else {
-			logger.PlainTextInfo(s.String())
+			logger.Log().PlainTextInfo(s.String())
 		}
 
 		if copyValue {
 			if err := clipboard.WriteAll(s.PlainTextString()); err != nil {
-				logger.Error(err, "\nunable to copy secret value to clipboard")
+				logger.Log().Error(err, "\nunable to copy secret value to clipboard")
 			} else {
-				logger.PlainTextSuccess("\ncopied secret value to clipboard")
+				logger.Log().PlainTextSuccess("\ncopied secret value to clipboard")
 			}
 		}
 	} else {
 		rVault, key, err := vaultV2.RefToParts(vaultV2.SecretRef(reference))
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		if rVault == "" {
 			rVault = currentVault(ctx.Config)
@@ -272,23 +269,23 @@ func getSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 		defer v.Close()
 
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		s, err := v.GetSecret(key)
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 
 		if asPlainText {
-			logger.PlainTextInfo(s.PlainTextString())
+			logger.Log().PlainTextInfo(s.PlainTextString())
 		} else {
-			logger.PlainTextInfo(s.String())
+			logger.Log().PlainTextInfo(s.String())
 		}
 		if copyValue {
 			if err := clipboard.WriteAll(s.PlainTextString()); err != nil {
-				logger.Error(err, "\nunable to copy secret value to clipboard")
+				logger.Log().Error(err, "\nunable to copy secret value to clipboard")
 			} else {
-				logger.PlainTextSuccess("\ncopied secret value to clipboard")
+				logger.Log().PlainTextSuccess("\ncopied secret value to clipboard")
 			}
 		}
 	}
