@@ -298,4 +298,121 @@ var _ = Describe("ExecutableCacheImpl", func() {
 			})
 		})
 	})
+
+	Describe("Duplicate executable warnings", func() {
+		Context("when duplicate executables exist in different flow files", func() {
+			It("should log warning for duplicate executable", func() {
+				v := executable.FlowFileVisibility(common.VisibilityPrivate)
+				execCfg1 := &executable.FlowFile{
+					Namespace:  "testdata",
+					Visibility: &v,
+					Executables: executable.ExecutableList{
+						{Verb: "run", Name: "duplicate-exec"},
+					},
+				}
+				execCfg1.SetContext(wsName, wsPath, filepath.Join(wsPath, "first"+executable.FlowFileExt))
+				err := filesystem.WriteFlowFile(execCfg1.ConfigPath(), execCfg1)
+				Expect(err).NotTo(HaveOccurred())
+
+				execCfg2 := &executable.FlowFile{
+					Namespace:  "testdata",
+					Visibility: &v,
+					Executables: executable.ExecutableList{
+						{Verb: "run", Name: "duplicate-exec"},
+					},
+				}
+				execCfg2.SetContext(wsName, wsPath, filepath.Join(wsPath, "second"+executable.FlowFileExt))
+				err = filesystem.WriteFlowFile(execCfg2.ConfigPath(), execCfg2)
+				Expect(err).NotTo(HaveOccurred())
+
+				logger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				logger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				logger.EXPECT().Warnx(
+					"duplicate executable found during cache update",
+					"ref", "run test/testdata:duplicate-exec",
+					"conflictPath", execCfg1.ConfigPath(),
+					"newPath", execCfg2.ConfigPath(),
+					"workspace", wsName,
+				).Times(1)
+
+				err = execCache.Update(logger)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("when duplicate executable aliases exist", func() {
+			It("should log warning for duplicate executable alias", func() {
+				v := executable.FlowFileVisibility(common.VisibilityPrivate)
+				execCfg1 := &executable.FlowFile{
+					Namespace:  "testdata",
+					Visibility: &v,
+					Executables: executable.ExecutableList{
+						{Verb: "run", Name: "first-exec"},
+					},
+				}
+				execCfg1.SetContext(wsName, wsPath, filepath.Join(wsPath, "first"+executable.FlowFileExt))
+				err := filesystem.WriteFlowFile(execCfg1.ConfigPath(), execCfg1)
+				Expect(err).NotTo(HaveOccurred())
+
+				execCfg2 := &executable.FlowFile{
+					Namespace:  "testdata",
+					Visibility: &v,
+					Executables: executable.ExecutableList{
+						{Verb: "exec", Name: "first-exec"},
+					},
+				}
+				execCfg2.SetContext(wsName, wsPath, filepath.Join(wsPath, "second"+executable.FlowFileExt))
+				err = filesystem.WriteFlowFile(execCfg2.ConfigPath(), execCfg2)
+				Expect(err).NotTo(HaveOccurred())
+
+				logger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				logger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				logger.EXPECT().Warnx(
+					"duplicate executable alias found during cache update",
+					gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(),
+				).AnyTimes()
+
+				err = execCache.Update(logger)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should log warning for duplicate name aliases", func() {
+				v := executable.FlowFileVisibility(common.VisibilityPrivate)
+				execCfg1 := &executable.FlowFile{
+					Namespace:  "testdata",
+					Visibility: &v,
+					Executables: executable.ExecutableList{
+						{Verb: "run", Name: "first-exec", Aliases: []string{"shared-alias"}},
+					},
+				}
+				execCfg1.SetContext(wsName, wsPath, filepath.Join(wsPath, "first"+executable.FlowFileExt))
+				err := filesystem.WriteFlowFile(execCfg1.ConfigPath(), execCfg1)
+				Expect(err).NotTo(HaveOccurred())
+
+				execCfg2 := &executable.FlowFile{
+					Namespace:  "testdata",
+					Visibility: &v,
+					Executables: executable.ExecutableList{
+						{Verb: "run", Name: "shared-alias"},
+					},
+				}
+				execCfg2.SetContext(wsName, wsPath, filepath.Join(wsPath, "second"+executable.FlowFileExt))
+				err = filesystem.WriteFlowFile(execCfg2.ConfigPath(), execCfg2)
+				Expect(err).NotTo(HaveOccurred())
+
+				logger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				logger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				logger.EXPECT().Warnx(
+					"duplicate executable alias found during cache update",
+					"aliasRef", gomock.Any(),
+					"conflictRef", gomock.Any(),
+					"primaryRef", gomock.Any(),
+					"workspace", wsName,
+				).AnyTimes()
+
+				err = execCache.Update(logger)
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+	})
 })
