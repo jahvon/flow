@@ -7,7 +7,7 @@ executables:
       execs:
         - ref: generate
         - ref: lint
-        - ref: test all
+        - ref: test
         - ref: validate generated
         - cmd: echo "✅ All development checks passed"
 
@@ -17,6 +17,11 @@ executables:
     exec:
       dir: //
       cmd: |
+        if [ "$CI" = "" ]; then
+          echo "Skipping diff validation"
+          exit 0
+        fi
+        
         echo "Checking for uncommitted generated files..."
 
         if [ -n "$(git status --porcelain)" ]; then

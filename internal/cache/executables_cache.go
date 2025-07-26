@@ -91,10 +91,32 @@ func (c *ExecutableCacheImpl) Update(logger io.Logger) error { //nolint:gocognit
 				if e == nil || (e.Visibility != nil && common.Visibility(*e.Visibility).IsHidden()) {
 					continue
 				}
+
+				if existingPath, exists := cacheData.ExecutableMap[e.Ref()]; exists && existingPath != flowFile.ConfigPath() {
+					logger.Warnx(
+						"duplicate executable found during cache update",
+						"ref", e.Ref().String(),
+						"conflictPath", existingPath,
+						"newPath", flowFile.ConfigPath(),
+						"workspace", wsCfg.AssignedName(),
+					)
+				}
+
 				cacheData.ExecutableMap[e.Ref()] = flowFile.ConfigPath()
+
 				for _, ref := range enumerateExecutableAliasRefs(e, wsCfg.VerbAliases) {
+					if existingPrimaryRef, exists := cacheData.AliasMap[ref]; exists && existingPrimaryRef != e.Ref() {
+						logger.Warnx(
+							"duplicate executable alias found during cache update",
+							"aliasRef", ref.String(),
+							"conflictRef", existingPrimaryRef.String(),
+							"primaryRef", e.Ref().String(),
+							"workspace", wsCfg.AssignedName(),
+						)
+					}
 					cacheData.AliasMap[ref] = e.Ref()
 				}
+
 				cacheData.ConfigMap[flowFile.ConfigPath()] = WorkspaceInfo{
 					WorkspaceName: wsCfg.AssignedName(),
 					WorkspacePath: wsCfg.Location(),
