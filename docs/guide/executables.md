@@ -42,6 +42,7 @@ executables:
 ### Common Fields <!-- {docsify-ignore} -->
 
 - **verb**: Action type (run, build, test, deploy, etc.)
+- **verbAliases**: Alternative names for the verb
 - **name**: Unique identifier within the namespace
 - **description**: Markdown documentation for the executable
 - **tags**: Labels for categorization and filtering

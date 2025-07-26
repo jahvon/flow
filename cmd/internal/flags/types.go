@@ -1,12 +1,6 @@
 //nolint:lll
 package flags
 
-import (
-	"fmt"
-
-	"github.com/flowexec/flow/types/executable"
-)
-
 type Metadata struct {
 	Name      string
 	Shorthand string
@@ -73,7 +67,7 @@ var FilterNamespaceFlag = &Metadata{
 var FilterVerbFlag = &Metadata{
 	Name:      "verb",
 	Shorthand: "v",
-	Usage:     fmt.Sprintf("Filter executables by verb. One of: %s", executable.SortedValidVerbs()),
+	Usage:     "Filter executables by verb.",
 	Default:   "",
 	Required:  false,
 }

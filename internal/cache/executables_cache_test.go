@@ -165,6 +165,41 @@ var _ = Describe("ExecutableCacheImpl", func() {
 			execCache.WorkspaceCache = wsCache
 		})
 
+		Context("when the executable has verbAliases configured", func() {
+			It("should be accessible from the alias", func() {
+				wsConfig := &workspace.Workspace{VerbAliases: nil}
+				wsConfig.SetContext(wsName, wsPath)
+				wsCache.EXPECT().GetLatestData().Return(&cache.WorkspaceCacheData{
+					Workspaces:         map[string]*workspace.Workspace{wsName: wsConfig},
+					WorkspaceLocations: map[string]string{wsName: wsPath},
+				}, nil).AnyTimes()
+
+				v := executable.FlowFileVisibility(common.VisibilityPrivate)
+				execCfg := &executable.FlowFile{
+					Namespace:  "testdata",
+					Visibility: &v,
+					Executables: executable.ExecutableList{
+						{Verb: "run", Name: "run-alias", VerbAliases: []executable.Verb{executable.VerbActivate}},
+					},
+				}
+				execCfg.SetContext(wsName, wsPath, filepath.Join(wsPath, "verbaliases"+executable.FlowFileExt))
+				err := filesystem.WriteFlowFile(execCfg.ConfigPath(), execCfg)
+				Expect(err).NotTo(HaveOccurred())
+
+				mockLogger.EXPECT().Debugf(gomock.Any()).AnyTimes()
+				mockLogger.EXPECT().Debugx(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+				Expect(execCache.Update()).To(Succeed())
+
+				// Should be able to access via verb alias "activate"
+				execRef := executable.Ref("activate test/testdata:run-alias")
+				exec, err := execCache.GetExecutableByRef(execRef)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(exec).NotTo(BeNil())
+				Expect(exec.Name).To(Equal("run-alias"))
+
+			})
+		})
+
 		Context("when workspace has no verbAliases configured (nil)", func() {
 			It("should allow access via default verb aliases", func() {
 				wsConfig := &workspace.Workspace{VerbAliases: nil}
