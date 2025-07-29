@@ -35,11 +35,15 @@ type Context struct {
 	WorkspacesCache  cache.WorkspaceCache
 	ExecutableCache  cache.ExecutableCache
 
+	// Args includes the command line arguments passed to the exec command. It is only populated when that command is used.
+	Args []string
+
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
 	// used to store temporary files all executable runs when the tmpDir value is specified.
 	ProcessTmpDir string
 
 	stdOut, stdIn *os.File
+	callbacks     []func(*Context) error
 }
 
 func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
@@ -136,9 +140,22 @@ func (ctx *Context) SetView(view tuikit.View) error {
 	return ctx.TUIContainer.SetView(view)
 }
 
+func (ctx *Context) AddCallback(callback func(*Context) error) {
+	if callback == nil {
+		return
+	}
+	ctx.callbacks = append(ctx.callbacks, callback)
+}
+
 func (ctx *Context) Finalize() {
 	_ = ctx.stdIn.Close()
 	_ = ctx.stdOut.Close()
+
+	for _, cb := range ctx.callbacks {
+		if err := cb(ctx); err != nil {
+			logger.Log().Error(err, "callback execution error")
+		}
+	}
 
 	if ctx.ProcessTmpDir != "" {
 		files, err := filepath.Glob(filepath.Join(ctx.ProcessTmpDir, "*"))

@@ -15,6 +15,7 @@ import (
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/expr"
 	"github.com/flowexec/flow/internal/services/rest"
+	"github.com/flowexec/flow/internal/utils/env"
 	"github.com/flowexec/flow/types/executable"
 )
 
@@ -42,8 +43,8 @@ func (r *requestRunner) Exec(
 	inputEnv map[string]string,
 ) error {
 	requestSpec := e.Request
-	envMap, err := runner.BuildEnvMap(
-		ctx.Config.CurrentVaultName(), e.Env(), inputEnv, runner.DefaultEnv(ctx, e),
+	envMap, err := env.BuildEnvMap(
+		ctx.Config.CurrentVaultName(), e.Env(), ctx.Args, inputEnv, env.DefaultEnv(ctx, e),
 	)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")

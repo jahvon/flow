@@ -184,10 +184,12 @@ definitions:
   ### Executable Environment
   Parameter:
     type: object
-    required: [ envKey ]
+    oneOf:
+      - required: [ envKey, outputFile ]
+      - required: [ text, secretRef, prompt ]
     description: |
       A parameter is a value that can be passed to an executable and all of its sub-executables.
-      Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.
+      Only one of `text`, `secretRef`, `prompt`, or `file` must be set. Specifying more than one will result in an error.
     properties:
       text:
         type: string
@@ -201,6 +203,12 @@ definitions:
         type: string
         description: A reference to a secret to be passed to the executable.
         default: ""
+      outputFile:
+        type: string
+        description: |
+          A path where the parameter value will be temporarily written to disk.
+          The file will be created before execution and cleaned up afterwards.
+        default: ""
       envKey:
         type: string
         description: The name of the environment variable that will be assigned the value.
@@ -212,7 +220,9 @@ definitions:
 
   Argument:
     type: object
-    required: [ envKey ]
+    oneOf:
+      - required: [ flag, pos ]
+      - required: [ envKey, outputFile ]
     properties:
       flag:
         type: string
@@ -226,7 +236,6 @@ definitions:
           The position of the argument in the command line ArgumentList. Values start at 1.
           Either `flag` or `pos` must be set, but not both.
         minimum: 1
-        default: 0
       envKey:
         type: string
         description: The name of the environment variable that will be assigned the value.
@@ -248,6 +257,12 @@ definitions:
           If the argument is required, the executable will fail if the argument is not provided.
           If the argument is not required, the default value will be used if the argument is not provided.
         default: false
+      outputFile:
+        type: string
+        description: |
+          A path where the argument value will be temporarily written to disk.
+          The file will be created before execution and cleaned up afterwards.
+        default: ""
       value:
         type: string
         default: ""

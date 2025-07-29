@@ -14,18 +14,23 @@ type Argument struct {
 	Default string `json:"default,omitempty" yaml:"default,omitempty" mapstructure:"default,omitempty"`
 
 	// The name of the environment variable that will be assigned the value.
-	EnvKey string `json:"envKey" yaml:"envKey" mapstructure:"envKey"`
+	EnvKey string `json:"envKey,omitempty" yaml:"envKey,omitempty" mapstructure:"envKey,omitempty"`
 
 	// The flag to use when setting the argument from the command line.
 	// Either `flag` or `pos` must be set, but not both.
 	//
 	Flag string `json:"flag,omitempty" yaml:"flag,omitempty" mapstructure:"flag,omitempty"`
 
+	// A path where the argument value will be temporarily written to disk.
+	// The file will be created before execution and cleaned up afterwards.
+	//
+	OutputFile string `json:"outputFile,omitempty" yaml:"outputFile,omitempty" mapstructure:"outputFile,omitempty"`
+
 	// The position of the argument in the command line ArgumentList. Values start at
 	// 1.
 	// Either `flag` or `pos` must be set, but not both.
 	//
-	Pos int `json:"pos,omitempty" yaml:"pos,omitempty" mapstructure:"pos,omitempty"`
+	Pos *int `json:"pos,omitempty" yaml:"pos,omitempty" mapstructure:"pos,omitempty"`
 
 	// If the argument is required, the executable will fail if the argument is not
 	// provided.
@@ -254,11 +259,16 @@ type ParallelRefConfigList []ParallelRefConfig
 
 // A parameter is a value that can be passed to an executable and all of its
 // sub-executables.
-// Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than
-// one will result in an error.
+// Only one of `text`, `secretRef`, `prompt`, or `file` must be set. Specifying
+// more than one will result in an error.
 type Parameter struct {
 	// The name of the environment variable that will be assigned the value.
-	EnvKey string `json:"envKey" yaml:"envKey" mapstructure:"envKey"`
+	EnvKey string `json:"envKey,omitempty" yaml:"envKey,omitempty" mapstructure:"envKey,omitempty"`
+
+	// A path where the parameter value will be temporarily written to disk.
+	// The file will be created before execution and cleaned up afterwards.
+	//
+	OutputFile string `json:"outputFile,omitempty" yaml:"outputFile,omitempty" mapstructure:"outputFile,omitempty"`
 
 	// A prompt to be displayed to the user when collecting an input value.
 	Prompt string `json:"prompt,omitempty" yaml:"prompt,omitempty" mapstructure:"prompt,omitempty"`

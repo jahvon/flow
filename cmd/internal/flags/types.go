@@ -127,6 +127,13 @@ var CopyFlag = &Metadata{
 	Required: false,
 }
 
+var SecretFromFile = &Metadata{
+	Name:     "file",
+	Usage:    "File to read the secret's value from",
+	Default:  "",
+	Required: false,
+}
+
 var LastLogEntryFlag = &Metadata{
 	Name:     "last",
 	Usage:    "Print the last execution's logs",

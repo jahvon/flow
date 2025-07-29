@@ -182,6 +182,8 @@ flow secret set my-secret "secret-value"
 
 # From file
 cat secret.txt | flow secret set my-secret
+# OR
+flow secret set my-secret --file secret.txt
 ```
 
 ### Viewing Secrets <!-- {docsify-ignore} -->

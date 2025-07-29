@@ -26,7 +26,6 @@ import (
 	"github.com/flowexec/flow/internal/runner/request"
 	"github.com/flowexec/flow/internal/runner/serial"
 	"github.com/flowexec/flow/internal/services/store"
-	argUtils "github.com/flowexec/flow/internal/utils/args"
 	"github.com/flowexec/flow/internal/vault"
 	vaultV2 "github.com/flowexec/flow/internal/vault/v2"
 	"github.com/flowexec/flow/types/executable"
@@ -96,6 +95,11 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.Log().FatalErr(err)
 	}
 
+	// populate args for environment handling ignoring arg 0 (the ref)
+	if len(args) >= 2 {
+		ctx.Args = args[1:]
+	}
+
 	var ref executable.Ref
 	if len(args) == 0 {
 		ref = context.ExpandRef(ctx, executable.NewRef("", verb))
@@ -128,15 +132,6 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		))
 	}
 
-	// add args to the env map
-	execArgs := make([]string, 0)
-	if len(args) >= 2 {
-		execArgs = args[1:]
-	}
-	envMap, err := argUtils.ProcessArgs(e, execArgs, nil)
-	if err != nil {
-		logger.Log().FatalErr(err)
-	}
 	s, err := store.NewStore(store.Path())
 	if err != nil {
 		logger.Log().FatalErr(err)
@@ -145,11 +140,9 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		logger.Log().FatalErr(err)
 	}
 	_ = s.Close()
-	if envMap == nil {
-		envMap = make(map[string]string)
-	}
 
 	// add --param overrides to the env map
+	envMap := make(map[string]string)
 	paramOverrides := flags.ValueFor[[]string](cmd, *flags.ParameterValueFlag, false)
 	applyParameterOverrides(paramOverrides, envMap)
 

@@ -130,10 +130,11 @@ func ExecWithTmpDir(opts ...Option) *executable.Executable {
 
 func ExecWithArgs(opts ...Option) *executable.Executable {
 	name := "with-args"
-	args := executable.ArgumentList{{EnvKey: "ARG1", Pos: 1}, {EnvKey: "ARG2", Flag: "x", Default: "yz"}}
+	pos := 1
+	args := executable.ArgumentList{{EnvKey: "ARG1", Pos: &pos}, {EnvKey: "ARG2", Flag: "x", Default: "yz"}}
 	var argCmds []string
 	for _, arg := range args {
-		if arg.Pos > 0 {
+		if arg.Pos != nil && *arg.Pos > 0 {
 			argCmds = append(argCmds, fmt.Sprintf("echo 'pos=%d, key=%s'", arg.Pos, arg.EnvKey))
 		} else if arg.Flag != "" {
 			argCmds = append(argCmds, fmt.Sprintf("echo 'flag=%s, key=%s'", arg.Flag, arg.EnvKey))
@@ -225,6 +226,38 @@ func ExecWithLogMode(opts ...Option) *executable.Executable {
 				"echo 'hello from %s'; echo 'line 2'; echo 'line 3'; echo 'line 4'",
 				name,
 			),
+		},
+	}
+	if len(opts) > 0 {
+		vals := NewOptionValues(opts...)
+		e.SetContext(vals.WorkspaceName, vals.WorkspacePath, vals.NamespaceName, vals.FlowFilePath)
+	}
+	return e
+}
+
+func ExecWithEnvOutputFiles(opts ...Option) *executable.Executable {
+	name := "with-file-param"
+	params := executable.ParameterList{
+		{Text: "database:\n  host: localhost\n  port: 5432", OutputFile: "test-config.yaml"},
+		{Text: "#!/bin/bash\necho 'Hello from script'", OutputFile: "test-script.sh"},
+	}
+	pos := 1
+	args := executable.ArgumentList{
+		{Pos: &pos, Default: "notme", OutputFile: "output.txt"},
+	}
+	cmds := []string{
+		`echo "param config file content:"; cat test-config.yaml; echo`,
+		`echo "param script file content:"; cat test-script.sh; echo`,
+		`echo "arg txt file content:"; cat output.txt; echo`,
+	}
+	e := &executable.Executable{
+		Verb:       "run",
+		Name:       name,
+		Visibility: privateExecVisibility(),
+		Exec: &executable.ExecExecutableType{
+			Params: params,
+			Args:   args,
+			Cmd:    fmt.Sprintf("echo 'hello from %s'; %s", name, strings.Join(cmds, "; ")),
 		},
 	}
 	if len(opts) > 0 {

@@ -8,6 +8,7 @@ import (
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/run"
+	"github.com/flowexec/flow/internal/utils/env"
 	"github.com/flowexec/flow/types/executable"
 )
 
@@ -35,14 +36,25 @@ func (r *execRunner) Exec(
 	inputEnv map[string]string,
 ) error {
 	execSpec := e.Exec
-	defaultEnv := runner.DefaultEnv(ctx, e)
-	envMap, err := runner.BuildEnvMap(ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
+	defaultEnv := env.DefaultEnv(ctx, e)
+	envMap, err := env.BuildEnvMap(ctx.Config.CurrentVaultName(), e.Env(), ctx.Args, inputEnv, defaultEnv)
 	if err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
 	}
-	envList, err := runner.BuildEnvList(ctx.Config.CurrentVaultName(), e.Env(), inputEnv, defaultEnv)
-	if err != nil {
-		return errors.Wrap(err, "unable to set parameters to env")
+	envList := env.EnvMapToEnvList(envMap)
+
+	if cb, err := env.CreateTempEnvFiles(
+		ctx.Config.CurrentVaultName(),
+		e.FlowFilePath(),
+		e.WorkspacePath(),
+		e.Env(),
+		ctx.Args,
+		envMap,
+	); err != nil {
+		ctx.AddCallback(cb)
+		return errors.Wrap(err, "unable to create temporary env files")
+	} else {
+		ctx.AddCallback(cb)
 	}
 
 	targetDir, isTmp, err := execSpec.Dir.ExpandDirectory(
