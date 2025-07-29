@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -15,6 +17,8 @@ import (
 	"github.com/flowexec/flow/internal/io/secret"
 	secretV2 "github.com/flowexec/flow/internal/io/secret/v2"
 	"github.com/flowexec/flow/internal/logger"
+	"github.com/flowexec/flow/internal/utils"
+	envUtils "github.com/flowexec/flow/internal/utils/env"
 	"github.com/flowexec/flow/internal/vault"
 	vaultV2 "github.com/flowexec/flow/internal/vault/v2"
 	"github.com/flowexec/flow/types/config"
@@ -97,14 +101,29 @@ func registerSetSecretCmd(ctx *context.Context, secretCmd *cobra.Command) {
 		Args:    cobra.MinimumNArgs(1),
 		Run:     func(cmd *cobra.Command, args []string) { setSecretFunc(ctx, cmd, args) },
 	}
+	RegisterFlag(ctx, setCmd, *flags.SecretFromFile)
 	secretCmd.AddCommand(setCmd)
 }
 
-func setSecretFunc(ctx *context.Context, _ *cobra.Command, args []string) {
+func setSecretFunc(ctx *context.Context, cmd *cobra.Command, args []string) {
 	reference := args[0]
+	filename := flags.ValueFor[string](cmd, *flags.SecretFromFile, false)
 
 	var value string
 	switch {
+	case filename != "" && len(args) >= 2:
+		logger.Log().FatalErr(errors.New("must specify either a filename OR a value as an argument"))
+	case filename != "":
+		wd, err := os.Getwd()
+		if err != nil {
+			logger.Log().FatalErr(err)
+		}
+		expanded := utils.ExpandPath(filename, wd, envUtils.EnvListToEnvMap(os.Environ()))
+		data, err := os.ReadFile(expanded)
+		if err != nil {
+			logger.Log().FatalErr(err)
+		}
+		value = string(data)
 	case len(args) == 1:
 		form, err := views.NewForm(
 			io.Theme(ctx.Config.Theme.String()),

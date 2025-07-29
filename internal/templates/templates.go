@@ -19,7 +19,7 @@ import (
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/expr"
 	"github.com/flowexec/flow/internal/utils"
-	argUtils "github.com/flowexec/flow/internal/utils/args"
+	argUtils "github.com/flowexec/flow/internal/utils/env"
 	execUtils "github.com/flowexec/flow/internal/utils/executables"
 	"github.com/flowexec/flow/types/executable"
 	"github.com/flowexec/flow/types/workspace"
@@ -144,9 +144,10 @@ func runExecutables(
 		default:
 			return errors.New("post-run executable must have a ref or cmd")
 		}
-		execEnv := make(map[string]string)
+		inputEnv := make(map[string]string)
 		ee := expressionEnv(templateData)
-		maps.Copy(execEnv, ee)
+		maps.Copy(inputEnv, ee)
+		//nolint:nestif
 		if len(e.Args) > 0 {
 			args := make([]string, 0)
 			for _, arg := range e.Args {
@@ -156,11 +157,19 @@ func runExecutables(
 				}
 				args = append(args, a.String())
 			}
-			a, err := argUtils.ProcessArgs(exec, args, ee)
-			if err != nil {
-				logger.Log().Error(err, "unable to process arguments")
+			execEnv := exec.Env()
+			if execEnv == nil || execEnv.Args == nil {
+				logger.Log().Warnf(
+					"executable %s has no arguments defined, skipping argument processing",
+					exec.Ref().String(),
+				)
+			} else {
+				a, err := argUtils.BuildArgsEnvMap(execEnv.Args, args, ee)
+				if err != nil {
+					logger.Log().Error(err, "unable to process arguments")
+				}
+				maps.Copy(inputEnv, a)
 			}
-			maps.Copy(execEnv, a)
 		}
 		if exec.Exec != nil {
 			exec.Exec.SetLogFields(map[string]interface{}{
@@ -168,7 +177,7 @@ func runExecutables(
 				"step":  i + 1,
 			})
 		}
-		if err := runner.Exec(ctx, exec, engine.NewExecEngine(), execEnv); err != nil {
+		if err := runner.Exec(ctx, exec, engine.NewExecEngine(), inputEnv); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("unable to execute %s executable %d", stage, i))
 		}
 	}

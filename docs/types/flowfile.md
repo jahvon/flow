@@ -111,7 +111,8 @@ Executables are the building blocks of workflows and are used to define the acti
 | `default` | The default value to use if the argument is not provided. If the argument is required and no default is provided, the executable will fail.  | `string` |  |  |
 | `envKey` | The name of the environment variable that will be assigned the value. | `string` |  |  |
 | `flag` | The flag to use when setting the argument from the command line. Either `flag` or `pos` must be set, but not both.  | `string` |  |  |
-| `pos` | The position of the argument in the command line ArgumentList. Values start at 1. Either `flag` or `pos` must be set, but not both.  | `integer` | 0 |  |
+| `outputFile` | A path where the argument value will be temporarily written to disk. The file will be created before execution and cleaned up afterwards.  | `string` |  |  |
+| `pos` | The position of the argument in the command line ArgumentList. Values start at 1. Either `flag` or `pos` must be set, but not both.  | `integer` | <no value> |  |
 | `required` | If the argument is required, the executable will fail if the argument is not provided. If the argument is not required, the default value will be used if the argument is not provided.  | `boolean` | false |  |
 | `type` | The type of the argument. This is used to determine how to parse the value of the argument. | `string` | string |  |
 
@@ -225,7 +226,7 @@ A list of executables to run in parallel. The executables can be defined by it's
 ### ExecutableParameter
 
 A parameter is a value that can be passed to an executable and all of its sub-executables.
-Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.
+Only one of `text`, `secretRef`, `prompt`, or `file` must be set. Specifying more than one will result in an error.
 
 
 **Type:** `object`
@@ -237,6 +238,7 @@ Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than o
 | Field | Description | Type | Default | Required |
 | ----- | ----------- | ---- | ------- | :--------: |
 | `envKey` | The name of the environment variable that will be assigned the value. | `string` |  |  |
+| `outputFile` | A path where the parameter value will be temporarily written to disk. The file will be created before execution and cleaned up afterwards.  | `string` |  |  |
 | `prompt` | A prompt to be displayed to the user when collecting an input value. | `string` |  |  |
 | `secretRef` | A reference to a secret to be passed to the executable. | `string` |  |  |
 | `text` | A static value to be passed to the executable. | `string` |  |  |

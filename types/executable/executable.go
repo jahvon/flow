@@ -253,6 +253,12 @@ func (e *Executable) Validate() error {
 		return fmt.Errorf("name cannot contain spaces")
 	}
 
+	if e.Env() != nil {
+		if err := e.Env().Args.Validate(); err != nil {
+			return fmt.Errorf("args validation failed - %w", err)
+		}
+	}
+
 	err := utils.ValidateOneOf(
 		"executable type",
 		e.Exec,

@@ -97,9 +97,6 @@
     },
     "ExecutableArgument": {
       "type": "object",
-      "required": [
-        "envKey"
-      ],
       "properties": {
         "default": {
           "description": "The default value to use if the argument is not provided.\nIf the argument is required and no default is provided, the executable will fail.\n",
@@ -116,10 +113,14 @@
           "type": "string",
           "default": ""
         },
+        "outputFile": {
+          "description": "A path where the argument value will be temporarily written to disk.\nThe file will be created before execution and cleaned up afterwards.\n",
+          "type": "string",
+          "default": ""
+        },
         "pos": {
           "description": "The position of the argument in the command line ArgumentList. Values start at 1.\nEither `flag` or `pos` must be set, but not both.\n",
-          "type": "integer",
-          "default": 0
+          "type": "integer"
         },
         "required": {
           "description": "If the argument is required, the executable will fail if the argument is not provided.\nIf the argument is not required, the default value will be used if the argument is not provided.\n",
@@ -279,14 +280,16 @@
       }
     },
     "ExecutableParameter": {
-      "description": "A parameter is a value that can be passed to an executable and all of its sub-executables.\nOnly one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.\n",
+      "description": "A parameter is a value that can be passed to an executable and all of its sub-executables.\nOnly one of `text`, `secretRef`, `prompt`, or `file` must be set. Specifying more than one will result in an error.\n",
       "type": "object",
-      "required": [
-        "envKey"
-      ],
       "properties": {
         "envKey": {
           "description": "The name of the environment variable that will be assigned the value.",
+          "type": "string",
+          "default": ""
+        },
+        "outputFile": {
+          "description": "A path where the parameter value will be temporarily written to disk.\nThe file will be created before execution and cleaned up afterwards.\n",
           "type": "string",
           "default": ""
         },

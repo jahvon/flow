@@ -33,6 +33,7 @@ func ExamplesExecFlowFile(opts ...Option) *executable.FlowFile {
 			ExecWithParams(opts...),
 			ExecWithLogMode(opts...),
 			ExecWithTimeout(opts...),
+			ExecWithEnvOutputFiles(opts...),
 		},
 	}
 	if len(opts) > 0 {

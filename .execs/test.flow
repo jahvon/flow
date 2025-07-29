@@ -2,6 +2,7 @@
 tags: [development, test]
 executables:
   - verb: test
+    name: all
     description: Run all Go tests (unit + e2e) in parallel
     parallel:
       failFast: false

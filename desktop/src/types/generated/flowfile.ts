@@ -329,13 +329,19 @@ export interface ExecutableArgument {
   /**
    * The name of the environment variable that will be assigned the value.
    */
-  envKey: string;
+  envKey?: string;
   /**
    * The flag to use when setting the argument from the command line.
    * Either `flag` or `pos` must be set, but not both.
    *
    */
   flag?: string;
+  /**
+   * A path where the argument value will be temporarily written to disk.
+   * The file will be created before execution and cleaned up afterwards.
+   *
+   */
+  outputFile?: string;
   /**
    * The position of the argument in the command line ArgumentList. Values start at 1.
    * Either `flag` or `pos` must be set, but not both.
@@ -356,14 +362,20 @@ export interface ExecutableArgument {
 }
 /**
  * A parameter is a value that can be passed to an executable and all of its sub-executables.
- * Only one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.
+ * Only one of `text`, `secretRef`, `prompt`, or `file` must be set. Specifying more than one will result in an error.
  *
  */
 export interface ExecutableParameter {
   /**
    * The name of the environment variable that will be assigned the value.
    */
-  envKey: string;
+  envKey?: string;
+  /**
+   * A path where the parameter value will be temporarily written to disk.
+   * The file will be created before execution and cleaned up afterwards.
+   *
+   */
+  outputFile?: string;
   /**
    * A prompt to be displayed to the user when collecting an input value.
    */

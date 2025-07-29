@@ -326,9 +326,6 @@ impl Executable {
 #[doc = r" ```json"]
 #[doc = "{"]
 #[doc = "  \"type\": \"object\","]
-#[doc = "  \"required\": ["]
-#[doc = "    \"envKey\""]
-#[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"default\": {"]
 #[doc = "      \"description\": \"The default value to use if the argument is not provided.\\nIf the argument is required and no default is provided, the executable will fail.\\n\","]
@@ -345,9 +342,13 @@ impl Executable {
 #[doc = "      \"default\": \"\","]
 #[doc = "      \"type\": \"string\""]
 #[doc = "    },"]
+#[doc = "    \"outputFile\": {"]
+#[doc = "      \"description\": \"A path where the argument value will be temporarily written to disk.\\nThe file will be created before execution and cleaned up afterwards.\\n\","]
+#[doc = "      \"default\": \"\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
 #[doc = "    \"pos\": {"]
 #[doc = "      \"description\": \"The position of the argument in the command line ArgumentList. Values start at 1.\\nEither `flag` or `pos` must be set, but not both.\\n\","]
-#[doc = "      \"default\": 0,"]
 #[doc = "      \"type\": \"integer\""]
 #[doc = "    },"]
 #[doc = "    \"required\": {"]
@@ -376,14 +377,17 @@ pub struct ExecutableArgument {
     #[serde(default)]
     pub default: ::std::string::String,
     #[doc = "The name of the environment variable that will be assigned the value."]
-    #[serde(rename = "envKey")]
+    #[serde(rename = "envKey", default)]
     pub env_key: ::std::string::String,
     #[doc = "The flag to use when setting the argument from the command line.\nEither `flag` or `pos` must be set, but not both.\n"]
     #[serde(default)]
     pub flag: ::std::string::String,
+    #[doc = "A path where the argument value will be temporarily written to disk.\nThe file will be created before execution and cleaned up afterwards.\n"]
+    #[serde(rename = "outputFile", default)]
+    pub output_file: ::std::string::String,
     #[doc = "The position of the argument in the command line ArgumentList. Values start at 1.\nEither `flag` or `pos` must be set, but not both.\n"]
-    #[serde(default)]
-    pub pos: i64,
+    #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
+    pub pos: ::std::option::Option<i64>,
     #[doc = "If the argument is required, the executable will fail if the argument is not provided.\nIf the argument is not required, the default value will be used if the argument is not provided.\n"]
     #[serde(default)]
     pub required: bool,
@@ -394,6 +398,19 @@ pub struct ExecutableArgument {
 impl ::std::convert::From<&ExecutableArgument> for ExecutableArgument {
     fn from(value: &ExecutableArgument) -> Self {
         value.clone()
+    }
+}
+impl ::std::default::Default for ExecutableArgument {
+    fn default() -> Self {
+        Self {
+            default: Default::default(),
+            env_key: Default::default(),
+            flag: Default::default(),
+            output_file: Default::default(),
+            pos: Default::default(),
+            required: Default::default(),
+            type_: defaults::executable_argument_type(),
+        }
     }
 }
 impl ExecutableArgument {
@@ -918,20 +935,22 @@ impl ::std::convert::From<::std::vec::Vec<ExecutableParallelRefConfig>>
         Self(value)
     }
 }
-#[doc = "A parameter is a value that can be passed to an executable and all of its sub-executables.\nOnly one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.\n"]
+#[doc = "A parameter is a value that can be passed to an executable and all of its sub-executables.\nOnly one of `text`, `secretRef`, `prompt`, or `file` must be set. Specifying more than one will result in an error.\n"]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
 #[doc = r""]
 #[doc = r" ```json"]
 #[doc = "{"]
-#[doc = "  \"description\": \"A parameter is a value that can be passed to an executable and all of its sub-executables.\\nOnly one of `text`, `secretRef`, or `prompt` must be set. Specifying more than one will result in an error.\\n\","]
+#[doc = "  \"description\": \"A parameter is a value that can be passed to an executable and all of its sub-executables.\\nOnly one of `text`, `secretRef`, `prompt`, or `file` must be set. Specifying more than one will result in an error.\\n\","]
 #[doc = "  \"type\": \"object\","]
-#[doc = "  \"required\": ["]
-#[doc = "    \"envKey\""]
-#[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"envKey\": {"]
 #[doc = "      \"description\": \"The name of the environment variable that will be assigned the value.\","]
+#[doc = "      \"default\": \"\","]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"outputFile\": {"]
+#[doc = "      \"description\": \"A path where the parameter value will be temporarily written to disk.\\nThe file will be created before execution and cleaned up afterwards.\\n\","]
 #[doc = "      \"default\": \"\","]
 #[doc = "      \"type\": \"string\""]
 #[doc = "    },"]
@@ -957,8 +976,11 @@ impl ::std::convert::From<::std::vec::Vec<ExecutableParallelRefConfig>>
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 pub struct ExecutableParameter {
     #[doc = "The name of the environment variable that will be assigned the value."]
-    #[serde(rename = "envKey")]
+    #[serde(rename = "envKey", default)]
     pub env_key: ::std::string::String,
+    #[doc = "A path where the parameter value will be temporarily written to disk.\nThe file will be created before execution and cleaned up afterwards.\n"]
+    #[serde(rename = "outputFile", default)]
+    pub output_file: ::std::string::String,
     #[doc = "A prompt to be displayed to the user when collecting an input value."]
     #[serde(default)]
     pub prompt: ::std::string::String,
@@ -972,6 +994,17 @@ pub struct ExecutableParameter {
 impl ::std::convert::From<&ExecutableParameter> for ExecutableParameter {
     fn from(value: &ExecutableParameter) -> Self {
         value.clone()
+    }
+}
+impl ::std::default::Default for ExecutableParameter {
+    fn default() -> Self {
+        Self {
+            env_key: Default::default(),
+            output_file: Default::default(),
+            prompt: Default::default(),
+            secret_ref: Default::default(),
+            text: Default::default(),
+        }
     }
 }
 impl ExecutableParameter {
@@ -2890,7 +2923,8 @@ pub mod builder {
         default: ::std::result::Result<::std::string::String, ::std::string::String>,
         env_key: ::std::result::Result<::std::string::String, ::std::string::String>,
         flag: ::std::result::Result<::std::string::String, ::std::string::String>,
-        pos: ::std::result::Result<i64, ::std::string::String>,
+        output_file: ::std::result::Result<::std::string::String, ::std::string::String>,
+        pos: ::std::result::Result<::std::option::Option<i64>, ::std::string::String>,
         required: ::std::result::Result<bool, ::std::string::String>,
         type_: ::std::result::Result<super::ExecutableArgumentType, ::std::string::String>,
     }
@@ -2898,8 +2932,9 @@ pub mod builder {
         fn default() -> Self {
             Self {
                 default: Ok(Default::default()),
-                env_key: Err("no value supplied for env_key".to_string()),
+                env_key: Ok(Default::default()),
                 flag: Ok(Default::default()),
+                output_file: Ok(Default::default()),
                 pos: Ok(Default::default()),
                 required: Ok(Default::default()),
                 type_: Ok(super::defaults::executable_argument_type()),
@@ -2937,9 +2972,19 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for flag: {}", e));
             self
         }
+        pub fn output_file<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::string::String>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.output_file = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for output_file: {}", e));
+            self
+        }
         pub fn pos<T>(mut self, value: T) -> Self
         where
-            T: ::std::convert::TryInto<i64>,
+            T: ::std::convert::TryInto<::std::option::Option<i64>>,
             T::Error: ::std::fmt::Display,
         {
             self.pos = value
@@ -2977,6 +3022,7 @@ pub mod builder {
                 default: value.default?,
                 env_key: value.env_key?,
                 flag: value.flag?,
+                output_file: value.output_file?,
                 pos: value.pos?,
                 required: value.required?,
                 type_: value.type_?,
@@ -2989,6 +3035,7 @@ pub mod builder {
                 default: Ok(value.default),
                 env_key: Ok(value.env_key),
                 flag: Ok(value.flag),
+                output_file: Ok(value.output_file),
                 pos: Ok(value.pos),
                 required: Ok(value.required),
                 type_: Ok(value.type_),
@@ -3422,6 +3469,7 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct ExecutableParameter {
         env_key: ::std::result::Result<::std::string::String, ::std::string::String>,
+        output_file: ::std::result::Result<::std::string::String, ::std::string::String>,
         prompt: ::std::result::Result<::std::string::String, ::std::string::String>,
         secret_ref: ::std::result::Result<::std::string::String, ::std::string::String>,
         text: ::std::result::Result<::std::string::String, ::std::string::String>,
@@ -3429,7 +3477,8 @@ pub mod builder {
     impl ::std::default::Default for ExecutableParameter {
         fn default() -> Self {
             Self {
-                env_key: Err("no value supplied for env_key".to_string()),
+                env_key: Ok(Default::default()),
+                output_file: Ok(Default::default()),
                 prompt: Ok(Default::default()),
                 secret_ref: Ok(Default::default()),
                 text: Ok(Default::default()),
@@ -3445,6 +3494,16 @@ pub mod builder {
             self.env_key = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for env_key: {}", e));
+            self
+        }
+        pub fn output_file<T>(mut self, value: T) -> Self
+        where
+            T: ::std::convert::TryInto<::std::string::String>,
+            T::Error: ::std::fmt::Display,
+        {
+            self.output_file = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for output_file: {}", e));
             self
         }
         pub fn prompt<T>(mut self, value: T) -> Self
@@ -3485,6 +3544,7 @@ pub mod builder {
         ) -> ::std::result::Result<Self, super::error::ConversionError> {
             Ok(Self {
                 env_key: value.env_key?,
+                output_file: value.output_file?,
                 prompt: value.prompt?,
                 secret_ref: value.secret_ref?,
                 text: value.text?,
@@ -3495,6 +3555,7 @@ pub mod builder {
         fn from(value: super::ExecutableParameter) -> Self {
             Self {
                 env_key: Ok(value.env_key),
+                output_file: Ok(value.output_file),
                 prompt: Ok(value.prompt),
                 secret_ref: Ok(value.secret_ref),
                 text: Ok(value.text),
