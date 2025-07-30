@@ -187,7 +187,8 @@ func (v Verb) Validate() error {
 }
 
 func (v Verb) Equals(other Verb) bool {
-	return DefaultVerbAliasGroup[v] != "" && DefaultVerbAliasGroup[v] == DefaultVerbAliasGroup[other]
+	return v.String() == other.String() ||
+		(DefaultVerbAliasGroup[v] != "" && DefaultVerbAliasGroup[v] == DefaultVerbAliasGroup[other])
 }
 
 func RelatedVerbs(verb Verb) []Verb {
