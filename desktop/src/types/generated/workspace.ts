@@ -36,11 +36,16 @@ export interface Workspace {
 }
 export interface ExecutableFilter {
   /**
-   * A list of directories to exclude from the executable search.
+   * A list of directories or file patterns to exclude from the executable search.
+   * Supports directory paths (e.g., "node_modules/", "vendor/") and glob patterns for filenames (e.g., "*.js.flow", "*temp*").
+   * Common exclusions like node_modules/, vendor/, third_party/, external/, and *.js.flow are excluded by default.
+   *
    */
   excluded?: string[];
   /**
-   * A list of directories to include in the executable search.
+   * A list of directories or file patterns to include in the executable search.
+   * Supports directory paths (e.g., "src/", "scripts/") and glob patterns for filenames (e.g., "*.test.flow", "example*").
+   *
    */
   included?: string[];
   [k: string]: unknown;
