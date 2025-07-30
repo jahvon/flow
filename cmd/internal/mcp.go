@@ -4,7 +4,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/flowexec/flow/internal/context"
-	"github.com/flowexec/flow/internal/services/mcp"
+	"github.com/flowexec/flow/internal/logger"
+	"github.com/flowexec/flow/internal/mcp"
 )
 
 func RegisterMCPCmd(ctx *context.Context, rootCmd *cobra.Command) {
@@ -19,9 +20,9 @@ func RegisterMCPCmd(ctx *context.Context, rootCmd *cobra.Command) {
 	rootCmd.AddCommand(subCmd)
 }
 
-func mcpFunc(_ *context.Context, _ *cobra.Command, _ []string) {
-	server := mcp.NewMCPServer()
+func mcpFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
+	server := mcp.NewMCPServer(ctx)
 	if err := server.Run(); err != nil {
-		panic(err)
+		logger.Log().FatalErr(err)
 	}
 }

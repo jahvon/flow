@@ -1,0 +1,249 @@
+# Flow Platform Concepts Guide
+
+## What is flow?
+
+flow is a local-first, customizable CLI automation platform designed to streamline development and operations workflows. 
+It helps developers organize, discover, and execute tasks across projects through a unified interface.
+
+## Core Philosophy
+
+- **Local-First**: All data and execution happens on your machine
+- **Declarative**: Define what you want to happen, not how
+- **Discoverable**: Find and explore workflows through interactive interfaces
+- **Composable**: Build complex workflows from simple building blocks
+- **Workspace-Centric**: Organize tasks by project/workspace context
+
+## Key Concepts
+
+### Executables
+**Executables** are the core building blocks of flow - they define actions that can be performed. 
+Think of them as "smart scripts" with metadata, parameters, and rich configuration options.
+
+**Types of Executables:**
+- **exec**: Run shell commands or scripts
+- **serial**: Execute multiple steps sequentially
+- **parallel**: Execute multiple steps concurrently
+- **request**: Make HTTP API calls
+- **launch**: Open applications or URIs
+- **render**: Generate and display markdown content
+
+**Example executable:**
+```yaml
+executables:
+  - verb: build
+    name: web-app
+    description: Build the web application
+    exec:
+      cmd: npm run build
+      params:
+        - envKey: NODE_ENV
+          text: production
+```
+
+### Verbs
+**Verbs** describe what action an executable performs. Flow groups related verbs together, allowing natural language-like commands.
+By default, flow provide the following verb alias groups:
+
+- **Execution Group**: exec, run, execute
+- **Retrieval Group**: get, fetch, retrieve
+- **Display Group**: show, view, list
+- **Configuration Group**: configure, setup
+- **Update Group**: update, upgrade
+
+Additional aliases can be defined in the workspace or executable configuration to customize verb behavior.
+
+Users can invoke executables using any verb using the CLI (e.g. `flow build app` and `flow deploy app`)
+
+### Workspaces
+**Workspaces** are project containers that organize related executables. Each workspace:
+- Has a root directory containing the workspace configuration file (`flow.yaml`)
+- Flow files can be located anywhere within the workspace directory
+- Can contain multiple namespaces (defined in flow files)
+- Provides isolation between projects
+
+**Example workspace structure:**
+```
+my-project/
+├── flow.yaml           # Workspace config
+├── backend.flow        # Backend executables
+├── frontend.flow       # Frontend executables  
+└── deployment/
+    └── k8s.flow       # Deployment executables
+```
+
+### Namespaces
+**Namespaces** provide logical grouping within workspaces. They help organize executables by:
+- Feature area (auth, payments, notifications)
+- Environment (dev, staging, production)
+- Technology stack (backend, frontend, mobile)
+- Team ownership (platform, product, data)
+
+**Referencing executables:**
+- `VERB app` - current workspace, root namespace
+- `VERB backend/app` - current workspace, backend namespace
+- `VERB my-project/backend:app` - specific workspace and namespace
+
+Executable names are optional. When not specified, the verb is used as the identifier, 
+e.g. `flow build` refers to the executable with the verb "build" in the current workspace.
+
+### Flow Files
+**Flow files** (`.flow`, `.flow.yaml`, `.flow.yml`) are YAML configuration files that define executables. They support:
+- Multiple executables per file
+- Shared metadata (namespace, tags, descriptions)
+- Environment variable management
+- Conditional execution logic
+
+### Secrets and Vaults
+**Vaults** provide secure secret storage with multiple encryption backends:
+- **AES256**: Symmetric encryption with generated keys
+- **Age**: Asymmetric encryption for team sharing
+
+Executables reference secrets using `secretRef` parameters, keeping sensitive data separate from configuration.
+
+### Templates
+**Templates** enable scaffolding new workspaces and executables. They support:
+- Interactive form collection
+- Go / Expr template rendering
+- File artifact copying
+- Pre/post-run hooks
+- Conditional generation
+
+## Execution Model
+
+### Command Structure
+```bash
+flow <verb> <reference> [arguments] [flags]
+```
+
+**Examples:**
+- `flow build app` - Build the app executable
+- `flow test backend/unit` - Run unit tests in backend namespace
+- `flow deploy prod-project/k8s:webapp` - Deploy webapp in specific workspace/namespace
+
+### Conditional Execution
+flow supports runtime conditions using the Expr language for serial and parallel executables:
+```yaml
+serial:
+  execs:
+    - if: os == "darwin"
+      cmd: brew install mytool
+    - if: env["CI"] == "true"  
+      cmd: run-ci-specific-setup
+    - if: len(store["build-id"]) > 0
+      cmd: use-cached-build
+```
+
+### State Management
+flow provides state persistence through:
+- **Cache**: Key-value store for sharing data between executables
+- **Context variables**: OS, architecture, workspace, and path information
+- **Environment inheritance**: Variables flow from parent to child executables
+- **Temporary directories**: Isolated scratch space for executable runs (set the `dir` to `f:tmp`)
+
+## Workflow Patterns
+
+### Simple Task
+```yaml
+executables:
+  - verb: test
+    name: unit
+    exec:
+      cmd: npm test
+```
+
+### Multi-Step Workflow
+```yaml
+executables:
+  - verb: deploy
+    name: application
+    serial:
+      execs:
+        - ref: build app
+        - ref: test unit
+        - cmd: docker build -t myapp .
+        - cmd: kubectl apply -f k8s/
+```
+
+### Parallel Execution
+```yaml
+executables:
+  - verb: test
+    name: all
+    parallel:
+      maxThreads: 3
+      execs:
+        - ref: test unit
+        - ref: test integration  
+        - ref: test e2e
+```
+
+## Integration Points
+
+### CLI Interface
+The primary interface is the `flow` CLI command:
+- Interactive TUI for browsing and discovery
+- Direct command execution
+- Workspace and configuration management
+- Secret and vault operations
+
+### Desktop Application (Upcoming)
+A companion GUI application providing:
+- Visual workflow browsing
+- Execution monitoring
+- Configuration editing
+- Documentation viewing
+
+## Common Use Cases
+
+### Development Workflows
+- Building and testing applications
+- Running development servers
+- Database migrations and seeding
+- Code generation and scaffolding
+
+### Deployment Automation
+- Container building and publishing
+- Kubernetes deployments
+- Infrastructure provisioning
+- Environment configuration
+
+### Operations Tasks
+- System monitoring and health checks
+- Backup and restore operations
+- Log analysis and debugging
+- Service management
+
+### Team Productivity
+- Standardized development setup
+- Shared workflow templates
+- Documentation generation
+- Code quality automation
+
+### Tool Building
+- Custom automation workflows for specific tasks
+- Reusable libraries of executables
+- Integration with / wrapper for existing CLI tools and APIs
+
+## Best Practices
+
+### Executable Design
+- Use descriptive verbs and names
+- Include clear descriptions and documentation
+- Make executables idempotent when possible
+- Handle errors gracefully with meaningful messages
+
+### Workspace Organization
+- Group related functionality in the same flow file (and namespace if it makes sense)
+- Use consistent naming conventions
+- Document workspace purpose and setup
+- Share common patterns through templates
+
+### Secret Management
+- Never commit secrets to flow files
+- Use descriptive secret references
+- Include information on required secrets in executable documentation
+
+### Workflow Composition
+- Break complex tasks into smaller, reusable executables
+- Use conditional logic for environment differences
+- Leverage parallel execution for independent tasks
