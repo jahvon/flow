@@ -69,6 +69,7 @@ func RequestExecWithTransform(opts ...Option) *executable.Executable {
 		Request: &executable.RequestExecutableType{
 			URL:               "https://httpbin.org/get",
 			TransformResponse: "status",
+			ValidStatusCodes:  []int{200, 503}, // TODO: use a mock server to avoid relying on external services
 		},
 	}
 	if len(opts) > 0 {
