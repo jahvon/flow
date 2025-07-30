@@ -418,7 +418,7 @@ flow install
 
 **Execute a nameless flow in the 'ws' workspace with the 'test' verb**
 
-flow test ws
+flow test ws/
 
 **Execute the 'build' flow in the current workspace and namespace**
 

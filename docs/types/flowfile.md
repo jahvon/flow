@@ -85,7 +85,7 @@ Executables are the building blocks of workflows and are used to define the acti
 | `description` | A description of the executable. This description is rendered as markdown in the interactive UI.  | `string` |  |  |
 | `exec` |  | [ExecutableExecExecutableType](#ExecutableExecExecutableType) | <no value> |  |
 | `launch` |  | [ExecutableLaunchExecutableType](#ExecutableLaunchExecutableType) | <no value> |  |
-| `name` | The name of the executable.  Name is used to reference the executable in the CLI using the format `workspace/namespace:name`. [Verb group + Name] must be unique within the namespace of the workspace. Name is required if the executable is defined within a namespace.  | `string` |  |  |
+| `name` | An optional name for the executable.  Name is used to reference the executable in the CLI using the format `workspace/namespace:name`. [Verb group + Name] must be unique within the namespace of the workspace.  | `string` |  |  |
 | `parallel` |  | [ExecutableParallelExecutableType](#ExecutableParallelExecutableType) | <no value> |  |
 | `render` |  | [ExecutableRenderExecutableType](#ExecutableRenderExecutableType) | <no value> |  |
 | `request` |  | [ExecutableRequestExecutableType](#ExecutableRequestExecutableType) | <no value> |  |

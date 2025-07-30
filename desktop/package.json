@@ -5,15 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start-desktop": "tauri dev",
-    "build-desktop": "tsc && vite build",
-    "lint-ts": "npx eslint src",
-    "lint-ts:fix": "npx eslint src --fix",
+    "start": "tauri dev",
+    "build": "tsc && vite build",
+    "lint": "npx eslint src",
+    "lint:fix": "npx eslint src --fix",
     "prettier": "npx prettier src --check",
     "prettier:fix": "npx prettier src --write",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate-types": "tsx scripts/generate-ts-types.ts"
+    "generate-ts": "tsx scripts/generate-ts-types.ts"
   },
   "dependencies": {
     "@mantine/core": "^8.0.2",
