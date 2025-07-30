@@ -49,7 +49,7 @@ func addServerResources(srv *server.MCPServer) {
 	getWorkspaceExecutables := mcp.NewResourceTemplate(
 		"flow://workspace/{name}/executables",
 		"workspace_executables",
-		mcp.WithTemplateDescription("Flow executables for a given workspace"))
+		mcp.WithTemplateDescription("List of Flow executables for a given workspace"))
 	srv.AddResourceTemplate(getWorkspaceExecutables, getWorkspaceExecutablesHandler)
 
 	getExecutable := mcp.NewResourceTemplate(

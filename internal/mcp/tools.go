@@ -19,7 +19,7 @@ func addServerTools(srv *server.MCPServer) {
 	srv.AddTool(listWorkspaces, listWorkspacesHandler)
 
 	listExecutables := mcp.NewTool("list_executables",
-		mcp.WithDescription("List executables in a workspace"),
+		mcp.WithDescription("List and filter executables across all workspaces"),
 		mcp.WithString("workspace", mcp.Description("Workspace name (optional)")),
 		mcp.WithString("namespace", mcp.Description("Namespace filter (optional)")),
 		mcp.WithString("verb", mcp.Description("Verb filter (optional)")),

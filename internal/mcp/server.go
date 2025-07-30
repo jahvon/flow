@@ -17,7 +17,9 @@ func NewMCPServer(ctx *context.Context) *MCPServer {
 	srv := server.NewMCPServer(
 		"Flow",
 		"1.0.0",
-		server.WithToolCapabilities(true),
+		server.WithToolCapabilities(false),
+		server.WithResourceCapabilities(false, true),
+		server.WithPromptCapabilities(false),
 	)
 
 	addServerResources(srv)
