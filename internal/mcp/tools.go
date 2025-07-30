@@ -18,12 +18,6 @@ func addServerTools(srv *server.MCPServer) {
 	)
 	srv.AddTool(listWorkspaces, listWorkspacesHandler)
 
-	getWorkspace := mcp.NewTool("get_workspace",
-		mcp.WithString("workspace_name", mcp.Required(), mcp.Description("Registered workspace name")),
-		mcp.WithDescription("Get details about a registered flow workspaces"),
-	)
-	srv.AddTool(getWorkspace, getWorkspaceHandler)
-
 	listExecutables := mcp.NewTool("list_executables",
 		mcp.WithDescription("List executables in a workspace"),
 		mcp.WithString("workspace", mcp.Description("Workspace name (optional)")),
@@ -62,21 +56,6 @@ func listWorkspacesHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallT
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list workspaces: %s", output)), nil
-	}
-
-	return mcp.NewToolResultText(string(output)), nil
-}
-
-func getWorkspaceHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	wsName, err := request.RequireString("workspace_name")
-	if err != nil {
-		return mcp.NewToolResultError("workspace_name is required"), nil
-	}
-
-	cmd := exec.Command("flow", "workspace", "get", wsName, "--output", "json")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get workspaces %s: %s", wsName, output)), nil
 	}
 
 	return mcp.NewToolResultText(string(output)), nil
