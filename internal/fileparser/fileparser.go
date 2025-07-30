@@ -87,7 +87,7 @@ func ExecutablesFromImports(
 
 func shortenWsPath(wsPath string, path string) string {
 	if strings.HasPrefix(path, wsPath) {
-		return "//" + path[len(wsPath):]
+		return "//" + path[len(wsPath)+1:]
 	}
 
 	return path

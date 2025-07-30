@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start-desktop": "tauri",
+    "dev": "vite",
+    "start-desktop": "tauri dev",
     "build-desktop": "tsc && vite build",
     "lint-ts": "npx eslint src",
     "lint-ts:fix": "npx eslint src --fix",
