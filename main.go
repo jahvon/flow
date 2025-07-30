@@ -22,7 +22,7 @@ func main() {
 	}
 
 	var archiveDir string
-	if args := os.Args; len(args) > 0 && slices.Contains(executable.ValidVerbs(), executable.Verb(args[0])) {
+	if args := os.Args; len(args) > 1 && slices.Contains(executable.ValidVerbs(), executable.Verb(args[1])) {
 		// only create a log archive file for exec commands
 		archiveDir = filesystem.LogsDir()
 	}
