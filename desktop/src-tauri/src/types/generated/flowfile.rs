@@ -228,7 +228,7 @@ impl ::std::default::Default for CommonVisibility {
 #[doc = "      \"$ref\": \"#/definitions/ExecutableLaunchExecutableType\""]
 #[doc = "    },"]
 #[doc = "    \"name\": {"]
-#[doc = "      \"description\": \"The name of the executable.\\n\\nName is used to reference the executable in the CLI using the format `workspace/namespace:name`.\\n[Verb group + Name] must be unique within the namespace of the workspace.\\nName is required if the executable is defined within a namespace.\\n\","]
+#[doc = "      \"description\": \"An optional name for the executable.\\n\\nName is used to reference the executable in the CLI using the format `workspace/namespace:name`.\\n[Verb group + Name] must be unique within the namespace of the workspace.\\n\","]
 #[doc = "      \"default\": \"\","]
 #[doc = "      \"type\": \"string\""]
 #[doc = "    },"]
@@ -282,7 +282,7 @@ pub struct Executable {
     pub exec: ::std::option::Option<ExecutableExecExecutableType>,
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]
     pub launch: ::std::option::Option<ExecutableLaunchExecutableType>,
-    #[doc = "The name of the executable.\n\nName is used to reference the executable in the CLI using the format `workspace/namespace:name`.\n[Verb group + Name] must be unique within the namespace of the workspace.\nName is required if the executable is defined within a namespace.\n"]
+    #[doc = "An optional name for the executable.\n\nName is used to reference the executable in the CLI using the format `workspace/namespace:name`.\n[Verb group + Name] must be unique within the namespace of the workspace.\n"]
     #[serde(default)]
     pub name: ::std::string::String,
     #[serde(default, skip_serializing_if = "::std::option::Option::is_none")]

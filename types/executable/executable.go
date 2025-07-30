@@ -247,9 +247,7 @@ func (e *Executable) Validate() error {
 	} else if err := e.Verb.Validate(); err != nil {
 		return err
 	}
-	if e.Name == "" && e.Namespace() != "" {
-		return fmt.Errorf("name cannot be empty when namespace is set")
-	} else if strings.Contains(e.Name, " ") {
+	if strings.Contains(e.Name, " ") {
 		return fmt.Errorf("name cannot contain spaces")
 	}
 

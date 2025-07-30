@@ -120,12 +120,11 @@ type Executable struct {
 	// Launch corresponds to the JSON schema field "launch".
 	Launch *LaunchExecutableType `json:"launch,omitempty" yaml:"launch,omitempty" mapstructure:"launch,omitempty"`
 
-	// The name of the executable.
+	// An optional name for the executable.
 	//
 	// Name is used to reference the executable in the CLI using the format
 	// `workspace/namespace:name`.
 	// [Verb group + Name] must be unique within the namespace of the workspace.
-	// Name is required if the executable is defined within a namespace.
 	//
 	Name string `json:"name,omitempty" yaml:"name,omitempty" mapstructure:"name,omitempty"`
 
