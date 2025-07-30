@@ -1,12 +1,6 @@
 //nolint:lll
 package flags
 
-import (
-	"fmt"
-
-	"github.com/flowexec/flow/types/executable"
-)
-
 type Metadata struct {
 	Name      string
 	Shorthand string
@@ -73,7 +67,7 @@ var FilterNamespaceFlag = &Metadata{
 var FilterVerbFlag = &Metadata{
 	Name:      "verb",
 	Shorthand: "v",
-	Usage:     fmt.Sprintf("Filter executables by verb. One of: %s", executable.SortedValidVerbs()),
+	Usage:     "Filter executables by verb.",
 	Default:   "",
 	Required:  false,
 }
@@ -130,6 +124,13 @@ var CopyFlag = &Metadata{
 	Name:     "copy",
 	Usage:    "Copy the secret value to the clipboard",
 	Default:  false,
+	Required: false,
+}
+
+var SecretFromFile = &Metadata{
+	Name:     "file",
+	Usage:    "File to read the secret's value from",
+	Default:  "",
 	Required: false,
 }
 

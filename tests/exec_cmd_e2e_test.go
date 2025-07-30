@@ -17,7 +17,7 @@ var _ = Describe("exec e2e", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = utils.NewContext(stdCtx.Background(), GinkgoT())
+		ctx = utils.NewContext(stdCtx.Background(), GinkgoTB())
 	})
 
 	AfterEach(func() {
@@ -48,6 +48,27 @@ var _ = Describe("exec e2e", func() {
 			Expect(out).To(ContainSubstring("value1"))
 			Expect(out).To(ContainSubstring("value2"))
 			Expect(out).To(ContainSubstring("value3"))
+		})
+	})
+
+	Describe("file parameter and argument output files", func() {
+		It("should create temporary files for file arguments", func() {
+			runner := utils.NewE2ECommandRunner()
+			stdOut := ctx.StdOut()
+			Expect(runner.Run(ctx.Context, "exec", "examples:with-file-param", "argval", "--log-level", "debug")).To(Succeed())
+			out, _ := readFileContent(stdOut)
+
+			Expect(out).To(ContainSubstring("database:"))
+			Expect(out).To(ContainSubstring("host: localhost"))
+			Expect(out).To(ContainSubstring("port: 5432"))
+			Expect(out).To(ContainSubstring("#!/bin/bash"))
+			Expect(out).To(ContainSubstring("Hello from script"))
+
+			// Should show passed in arg instead of default
+			Expect(out).To(ContainSubstring("argval"))
+			Expect(out).NotTo(ContainSubstring("notme"))
+
+			Expect(out).To(ContainSubstring("flow completed"))
 		})
 	})
 })

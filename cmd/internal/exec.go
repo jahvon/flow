@@ -16,6 +16,7 @@ import (
 	"github.com/flowexec/flow/internal/cache"
 	"github.com/flowexec/flow/internal/context"
 	"github.com/flowexec/flow/internal/io"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/runner/exec"
@@ -25,7 +26,6 @@ import (
 	"github.com/flowexec/flow/internal/runner/request"
 	"github.com/flowexec/flow/internal/runner/serial"
 	"github.com/flowexec/flow/internal/services/store"
-	argUtils "github.com/flowexec/flow/internal/utils/args"
 	"github.com/flowexec/flow/internal/vault"
 	vaultV2 "github.com/flowexec/flow/internal/vault/v2"
 	"github.com/flowexec/flow/types/executable"
@@ -45,7 +45,7 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 		),
 		Args: cobra.ArbitraryArgs,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			execList, err := ctx.ExecutableCache.GetExecutableList(ctx.Logger)
+			execList, err := ctx.ExecutableCache.GetExecutableList()
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveError
 			}
@@ -56,9 +56,9 @@ func RegisterExecCmd(ctx *context.Context, rootCmd *cobra.Command) {
 			return execIDs, cobra.ShellCompDirectiveNoFileComp
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
-			logMode := flags.ValueFor[string](ctx, cmd, *flags.LogModeFlag, false)
+			logMode := flags.ValueFor[string](cmd, *flags.LogModeFlag, false)
 			if err := tuikitIO.LogMode(logMode).Validate(); err != nil {
-				ctx.Logger.FatalErr(err)
+				logger.Log().FatalErr(err)
 			}
 			execPreRun(ctx, cmd, args)
 		},
@@ -86,14 +86,18 @@ func execPreRun(_ *context.Context, _ *cobra.Command, _ []string) {
 //
 //nolint:funlen,gocognit
 func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, args []string) {
-	logger := ctx.Logger
-	logMode := flags.ValueFor[string](ctx, cmd, *flags.LogModeFlag, false)
+	logMode := flags.ValueFor[string](cmd, *flags.LogModeFlag, false)
 	if logMode != "" {
-		logger.SetMode(tuikitIO.LogMode(logMode))
+		logger.Log().SetMode(tuikitIO.LogMode(logMode))
 	}
 
 	if err := verb.Validate(); err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
+	}
+
+	// populate args for environment handling ignoring arg 0 (the ref)
+	if len(args) >= 2 {
+		ctx.Args = args[1:]
 	}
 
 	var ref executable.Ref
@@ -104,53 +108,42 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 		ref = context.ExpandRef(ctx, executable.NewRef(idArg, verb))
 	}
 
-	e, err := ctx.ExecutableCache.GetExecutableByRef(logger, ref)
+	e, err := ctx.ExecutableCache.GetExecutableByRef(ref)
 	if err != nil && errors.Is(cache.NewExecutableNotFoundError(ref.String()), err) {
-		logger.Debugf("Executable %s not found in cache, syncing cache", ref)
-		if err := ctx.ExecutableCache.Update(logger); err != nil {
-			logger.FatalErr(err)
+		logger.Log().Debugf("Executable %s not found in cache, syncing cache", ref)
+		if err := ctx.ExecutableCache.Update(); err != nil {
+			logger.Log().FatalErr(err)
 		}
-		e, err = ctx.ExecutableCache.GetExecutableByRef(logger, ref)
+		e, err = ctx.ExecutableCache.GetExecutableByRef(ref)
 	}
 	if err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 
 	if err := e.Validate(); err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 
 	if !e.IsExecutableFromWorkspace(ctx.CurrentWorkspace.AssignedName()) {
-		logger.FatalErr(fmt.Errorf(
+		logger.Log().FatalErr(fmt.Errorf(
 			"e '%s' cannot be executed from workspace %s",
 			ref,
 			ctx.Config.CurrentWorkspace,
 		))
 	}
 
-	// add args to the env map
-	execArgs := make([]string, 0)
-	if len(args) >= 2 {
-		execArgs = args[1:]
-	}
-	envMap, err := argUtils.ProcessArgs(e, execArgs, nil)
-	if err != nil {
-		logger.FatalErr(err)
-	}
 	s, err := store.NewStore(store.Path())
 	if err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 	if _, err = s.CreateAndSetBucket(ref.String()); err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 	_ = s.Close()
-	if envMap == nil {
-		envMap = make(map[string]string)
-	}
 
 	// add --param overrides to the env map
-	paramOverrides := flags.ValueFor[[]string](ctx, cmd, *flags.ParameterValueFlag, false)
+	envMap := make(map[string]string)
+	paramOverrides := flags.ValueFor[[]string](cmd, *flags.ParameterValueFlag, false)
 	applyParameterOverrides(paramOverrides, envMap)
 
 	// add values from the prompt param type to the env map
@@ -158,10 +151,10 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	if len(textInputs) > 0 {
 		form, err := views.NewForm(io.Theme(ctx.Config.Theme.String()), ctx.StdIn(), ctx.StdOut(), textInputs...)
 		if err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		if err := form.Run(ctx.Ctx); err != nil {
-			logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		for key, val := range form.ValueMap() {
 			envMap[key] = fmt.Sprintf("%v", val)
@@ -174,20 +167,20 @@ func execFunc(ctx *context.Context, cmd *cobra.Command, verb executable.Verb, ar
 	startTime := time.Now()
 	eng := engine.NewExecEngine()
 	if err := runner.Exec(ctx, e, eng, envMap); err != nil {
-		logger.FatalErr(err)
+		logger.Log().FatalErr(err)
 	}
 	dur := time.Since(startTime)
 	processStore, err := store.NewStore(store.Path())
 	if err != nil {
-		logger.Errorf("failed clearing process store\n%v", err)
+		logger.Log().Errorf("failed clearing process store\n%v", err)
 	}
 	if processStore != nil {
 		if err = processStore.DeleteBucket(store.EnvironmentBucket()); err != nil {
-			logger.Errorf("failed clearing process store\n%v", err)
+			logger.Log().Errorf("failed clearing process store\n%v", err)
 		}
 		_ = processStore.Close()
 	}
-	logger.Debugx(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
+	logger.Log().Debugx(fmt.Sprintf("%s flow completed", ref), "Elapsed", dur.Round(time.Millisecond))
 	if TUIEnabled(ctx, cmd) {
 		if dur > 1*time.Minute && ctx.Config.SendSoundNotification() {
 			_ = beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
@@ -241,17 +234,17 @@ func setAuthEnv(ctx *context.Context, _ *cobra.Command, executable *executable.E
 				Type:  views.PromptTypeMasked,
 			})
 		if err != nil {
-			ctx.Logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		if err := form.Run(ctx.Ctx); err != nil {
-			ctx.Logger.FatalErr(err)
+			logger.Log().FatalErr(err)
 		}
 		val := form.FindByKey(vault.EncryptionKeyEnvVar).Value()
 		if val == "" {
-			ctx.Logger.FatalErr(fmt.Errorf("vault encryption key required"))
+			logger.Log().FatalErr(fmt.Errorf("vault encryption key required"))
 		}
 		if err := os.Setenv(vault.EncryptionKeyEnvVar, val); err != nil {
-			ctx.Logger.FatalErr(fmt.Errorf("failed to set vault encryption key\n%w", err))
+			logger.Log().FatalErr(fmt.Errorf("failed to set vault encryption key\n%w", err))
 		}
 	}
 }
@@ -296,7 +289,7 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 		}
 		for _, e := range rootExec.Serial.Execs {
 			if e.Ref != "" {
-				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, e.Ref)
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(e.Ref)
 				if err != nil {
 					continue
 				}
@@ -313,7 +306,7 @@ func authRequired(ctx *context.Context, rootExec *executable.Executable) bool {
 		}
 		for _, e := range rootExec.Parallel.Execs {
 			if e.Ref != "" {
-				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, e.Ref)
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(e.Ref)
 				if err != nil {
 					continue
 				}
@@ -369,7 +362,7 @@ func pendingFormFields(
 		}
 		for _, child := range rootExec.Serial.Execs {
 			if child.Ref != "" {
-				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child.Ref)
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(child.Ref)
 				if err != nil {
 					continue
 				}
@@ -385,7 +378,7 @@ func pendingFormFields(
 		}
 		for _, child := range rootExec.Parallel.Execs {
 			if child.Ref != "" {
-				childExec, err := ctx.ExecutableCache.GetExecutableByRef(ctx.Logger, child.Ref)
+				childExec, err := ctx.ExecutableCache.GetExecutableByRef(child.Ref)
 				if err != nil {
 					continue
 				}
@@ -425,7 +418,7 @@ flow install
 
 **Execute a nameless flow in the 'ws' workspace with the 'test' verb**
 
-flow test ws
+flow test ws/
 
 **Execute the 'build' flow in the current workspace and namespace**
 

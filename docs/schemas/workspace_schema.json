@@ -16,7 +16,7 @@
       "type": "object",
       "properties": {
         "excluded": {
-          "description": "A list of directories to exclude from the executable search.",
+          "description": "A list of directories or file patterns to exclude from the executable search.\nSupports directory paths (e.g., \"node_modules/\", \"vendor/\") and glob patterns for filenames (e.g., \"*.js.flow\", \"*temp*\").\nCommon exclusions like node_modules/, vendor/, third_party/, external/, and *.js.flow are excluded by default.\n",
           "type": "array",
           "default": [],
           "items": {
@@ -24,7 +24,7 @@
           }
         },
         "included": {
-          "description": "A list of directories to include in the executable search.",
+          "description": "A list of directories or file patterns to include in the executable search.\nSupports directory paths (e.g., \"src/\", \"scripts/\") and glob patterns for filenames (e.g., \"*.test.flow\", \"example*\").\n",
           "type": "array",
           "default": [],
           "items": {

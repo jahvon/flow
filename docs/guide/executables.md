@@ -42,6 +42,7 @@ executables:
 ### Common Fields <!-- {docsify-ignore} -->
 
 - **verb**: Action type (run, build, test, deploy, etc.)
+- **verbAliases**: Alternative names for the verb
 - **name**: Unique identifier within the namespace
 - **description**: Markdown documentation for the executable
 - **tags**: Labels for categorization and filtering
@@ -58,11 +59,11 @@ executables:
 
 ## Environment Variables
 
-Customize executable behavior with environment variables using `params` or `args`.
+Customize executable behavior with environment variables or temporary files using `params` or `args`.
 
 ### Parameters (`params`) <!-- {docsify-ignore} -->
 
-Set environment variables from various sources:
+Set environment data from various sources:
 
 ```yaml
 executables:
@@ -84,6 +85,10 @@ executables:
         # Static values
         - text: "production"
           envKey: DEPLOY_ENV
+
+        # Saved to a file
+        - secretRef: tls-cert
+          outputFile: cert.pem
 ```
 
 **Parameter types:**
@@ -116,6 +121,10 @@ executables:
         - flag: registry
           envKey: REGISTRY
           default: "docker.io"
+
+        # Saved to a file
+        - flag: version
+          outputFile: //version.txt
 ```
 
 **Run with arguments:**
@@ -126,7 +135,6 @@ flow build container v1.2.3 publish=true registry=my-registry.com
 **Argument types:**
 - `pos`: Positional argument (by position number, starting from 1)
 - `flag`: Named flag argument
-- `type`: Validation type (string, int, float, bool)
 
 ### Command-Line Overrides <!-- {docsify-ignore} -->
 
@@ -135,6 +143,9 @@ Override any environment variable with `--param`:
 ```shell
 flow deploy app --param API_TOKEN=override --param ENVIRONMENT=staging
 ```
+
+> [!NOTE]
+> If the `outputFile` field is used to save a value, it will automatically be cleaned up after the executable finishes running.
 
 ## Working Directories
 

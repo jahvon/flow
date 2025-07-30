@@ -9,11 +9,12 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/expr"
 	"github.com/flowexec/flow/internal/services/store"
-	argUtils "github.com/flowexec/flow/internal/utils/args"
+	envUtils "github.com/flowexec/flow/internal/utils/env"
 	execUtils "github.com/flowexec/flow/internal/utils/executables"
 	"github.com/flowexec/flow/types/executable"
 )
@@ -42,8 +43,22 @@ func (r *parallelRunner) Exec(
 	inputEnv map[string]string,
 ) error {
 	parallelSpec := e.Parallel
-	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
+	if err := envUtils.SetEnv(ctx.Config.CurrentVaultName(), e.Env(), ctx.Args, inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
+	}
+
+	if cb, err := envUtils.CreateTempEnvFiles(
+		ctx.Config.CurrentVaultName(),
+		e.FlowFilePath(),
+		e.WorkspacePath(),
+		e.Env(),
+		ctx.Args,
+		inputEnv,
+	); err != nil {
+		ctx.AddCallback(cb)
+		return errors.Wrap(err, "unable to create temporary env files")
+	} else {
+		ctx.AddCallback(cb)
 	}
 
 	if len(parallelSpec.Execs) > 0 {
@@ -59,7 +74,7 @@ func (r *parallelRunner) Exec(
 			return err
 		}
 		if err := str.Close(); err != nil {
-			ctx.Logger.Error(err, "unable to close store")
+			logger.Log().Error(err, "unable to close store")
 		}
 
 		return handleExec(ctx, e, eng, parallelSpec, inputEnv, cacheData)
@@ -93,7 +108,7 @@ func handleExec(
 			if truthy, err := expr.IsTruthy(refConfig.If, &dataMap); err != nil {
 				return err
 			} else if !truthy {
-				ctx.Logger.Debugf("skipping execution %d/%d", i+1, len(parallelSpec.Execs))
+				logger.Log().Debugf("skipping execution %d/%d", i+1, len(parallelSpec.Execs))
 				continue
 			}
 		}
@@ -114,11 +129,19 @@ func handleExec(
 		execPromptedEnv := make(map[string]string)
 		maps.Copy(promptedEnv, execPromptedEnv)
 		if len(refConfig.Args) > 0 {
-			a, err := argUtils.ProcessArgs(exec, refConfig.Args, execPromptedEnv)
-			if err != nil {
-				ctx.Logger.Error(err, "unable to process arguments")
+			execEnv := exec.Env()
+			if execEnv == nil || execEnv.Args == nil {
+				logger.Log().Warnf(
+					"executable %s has no arguments defined, skipping argument processing",
+					exec.Ref().String(),
+				)
+			} else {
+				a, err := envUtils.BuildArgsEnvMap(execEnv.Args, refConfig.Args, execPromptedEnv)
+				if err != nil {
+					logger.Log().Error(err, "unable to process arguments")
+				}
+				maps.Copy(execPromptedEnv, a)
 			}
-			maps.Copy(execPromptedEnv, a)
 		}
 
 		switch {

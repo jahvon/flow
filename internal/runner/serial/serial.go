@@ -9,11 +9,12 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/flowexec/flow/internal/context"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/internal/runner"
 	"github.com/flowexec/flow/internal/runner/engine"
 	"github.com/flowexec/flow/internal/services/expr"
 	"github.com/flowexec/flow/internal/services/store"
-	argUtils "github.com/flowexec/flow/internal/utils/args"
+	envUtils "github.com/flowexec/flow/internal/utils/env"
 	execUtils "github.com/flowexec/flow/internal/utils/executables"
 	"github.com/flowexec/flow/types/executable"
 )
@@ -42,8 +43,22 @@ func (r *serialRunner) Exec(
 	inputEnv map[string]string,
 ) error {
 	serialSpec := e.Serial
-	if err := runner.SetEnv(ctx.Logger, ctx.Config.CurrentVaultName(), e.Env(), inputEnv); err != nil {
+	if err := envUtils.SetEnv(ctx.Config.CurrentVaultName(), e.Env(), ctx.Args, inputEnv); err != nil {
 		return errors.Wrap(err, "unable to set parameters to env")
+	}
+
+	if cb, err := envUtils.CreateTempEnvFiles(
+		ctx.Config.CurrentVaultName(),
+		e.FlowFilePath(),
+		e.WorkspacePath(),
+		e.Env(),
+		ctx.Args,
+		inputEnv,
+	); err != nil {
+		ctx.AddCallback(cb)
+		return errors.Wrap(err, "unable to create temporary env files")
+	} else {
+		ctx.AddCallback(cb)
 	}
 
 	if len(serialSpec.Execs) > 0 {
@@ -59,7 +74,7 @@ func (r *serialRunner) Exec(
 			return err
 		}
 		if err := str.Close(); err != nil {
-			ctx.Logger.Error(err, "unable to close store")
+			logger.Log().Error(err, "unable to close store")
 		}
 
 		return handleExec(ctx, e, eng, serialSpec, inputEnv, cacheData)
@@ -86,10 +101,10 @@ func handleExec(
 				return err
 			}
 			if !truthy {
-				ctx.Logger.Debugf("skipping execution %d/%d", i+1, len(serialSpec.Execs))
+				logger.Log().Debugf("skipping execution %d/%d", i+1, len(serialSpec.Execs))
 				continue
 			}
-			ctx.Logger.Debugf("condition %s is true", refConfig.If)
+			logger.Log().Debugf("condition %s is true", refConfig.If)
 		}
 		var exec *executable.Executable
 		switch {
@@ -104,16 +119,24 @@ func handleExec(
 		default:
 			return errors.New("serial executable must have a ref or cmd")
 		}
-		ctx.Logger.Debugf("executing %s (%d/%d)", exec.Ref(), i+1, len(serialSpec.Execs))
+		logger.Log().Debugf("executing %s (%d/%d)", exec.Ref(), i+1, len(serialSpec.Execs))
 
 		execPromptedEnv := make(map[string]string)
 		maps.Copy(promptedEnv, execPromptedEnv)
 		if len(refConfig.Args) > 0 {
-			a, err := argUtils.ProcessArgs(exec, refConfig.Args, execPromptedEnv)
-			if err != nil {
-				ctx.Logger.Error(err, "unable to process arguments")
+			execEnv := exec.Env()
+			if execEnv == nil || execEnv.Args == nil {
+				logger.Log().Warnf(
+					"executable %s has no arguments defined, skipping argument processing",
+					exec.Ref().String(),
+				)
+			} else {
+				a, err := envUtils.BuildArgsEnvMap(execEnv.Args, refConfig.Args, execPromptedEnv)
+				if err != nil {
+					logger.Log().Error(err, "unable to process arguments")
+				}
+				maps.Copy(execPromptedEnv, a)
 			}
-			maps.Copy(execPromptedEnv, a)
 		}
 
 		switch {
@@ -160,7 +183,7 @@ func runSerialExecFunc(
 		return err
 	}
 	if step < len(serialSpec.Execs) && refConfig.ReviewRequired {
-		ctx.Logger.Println("Do you want to proceed with the next execution? (y/n)")
+		logger.Log().Println("Do you want to proceed with the next execution? (y/n)")
 		if !inputConfirmed(os.Stdin) {
 			return fmt.Errorf("stopping runner early (%d/%d)", step+1, len(serialSpec.Execs))
 		}

@@ -30,7 +30,7 @@ var _ = Describe("Request Runner", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = testUtils.NewContextWithMocks(stdCtx.Background(), GinkgoT())
+		ctx = testUtils.NewContextWithMocks(stdCtx.Background(), GinkgoTB())
 		requestRnr = request.NewRunner()
 		ctrl := gomock.NewController(GinkgoT())
 		mockEngine = mocks.NewMockEngine(ctrl)

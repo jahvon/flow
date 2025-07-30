@@ -80,7 +80,7 @@ executables:
         else
           echo "npm dependencies already installed"
         fi
-        npm run generate-types
+        npm run generate-ts
 
   - verb: generate
     name: backend

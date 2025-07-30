@@ -9,14 +9,13 @@ import (
 	"strings"
 
 	"github.com/flowexec/tuikit"
-	"github.com/flowexec/tuikit/io"
 	"github.com/flowexec/tuikit/themes"
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slices"
 
 	"github.com/flowexec/flow/internal/cache"
 	"github.com/flowexec/flow/internal/filesystem"
 	flowIO "github.com/flowexec/flow/internal/io"
+	"github.com/flowexec/flow/internal/logger"
 	"github.com/flowexec/flow/types/config"
 	"github.com/flowexec/flow/types/executable"
 	"github.com/flowexec/flow/types/workspace"
@@ -30,18 +29,21 @@ const (
 type Context struct {
 	Ctx              context.Context
 	CancelFunc       context.CancelFunc
-	Logger           io.Logger
 	Config           *config.Config
 	CurrentWorkspace *workspace.Workspace
 	TUIContainer     *tuikit.Container
 	WorkspacesCache  cache.WorkspaceCache
 	ExecutableCache  cache.ExecutableCache
 
+	// Args includes the command line arguments passed to the exec command. It is only populated when that command is used.
+	Args []string
+
 	// ProcessTmpDir is the temporary directory for the current process. If set, it will be
 	// used to store temporary files all executable runs when the tmpDir value is specified.
 	ProcessTmpDir string
 
 	stdOut, stdIn *os.File
+	callbacks     []func(*Context) error
 }
 
 func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
@@ -73,16 +75,6 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 	}
 
 	ctxx, cancel := context.WithCancel(ctx)
-	logMode := cfg.DefaultLogMode
-	loggerOpts := []io.LoggerOptions{
-		io.WithOutput(stdOut),
-		io.WithTheme(flowIO.Theme(cfg.Theme.String())),
-		io.WithMode(logMode),
-	}
-	// only create a log archive file for exec commands
-	if args := os.Args; len(args) > 0 && slices.Contains(executable.ValidVerbs(), executable.Verb(args[0])) {
-		loggerOpts = append(loggerOpts, io.WithArchiveDirectory(filesystem.LogsDir()))
-	}
 	c := &Context{
 		Ctx:              ctxx,
 		CancelFunc:       cancel,
@@ -90,7 +82,6 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 		CurrentWorkspace: wsConfig,
 		WorkspacesCache:  workspaceCache,
 		ExecutableCache:  executableCache,
-		Logger:           io.NewLogger(loggerOpts...),
 		stdOut:           stdOut,
 		stdIn:            stdIn,
 	}
@@ -149,31 +140,38 @@ func (ctx *Context) SetView(view tuikit.View) error {
 	return ctx.TUIContainer.SetView(view)
 }
 
+func (ctx *Context) AddCallback(callback func(*Context) error) {
+	if callback == nil {
+		return
+	}
+	ctx.callbacks = append(ctx.callbacks, callback)
+}
+
 func (ctx *Context) Finalize() {
 	_ = ctx.stdIn.Close()
 	_ = ctx.stdOut.Close()
 
+	for _, cb := range ctx.callbacks {
+		if err := cb(ctx); err != nil {
+			logger.Log().Error(err, "callback execution error")
+		}
+	}
+
 	if ctx.ProcessTmpDir != "" {
 		files, err := filepath.Glob(filepath.Join(ctx.ProcessTmpDir, "*"))
 		if err != nil {
-			ctx.Logger.Error(err, fmt.Sprintf("unable to list files in temp dir %s", ctx.ProcessTmpDir))
+			logger.Log().Error(err, fmt.Sprintf("unable to list files in temp dir %s", ctx.ProcessTmpDir))
 			return
 		}
 		for _, f := range files {
 			err = os.RemoveAll(f)
 			if err != nil {
-				ctx.Logger.Error(err, fmt.Sprintf("unable to remove file %s", f))
+				logger.Log().Error(err, fmt.Sprintf("unable to remove file %s", f))
 			}
 		}
 		if err := os.Remove(ctx.ProcessTmpDir); err != nil {
-			ctx.Logger.Error(err, fmt.Sprintf("unable to remove temp dir %s", ctx.ProcessTmpDir))
+			logger.Log().Error(err, fmt.Sprintf("unable to remove temp dir %s", ctx.ProcessTmpDir))
 		}
-	}
-	if err := ctx.Logger.Flush(); err != nil {
-		if errors.Is(err, os.ErrClosed) {
-			return
-		}
-		panic(err)
 	}
 }
 

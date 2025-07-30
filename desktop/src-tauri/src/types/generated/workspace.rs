@@ -76,7 +76,7 @@ impl ::std::convert::From<::std::vec::Vec<::std::string::String>> for CommonTags
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"excluded\": {"]
-#[doc = "      \"description\": \"A list of directories to exclude from the executable search.\","]
+#[doc = "      \"description\": \"A list of directories or file patterns to exclude from the executable search.\\nSupports directory paths (e.g., \\\"node_modules/\\\", \\\"vendor/\\\") and glob patterns for filenames (e.g., \\\"*.js.flow\\\", \\\"*temp*\\\").\\nCommon exclusions like node_modules/, vendor/, third_party/, external/, and *.js.flow are excluded by default.\\n\","]
 #[doc = "      \"default\": [],"]
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
@@ -84,7 +84,7 @@ impl ::std::convert::From<::std::vec::Vec<::std::string::String>> for CommonTags
 #[doc = "      }"]
 #[doc = "    },"]
 #[doc = "    \"included\": {"]
-#[doc = "      \"description\": \"A list of directories to include in the executable search.\","]
+#[doc = "      \"description\": \"A list of directories or file patterns to include in the executable search.\\nSupports directory paths (e.g., \\\"src/\\\", \\\"scripts/\\\") and glob patterns for filenames (e.g., \\\"*.test.flow\\\", \\\"example*\\\").\\n\","]
 #[doc = "      \"default\": [],"]
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
@@ -97,10 +97,10 @@ impl ::std::convert::From<::std::vec::Vec<::std::string::String>> for CommonTags
 #[doc = r" </details>"]
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug)]
 pub struct ExecutableFilter {
-    #[doc = "A list of directories to exclude from the executable search."]
+    #[doc = "A list of directories or file patterns to exclude from the executable search.\nSupports directory paths (e.g., \"node_modules/\", \"vendor/\") and glob patterns for filenames (e.g., \"*.js.flow\", \"*temp*\").\nCommon exclusions like node_modules/, vendor/, third_party/, external/, and *.js.flow are excluded by default.\n"]
     #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
     pub excluded: ::std::vec::Vec<::std::string::String>,
-    #[doc = "A list of directories to include in the executable search."]
+    #[doc = "A list of directories or file patterns to include in the executable search.\nSupports directory paths (e.g., \"src/\", \"scripts/\") and glob patterns for filenames (e.g., \"*.test.flow\", \"example*\").\n"]
     #[serde(default, skip_serializing_if = "::std::vec::Vec::is_empty")]
     pub included: ::std::vec::Vec<::std::string::String>,
 }

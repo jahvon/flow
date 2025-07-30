@@ -31,7 +31,7 @@ var _ = Describe("SerialRunner", func() {
 	)
 
 	BeforeEach(func() {
-		ctx = testUtils.NewContextWithMocks(stdCtx.Background(), GinkgoT())
+		ctx = testUtils.NewContextWithMocks(stdCtx.Background(), GinkgoTB())
 		runner.RegisterRunner(ctx.RunnerMock)
 		serialRnr = serial.NewRunner()
 		engCtl := gomock.NewController(GinkgoT())
@@ -98,9 +98,9 @@ var _ = Describe("SerialRunner", func() {
 			for i, e := range subExecs {
 				switch i {
 				case 0:
-					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockCache.EXPECT().GetExecutableByRef(e.Ref()).Return(e, nil).Times(1)
 				case 1:
-					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockCache.EXPECT().GetExecutableByRef(e.Ref()).Return(e, nil).Times(1)
 				}
 			}
 			results := engine.ResultSummary{Results: []engine.Result{{}}}
@@ -113,9 +113,9 @@ var _ = Describe("SerialRunner", func() {
 			for i, e := range subExecs {
 				switch i {
 				case 0:
-					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockCache.EXPECT().GetExecutableByRef(e.Ref()).Return(e, nil).Times(1)
 				case 1:
-					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockCache.EXPECT().GetExecutableByRef(e.Ref()).Return(e, nil).Times(1)
 				}
 			}
 			results := engine.ResultSummary{Results: []engine.Result{{Error: errors.New("error")}}}
@@ -130,7 +130,7 @@ var _ = Describe("SerialRunner", func() {
 			mockCache := ctx.ExecutableCache
 			for i, e := range subExecs {
 				if i == 1 {
-					mockCache.EXPECT().GetExecutableByRef(ctx.Logger, e.Ref()).Return(e, nil).Times(1)
+					mockCache.EXPECT().GetExecutableByRef(e.Ref()).Return(e, nil).Times(1)
 				}
 			}
 			results := engine.ResultSummary{Results: []engine.Result{{}}}
