@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -88,6 +87,14 @@ func LoadWorkspaceFlowFiles(
 	return cfgs, nil
 }
 
+var defaultExcutablePaths = []string{
+	"vendor/",
+	"third_party/",
+	"external/",
+	"node_modules/",
+	"*.js.flow",
+}
+
 func findFlowFiles(workspaceCfg *workspace.Workspace) ([]string, error) {
 	var includePaths, excludedPaths []string
 	if workspaceCfg.Executables != nil {
@@ -100,6 +107,7 @@ func findFlowFiles(workspaceCfg *workspace.Workspace) ([]string, error) {
 	} else {
 		includePaths = []string{workspaceCfg.Location()}
 	}
+	excludedPaths = append(excludedPaths, defaultExcutablePaths...)
 
 	var cfgPaths []string
 	walkDirFunc := func(path string, entry fs.DirEntry, err error) error {
@@ -128,64 +136,52 @@ func findFlowFiles(workspaceCfg *workspace.Workspace) ([]string, error) {
 	return cfgPaths, nil
 }
 
-// IsPathIn returns true if the path is in any of the include paths.
-func isPathIncluded(path, basePath string, includePaths []string) bool {
-	if includePaths == nil {
-		return true
+func pathMatches(path, basePath string, patterns []string) bool {
+	if patterns == nil {
+		return false
 	}
 
-	for _, p := range includePaths {
-		includePath := p
-		if strings.HasPrefix(includePath, "//") {
-			includePath = strings.Replace(includePath, "//", basePath+"/", 1)
+	relPath, err := filepath.Rel(basePath, path)
+	if err != nil {
+		// fallback to absolute if relative path cannot be determined
+		relPath = path
+	}
+
+	for _, p := range patterns {
+		pattern := p
+		if strings.HasPrefix(pattern, "//") {
+			pattern = strings.Replace(pattern, "//", basePath+"/", 1)
 		}
 
-		if path == includePath || strings.HasPrefix(path, includePath) {
+		if path == pattern || strings.HasPrefix(path, pattern) {
+			return true
+		}
+		if relPath == pattern || strings.HasPrefix(relPath, pattern) {
 			return true
 		}
 
-		isMatch, err := regexp.MatchString(includePath, path)
-		if err != nil {
-			logger.Log().Errorx(
-				"unable to regex match path against include path",
-				"path", path,
-				"includePath", includePath,
-				"err", err,
-			)
-			continue
+		for _, checkPath := range []string{path, relPath} {
+			if strings.Contains(pattern, "*") ||
+				strings.Contains(pattern, "?") ||
+				strings.Contains(pattern, "[") {
+				fileName := filepath.Base(checkPath)
+				isMatch, err := filepath.Match(pattern, fileName)
+				if err == nil && isMatch {
+					return true
+				}
+			}
 		}
-		return isMatch
 	}
 	return false
 }
 
-// IsPathExcluded returns true if the path is in any of the excluded paths.
+func isPathIncluded(path, basePath string, includePaths []string) bool {
+	if includePaths == nil {
+		return true
+	}
+	return pathMatches(path, basePath, includePaths)
+}
+
 func isPathExcluded(path, basePath string, excludedPaths []string) bool {
-	if excludedPaths == nil {
-		return false
-	}
-
-	for _, p := range excludedPaths {
-		excludedPath := p
-		if strings.HasPrefix(excludedPath, "//") {
-			excludedPath = strings.Replace(excludedPath, "//", basePath+"/", 1)
-		}
-
-		if path == excludedPath || strings.HasPrefix(path, excludedPath) {
-			return true
-		}
-
-		isMatch, err := regexp.MatchString(excludedPath, path)
-		if err != nil {
-			logger.Log().Errorx(
-				"unable to regex match path against excluded path",
-				"path", path,
-				"excludedPath", excludedPath,
-				"err", err,
-			)
-			continue
-		}
-		return isMatch
-	}
-	return false
+	return pathMatches(path, basePath, excludedPaths)
 }
