@@ -1,9 +1,11 @@
-# Flow Platform Concepts Guide
+# Flow Concepts Guide
 
 ## What is flow?
 
 flow is a local-first, customizable CLI automation platform designed to streamline development and operations workflows. 
 It helps developers organize, discover, and execute tasks across projects through a unified interface.
+
+More comprehensive details can be found in the [flow documentation](https://flowexec.io).
 
 ## Core Philosophy
 
@@ -40,6 +42,16 @@ executables:
           text: production
 ```
 
+#### Executable References
+Executables are identified by its reference: combination of **Verb** and **ID**. The  ID is in the form `<workspace>/<namespace>:<name>`.
+A full reference must be unique across all registered workspaces.
+
+For instance:
+- `build app` - current workspace, root namespace
+- `build backend/app` - current workspace, backend namespace
+- `build my-project/backend:app` - specific workspace and namespace
+- `build` - current workspace, root namespace, no name set
+
 ### Verbs
 **Verbs** describe what action an executable performs. Flow groups related verbs together, allowing natural language-like commands.
 By default, flow provide the following verb alias groups:
@@ -57,19 +69,8 @@ Users can invoke executables using any verb using the CLI (e.g. `flow build app`
 ### Workspaces
 **Workspaces** are project containers that organize related executables. Each workspace:
 - Has a root directory containing the workspace configuration file (`flow.yaml`)
-- Flow files can be located anywhere within the workspace directory
 - Can contain multiple namespaces (defined in flow files)
 - Provides isolation between projects
-
-**Example workspace structure:**
-```
-my-project/
-├── flow.yaml           # Workspace config
-├── backend.flow        # Backend executables
-├── frontend.flow       # Frontend executables  
-└── deployment/
-    └── k8s.flow       # Deployment executables
-```
 
 ### Namespaces
 **Namespaces** provide logical grouping within workspaces. They help organize executables by:
@@ -78,20 +79,17 @@ my-project/
 - Technology stack (backend, frontend, mobile)
 - Team ownership (platform, product, data)
 
-**Referencing executables:**
-- `VERB app` - current workspace, root namespace
-- `VERB backend/app` - current workspace, backend namespace
-- `VERB my-project/backend:app` - specific workspace and namespace
 
 Executable names are optional. When not specified, the verb is used as the identifier, 
 e.g. `flow build` refers to the executable with the verb "build" in the current workspace.
 
-### Flow Files
+### Executable Definitions (Flow Files)
 **Flow files** (`.flow`, `.flow.yaml`, `.flow.yml`) are YAML configuration files that define executables. They support:
 - Multiple executables per file
 - Shared metadata (namespace, tags, descriptions)
 - Environment variable management
 - Conditional execution logic
+- Can be located anywhere within the workspace directory
 
 ### Secrets and Vaults
 **Vaults** provide secure secret storage with multiple encryption backends:
@@ -110,7 +108,27 @@ Executables reference secrets using `secretRef` parameters, keeping sensitive da
 
 ## Execution Model
 
-### Command Structure
+### Sync
+
+Anytime a new workspace is registered, an executable is added, or it's identifier changes, flow state will need to be synchronized.
+This ensures that the latest workspace and executable definitions are available in the cache for execution.
+This can be done using the `flow sync` command or with the `--sync` flag on any command.
+
+### Management Commands
+
+Flow provides a set of management commands to interact with workspaces, executables, and configurations:
+```bash
+flow config # Manage flow's user configuration (get, set, reset)
+flow workspace # Manage workspaces (add, get, switch, list, remove)
+flow browse # Discover executables (interactive TUI)
+flow vault # Manage secrets and vaults (create, edit, get, list, remove, switch)
+flow cache # Manage cache data (get, set, remove, list, clear)
+flow secret # Manage secrets (get, list, remove, set)
+flow template # Manage templates (add, generate, get, list)
+flow logs # View execution logs
+```
+
+### Execution Command Structure
 ```bash
 flow <verb> <reference> [arguments] [flags]
 ```
@@ -129,16 +147,19 @@ serial:
       cmd: brew install mytool
     - if: env["CI"] == "true"  
       cmd: run-ci-specific-setup
-    - if: len(store["build-id"]) > 0
+    - if: len(store["build-id"]) > 0 # checks the cache for a build ID key
       cmd: use-cached-build
 ```
 
 ### State Management
 flow provides state persistence through:
-- **Cache**: Key-value store for sharing data between executables
+- **Cache**: Key-value store for sharing data between executables. State is only persisted during execution 
+  - Use `flow cache set KEY VALUE` and `flow cache get KEY` to manage cache entries within executable scripts
+  - Users can also manage global keys outside the execution context using `flow cache` commands
 - **Context variables**: OS, architecture, workspace, and path information
-- **Environment inheritance**: Variables flow from parent to child executables
-- **Temporary directories**: Isolated scratch space for executable runs (set the `dir` to `f:tmp`)
+- **Environment inheritance**: Variables (`params` and `args`) flow from parent to child executables (for serial and parallel)
+- **Temporary directories**: Isolated scratch space for executable runs
+  - A temporary directory is created for the execution when the executable's `dir` is set to `f:tmp`)
 
 ## Workflow Patterns
 

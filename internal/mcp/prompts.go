@@ -207,7 +207,6 @@ func createWorkspacePrompt(_ context.Context, request mcp.GetPromptRequest) (*mc
 	name := getArgOrDefault(args, "name", "my-project")
 	projectType := getArgOrDefault(args, "type", "web")
 	techStack := getArgOrDefault(args, "tech_stack", "")
-
 	prompt := fmt.Sprintf(`I want to set up a new Flow workspace for a %s project:
 
 **Project Details:**

@@ -16,17 +16,20 @@ import (
 )
 
 var (
-	//go:embed resources/info.md
-	infoMD string
+	//go:embed resources/concepts-guide.md
+	conceptsMD string
+
+	//go:embed resources/file-types-guide.md
+	fileTypesMD string
 
 	//go:embed resources/flowfile_schema.json
 	flowFileSchema string
 
+	//go:embed resources/template_schema.json
+	templateSchema string
+
 	//go:embed resources/workspace_schema.json
 	workspaceSchema string
-
-	flowFileSchemaURI        = "flow://schema/flowfile"
-	workspaceConfigSchemaURI = "flow://schema/workspace"
 )
 
 func addServerResources(srv *server.MCPServer) {
@@ -34,46 +37,60 @@ func addServerResources(srv *server.MCPServer) {
 		"flow://context/current",
 		"context",
 		mcp.WithResourceDescription("Current flow execution context (workspace, namespace, vault)"),
-		mcp.WithMIMEType("application/json"),
-	)
+		mcp.WithMIMEType("application/json"))
 	srv.AddResource(getCtx, getContextResourceHandler)
 
 	getWorkspace := mcp.NewResourceTemplate(
 		"flow://workspace/{name}",
 		"workspace",
-		mcp.WithTemplateDescription("Flow workspace configuration and details"),
-	)
+		mcp.WithTemplateDescription("Flow workspace configuration and details"))
 	srv.AddResourceTemplate(getWorkspace, getWorkspaceResourceHandler)
 
 	getWorkspaceExecutables := mcp.NewResourceTemplate(
 		"flow://workspace/{name}/executables",
 		"workspace_executables",
-		mcp.WithTemplateDescription("Flow executables for a given workspace"),
-	)
+		mcp.WithTemplateDescription("Flow executables for a given workspace"))
 	srv.AddResourceTemplate(getWorkspaceExecutables, getWorkspaceExecutablesHandler)
 
-	getFlowInfo := mcp.NewResource(
-		"flow://info",
-		"flow_info",
-		mcp.WithResourceDescription("Information about Flow and it's usage"),
-		mcp.WithMIMEType("text/markdown"),
-	)
-	srv.AddResource(getFlowInfo, getFlowInfoResourceHandler)
+	getExecutable := mcp.NewResourceTemplate(
+		"flow://executable/{ref}",
+		"executable",
+		mcp.WithTemplateDescription("Flow executable details by reference"))
+	srv.AddResourceTemplate(getExecutable, getExecutableResourceHandler)
+
+	getFlowConcepts := mcp.NewResource(
+		"flow://guide/concepts",
+		"flow_concepts",
+		mcp.WithResourceDescription("Information about flow and it's usage"),
+		mcp.WithMIMEType("text/markdown"))
+	srv.AddResource(getFlowConcepts, getFlowConceptsResourceHandler)
+
+	getFlowFileTypes := mcp.NewResource(
+		"flow://guide/file-types",
+		"flow_file_types",
+		mcp.WithResourceDescription("Information about flow file types and their usage"),
+		mcp.WithMIMEType("text/markdown"))
+	srv.AddResource(getFlowFileTypes, getFlowFileTypesResourceHandler)
 
 	getFlowFileSchema := mcp.NewResource(
-		flowFileSchemaURI,
+		"flow://schema/flowfile",
 		"flowfile_schema",
 		mcp.WithResourceDescription("Flow file (*.flow, *.flow.yaml, *.flow.yml) schema"),
-		mcp.WithMIMEType("application/json"),
-	)
+		mcp.WithMIMEType("application/json"))
 	srv.AddResource(getFlowFileSchema, getFlowFileSchemaResourceHandler)
 
+	getTemplateSchema := mcp.NewResource(
+		"flow://schema/template",
+		"template_schema",
+		mcp.WithResourceDescription("Flow template (*.flow.tmpl, *.flow.yaml.tmpl, *.flow.yml.tmpl) schema"),
+		mcp.WithMIMEType("application/json"))
+	srv.AddResource(getTemplateSchema, getTemplateSchemaResourceHandler)
+
 	getWorkspaceSchema := mcp.NewResource(
-		workspaceConfigSchemaURI,
+		"flow://schema/workspace",
 		"workspace_schema",
 		mcp.WithResourceDescription("Flow workspace configuration (flow.yaml) schema"),
-		mcp.WithMIMEType("application/json"),
-	)
+		mcp.WithMIMEType("application/json"))
 	srv.AddResource(getWorkspaceSchema, getWorkspaceSchemaResourceHandler)
 }
 
@@ -152,26 +169,49 @@ func getWorkspaceExecutablesHandler(_ context.Context, request mcp.ReadResourceR
 	}, nil
 }
 
-func extractWsName(uri string) (string, error) {
-	// Assuming the URI is in the format "flow://workspace/{name}" or "flow://workspace/{name}/executables"
-	if len(uri) < len("flow://workspace/") {
-		return "", fmt.Errorf("invalid workspace URI: %s", uri)
+func getExecutableResourceHandler(_ context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	executableVerb, executableID, err := extractExecutableRef(request.Params.URI)
+	if err != nil {
+		return nil, err
 	}
 
-	wsName := uri[len("flow://workspace/"):]
-	strings.TrimSuffix(wsName, "/executables")
-	if wsName == "" {
-		return "", fmt.Errorf("workspace name cannot be empty in URI: %s", uri)
+	cmdArgs := []string{"browse", "--output", "json", executableVerb}
+	if executableID != "" {
+		cmdArgs = append(cmdArgs, executableID)
 	}
-	return wsName, nil
+	cmd := exec.Command("flow", cmdArgs...)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		ref := strings.Join([]string{executableVerb, executableID}, " ")
+		return nil, fmt.Errorf("%s executable details retrieval failed: %s", ref, output)
+	}
+
+	return []mcp.ResourceContents{
+		mcp.TextResourceContents{
+			URI:      request.Params.URI,
+			MIMEType: "application/json",
+			Text:     string(output),
+		},
+	}, nil
 }
 
-func getFlowInfoResourceHandler(_ context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+func getFlowConceptsResourceHandler(_ context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	return []mcp.ResourceContents{
 		mcp.TextResourceContents{
 			URI:      request.Params.URI,
 			MIMEType: "text/markdown",
-			Text:     infoMD,
+			Text:     conceptsMD,
+		},
+	}, nil
+}
+
+func getFlowFileTypesResourceHandler(_ context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	return []mcp.ResourceContents{
+		mcp.TextResourceContents{
+			URI:      request.Params.URI,
+			MIMEType: "text/markdown",
+			Text:     fileTypesMD,
 		},
 	}, nil
 }
@@ -186,6 +226,16 @@ func getFlowFileSchemaResourceHandler(_ context.Context, request mcp.ReadResourc
 	}, nil
 }
 
+func getTemplateSchemaResourceHandler(_ context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	return []mcp.ResourceContents{
+		mcp.TextResourceContents{
+			URI:      request.Params.URI,
+			MIMEType: "application/json",
+			Text:     templateSchema,
+		},
+	}, nil
+}
+
 func getWorkspaceSchemaResourceHandler(_ context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	return []mcp.ResourceContents{
 		mcp.TextResourceContents{
@@ -194,4 +244,39 @@ func getWorkspaceSchemaResourceHandler(_ context.Context, request mcp.ReadResour
 			Text:     workspaceSchema,
 		},
 	}, nil
+}
+
+func extractWsName(uri string) (string, error) {
+	// Assuming the URI is in the format "flow://workspace/{name}" or "flow://workspace/{name}/executables"
+	if len(uri) < len("flow://workspace/") {
+		return "", fmt.Errorf("invalid workspace URI: %s", uri)
+	}
+
+	wsName := uri[len("flow://workspace/"):]
+	strings.TrimSuffix(wsName, "/executables")
+	if wsName == "" {
+		return "", fmt.Errorf("workspace name cannot be empty in URI: %s", uri)
+	}
+	return wsName, nil
+}
+
+func extractExecutableRef(uri string) (string, string, error) {
+	if len(uri) < len("flow://executable/") {
+		return "", "", fmt.Errorf("invalid executable URI: %s", uri)
+	}
+
+	ref := uri[len("flow://executable/"):]
+	if ref == "" {
+		return "", "", fmt.Errorf("executable reference cannot be empty in URI: %s", uri)
+	}
+
+	parts := strings.SplitN(ref, " ", 2)
+	switch len(parts) {
+	case 1:
+		return parts[0], "", nil
+	case 2:
+		return parts[0], parts[1], nil
+	default:
+		return "", "", fmt.Errorf("invalid executable reference format in URI: %s", uri)
+	}
 }
