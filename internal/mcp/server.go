@@ -8,6 +8,9 @@ import (
 	"github.com/flowexec/flow/internal/context"
 )
 
+//go:embed resources/server-instructions.md
+var serverInstructions string
+
 type Server struct {
 	ctx *context.Context
 	srv *server.MCPServer
@@ -19,6 +22,7 @@ func NewServer(ctx *context.Context) *Server {
 		"1.0.0",
 		server.WithToolCapabilities(false),
 		server.WithPromptCapabilities(false),
+		server.WithInstructions(serverInstructions),
 	)
 	addServerTools(srv)
 	addServerPrompts(srv)

@@ -5,7 +5,7 @@
 flow is a local-first, customizable CLI automation platform designed to streamline development and operations workflows. 
 It helps developers organize, discover, and execute tasks across projects through a unified interface.
 
-More comprehensive details can be found in the [flow documentation](https://flowexec.io).
+More comprehensive details can be fetched from the [flow documentation](https://flowexec.io).
 
 ## Core Philosophy
 
@@ -73,6 +73,13 @@ Run `flow exec --help` for more information on available verbs and execution det
 - Has a root directory containing the workspace configuration file (`flow.yaml`)
 - Can contain multiple namespaces (defined in flow files)
 - Provides isolation between projects
+
+#### Workspace Modes
+**Dynamic**: The flow workspace is determined by the current working directory that the flow CLI is executed from
+**Fixed**: The flow workspace much be switched explicitly
+
+Only executables with `public` visibility can be executed across workspaces without switching. If the current workspace
+is not the workspace under review, you should switch into that workspace to avoid execution errors.
 
 ### Namespaces
 **Namespaces** provide logical grouping within workspaces. They help organize executables by:
@@ -218,34 +225,43 @@ A companion GUI application providing:
 
 ## Common Use Cases
 
-### Development Workflows
-- Building and testing applications
-- Running development servers
-- Database migrations and seeding
+Flow is NOT just a DevOps tool. It's a general-purpose automation platform for ANY repetitive task:
+
+### Development & Operations
+- Build, test, deploy applications
+- Manage infrastructure and environments
+- Automate CI/CD workflows
 - Code generation and scaffolding
 
-### Deployment Automation
-- Container building and publishing
-- Kubernetes deployments
-- Infrastructure provisioning
-- Environment configuration
-
-### Operations Tasks
-- System monitoring and health checks
-- Backup and restore operations
-- Log analysis and debugging
-- Service management
-
-### Team Productivity
+### Personal and Team Productivity
 - Standardized development setup
 - Shared workflow templates
-- Documentation generation
-- Code quality automation
+- Manage todo lists via APIs (Todoist, Notion, etc.)
+- Organize notes and knowledge bases
+- Automate file organization and backups
+- Schedule and run maintenance tasks
 
-### Tool Building
-- Custom automation workflows for specific tasks
+### Content & Media
+- Process images, videos, documents
+- Generate reports and documentation
+- Manage blog posts and publications
+- Sync content between platforms
+
+### System Administration
+- Monitor system health and resources
+- Manage configurations and settings
+- Automate routine maintenance
+- Handle log analysis and cleanup
+
+### Custom Integrations
 - Reusable libraries of executables
 - Integration with / wrapper for existing CLI tools and APIs
+- Connect different APIs and services
+- Build personal dashboards and tools
+- Automate data synchronization
+- Create custom workflows for unique needs
+
+**Key Insight**: If someone has a repetitive task involving commands, APIs, or file operations, Flow can likely automate it.
 
 ## Best Practices
 

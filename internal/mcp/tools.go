@@ -37,13 +37,13 @@ func addServerTools(srv *server.MCPServer) {
 	// Ideally this information would just be exposed via resources but many MCP clients don't support resources.
 	// This implementation should be revisited in the future.
 	// See https://modelcontextprotocol.io/clients
-	getFlowInfo := mcp.NewTool(
-		"get_info",
+	getFlowInfo := mcp.NewTool("get_info",
 		mcp.WithDescription(
 			"Get information about flow, it's usage, and the current workflow execution context. "+
-				"This includes file JSON schemas, concepts guides, and user configuration and state details."))
+				"This includes file JSON schemas for flow executable, template, and workspace files, concepts guides, "+
+				"and the current user configuration and state details."))
 	getFlowInfo.Annotations = mcp.ToolAnnotation{
-		Title:           "Get Flow CLI Information",
+		Title:           "Get flow information and current context",
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(false), OpenWorldHint: boolPtr(false),
 	}
@@ -54,7 +54,7 @@ func addServerTools(srv *server.MCPServer) {
 		mcp.WithDescription("Get details about a registered flow workspaces"),
 	)
 	getWorkspace.Annotations = mcp.ToolAnnotation{
-		Title:           "Get a Flow Specific Workspace by Name",
+		Title:           "Get a specific workspace by name",
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
@@ -64,11 +64,22 @@ func addServerTools(srv *server.MCPServer) {
 		mcp.WithDescription("List all registered flow workspaces"),
 	)
 	listWorkspaces.Annotations = mcp.ToolAnnotation{
-		Title:           "List Flow Workspaces",
+		Title:           "List workspaces",
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
 	srv.AddTool(listWorkspaces, listWorkspacesHandler)
+
+	switchWorkspace := mcp.NewTool("switch_workspace",
+		mcp.WithString("workspace_name", mcp.Required(), mcp.Description("Registered workspace name")),
+		mcp.WithDescription("Change the current workspace"),
+	)
+	switchWorkspace.Annotations = mcp.ToolAnnotation{
+		Title:           "Change the current workspace",
+		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(false),
+		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(false),
+	}
+	srv.AddTool(switchWorkspace, switchWorkspaceHandler)
 
 	getExecutable := mcp.NewTool("get_executable",
 		mcp.WithDescription("Get detailed information about an executable"),
@@ -80,7 +91,7 @@ func addServerTools(srv *server.MCPServer) {
 			mcp.Description("Executable ID (workspace/namespace:name or just name if using the current workspace/namespace)")),
 	)
 	getExecutable.Annotations = mcp.ToolAnnotation{
-		Title:           "Get a Flow Specific Flow Executable by Reference",
+		Title:           "Get a specific executable by reference",
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
@@ -95,7 +106,7 @@ func addServerTools(srv *server.MCPServer) {
 		mcp.WithString("tag", mcp.Description("Tag filter (optional)")),
 	)
 	listExecutables.Annotations = mcp.ToolAnnotation{
-		Title:           "List Flow Executables",
+		Title:           "List executables",
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
@@ -108,12 +119,15 @@ func addServerTools(srv *server.MCPServer) {
 			mcp.Description("Executable verb")),
 		mcp.WithString("executable_id",
 			mcp.Pattern(`^([a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)?:)?[a-zA-Z0-9_-]+$`),
-			mcp.Description("Executable ID (workspace/namespace:name or just name if using the current workspace/namespace)")),
+			mcp.Description(
+				"Executable ID (workspace/namespace:name or just name if using the current workspace/namespace). "+
+					"If the executable does not have a name, you can specify just the workspace (`ws/`), namespace (`ns:`) "+
+					"both (`ws/ns:`) or neither if the current workspace/namespace should be used.")),
 		mcp.WithString("args", mcp.Description("Arguments to pass")),
 		mcp.WithBoolean("sync", mcp.Description("Sync executable changes before execution")),
 	)
 	executeFlow.Annotations = mcp.ToolAnnotation{
-		Title:        "Execute Flow Executable",
+		Title:        "Execute executable",
 		ReadOnlyHint: boolPtr(false), DestructiveHint: boolPtr(true),
 		IdempotentHint: boolPtr(false), OpenWorldHint: boolPtr(true),
 	}
@@ -123,7 +137,7 @@ func addServerTools(srv *server.MCPServer) {
 		mcp.WithDescription("Get a list of the recent flow execution logs"),
 		mcp.WithBoolean("last", mcp.Description("Get only the last execution logs")))
 	getExecutionLogs.Annotations = mcp.ToolAnnotation{
-		Title:           "Get Flow Execution Logs",
+		Title:           "Get execution logs",
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
@@ -132,7 +146,7 @@ func addServerTools(srv *server.MCPServer) {
 	sync := mcp.NewTool("sync_executables",
 		mcp.WithDescription("Sync the flow workspace and executable state"))
 	sync.Annotations = mcp.ToolAnnotation{
-		Title:           "Sync Flow Executables",
+		Title:           "Sync executable and workspace state",
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(false),
 		IdempotentHint: boolPtr(false), OpenWorldHint: boolPtr(true),
 	}
@@ -198,6 +212,21 @@ func listWorkspacesHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallT
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list workspaces: %s", output)), nil
+	}
+
+	return mcp.NewToolResultText(string(output)), nil
+}
+
+func switchWorkspaceHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	wsName, err := request.RequireString("workspace_name")
+	if err != nil {
+		return mcp.NewToolResultError("workspace_name is required"), nil
+	}
+
+	cmd := exec.Command("flow", "workspace", "switch", wsName)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to switch workspace to %s: %s", wsName, output)), nil
 	}
 
 	return mcp.NewToolResultText(string(output)), nil
