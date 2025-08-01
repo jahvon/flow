@@ -21,16 +21,17 @@ tags: ["web", "typescript"]
 - `description`: Workspace description (markdown supported)
 - `tags`: Workspace-level tags for organization
 
-## 2. Executable Definitions: .flow files
+## 2. Executable Definitions: *.flow files
 
-- Extensions: .flow, .flow.yaml, .flow.yml
+- Extensions: *.flow, *.flow.yaml, *.flow.yml
 - Purpose: Define executable tasks and workflows
 - Contains: Executable definitions with verbs, commands, parameters
 - Quantity: Multiple per workspace
 - Example paths: /my-project/build.flow, /my-project/deploy.flow.yaml, /my-project/.execs/test.flow.yml
 
-**Note**: `.flow` is reserved for flow files, while `flow.yaml` is the workspace configuration file. 
-Do not try to create executables in a `.flow` directory.
+**Note**: The `.flow` extension is reserved for flow files, while `flow.yaml` is the workspace configuration file. 
+Do not try to create executables in a `.flow` directory, if grouping of flow files is desired use the `.execs` directory 
+if a name is needed.
 
 **Example content:**
 ```yaml
@@ -121,9 +122,7 @@ template: |
 - **.flow** = "What tasks can I run?"
 - **.flow.tmpl** = "How do I generate new flow files?"
 
-## Examples in Practice
-
-### Project Structure:
+## Examples Project Structure:
 ```
 my-web-app/
 ├── flow.yaml                    # Workspace config
@@ -135,8 +134,9 @@ my-web-app/
     └── microservice.flow.tmpl   # Service template
 ```
 
-### Typical Workflow:
+## Typical Workflow:
 1. **Create workspace**: Add `flow.yaml` to configure workspace
 2. **Define executables**: Create `.flow` files with tasks
-3. **Use templates**: Generate new `.flow` files from `.flow.tmpl` templates
-4. **Execute tasks**: Run executables with `flow <verb> <id>`
+3. **Use templates**: (optional) Generate new `.flow` files from `.flow.tmpl` templates
+4. **Sync workspace state**: Update flow's cache with `flow sync`
+5**Execute tasks**: Run executables with `flow <verb> <id>`

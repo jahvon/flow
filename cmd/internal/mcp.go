@@ -21,7 +21,7 @@ func RegisterMCPCmd(ctx *context.Context, rootCmd *cobra.Command) {
 }
 
 func mcpFunc(ctx *context.Context, _ *cobra.Command, _ []string) {
-	server := mcp.NewMCPServer(ctx)
+	server := mcp.NewServer(ctx)
 	if err := server.Run(); err != nil {
 		logger.Log().FatalErr(err)
 	}

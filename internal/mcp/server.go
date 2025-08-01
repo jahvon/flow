@@ -8,27 +8,24 @@ import (
 	"github.com/flowexec/flow/internal/context"
 )
 
-type MCPServer struct {
+type Server struct {
 	ctx *context.Context
 	srv *server.MCPServer
 }
 
-func NewMCPServer(ctx *context.Context) *MCPServer {
+func NewServer(ctx *context.Context) *Server {
 	srv := server.NewMCPServer(
 		"Flow",
 		"1.0.0",
 		server.WithToolCapabilities(false),
-		server.WithResourceCapabilities(false, true),
 		server.WithPromptCapabilities(false),
 	)
-
-	addServerResources(srv)
 	addServerTools(srv)
 	addServerPrompts(srv)
 
-	return &MCPServer{ctx: ctx, srv: srv}
+	return &Server{ctx: ctx, srv: srv}
 }
 
-func (s *MCPServer) Run() error {
+func (s *Server) Run() error {
 	return server.ServeStdio(s.srv)
 }

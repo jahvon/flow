@@ -66,6 +66,8 @@ Additional aliases can be defined in the workspace or executable configuration t
 
 Users can invoke executables using any verb using the CLI (e.g. `flow build app` and `flow deploy app`)
 
+Run `flow exec --help` for more information on available verbs and execution details.
+
 ### Workspaces
 **Workspaces** are project containers that organize related executables. Each workspace:
 - Has a root directory containing the workspace configuration file (`flow.yaml`)
