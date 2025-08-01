@@ -4,19 +4,17 @@ import (
 	_ "embed"
 
 	"github.com/mark3labs/mcp-go/server"
-
-	"github.com/flowexec/flow/internal/context"
 )
 
 //go:embed resources/server-instructions.md
 var serverInstructions string
 
 type Server struct {
-	ctx *context.Context
-	srv *server.MCPServer
+	srv      *server.MCPServer
+	executor CommandExecutor
 }
 
-func NewServer(ctx *context.Context) *Server {
+func NewServer(executor CommandExecutor) *Server {
 	srv := server.NewMCPServer(
 		"Flow",
 		"1.0.0",
@@ -24,12 +22,17 @@ func NewServer(ctx *context.Context) *Server {
 		server.WithPromptCapabilities(false),
 		server.WithInstructions(serverInstructions),
 	)
-	addServerTools(srv)
+	addServerTools(srv, executor)
 	addServerPrompts(srv)
 
-	return &Server{ctx: ctx, srv: srv}
+	return &Server{srv: srv, executor: executor}
 }
 
 func (s *Server) Run() error {
 	return server.ServeStdio(s.srv)
+}
+
+// GetMCPServer returns the underlying MCP server for testing purposes
+func (s *Server) GetMCPServer() *server.MCPServer {
+	return s.srv
 }

@@ -6,7 +6,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -38,7 +37,7 @@ var (
 )
 
 //nolint:funlen
-func addServerTools(srv *server.MCPServer) {
+func addServerTools(srv *server.MCPServer, executor CommandExecutor) {
 	// Ideally this information would just be exposed via resources but many MCP clients don't support resources.
 	// This implementation should be revisited in the future.
 	// See https://modelcontextprotocol.io/clients
@@ -63,7 +62,7 @@ func addServerTools(srv *server.MCPServer) {
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
-	srv.AddTool(getWorkspace, getWorkspaceHandler)
+	srv.AddTool(getWorkspace, getWorkspaceHandler(executor))
 
 	listWorkspaces := mcp.NewTool("list_workspaces",
 		mcp.WithDescription("List all registered flow workspaces"),
@@ -73,7 +72,7 @@ func addServerTools(srv *server.MCPServer) {
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
-	srv.AddTool(listWorkspaces, listWorkspacesHandler)
+	srv.AddTool(listWorkspaces, listWorkspacesHandler(executor))
 
 	switchWorkspace := mcp.NewTool("switch_workspace",
 		mcp.WithString("workspace_name", mcp.Required(), mcp.Description("Registered workspace name")),
@@ -84,7 +83,7 @@ func addServerTools(srv *server.MCPServer) {
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(false),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(false),
 	}
-	srv.AddTool(switchWorkspace, switchWorkspaceHandler)
+	srv.AddTool(switchWorkspace, switchWorkspaceHandler(executor))
 
 	getExecutable := mcp.NewTool("get_executable",
 		mcp.WithDescription("Get detailed information about an executable"),
@@ -100,7 +99,7 @@ func addServerTools(srv *server.MCPServer) {
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
-	srv.AddTool(getExecutable, getExecutableHandler)
+	srv.AddTool(getExecutable, getExecutableHandler(executor))
 
 	listExecutables := mcp.NewTool("list_executables",
 		mcp.WithDescription("List and filter executables across all workspaces"),
@@ -115,7 +114,7 @@ func addServerTools(srv *server.MCPServer) {
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
-	srv.AddTool(listExecutables, listExecutablesHandler)
+	srv.AddTool(listExecutables, listExecutablesHandler(executor))
 
 	executeFlow := mcp.NewTool("execute_flow",
 		mcp.WithDescription("Execute a flow executable"),
@@ -136,7 +135,7 @@ func addServerTools(srv *server.MCPServer) {
 		ReadOnlyHint: boolPtr(false), DestructiveHint: boolPtr(true),
 		IdempotentHint: boolPtr(false), OpenWorldHint: boolPtr(true),
 	}
-	srv.AddTool(executeFlow, executeFlowHandler)
+	srv.AddTool(executeFlow, executeFlowHandler(executor))
 
 	getExecutionLogs := mcp.NewTool("get_execution_logs",
 		mcp.WithDescription("Get a list of the recent flow execution logs"),
@@ -146,7 +145,7 @@ func addServerTools(srv *server.MCPServer) {
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(true),
 		IdempotentHint: boolPtr(true), OpenWorldHint: boolPtr(true),
 	}
-	srv.AddTool(getExecutionLogs, getExecutionLogsHandler)
+	srv.AddTool(getExecutionLogs, getExecutionLogsHandler(executor))
 
 	sync := mcp.NewTool("sync_executables",
 		mcp.WithDescription("Sync the flow workspace and executable state"))
@@ -155,7 +154,7 @@ func addServerTools(srv *server.MCPServer) {
 		DestructiveHint: boolPtr(false), ReadOnlyHint: boolPtr(false),
 		IdempotentHint: boolPtr(false), OpenWorldHint: boolPtr(true),
 	}
-	srv.AddTool(sync, syncStateHandler)
+	srv.AddTool(sync, syncStateHandler(executor))
 }
 
 func getInfoHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -196,149 +195,158 @@ func getInfoHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResu
 	return mcp.NewToolResultText(string(jsonData)), nil
 }
 
-func getWorkspaceHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	wsName, err := request.RequireString("workspace_name")
-	if err != nil {
-		return mcp.NewToolResultError("workspace_name is required"), nil
-	}
+func getWorkspaceHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		wsName, err := request.RequireString("workspace_name")
+		if err != nil {
+			return mcp.NewToolResultError("workspace_name is required"), nil
+		}
 
-	cmd := exec.Command("flow", "workspace", "get", wsName, "--output", "json")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get workspaces %s: %s", wsName, output)), nil
-	}
+		output, err := executor.Execute("workspace", "get", wsName, "--output", "json")
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get workspaces %s: %s", wsName, output)), nil
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
-func listWorkspacesHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	cmd := exec.Command("flow", "workspace", "list", "--output", "json")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to list workspaces: %s", output)), nil
-	}
+func listWorkspacesHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		output, err := executor.Execute("workspace", "list", "--output", "json")
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to list workspaces: %s", output)), nil
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
-func switchWorkspaceHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	wsName, err := request.RequireString("workspace_name")
-	if err != nil {
-		return mcp.NewToolResultError("workspace_name is required"), nil
-	}
+func switchWorkspaceHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		wsName, err := request.RequireString("workspace_name")
+		if err != nil {
+			return mcp.NewToolResultError("workspace_name is required"), nil
+		}
 
-	cmd := exec.Command("flow", "workspace", "switch", wsName)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to switch workspace to %s: %s", wsName, output)), nil
-	}
+		output, err := executor.Execute("workspace", "switch", wsName)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to switch workspace to %s: %s", wsName, output)), nil
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
-func getExecutableHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	executableVerb, err := request.RequireString("executable_verb")
-	if err != nil {
-		return mcp.NewToolResultError("executable_verb is required"), nil
-	}
-	executableID := request.GetString("executable_id", "")
+func getExecutableHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		executableVerb, err := request.RequireString("executable_verb")
+		if err != nil {
+			return mcp.NewToolResultError("executable_verb is required"), nil
+		}
+		executableID := request.GetString("executable_id", "")
 
-	cmdArgs := []string{"browse", "--output", "json", executableVerb}
-	if executableID != "" {
-		cmdArgs = append(cmdArgs, executableID)
-	}
-	cmd := exec.Command("flow", cmdArgs...)
+		cmdArgs := []string{"browse", "--output", "json", executableVerb}
+		if executableID != "" {
+			cmdArgs = append(cmdArgs, executableID)
+		}
 
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		ref := strings.Join([]string{executableVerb, executableID}, " ")
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get executable %s: %s", ref, output)), nil
-	}
+		output, err := executor.Execute(cmdArgs...)
+		if err != nil {
+			ref := strings.Join([]string{executableVerb, executableID}, " ")
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get executable %s: %s", ref, output)), nil
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
-func listExecutablesHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	wsFilter := request.GetString("workspace", executable.WildcardWorkspace)
-	nsFilter := request.GetString("namespace", executable.WildcardNamespace)
-	verbFilter := request.GetString("verb", "")
-	keywordFilter := request.GetString("keyword", "")
-	tagFilter := request.GetString("tag", "")
+func listExecutablesHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		wsFilter := request.GetString("workspace", executable.WildcardWorkspace)
+		nsFilter := request.GetString("namespace", executable.WildcardNamespace)
+		verbFilter := request.GetString("verb", "")
+		keywordFilter := request.GetString("keyword", "")
+		tagFilter := request.GetString("tag", "")
 
-	cmdArgs := []string{"browse", "--output", "json", "--workspace", wsFilter, "--namespace", nsFilter}
-	if verbFilter != "" {
-		cmdArgs = append(cmdArgs, "--verb", verbFilter)
-	}
-	if keywordFilter != "" {
-		cmdArgs = append(cmdArgs, "--filter", keywordFilter)
-	}
-	if tagFilter != "" {
-		cmdArgs = append(cmdArgs, "--tag", tagFilter)
-	}
+		cmdArgs := []string{"browse", "--output", "json", "--workspace", wsFilter, "--namespace", nsFilter}
+		if verbFilter != "" {
+			cmdArgs = append(cmdArgs, "--verb", verbFilter)
+		}
+		if keywordFilter != "" {
+			cmdArgs = append(cmdArgs, "--filter", keywordFilter)
+		}
+		if tagFilter != "" {
+			cmdArgs = append(cmdArgs, "--tag", tagFilter)
+		}
 
-	cmd := exec.Command("flow", cmdArgs...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to list executables: %s", output)), nil
-	}
+		output, err := executor.Execute(cmdArgs...)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to list executables: %s", output)), nil
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
-func executeFlowHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	executableVerb, err := request.RequireString("executable_verb")
-	if err != nil {
-		return mcp.NewToolResultError("executable_verb is required"), nil
-	}
-	executableID := request.GetString("executable_id", "")
+func executeFlowHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		executableVerb, err := request.RequireString("executable_verb")
+		if err != nil {
+			return mcp.NewToolResultError("executable_verb is required"), nil
+		}
+		executableID := request.GetString("executable_id", "")
 
-	args := request.GetString("args", "")
-	sync := request.GetBool("sync", false)
+		args := request.GetString("args", "")
+		sync := request.GetBool("sync", false)
 
-	cmdArgs := []string{executableVerb}
-	if executableID != "" {
-		cmdArgs = append(cmdArgs, executableID)
-	}
-	if args != "" {
-		cmdArgs = append(cmdArgs, strings.Fields(args)...)
-	}
-	if sync {
-		cmdArgs = append(cmdArgs, "--sync")
-	}
+		cmdArgs := []string{executableVerb}
+		if executableID != "" {
+			cmdArgs = append(cmdArgs, executableID)
+		}
+		if args != "" {
+			cmdArgs = append(cmdArgs, strings.Fields(args)...)
+		}
+		if sync {
+			cmdArgs = append(cmdArgs, "--sync")
+		}
 
-	cmd := exec.Command("flow", cmdArgs...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		ref := strings.Join([]string{executableVerb, executableID}, " ")
-		return mcp.NewToolResultError(fmt.Sprintf("%s execution failed: %s", ref, string(output))), nil
-	}
+		output, err := executor.Execute(cmdArgs...)
+		if err != nil {
+			ref := strings.Join([]string{executableVerb, executableID}, " ")
+			return mcp.NewToolResultError(fmt.Sprintf("%s execution failed: %s", ref, output)), nil
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
-func getExecutionLogsHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	last := request.GetBool("last", false)
-	cmdArgs := []string{"logs", "--output", "json"}
-	if last {
-		cmdArgs = append(cmdArgs, "--last")
-	}
-	cmd := exec.Command("flow", cmdArgs...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get flow execution logs: %s", output)), nil
-	}
+func getExecutionLogsHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		last := request.GetBool("last", false)
+		cmdArgs := []string{"logs", "--output", "json"}
+		if last {
+			cmdArgs = append(cmdArgs, "--last")
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		output, err := executor.Execute(cmdArgs...)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get flow execution logs: %s", output)), nil
+		}
+
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
-func syncStateHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	cmd := exec.Command("flow", "sync")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to sync flow's state: %s", output)), nil
-	}
+func syncStateHandler(executor CommandExecutor) server.ToolHandlerFunc {
+	return func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		output, err := executor.Execute("sync")
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to sync flow's state: %s", output)), nil
+		}
 
-	return mcp.NewToolResultText(string(output)), nil
+		return mcp.NewToolResultText(output), nil
+	}
 }
 
 func boolPtr(b bool) *bool {
