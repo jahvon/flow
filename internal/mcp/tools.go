@@ -1,3 +1,4 @@
+//nolint:nilerr
 package mcp
 
 import (
@@ -23,6 +24,9 @@ var (
 	//go:embed resources/file-types-guide.md
 	fileTypesMD string
 
+	// The below schemas are updated by the docsgen tool. We embed instead of fetching to avoid unnecessary network
+	// requests and to ensure that the MCP server always has the schema needed for the current CLI version.
+
 	//go:embed resources/flowfile_schema.json
 	flowFileSchema string
 
@@ -33,6 +37,7 @@ var (
 	workspaceSchema string
 )
 
+//nolint:funlen
 func addServerTools(srv *server.MCPServer) {
 	// Ideally this information would just be exposed via resources but many MCP clients don't support resources.
 	// This implementation should be revisited in the future.
@@ -189,7 +194,6 @@ func getInfoHandler(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResu
 	}
 
 	return mcp.NewToolResultText(string(jsonData)), nil
-
 }
 
 func getWorkspaceHandler(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

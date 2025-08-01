@@ -64,13 +64,7 @@ func NewContext(ctx context.Context, stdIn, stdOut *os.File) *Context {
 	}
 
 	workspaceCache := cache.NewWorkspaceCache()
-	if workspaceCache == nil {
-		panic("workspace cache initialization error")
-	}
 	executableCache := cache.NewExecutableCache(workspaceCache)
-	if executableCache == nil {
-		panic("executable cache initialization error")
-	}
 
 	ctxx, cancel := context.WithCancel(ctx)
 	c := &Context{
